@@ -69,3 +69,11 @@ Antes de diseñar el backend, conviene:
 - Los `.docx` de `docs/` se generan con Node.js y la librería [`docx`](https://www.npmjs.com/package/docx) a partir de los scripts en `src/` (`build_manual.js`, `build_portafolio.js`, `build_acompanamiento.js`), que comparten helpers de estilo institucional en `src/docHelpers.js` (color primario `#7A1F2B`, tamaño carta, encabezado/pie con numeración).
 - El `.xlsx` de `planeacion/` se genera con Python y `openpyxl` desde `src/build_planeacion_2026_2_v2.py` — una lista `IDEAS` de diccionarios (una entrada por iniciativa) que alimenta ambas hojas del libro (`Planeación` y `Planeación del Área`).
 - Los `.md` de `docs/empalme/` y `docs/organizacion-drive/` se escribieron directamente en Markdown y se convirtieron a `.docx` con `pandoc`.
+
+## 8. Prompt sugerido para la primera sesión de Claude Code en este repo
+
+Si quien retoma esto no sabe por dónde empezar, este prompt es un punto de partida razonable (asume que ya se leyó este archivo, porque Claude Code lo carga automáticamente al abrir el repo):
+
+> Quiero empezar a diseñar el backend de seguimiento descrito en la sección 6 de CLAUDE.md. Antes de escribir código: (1) revisa `planeacion/planeacion_del_area.csv` y propón un modelo de datos normalizado (proyecto, entregable, estudiante, estado, fechas) que no pierda la información que ya existe en las columnas actuales; (2) dime qué decisiones de alcance necesitas que yo tome antes de seguir (por ejemplo: base de datos a usar, si habrá autenticación de estudiantes, si el checklist se deriva automáticamente del campo `Entregables` o se captura aparte); (3) no toques los documentos de `docs/` ni el `.xlsx` de planeación — son la fuente de verdad editada por personas, el backend debe leerlos, no reemplazarlos.
+
+Este prompt está escrito para frenar al agente antes de que empiece a generar código sin resolver las decisiones de producto primero (base de datos, autenticación, granularidad del checklist) — que son decisiones del usuario, no algo que un agente deba asumir.
