@@ -1,0 +1,64 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Fondo cálido derivado de #FFF4D6 */
+    --background: 44 100% 92%;
+    --foreground: 198 20% 14%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 198 20% 14%;
+
+    /* Azul pizarra #263B44 */
+    --primary: 198 28% 21%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 44 75% 86%;
+    --secondary-foreground: 198 28% 18%;
+
+    --muted: 44 40% 93%;
+    --muted-foreground: 198 10% 40%;
+
+    --accent: 44 65% 88%;
+    --accent-foreground: 198 28% 18%;
+
+    --destructive: 0 72% 45%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 142 60% 32%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 92% 40%;
+    --warning-foreground: 0 0% 100%;
+
+    --border: 44 45% 80%;
+    --input: 44 45% 80%;
+    --ring: 198 28% 21%;
+
+    --radius: 0.75rem;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer utilities {
+  .press {
+    @apply transition-transform duration-150 ease-out active:scale-[0.97];
+  }
+}

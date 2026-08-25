@@ -17,11 +17,13 @@ Este repositorio consolida los entregables de la planeación de inicio de semest
 ├── planeacion/
 │   ├── Estrategias Tecnológicas-Planeación 2026-2.xlsx   (fuente de verdad)
 │   ├── planeacion.csv                                     (hoja "Planeación")
-│   └── planeacion_del_area.csv                             (hoja "Planeación del Área")
-└── src/
-    ├── docHelpers.js, build_manual.js, build_portafolio.js,
-    │   build_acompanamiento.js    → generan los .docx de docs/ (Node.js, librería `docx`)
-    └── build_planeacion_2026_2_v2.py → genera el .xlsx de planeacion/ (Python, `openpyxl`)
+│   └── planeacion_del_area.csv                             (hoja "Planeación del Área", con columna ID)
+├── src/
+│   ├── docHelpers.js, build_manual.js, build_portafolio.js,
+│   │   build_acompanamiento.js    → generan los .docx de docs/ (Node.js, librería `docx`)
+│   └── build_planeacion_2026_2_v2.py → genera el .xlsx de planeacion/ (Python, `openpyxl`)
+└── webapp/                        → "ET en Marcha": Next.js + Prisma/PostgreSQL,
+                                       la app de seguimiento en vivo (ver webapp/README.md)
 ```
 
 Cada documento en `docs/` existe en dos formatos: `.docx` (versión formal para compartir/imprimir) y `.md` (versión en texto plano, más fácil de leer y editar por un agente o en el propio repositorio).
@@ -46,4 +48,4 @@ Ver [`CLAUDE.md`](./CLAUDE.md) para el contexto institucional completo antes de 
 
 ## Estado
 
-Todos los entregables de la planeación de inicio de semestre 2026-2 están completos a la fecha de creación de este repositorio. El repositorio queda listo para la siguiente fase: construir sobre `planeacion/planeacion_del_area.csv` el backend/frontend de seguimiento descrito en `CLAUDE.md`.
+Todos los entregables de la planeación de inicio de semestre 2026-2 están completos. La primera versión de la app de seguimiento ("ET en Marcha") vive en `webapp/` — ver `webapp/README.md` para ponerla en marcha (requiere Node.js y una base de datos PostgreSQL, por ejemplo en Neon).

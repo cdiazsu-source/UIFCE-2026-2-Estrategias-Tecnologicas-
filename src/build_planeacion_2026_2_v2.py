@@ -21,6 +21,7 @@ PRIORITY_FILL = PatternFill(start_color="FCE9CE", end_color="FCE9CE", fill_type=
 # ---------------------------------------------------------------------------
 IDEAS = [
     dict(
+        id="redes-instagram",
         cat="Redes y canales — CRÍTICO",
         idea="Recuperación o recreación de la cuenta de Instagram @uifce_un",
         hacer="Agotar primero las vías de recuperación de la cuenta @uifce_un (verificación de identidad ante Meta, apoyo de Imagen Institucional/Unimedios, revisión de correos y dispositivos con sesión activa) e insistir por distintos canales con la persona con la que se ha intentado retomar contacto. Si no se logra recuperar en un plazo máximo de 2-3 semanas, escalar pidiendo la intermediación directa del profesor a cargo del área y, en paralelo, crear una cuenta nueva oficial, tramitar su oficialización ante la Oficina de Medios Digitales de la UNAL (mismo procedimiento ya usado con Instagram y LinkedIn en 2025-2) y migrar de inmediato los contenidos disponibles.",
@@ -30,6 +31,7 @@ IDEAS = [
         priority=True,
     ),
     dict(
+        id="redes-linkedin",
         cat="Redes y canales — PRIORITARIO",
         idea="Posicionamiento prioritario de LinkedIn UIFCE",
         hacer="Definir LinkedIn como canal prioritario del semestre: construir un calendario editorial propio (logros de monitores y egresados, proyectos de estudio, contenido profesional/técnico), aumentar la frecuencia de publicación frente a 2026-1 y evaluar la migración de contenido desde la cuenta personal hacia la cuenta empresa de la Unidad, pendiente según la Guía de Empalme.",
@@ -39,6 +41,7 @@ IDEAS = [
         priority=True,
     ),
     dict(
+        id="redes-tiktok",
         cat="Redes y canales — NUEVO",
         idea="Creación de la cuenta de TikTok UIFCE",
         hacer="Solicitar ante Imagen Institucional/Unimedios los lineamientos para cuentas institucionales en nuevas plataformas, crear y oficializar la cuenta de TikTok siguiendo el mismo trámite usado en 2026-1 para Instagram y LinkedIn, y definir un formato de contenido propio (no una simple réplica de los reels de Instagram). Complementar el lanzamiento con difusión \"análoga\" presencial (volantes/folletos entregados directamente a estudiantes en la Facultad, siguiendo la lógica de negocios cercanos que reparten volantes con promociones), en lugar de depender solo de que la audiencia encuentre la cuenta por su cuenta en redes.",
@@ -48,6 +51,7 @@ IDEAS = [
         priority=False,
     ),
     dict(
+        id="redes-youtube",
         cat="Redes y canales",
         idea="Consolidación y cierre de oficialización de YouTube UIFCE",
         hacer="Cerrar el trámite de oficialización de YouTube ante la Oficina de Medios Digitales UNAL, en curso desde 2025-2, resolviendo los inconvenientes de titularidad de cuenta ya identificados. Definir un calendario editorial propio (tutoriales, hacks en formato largo, videos institucionales) y coordinar con Virtualización la incrustación de videos de cursos.",
@@ -57,6 +61,7 @@ IDEAS = [
         priority=False,
     ),
     dict(
+        id="normativa-terminos-condiciones",
         cat="Normativa",
         idea="Cierre de Términos y Condiciones de Estrategias Tecnológicas",
         hacer="Redactar el documento formal de Términos y Condiciones de ET (microtalleres, microeventos, Hackatón y otros eventos), definiendo con claridad las penalizaciones por inasistencia y dando continuidad al Manual de Microtalleres y Microeventos ya vigente. Presentarlo a Coordinación para aval.",
@@ -66,6 +71,7 @@ IDEAS = [
         priority=False,
     ),
     dict(
+        id="produccion-piezas-audiovisual",
         cat="Producción de contenido",
         idea="Piezas gráficas y material audiovisual",
         hacer="Mantener la producción semanal de piezas y contenido audiovisual bajo un calendario editorial único (referencia histórica: un reel por semana y una pieza cada 15 días), priorizando calidad sobre volumen, y verificar la vigencia de la licencia de Adobe ya instalada en el equipo de la unidad usado por el monitor de artes (evitar depender de licencias personales). Retomar y terminar el material institucional pendiente identificado en el empalme: video de bienvenida tipo \"trailer\" para nuevos integrantes, ampliación del video de testimonios de ex-monitores (solo 3 grabados y sin editar), edición de los dos videos de apoyo académico ya grabados, y uso de los bloopers guardados para un evento de cierre de semestre.",
@@ -75,6 +81,7 @@ IDEAS = [
         priority=False,
     ),
     dict(
+        id="produccion-hacks-informaticos",
         cat="Producción de contenido",
         idea="Repositorio de Hacks Informáticos",
         hacer="Continuar la producción y publicación de hacks informáticos aplicando la rúbrica de calificación ya creada en 2026-1 (duración estándar, vigencia, calidad audiovisual). Depurar contenidos obsoletos y mantener actualizado el repositorio interno.",
@@ -84,6 +91,7 @@ IDEAS = [
         priority=False,
     ),
     dict(
+        id="eventos-microtalleres",
         cat="Eventos",
         idea="Microtalleres UIFCE",
         hacer="Ejecutar un máximo de 5 microtalleres en el semestre (idealmente 3), priorizando calidad y asistencia efectiva sobre cantidad, y evitando programarlos en las últimas semanas del calendario académico. Implementar certificados de participación desde el primer microtaller (misma plantilla usada para Cursos Libres), confirmar con Juan Martínez (ex-monitor de geología) si dicta el microtaller ya diseñado de \"Análisis espacial aplicado a las ciencias económicas\" (5 sesiones), y confirmar con Jonny el horario del microtaller de Introducción a la Lógica de Programación.",
@@ -93,6 +101,7 @@ IDEAS = [
         priority=False,
     ),
     dict(
+        id="continuidad-blog",
         cat="Proyectos en continuidad",
         idea="Blog UIFCE",
         hacer="Aprobar y ejecutar la propuesta de difusión del blog, pendiente desde 2026-1, coordinando un cronograma conjunto con Gestión del Conocimiento (GC): GC cura y redacta los resúmenes de proyectos de estudio, ET diseña la plataforma y acompaña el despliegue.",
@@ -102,6 +111,7 @@ IDEAS = [
         priority=False,
     ),
     dict(
+        id="continuidad-micrositio",
         cat="Proyectos en continuidad",
         idea="Micrositio UIFCE",
         hacer="Actualizar fotos, biografías y estructura de contenido del equipo vigente (coordinando con Comunicaciones una sesión de fotos institucionales, individuales y grupales por área), gestionando los consentimientos de imagen mediante el script ya existente en el Drive de ET (genera automáticamente un documento de consentimiento por persona a partir de la lista de monitores). Evaluar con Desarrollo (Johnny) la viabilidad técnica de que la foto de cada integrante del equipo enlace a su perfil de LinkedIn al hacer clic, como mecanismo adicional de posicionamiento del canal.",
@@ -111,6 +121,7 @@ IDEAS = [
         priority=False,
     ),
     dict(
+        id="produccion-senaletica-salas",
         cat="Producción de contenido",
         idea="Vigilancia y piezas de software disponible en cada sala",
         hacer="Mantener actualizadas las piezas gráficas de disponibilidad de software y salas en los televisores de oficina y pasillo, evitando el lenguaje restrictivo (tipo \"prohibido\") señalado en la reunión final 2026-1.",
@@ -120,6 +131,7 @@ IDEAS = [
         priority=False,
     ),
     dict(
+        id="cursoslibres-linea-grafica",
         cat="Acompañamiento a Cursos Libres",
         idea="Línea gráfica de Cursos Libres",
         hacer="Completar el despliegue de la nueva línea gráfica modular en medios físicos y digitales, y coordinar con Cursos Libres (CL) el mantenimiento de la cartelera y el diseño de plantillas de certificados conforme a Imagen Institucional.",
@@ -129,6 +141,7 @@ IDEAS = [
         priority=False,
     ),
     dict(
+        id="estrategicos-extension-solidaria",
         cat="Proyectos estratégicos",
         idea="Extensión Solidaria",
         hacer="Presentar la propuesta técnica y presupuestal completa (metodología, población objetivo identificada a través de Bienestar Universitario, cotizaciones ya cerradas de kit escolar con Doneta y de refrigerio con Colombia Gourmet) ante Vicedecanatura para obtener el aval institucional. Esperar a que se complete el cambio de Vicedecanatura ya en curso antes de formalizar el trámite presupuestal, para no arriesgar compromisos con la administración saliente; explorar en paralelo la vía de una convocatoria de extensión asociada a problemáticas de Bogotá con apoyo de la Vicedecanatura de Investigación y Extensión (contacto: Sandra Carlos Vargas). Una vez aprobada, iniciar la gestión de ejecución.",
@@ -138,6 +151,7 @@ IDEAS = [
         priority=False,
     ),
     dict(
+        id="produccion-carteleras",
         cat="Producción de contenido",
         idea="Carteleras UIFCE (física y digital)",
         hacer="Mantener la proyección de piezas en las carteleras digitales de los edificios 310 y 311 en articulación con la Dependencia de Comunicaciones de la Facultad, y conservar y actualizar la cartelera física renovada en 2025-2.",
@@ -147,6 +161,7 @@ IDEAS = [
         priority=False,
     ),
     dict(
+        id="eventos-semana-uifce",
         cat="Eventos / Proyectos estratégicos",
         idea="Semana UIFCE — primera edición",
         hacer="Ejecutar la primera edición del evento (septiembre), articulada con la Semana de Investigación de la Vicedecanatura de Investigación y Extensión (VIE, contacto Sandra Carlos Vargas), con tres componentes: (1) Hackatón en Bizagi a tres días no consecutivos (capacitación, entrega del caso, y sustentación una semana después), en equipos de 4 y con profesores como jurados, coordinada con Gau y Ángela, quienes ya tienen la capacitación y el proyecto de estudio documentados; (2) microtaller de Introducción a la Lógica de Programación ya comprometido con Jonny; (3) conferencia con invitado del sector empresarial, gestionada por el profesor Montoya vía Daniel, con fecha límite del 17 de septiembre. Formalizar con Carlos Osorio Ramírez (CIID) la donación de cupos en diplomados como premio de la Hackatón, y sumar un stand físico por cada área de la UIFCE en el pasillo de la biblioteca. Activar la Red de Aliados Académicos y solicitar estudiantes de corresponsabilidad con suficiente anticipación para que la convocatoria a la Hackatón no se anuncie de un día para otro, como ocurrió en la edición cancelada de 2025-2.",
@@ -156,6 +171,7 @@ IDEAS = [
         priority=False,
     ),
     dict(
+        id="estrategicos-boletin-digital",
         cat="Proyectos estratégicos — NUEVO",
         idea="Boletín Digital UIFCE",
         hacer="Diseñar la plantilla del boletín, definir el protocolo de recolección de contenido con cada área (AA, GC, DS, Virtualización, CL) y publicar tres números durante el semestre.",
@@ -165,6 +181,7 @@ IDEAS = [
         priority=False,
     ),
     dict(
+        id="estrategicos-red-aliados-academicos",
         cat="Proyectos estratégicos — NUEVO",
         idea="Red de Aliados Académicos UIFCE",
         hacer="Construir un listado vivo de profesores y asignaturas aliadas por programa curricular (administración, economía, contaduría) que faciliten la convocatoria presencial a eventos y servicios de la UIFCE.",
@@ -174,6 +191,7 @@ IDEAS = [
         priority=False,
     ),
     dict(
+        id="innovacion-repositorio-ia",
         cat="Innovación y eficiencia operativa — NUEVO",
         idea="Repositorio de material con IA y automatización de producción de video",
         hacer="Evaluar y adoptar herramientas de inteligencia artificial en dos frentes: (1) un repositorio de material clasificado y buscable (piezas, hacks, videos, documentos de proyectos), y (2) automatización de tareas repetitivas de edición de video (subtitulado, recortes por plataforma, primeros cortes). Articular el repositorio con el soporte documental permanente del área (idea siguiente).",
@@ -183,6 +201,7 @@ IDEAS = [
         priority=False,
     ),
     dict(
+        id="documentacion-repositorio-permanente",
         cat="Documentación y memoria institucional — NUEVO",
         idea="Repositorio documental permanente de Estrategias Tecnológicas",
         hacer="Diseñar y poner en marcha un repositorio propio de ET (carpeta estructurada en Drive con convención de nombres y metadatos mínimos: fecha, tipo de pieza, campaña, autor) donde se archive de forma permanente todo el material del área —piezas gráficas, videos, documentos de proyectos, credenciales y evidencias de gestión de redes— más allá de cada semestre, en articulación con el repositorio general que ya lidera Gestión del Conocimiento (GC). Adoptar el mecanismo propuesto en el empalme: que cada máster entrante tome accesos directos al repositorio único en lugar de copiar carpetas completas semestre a semestre, y mantener un asistente de IA con contexto del Drive (ej. Gemini) que permita ubicar cualquier archivo por consulta en lenguaje natural.",
@@ -192,6 +211,7 @@ IDEAS = [
         priority=False,
     ),
     dict(
+        id="documentacion-propuesta-drive-gc",
         cat="Documentación y memoria institucional — NUEVO",
         idea="Propuesta de reorganización del Drive UIFCE ante Gestión del Conocimiento (GC)",
         hacer="Presentar a GC la propuesta formal de repositorio documental permanente para todo el Drive de UIFCE: separar el contenido vigente de cada semestre del contenido permanente por proyecto de continuidad, con convención común de nomenclatura y uso de accesos directos en lugar de copias, tomando como piloto la carpeta ya reorganizada de ET 2026-2. Acordar con GC qué proyectos migran primero al repositorio permanente y quién lidera la migración del material disperso ya existente.",
@@ -201,6 +221,7 @@ IDEAS = [
         priority=False,
     ),
     dict(
+        id="acompanamiento-interarea",
         cat="Acompañamiento interárea",
         idea="Acompañamiento Interárea",
         hacer="Ejecutar la matriz de acompañamiento a Apoyos Académicos, Gestión del Conocimiento, Desarrollo, Virtualización, Cursos Libres y Coordinación bajo el protocolo de solicitud definido: canal único ante el Máster ET, SLA de 5 días hábiles para piezas puntuales y 4 semanas para campañas institucionales, y criterios de priorización ante solicitudes simultáneas.",
@@ -217,15 +238,15 @@ ws1.title = "Planeación"
 
 ws1["A1"] = "ESTRATEGIAS TECNOLÓGICAS — PLANEACIÓN 2026-2"
 ws1["A1"].font = TITLE_FONT
-ws1.merge_cells("A1:F1")
+ws1.merge_cells("A1:G1")
 ws1["A2"] = ("UIFCE · Facultad de Ciencias Económicas · UNAL — Documento para presentar a Coordinación: "
              "qué se debe hacer, qué se espera y con qué fundamento, para cada línea de trabajo de ET en 2026-2. "
              "Principio rector del semestre: calidad sobre cantidad para posicionar la Unidad (informes 2025-1 a 2026-1, "
              "y video de empalme entre líder saliente y entrante).")
 ws1["A2"].font = SUB_FONT
-ws1.merge_cells("A2:F2")
+ws1.merge_cells("A2:G2")
 
-headers1 = ["Categoría", "#", "Idea principal", "Qué se debe hacer", "Qué se espera", "Fundamento"]
+headers1 = ["ID", "Categoría", "#", "Idea principal", "Qué se debe hacer", "Qué se espera", "Fundamento"]
 row0 = 4
 for j, htext in enumerate(headers1, start=1):
     c = ws1.cell(row=row0, column=j, value=htext)
@@ -236,18 +257,20 @@ for j, htext in enumerate(headers1, start=1):
 
 r = row0 + 1
 for i, d in enumerate(IDEAS):
-    ws1.cell(row=r, column=1, value=d["cat"]).alignment = WRAP_TOP
-    ws1.cell(row=r, column=1).font = Font(bold=True, size=9, color="7A1F2B")
-    ws1.cell(row=r, column=2, value=i + 1).alignment = Alignment(horizontal="center", vertical="top")
-    ws1.cell(row=r, column=3, value=d["idea"]).alignment = WRAP_TOP
-    ws1.cell(row=r, column=3).font = Font(bold=True, size=10)
-    ws1.cell(row=r, column=4, value=d["hacer"]).alignment = WRAP_TOP
-    ws1.cell(row=r, column=4).font = Font(size=10)
-    ws1.cell(row=r, column=5, value=d["espera"]).alignment = WRAP_TOP
+    ws1.cell(row=r, column=1, value=d["id"]).alignment = WRAP_TOP
+    ws1.cell(row=r, column=1).font = Font(size=9, color="595959")
+    ws1.cell(row=r, column=2, value=d["cat"]).alignment = WRAP_TOP
+    ws1.cell(row=r, column=2).font = Font(bold=True, size=9, color="7A1F2B")
+    ws1.cell(row=r, column=3, value=i + 1).alignment = Alignment(horizontal="center", vertical="top")
+    ws1.cell(row=r, column=4, value=d["idea"]).alignment = WRAP_TOP
+    ws1.cell(row=r, column=4).font = Font(bold=True, size=10)
+    ws1.cell(row=r, column=5, value=d["hacer"]).alignment = WRAP_TOP
     ws1.cell(row=r, column=5).font = Font(size=10)
-    ws1.cell(row=r, column=6, value=d["fundamento"]).alignment = WRAP_TOP
-    ws1.cell(row=r, column=6).font = Font(size=10, italic=True, color="595959")
-    for col in range(1, 7):
+    ws1.cell(row=r, column=6, value=d["espera"]).alignment = WRAP_TOP
+    ws1.cell(row=r, column=6).font = Font(size=10)
+    ws1.cell(row=r, column=7, value=d["fundamento"]).alignment = WRAP_TOP
+    ws1.cell(row=r, column=7).font = Font(size=10, italic=True, color="595959")
+    for col in range(1, 8):
         cell = ws1.cell(row=r, column=col)
         cell.border = BORDER
         if d.get("priority"):
@@ -256,12 +279,13 @@ for i, d in enumerate(IDEAS):
             cell.fill = ALT_FILL
     r += 1
 
-ws1.column_dimensions["A"].width = 20
-ws1.column_dimensions["B"].width = 5
-ws1.column_dimensions["C"].width = 26
-ws1.column_dimensions["D"].width = 50
-ws1.column_dimensions["E"].width = 40
-ws1.column_dimensions["F"].width = 45
+ws1.column_dimensions["A"].width = 24
+ws1.column_dimensions["B"].width = 20
+ws1.column_dimensions["C"].width = 5
+ws1.column_dimensions["D"].width = 26
+ws1.column_dimensions["E"].width = 50
+ws1.column_dimensions["F"].width = 40
+ws1.column_dimensions["G"].width = 45
 ws1.freeze_panes = "A5"
 for rr in range(row0 + 1, r):
     ws1.row_dimensions[rr].height = 130
@@ -270,16 +294,16 @@ for rr in range(row0 + 1, r):
 ws2 = wb.create_sheet("Planeación del Área")
 ws2["A1"] = "PLANEACIÓN DEL ÁREA — DETALLE OPERATIVO 2026-2"
 ws2["A1"].font = TITLE_FONT
-ws2.merge_cells("A1:F1")
+ws2.merge_cells("A1:G1")
 ws2["A2"] = ("Mismo contenido de la hoja \"Planeación\", organizado por actividad con entregables explícitos, enriquecido con "
              "los hallazgos operativos concretos (contactos, procesos y pendientes) del video de empalme entre la líder saliente "
              "y la entrante — ver Transcripción y Notas del Empalme ET 2026-2, numeral 15. "
              "Principio rector del semestre: calidad sobre cantidad para posicionar la Unidad. "
              "Completar en equipo con fechas y responsables de pago al inicio del semestre.")
 ws2["A2"].font = SUB_FONT
-ws2.merge_cells("A2:F2")
+ws2.merge_cells("A2:G2")
 
-headers2 = ["Categoría", "Actividad", "Qué se debe hacer", "Qué se espera", "Fundamento", "Entregables"]
+headers2 = ["ID", "Categoría", "Actividad", "Qué se debe hacer", "Qué se espera", "Fundamento", "Entregables"]
 row0b = 4
 for j, htext in enumerate(headers2, start=1):
     c = ws2.cell(row=row0b, column=j, value=htext)
@@ -290,19 +314,21 @@ for j, htext in enumerate(headers2, start=1):
 
 r2 = row0b + 1
 for i, d in enumerate(IDEAS):
-    ws2.cell(row=r2, column=1, value=d["cat"]).alignment = WRAP_TOP
-    ws2.cell(row=r2, column=1).font = Font(bold=True, size=9, color="7A1F2B")
-    ws2.cell(row=r2, column=2, value=d["idea"]).alignment = WRAP_TOP
-    ws2.cell(row=r2, column=2).font = Font(bold=True, size=10)
-    ws2.cell(row=r2, column=3, value=d["hacer"]).alignment = WRAP_TOP
-    ws2.cell(row=r2, column=3).font = Font(size=10)
-    ws2.cell(row=r2, column=4, value=d["espera"]).alignment = WRAP_TOP
+    ws2.cell(row=r2, column=1, value=d["id"]).alignment = WRAP_TOP
+    ws2.cell(row=r2, column=1).font = Font(size=9, color="595959")
+    ws2.cell(row=r2, column=2, value=d["cat"]).alignment = WRAP_TOP
+    ws2.cell(row=r2, column=2).font = Font(bold=True, size=9, color="7A1F2B")
+    ws2.cell(row=r2, column=3, value=d["idea"]).alignment = WRAP_TOP
+    ws2.cell(row=r2, column=3).font = Font(bold=True, size=10)
+    ws2.cell(row=r2, column=4, value=d["hacer"]).alignment = WRAP_TOP
     ws2.cell(row=r2, column=4).font = Font(size=10)
-    ws2.cell(row=r2, column=5, value=d["fundamento"]).alignment = WRAP_TOP
-    ws2.cell(row=r2, column=5).font = Font(size=10, italic=True, color="595959")
-    ws2.cell(row=r2, column=6, value=d["entregables"]).alignment = WRAP_TOP
-    ws2.cell(row=r2, column=6).font = Font(size=10)
-    for col in range(1, 7):
+    ws2.cell(row=r2, column=5, value=d["espera"]).alignment = WRAP_TOP
+    ws2.cell(row=r2, column=5).font = Font(size=10)
+    ws2.cell(row=r2, column=6, value=d["fundamento"]).alignment = WRAP_TOP
+    ws2.cell(row=r2, column=6).font = Font(size=10, italic=True, color="595959")
+    ws2.cell(row=r2, column=7, value=d["entregables"]).alignment = WRAP_TOP
+    ws2.cell(row=r2, column=7).font = Font(size=10)
+    for col in range(1, 8):
         cell = ws2.cell(row=r2, column=col)
         cell.border = BORDER
         if d.get("priority"):
@@ -311,12 +337,13 @@ for i, d in enumerate(IDEAS):
             cell.fill = ALT_FILL
     r2 += 1
 
-ws2.column_dimensions["A"].width = 20
-ws2.column_dimensions["B"].width = 26
-ws2.column_dimensions["C"].width = 48
-ws2.column_dimensions["D"].width = 38
-ws2.column_dimensions["E"].width = 42
-ws2.column_dimensions["F"].width = 32
+ws2.column_dimensions["A"].width = 24
+ws2.column_dimensions["B"].width = 20
+ws2.column_dimensions["C"].width = 26
+ws2.column_dimensions["D"].width = 48
+ws2.column_dimensions["E"].width = 38
+ws2.column_dimensions["F"].width = 42
+ws2.column_dimensions["G"].width = 32
 ws2.freeze_panes = "A5"
 for rr in range(row0b + 1, r2):
     ws2.row_dimensions[rr].height = 130
