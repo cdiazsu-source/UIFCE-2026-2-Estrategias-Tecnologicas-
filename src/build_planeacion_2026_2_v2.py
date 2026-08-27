@@ -230,6 +230,26 @@ IDEAS = [
         entregables="* Registro compartido de solicitudes.\n* Cumplimiento de SLA.\n* Necesidades de cada área recogidas al inicio de semestre.",
         priority=False,
     ),
+    dict(
+        id="documentacion-memorias-2026-2",
+        cat="Documentación y memoria institucional — NUEVO",
+        idea="Memorias UIFCE 2026-2S",
+        hacer="Construir un repositorio de memorias del semestre 2026-2 del área —piezas destacadas, eventos, métricas de canales, hitos, decisiones y aprendizajes— recopilando el material de forma continua durante el semestre y no al cierre, con una estructura de carpetas y una convención de nombres consistentes con el repositorio documental permanente. Producir, a partir de ese material, un video final que resuma la gestión del área en el semestre (línea de tiempo de logros, cifras y testimonios del equipo), aplicando la línea gráfica vigente y el flujo de aprobación por el grupo Piezas Redes Sociales.",
+        espera="Al cierre del semestre, un repositorio de memorias 2026-2S organizado y navegable, y un video final publicado y enlazado desde ese repositorio, que sirva de cierre de gestión y de insumo directo para el empalme con el equipo entrante.",
+        fundamento="El diagnóstico identificó como brecha estructural que el conocimiento del área se pierde si no se organiza, y que cada máster entrante reconstruye contexto copiando carpetas completas de Drive. El empalme 2026-2 se apoyó justamente en un video y su transcripción para transferir el conocimiento tácito de la líder saliente. Un repositorio de memorias y un video de cierre sistematizan esa transferencia y refuerzan la línea del repositorio documental permanente.",
+        entregables="* Estructura de carpetas y convención de nombres del repositorio de memorias 2026-2S.\n* Recopilación continua de material a lo largo del semestre (piezas, eventos, métricas, aprendizajes).\n* Guion y edición del video final del área.\n* Video final publicado y enlazado en el repositorio de memorias.",
+        priority=False,
+    ),
+    dict(
+        id="cursoslibres-piezas-primer-lanzamiento",
+        cat="Acompañamiento a Cursos Libres",
+        idea="Elaboración de piezas gráficas de Cursos Libres — Primer lanzamiento",
+        hacer="Gestionar y producir las piezas gráficas de difusión del primer lanzamiento de Cursos Libres 2026-2 (seis cursos virtualizados), aplicando la línea gráfica modular vigente de CL y el flujo de aprobación por el grupo Piezas Redes Sociales. El lanzamiento corre de la semana 4 a la semana 8-9 (14 de septiembre a 24 de octubre de 2026). Para cada curso: pieza de inscripción y video corto de lanzamiento del monitor. Coordinar con Cursos Libres con anticipación las fechas, textos y códigos definitivos —es el área con mayor fricción de tiempos según el diagnóstico— y bloquear en el calendario editorial las fechas de entrega antes del inicio de inscripciones de cada curso.",
+        espera="Las seis piezas de inscripción y sus videos de lanzamiento aprobados y publicados antes del inicio de inscripciones de cada curso, sin retrasos atribuibles a coordinación tardía con Cursos Libres.",
+        fundamento="El diagnóstico y el video de empalme señalan a Cursos Libres como el área con la que ET tiene mayor fricción de tiempos: sus agendamientos se demoran y luego se piden piezas con plazos muy cortos. La planeación 2026-1 dejó el despliegue de la línea gráfica modular de CL en curso. Adelantar y estandarizar la producción del primer lanzamiento reduce ese riesgo recurrente.",
+        entregables="* Excel Básico Virtualizado (CLEBV-I) — monitor: María Fernanda Celis · sem 4-8 (14 sep - 17 oct) · 5 sesiones · cupo 10-20 · prerrequisito: ninguno.\n* Excel Intermedio Virtualizado (VEA-20202) — monitor: Joel Santiago Rodríguez Guzmán · sem 4-9 (14 sep - 24 oct) · 6 sesiones · cupo 12-24 · prerrequisito: Excel Básico Virtualizado.\n* Econometría en Python (CLEPY202602) — monitor: Laura Angélica Cárdenas Cely · sem 4-8 (14 sep - 17 oct) · 5 sesiones · cupo 10-20 · prerrequisito: Introducción a la Programación o a Lógica, y estar cursando o haber cursado Econometría I.\n* Introducción a la Programación en Python y R (CLIPPYR292602) — monitor: Diego Alejandro Garnica Mamanché · sem 4-8 (14 sep - 17 oct) · 5 sesiones · cupo 10-20 · prerrequisito: ninguno.\n* Introducción a Power BI (CLIPBI202602) — monitor: Paula Sofía Bocarejo Alberto · sem 4-8 (14 sep - 17 oct) · 5 sesiones · cupo 10-20 · prerrequisito: Excel Intermedio Virtualizado.\n* Siigo Nube (CLSIN2020602) — monitor: Jean Carlos Baquero García · sem 4-8 (14 sep - 17 oct) · 5 sesiones · cupo 10-20 · prerrequisito: Contabilidad de Inversión y Financiación.",
+        priority=False,
+    ),
 ]
 
 # ---------- Sheet 1: Planeación ----------
