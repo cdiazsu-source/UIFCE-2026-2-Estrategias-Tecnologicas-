@@ -82,3 +82,30 @@ export async function deleteChecklistItem(itemId: string, projectId: string) {
   revalidatePath("/");
   revalidatePath(`/proyectos/${projectId}`);
 }
+
+/** Sube o baja una subtarea en el orden del checklist del proyecto,
+ *  intercambiando su `order` con el de la vecina. */
+export async function moveChecklistItem(itemId: string, projectId: string, dir: "up" | "down") {
+  if (await blockedForJunior()) return;
+
+  const items = await prisma.checklistItem.findMany({
+    where: { projectId },
+    orderBy: { order: "asc" },
+    select: { id: true, order: true },
+  });
+
+  const idx = items.findIndex((i) => i.id === itemId);
+  if (idx === -1) return;
+  const swapIdx = dir === "up" ? idx - 1 : idx + 1;
+  if (swapIdx < 0 || swapIdx >= items.length) return;
+
+  const a = items[idx];
+  const b = items[swapIdx];
+  await prisma.$transaction([
+    prisma.checklistItem.update({ where: { id: a.id }, data: { order: b.order } }),
+    prisma.checklistItem.update({ where: { id: b.id }, data: { order: a.order } }),
+  ]);
+
+  revalidatePath("/");
+  revalidatePath(`/proyectos/${projectId}`);
+}

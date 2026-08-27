@@ -1,10 +1,16 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronUp, Pencil, Plus, Trash2 } from "lucide-react";
 import type { ChecklistItem } from "@prisma/client";
 
-import { addChecklistItem, deleteChecklistItem, toggleChecklistItem, updateChecklistItem } from "@/lib/actions/checklist";
+import {
+  addChecklistItem,
+  deleteChecklistItem,
+  moveChecklistItem,
+  toggleChecklistItem,
+  updateChecklistItem,
+} from "@/lib/actions/checklist";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
@@ -41,7 +47,19 @@ function AssigneeTag({ item, people }: { item: ChecklistItem; people: PersonOpti
   );
 }
 
-function ChecklistRow({ item, projectId, people }: { item: ChecklistItem; projectId: string; people: PersonOption[] }) {
+function ChecklistRow({
+  item,
+  projectId,
+  people,
+  isFirst,
+  isLast,
+}: {
+  item: ChecklistItem;
+  projectId: string;
+  people: PersonOption[];
+  isFirst: boolean;
+  isLast: boolean;
+}) {
   const canEdit = useCanEdit();
   const [editing, setEditing] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -104,6 +122,24 @@ function ChecklistRow({ item, projectId, people }: { item: ChecklistItem; projec
       </div>
       {canEdit && (
         <div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+          <button
+            type="button"
+            disabled={isFirst}
+            onClick={() => startTransition(() => moveChecklistItem(item.id, projectId, "up"))}
+            className="rounded p-1 text-muted-foreground hover:bg-accent disabled:pointer-events-none disabled:opacity-30"
+            aria-label="Subir subtarea"
+          >
+            <ChevronUp className="h-3.5 w-3.5" />
+          </button>
+          <button
+            type="button"
+            disabled={isLast}
+            onClick={() => startTransition(() => moveChecklistItem(item.id, projectId, "down"))}
+            className="rounded p-1 text-muted-foreground hover:bg-accent disabled:pointer-events-none disabled:opacity-30"
+            aria-label="Bajar subtarea"
+          >
+            <ChevronDown className="h-3.5 w-3.5" />
+          </button>
           <button type="button" onClick={() => setEditing(true)} className="rounded p-1 text-muted-foreground hover:bg-accent" aria-label="Editar subtarea">
             <Pencil className="h-3.5 w-3.5" />
           </button>
@@ -177,8 +213,15 @@ export function Checklist({
           <p className="text-sm text-muted-foreground">Este proyecto todavía no tiene subtareas.</p>
         ) : (
           <ul className="flex flex-col divide-y divide-border">
-            {sorted.map((item) => (
-              <ChecklistRow key={item.id} item={item} projectId={projectId} people={people} />
+            {sorted.map((item, i) => (
+              <ChecklistRow
+                key={item.id}
+                item={item}
+                projectId={projectId}
+                people={people}
+                isFirst={i === 0}
+                isLast={i === sorted.length - 1}
+              />
             ))}
           </ul>
         )}
