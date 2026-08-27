@@ -20,6 +20,24 @@ enum ToolStatus {
   GRATUITA
 }
 
+/// Rol de una persona del equipo o de su entorno cercano. El directorio de
+/// `User` es editable in-app; por ahora no hay inicio de sesión.
+enum UserRole {
+  MASTER
+  JUNIOR_ARTES
+  JUNIOR_AUXILIAR
+  COORDINADOR
+  DIRECTOR
+}
+
+/// Estado de cada punto de corte de un proyecto de estudio.
+enum CheckpointStatus {
+  PENDIENTE
+  EN_CURSO
+  CUMPLIDO
+  ATRASADO
+}
+
 /// Una iniciativa de planeacion_del_area.csv. El id coincide con la
 /// columna ID del CSV (slug estable, ver src/build_planeacion_2026_2_v2.py).
 /// Los campos de contenido (title/description/expectedOutcome/rationale) se
@@ -35,7 +53,11 @@ model Project {
   status          ProjectStatus @default(POR_INICIAR)
   driveFolderUrl  String?
   /// Orden de la fila en el CSV, para mantener el orden original en la UI.
+  /// Los proyectos creados a mano toman sourceOrder >= 1000 (ver
+  /// src/lib/actions/projects.ts) para no chocar con el índice del CSV.
   sourceOrder     Int           @unique
+  /// true = creado desde la app, no viene del CSV. El resync por seed lo ignora.
+  isManual        Boolean       @default(false)
 
   checklistItems ChecklistItem[]
   notes          ProjectNote[]
@@ -115,4 +137,79 @@ model Contact {
   updatedAt DateTime @updatedAt
 
   @@index([projectId])
+}
+
+/// Persona del equipo de ET o de su entorno cercano (coordinación, dirección).
+/// Directorio editable desde /equipo. `email` es la identidad; por ahora no
+/// habilita inicio de sesión — es sólo dato de contacto y atribución.
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  role      UserRole
+  /// Área a la que pertenece ("ET"); null para coordinación/dirección transversal.
+  area      String?
+  active    Boolean  @default(true)
+
+  studyProjects StudyProject[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/// Proyecto de estudio de un monitor Junior. Cada Junior expone dos por semestre.
+/// El cronograma es texto libre; el seguimiento formal son los 4 puntos de corte.
+model StudyProject {
+  id          String   @id @default(cuid())
+  title       String
+  owner       User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId     String
+  description String?   @db.Text
+  /// Cronograma en texto libre (hitos, fechas, entregas parciales).
+  schedule    String?   @db.Text
+  order       Int       @default(0)
+
+  checkpoints StudyCheckpoint[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([ownerId])
+}
+
+/// Uno de los 4 puntos de corte de un proyecto de estudio. Se crean los 4 al
+/// crear el proyecto (number 1..4) y sólo se editan fecha, estado y notas.
+model StudyCheckpoint {
+  id             String           @id @default(cuid())
+  studyProject   StudyProject     @relation(fields: [studyProjectId], references: [id], onDelete: Cascade)
+  studyProjectId String
+  number         Int
+  label          String
+  dueDate        DateTime?
+  status         CheckpointStatus @default(PENDIENTE)
+  notes          String?          @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([studyProjectId, number])
+  @@index([studyProjectId])
+}
+
+/// Un bloque de la guía de línea gráfica (colores, franjas, formatos,
+/// lineamientos de Imagen Institucional / Unimedios). Editable desde /linea-grafica.
+model BrandGuideline {
+  id        String   @id @default(cuid())
+  /// Agrupador: "Colores", "Franjas", "Formatos", "Lineamientos".
+  section   String
+  title     String
+  body      String   @db.Text
+  /// Color en hex (#RRGGBB) si el bloque describe un color; muestra un swatch.
+  colorHex  String?
+  order     Int      @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([section])
 }
