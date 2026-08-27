@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { LogOut } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { logout } from "@/lib/actions/auth";
 
 const LINKS = [
   { href: "/", label: "Panel principal" },
@@ -16,6 +18,8 @@ const LINKS = [
 
 export function SiteNav() {
   const pathname = usePathname();
+
+  if (pathname === "/login") return null;
 
   return (
     <header className="site-nav sticky top-0 z-40 border-b border-border/60 bg-card/95 backdrop-blur-xl backdrop-saturate-150 supports-[backdrop-filter]:bg-card/70">
@@ -42,6 +46,15 @@ export function SiteNav() {
             );
           })}
         </nav>
+        <form action={logout} className="ml-auto">
+          <button
+            type="submit"
+            className="press inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-[color,background-color] duration-150 ease-out-strong hover:bg-accent hover:text-accent-foreground"
+          >
+            <LogOut className="h-3.5 w-3.5" />
+            Salir
+          </button>
+        </form>
       </div>
     </header>
   );
