@@ -152,6 +152,9 @@ model User {
   role      UserRole
   /// Área a la que pertenece ("ET"); null para coordinación/dirección transversal.
   area      String?
+  /// Nombre de archivo de la foto en webapp/public/avatares/ o URL completa.
+  /// Si está vacío, la UI muestra las iniciales. Mismo criterio que Contact.photoUrl.
+  photoUrl  String?
   active    Boolean  @default(true)
 
   studyProjects StudyProject[]

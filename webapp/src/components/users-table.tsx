@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { PersonAvatar } from "@/components/person-avatar";
 import { USER_ROLE_LABEL } from "@/lib/utils";
 
 const ROLE_OPTIONS: UserRole[] = ["MASTER", "JUNIOR_ARTES", "JUNIOR_AUXILIAR", "COORDINADOR", "DIRECTOR"];
@@ -45,6 +46,12 @@ function UserRow({ user }: { user: User }) {
             <Input name="email" type="email" defaultValue={user.email} placeholder="Correo" className="w-56" />
             <RoleSelect name="role" defaultValue={user.role} />
             <Input name="area" defaultValue={user.area ?? ""} placeholder="Área (ej. ET)" className="w-28" />
+            <Input
+              name="photoUrl"
+              defaultValue={user.photoUrl ?? ""}
+              placeholder="Foto: archivo en /avatares/ o URL"
+              className="w-56"
+            />
             <Select name="active" defaultValue={String(user.active)} className="w-32">
               <option value="true">Activo</option>
               <option value="false">Inactivo</option>
@@ -63,7 +70,12 @@ function UserRow({ user }: { user: User }) {
 
   return (
     <TableRow className={user.active ? undefined : "opacity-55"}>
-      <TableCell className="font-medium">{user.name}</TableCell>
+      <TableCell className="font-medium">
+        <div className="flex items-center gap-2.5">
+          <PersonAvatar name={user.name} photoUrl={user.photoUrl} />
+          <span>{user.name}</span>
+        </div>
+      </TableCell>
       <TableCell className="text-muted-foreground">
         <a href={`mailto:${user.email}`} className="hover:text-primary hover:underline">
           {user.email}
@@ -129,6 +141,7 @@ export function UsersTable({ users }: { users: User[] }) {
           <Input name="email" type="email" placeholder="Correo" required className="w-56" />
           <RoleSelect name="role" />
           <Input name="area" placeholder="Área (ej. ET)" defaultValue="ET" className="w-28" />
+          <Input name="photoUrl" placeholder="Foto: archivo en /avatares/ o URL" className="w-56" />
           <Button type="submit" size="sm">
             Agregar
           </Button>

@@ -10,43 +10,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { PersonAvatar } from "@/components/person-avatar";
 
 export type ContactWithProject = Contact & { project: { id: string; title: string } | null };
 export type ProjectOption = { id: string; title: string };
-
-function initials(name: string) {
-  return name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((w) => w[0]?.toUpperCase() ?? "")
-    .join("");
-}
-
-/** Resuelve el valor de photoUrl: URL completa o ruta absoluta tal cual;
- *  un nombre de archivo suelto se busca en /public/avatares/. */
-function resolvePhoto(photoUrl: string) {
-  if (/^(https?:\/\/|\/)/.test(photoUrl)) return photoUrl;
-  return `/avatares/${photoUrl}`;
-}
-
-function ContactAvatar({ name, photoUrl }: { name: string; photoUrl: string | null }) {
-  if (photoUrl && photoUrl.trim().length > 0) {
-    return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
-        src={resolvePhoto(photoUrl.trim())}
-        alt={name}
-        className="h-7 w-7 shrink-0 rounded-full border border-border object-cover"
-      />
-    );
-  }
-  return (
-    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[11px] font-semibold text-primary">
-      {initials(name)}
-    </span>
-  );
-}
 
 function ContactRow({ contact, projectOptions }: { contact: ContactWithProject; projectOptions: ProjectOption[] }) {
   const [editing, setEditing] = useState(false);
@@ -98,7 +65,7 @@ function ContactRow({ contact, projectOptions }: { contact: ContactWithProject; 
     <TableRow>
       <TableCell className="font-medium">
         <div className="flex items-center gap-2.5">
-          <ContactAvatar name={contact.name} photoUrl={contact.photoUrl} />
+          <PersonAvatar name={contact.name} photoUrl={contact.photoUrl} />
           <span>{contact.name}</span>
         </div>
       </TableCell>
