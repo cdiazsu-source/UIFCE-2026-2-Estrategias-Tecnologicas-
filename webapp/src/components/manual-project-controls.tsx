@@ -9,9 +9,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useCanEdit } from "@/components/access-context";
 
 export function ManualProjectControls({ project }: { project: Project }) {
+  const canEdit = useCanEdit();
   const [editing, setEditing] = useState(false);
+
+  if (!canEdit) return null;
 
   if (!editing) {
     return (

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { prisma } from "@/lib/prisma";
+import { blockedForJunior } from "@/lib/session";
 
 const PATH = "/linea-grafica";
 
@@ -14,6 +15,7 @@ function normalizeHex(raw: FormDataEntryValue | null): string | null {
 }
 
 export async function addGuideline(formData: FormData) {
+  if (await blockedForJunior()) return;
   const section = String(formData.get("section") ?? "").trim();
   const title = String(formData.get("title") ?? "").trim();
   const body = String(formData.get("body") ?? "").trim();
@@ -39,6 +41,7 @@ export async function addGuideline(formData: FormData) {
 }
 
 export async function updateGuideline(id: string, formData: FormData) {
+  if (await blockedForJunior()) return;
   const section = String(formData.get("section") ?? "").trim();
   const title = String(formData.get("title") ?? "").trim();
   const body = String(formData.get("body") ?? "").trim();
@@ -57,6 +60,7 @@ export async function updateGuideline(id: string, formData: FormData) {
 }
 
 export async function deleteGuideline(id: string) {
+  if (await blockedForJunior()) return;
   await prisma.brandGuideline.delete({ where: { id } });
   revalidatePath(PATH);
 }

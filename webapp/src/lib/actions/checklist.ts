@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { prisma } from "@/lib/prisma";
+import { blockedForJunior } from "@/lib/session";
 
 function parseDueDate(raw: FormDataEntryValue | null): Date | null {
   if (!raw || typeof raw !== "string" || raw.trim().length === 0) return null;
@@ -20,6 +21,7 @@ async function resolveAssignee(raw: FormDataEntryValue | null) {
 }
 
 export async function addChecklistItem(projectId: string, formData: FormData) {
+  if (await blockedForJunior()) return;
   const text = String(formData.get("text") ?? "").trim();
   if (!text) return;
 
@@ -48,12 +50,14 @@ export async function addChecklistItem(projectId: string, formData: FormData) {
 }
 
 export async function toggleChecklistItem(itemId: string, projectId: string, done: boolean) {
+  if (await blockedForJunior()) return;
   await prisma.checklistItem.update({ where: { id: itemId }, data: { done } });
   revalidatePath("/");
   revalidatePath(`/proyectos/${projectId}`);
 }
 
 export async function updateChecklistItem(itemId: string, projectId: string, formData: FormData) {
+  if (await blockedForJunior()) return;
   const text = String(formData.get("text") ?? "").trim();
   const { assigneeId, assignee } = await resolveAssignee(formData.get("assigneeId"));
   const dueDate = parseDueDate(formData.get("dueDate"));
@@ -73,6 +77,7 @@ export async function updateChecklistItem(itemId: string, projectId: string, for
 }
 
 export async function deleteChecklistItem(itemId: string, projectId: string) {
+  if (await blockedForJunior()) return;
   await prisma.checklistItem.delete({ where: { id: itemId } });
   revalidatePath("/");
   revalidatePath(`/proyectos/${projectId}`);

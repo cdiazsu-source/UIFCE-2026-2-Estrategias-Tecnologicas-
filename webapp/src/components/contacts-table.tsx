@@ -11,11 +11,13 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { PersonAvatar } from "@/components/person-avatar";
+import { useCanEdit } from "@/components/access-context";
 
 export type ContactWithProject = Contact & { project: { id: string; title: string } | null };
 export type ProjectOption = { id: string; title: string };
 
 function ContactRow({ contact, projectOptions }: { contact: ContactWithProject; projectOptions: ProjectOption[] }) {
+  const canEdit = useCanEdit();
   const [editing, setEditing] = useState(false);
   const [, startTransition] = useTransition();
 
@@ -86,19 +88,21 @@ function ContactRow({ contact, projectOptions }: { contact: ContactWithProject; 
       </TableCell>
       <TableCell className="max-w-xs text-muted-foreground">{contact.notes ?? "—"}</TableCell>
       <TableCell>
-        <div className="flex justify-end gap-1">
-          <button type="button" onClick={() => setEditing(true)} className="rounded p-1 text-muted-foreground hover:bg-accent" aria-label="Editar contacto">
-            <Pencil className="h-3.5 w-3.5" />
-          </button>
-          <button
-            type="button"
-            onClick={() => startTransition(() => deleteContact(contact.id))}
-            className="rounded p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-            aria-label="Eliminar contacto"
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-          </button>
-        </div>
+        {canEdit && (
+          <div className="flex justify-end gap-1">
+            <button type="button" onClick={() => setEditing(true)} className="rounded p-1 text-muted-foreground hover:bg-accent" aria-label="Editar contacto">
+              <Pencil className="h-3.5 w-3.5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => startTransition(() => deleteContact(contact.id))}
+              className="rounded p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+              aria-label="Eliminar contacto"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        )}
       </TableCell>
     </TableRow>
   );
@@ -111,18 +115,21 @@ export function ContactsTable({
   contacts: ContactWithProject[];
   projectOptions: ProjectOption[];
 }) {
+  const canEdit = useCanEdit();
   const [showForm, setShowForm] = useState(false);
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex justify-end">
-        <Button size="sm" variant="outline" onClick={() => setShowForm((s) => !s)}>
-          <Plus className="h-3.5 w-3.5" />
-          Agregar contacto
-        </Button>
-      </div>
+      {canEdit && (
+        <div className="flex justify-end">
+          <Button size="sm" variant="outline" onClick={() => setShowForm((s) => !s)}>
+            <Plus className="h-3.5 w-3.5" />
+            Agregar contacto
+          </Button>
+        </div>
+      )}
 
-      {showForm && (
+      {canEdit && showForm && (
         <form
           action={async (formData) => {
             await addContact(formData);

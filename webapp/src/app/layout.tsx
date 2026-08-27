@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 
 import { SiteNav } from "@/components/site-nav";
+import { AccessProvider } from "@/components/access-context";
+import { canEdit } from "@/lib/session";
 
 import "./globals.css";
 
@@ -9,12 +11,16 @@ export const metadata: Metadata = {
   description: "Seguimiento en vivo de la planeación de Estrategias Tecnológicas — UIFCE 2026-2",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const editable = await canEdit();
+
   return (
     <html lang="es">
       <body className="min-h-screen bg-background font-sans antialiased">
-        <SiteNav />
-        <main className="mx-auto max-w-6xl px-6 py-8">{children}</main>
+        <AccessProvider canEdit={editable}>
+          <SiteNav canEdit={editable} />
+          <main className="mx-auto max-w-6xl px-6 py-8">{children}</main>
+        </AccessProvider>
       </body>
     </html>
   );

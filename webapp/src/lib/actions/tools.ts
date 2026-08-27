@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import type { ToolStatus } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
+import { blockedForJunior } from "@/lib/session";
 
 function parseVerifiedDate(raw: FormDataEntryValue | null): Date | null {
   if (!raw || typeof raw !== "string" || raw.trim().length === 0) return null;
@@ -12,6 +13,7 @@ function parseVerifiedDate(raw: FormDataEntryValue | null): Date | null {
 }
 
 export async function addTool(formData: FormData) {
+  if (await blockedForJunior()) return;
   const name = String(formData.get("name") ?? "").trim();
   if (!name) return;
 
@@ -27,6 +29,7 @@ export async function addTool(formData: FormData) {
 }
 
 export async function updateTool(id: string, formData: FormData) {
+  if (await blockedForJunior()) return;
   const name = String(formData.get("name") ?? "").trim();
   const status = String(formData.get("status") ?? "SIN_LICENCIA") as ToolStatus;
   const location = String(formData.get("location") ?? "").trim();
@@ -46,6 +49,7 @@ export async function updateTool(id: string, formData: FormData) {
 }
 
 export async function deleteTool(id: string) {
+  if (await blockedForJunior()) return;
   await prisma.tool.delete({ where: { id } });
   revalidatePath("/herramientas");
 }

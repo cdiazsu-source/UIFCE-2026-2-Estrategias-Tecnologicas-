@@ -1,31 +1,26 @@
 /**
- * Autenticación mínima: un acceso compartido (usuario + contraseña únicos) que
- * protege TODO el sitio. Diseñado para reemplazarse por enlace mágico por correo
- * + cuentas por persona sin tocar los call-sites:
+ * Autenticación mínima: acceso compartido con dos perfiles, ambos con el mismo
+ * usuario. Protege TODO el sitio (middleware.ts): sin cookie válida → /login.
  *
- *  - `verifyToken` / la cookie de sesión no cambian.
- *  - Hoy el `middleware.ts` protege TODO el sitio (páginas y POST de server
- *    actions): sin cookie válida → /login. Con acceso compartido, todo el que
- *    entra puede editar todo.
- *  - Mañana `getSession()` (src/lib/session.ts) devolverá
- *    { authed, kind: "user", userId, role } y cada server action de escritura
- *    llamará `requireSession()` + un `can(session, accion)` que aplique la matriz.
+ *  - Perfil "full"  (contraseña ET2026): edita todo.
+ *  - Perfil "junior" (contraseña TEAM):  ve todo, pero solo puede agregar notas
+ *    de bitácora a los proyectos. El resto es de solo lectura.
+ *
+ * El nivel viaja firmado en la cookie. Diseñado para pasar más adelante a enlace
+ * mágico por correo + cuentas por persona sin tocar los call-sites: `getSession()`
+ * pasará a devolver { userId, role } y `canEdit()` aplicará la matriz por rol.
  *
  * Este módulo NO importa `next/headers` para poder usarse también en el
  * middleware (Edge). El acceso a cookies vive en src/lib/session.ts.
- *
- * Matriz de permisos objetivo (aún NO se aplica — con acceso compartido todos
- * pueden editar todo):
- *  - MASTER / COORDINADOR / DIRECTOR: editan todo.
- *  - JUNIOR_ARTES / JUNIOR_AUXILIAR: marcan y editan subtareas y dejan notas en
- *    cualquier proyecto; editan solo SUS proyectos de estudio; no borran
- *    proyectos ni tocan Equipo / Herramientas / Situación / Línea gráfica.
  */
 export const SESSION_COOKIE = "et_session";
 export const SESSION_MAX_AGE = 60 * 60 * 24 * 30; // 30 días
 
+export type AccessLevel = "full" | "junior";
+
 export const SITE_USER = process.env.SITE_USER || "UIFCE";
-const SITE_PASSWORD = process.env.SITE_PASSWORD || "ET2026";
+const PASS_FULL = process.env.SITE_PASSWORD || "ET2026";
+const PASS_JUNIOR = process.env.SITE_PASSWORD_JUNIOR || "TEAM";
 const SECRET = process.env.AUTH_SECRET || "et-en-marcha-dev-secret-cambiar-en-vercel";
 
 const enc = new TextEncoder();
@@ -49,28 +44,33 @@ async function hmac(data: string): Promise<string> {
   return b64url(sig);
 }
 
-/** Comprueba usuario + contraseña del acceso compartido. */
-export function checkCredentials(username: string, password: string): boolean {
-  return username.trim() === SITE_USER && password === SITE_PASSWORD;
+/** Devuelve el nivel de acceso si usuario+contraseña son válidos, o null. */
+export function checkCredentials(username: string, password: string): AccessLevel | null {
+  if (username.trim() !== SITE_USER) return null;
+  if (password === PASS_FULL) return "full";
+  if (password === PASS_JUNIOR) return "junior";
+  return null;
 }
 
-/** Token firmado para la cookie de sesión. */
-export async function signToken(): Promise<string> {
-  const payload = b64url(enc.encode(JSON.stringify({ v: 1, t: Date.now() })).buffer);
+/** Token firmado para la cookie de sesión, con el nivel de acceso. */
+export async function signToken(level: AccessLevel): Promise<string> {
+  const payload = b64url(enc.encode(JSON.stringify({ v: 1, t: Date.now(), a: level })).buffer);
   return `${payload}.${await hmac(payload)}`;
 }
 
-/** Valida el token (firma + antigüedad). Sirve en Edge (middleware) y en Node. */
-export async function verifyToken(token: string | undefined | null): Promise<boolean> {
-  if (!token || !token.includes(".")) return false;
+/** Nivel de acceso del token si es válido (firma + antigüedad), o null.
+ *  Sirve en Edge (middleware) y en Node. */
+export async function verifyToken(token: string | undefined | null): Promise<AccessLevel | null> {
+  if (!token || !token.includes(".")) return null;
   const [payload, sig] = token.split(".");
-  if (!payload || !sig) return false;
-  if (sig !== (await hmac(payload))) return false;
+  if (!payload || !sig) return null;
+  if (sig !== (await hmac(payload))) return null;
   try {
     const json = JSON.parse(atob(payload.replace(/-/g, "+").replace(/_/g, "/")));
-    if (typeof json.t !== "number") return false;
-    return Date.now() - json.t < SESSION_MAX_AGE * 1000;
+    if (typeof json.t !== "number") return null;
+    if (Date.now() - json.t >= SESSION_MAX_AGE * 1000) return null;
+    return json.a === "junior" ? "junior" : "full";
   } catch {
-    return false;
+    return null;
   }
 }

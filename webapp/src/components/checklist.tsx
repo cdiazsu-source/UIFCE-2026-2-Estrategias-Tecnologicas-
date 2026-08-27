@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { InfoHint } from "@/components/info-hint";
 import { cn, formatDate } from "@/lib/utils";
 import { personColor } from "@/lib/person-color";
+import { useCanEdit } from "@/components/access-context";
 
 export type PersonOption = { id: string; name: string; color?: string | null };
 
@@ -41,10 +42,11 @@ function AssigneeTag({ item, people }: { item: ChecklistItem; people: PersonOpti
 }
 
 function ChecklistRow({ item, projectId, people }: { item: ChecklistItem; projectId: string; people: PersonOption[] }) {
+  const canEdit = useCanEdit();
   const [editing, setEditing] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  if (editing) {
+  if (editing && canEdit) {
     return (
       <form
         action={async (formData) => {
@@ -80,8 +82,9 @@ function ChecklistRow({ item, projectId, people }: { item: ChecklistItem; projec
       <input
         type="checkbox"
         checked={item.done}
-        disabled={isPending}
+        disabled={isPending || !canEdit}
         onChange={(e) => {
+          if (!canEdit) return;
           const done = e.target.checked;
           startTransition(() => {
             toggleChecklistItem(item.id, projectId, done);
@@ -99,19 +102,21 @@ function ChecklistRow({ item, projectId, people }: { item: ChecklistItem; projec
           </p>
         )}
       </div>
-      <div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-        <button type="button" onClick={() => setEditing(true)} className="rounded p-1 text-muted-foreground hover:bg-accent" aria-label="Editar subtarea">
-          <Pencil className="h-3.5 w-3.5" />
-        </button>
-        <button
-          type="button"
-          onClick={() => startTransition(() => deleteChecklistItem(item.id, projectId))}
-          className="rounded p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-          aria-label="Eliminar subtarea"
-        >
-          <Trash2 className="h-3.5 w-3.5" />
-        </button>
-      </div>
+      {canEdit && (
+        <div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+          <button type="button" onClick={() => setEditing(true)} className="rounded p-1 text-muted-foreground hover:bg-accent" aria-label="Editar subtarea">
+            <Pencil className="h-3.5 w-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => startTransition(() => deleteChecklistItem(item.id, projectId))}
+            className="rounded p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+            aria-label="Eliminar subtarea"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      )}
     </li>
   );
 }
@@ -125,6 +130,7 @@ export function Checklist({
   items: ChecklistItem[];
   people: PersonOption[];
 }) {
+  const canEdit = useCanEdit();
   const [showForm, setShowForm] = useState(false);
   const sorted = [...items].sort((a, b) => a.order - b.order);
   const done = sorted.filter((i) => i.done).length;
@@ -139,13 +145,15 @@ export function Checklist({
           </span>
           <InfoHint text="Las subtareas de este proyecto. Se sembraron una vez desde la columna Entregables del CSV de planeación; a partir de ahí viven aquí — puedes marcarlas, editarlas, borrarlas o agregar nuevas sin que se pierdan al resincronizar. El responsable se elige del Equipo y lleva su color." />
         </CardTitle>
-        <Button size="sm" variant="outline" onClick={() => setShowForm((s) => !s)}>
-          <Plus className="h-3.5 w-3.5" />
-          Agregar subtarea
-        </Button>
+        {canEdit && (
+          <Button size="sm" variant="outline" onClick={() => setShowForm((s) => !s)}>
+            <Plus className="h-3.5 w-3.5" />
+            Agregar subtarea
+          </Button>
+        )}
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
-        {showForm && (
+        {canEdit && showForm && (
           <form
             action={async (formData) => {
               await addChecklistItem(projectId, formData);

@@ -3,8 +3,10 @@
 import { revalidatePath } from "next/cache";
 
 import { prisma } from "@/lib/prisma";
+import { blockedForJunior } from "@/lib/session";
 
 export async function updateSituationStat(id: string, formData: FormData) {
+  if (await blockedForJunior()) return;
   const label = String(formData.get("label") ?? "").trim();
   const value = String(formData.get("value") ?? "").trim();
   if (!label || !value) return;

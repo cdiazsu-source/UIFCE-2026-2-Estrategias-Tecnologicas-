@@ -8,9 +8,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useCanEdit } from "@/components/access-context";
 
 export function NewProjectButton() {
+  const canEdit = useCanEdit();
   const [open, setOpen] = useState(false);
+
+  if (!canEdit) return null;
 
   if (!open) {
     return (

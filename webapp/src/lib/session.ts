@@ -1,19 +1,24 @@
 import { cookies } from "next/headers";
 
-import { SESSION_COOKIE, verifyToken } from "@/lib/auth";
+import { type AccessLevel, SESSION_COOKIE, verifyToken } from "@/lib/auth";
 
-export type Session = { authed: true; kind: "shared" } | { authed: false };
+export type Session = { authed: true; level: AccessLevel } | { authed: false };
 
 /** Sesión actual (server components / server actions). */
 export async function getSession(): Promise<Session> {
-  const token = cookies().get(SESSION_COOKIE)?.value;
-  return (await verifyToken(token)) ? { authed: true, kind: "shared" } : { authed: false };
+  const level = await verifyToken(cookies().get(SESSION_COOKIE)?.value);
+  return level ? { authed: true, level } : { authed: false };
 }
 
-/** Úsalo al principio de cada server action que escribe. Con acceso compartido
- *  solo exige estar logueado; luego aplicará la matriz por rol. */
-export async function requireSession(): Promise<Extract<Session, { authed: true }>> {
+/** ¿La sesión puede editar? Solo el perfil "full". El perfil "junior" ve todo
+ *  pero solo agrega notas de bitácora. */
+export async function canEdit(): Promise<boolean> {
   const s = await getSession();
-  if (!s.authed) throw new Error("No autenticado");
-  return s;
+  return s.authed && s.level === "full";
+}
+
+/** Poner al inicio de cada server action de escritura (salvo agregar notas):
+ *  si la sesión no puede editar, corta en silencio. */
+export async function blockedForJunior(): Promise<boolean> {
+  return !(await canEdit());
 }

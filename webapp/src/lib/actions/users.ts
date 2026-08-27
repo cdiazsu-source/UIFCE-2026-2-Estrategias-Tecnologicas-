@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import type { UserRole } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
+import { blockedForJunior } from "@/lib/session";
 
 const ROLES: UserRole[] = ["MASTER", "JUNIOR_ARTES", "JUNIOR_AUXILIAR", "COORDINADOR", "DIRECTOR"];
 
@@ -13,6 +14,7 @@ function parseRole(raw: FormDataEntryValue | null): UserRole {
 }
 
 export async function addUser(formData: FormData) {
+  if (await blockedForJunior()) return;
   const name = String(formData.get("name") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   if (!name || !email) return;
@@ -37,6 +39,7 @@ export async function addUser(formData: FormData) {
 }
 
 export async function updateUser(id: string, formData: FormData) {
+  if (await blockedForJunior()) return;
   const name = String(formData.get("name") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const area = String(formData.get("area") ?? "").trim();
@@ -60,6 +63,7 @@ export async function updateUser(id: string, formData: FormData) {
 }
 
 export async function deleteUser(id: string) {
+  if (await blockedForJunior()) return;
   await prisma.user.delete({ where: { id } });
   revalidatePath("/equipo");
   revalidatePath("/proyectos-de-estudio");

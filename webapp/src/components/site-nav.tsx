@@ -16,7 +16,7 @@ const LINKS = [
   { href: "/equipo", label: "Equipo" },
 ];
 
-export function SiteNav() {
+export function SiteNav({ canEdit = true }: { canEdit?: boolean }) {
   const pathname = usePathname();
 
   if (pathname === "/login") return null;
@@ -46,15 +46,22 @@ export function SiteNav() {
             );
           })}
         </nav>
-        <form action={logout} className="ml-auto">
-          <button
-            type="submit"
-            className="press inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-[color,background-color] duration-150 ease-out-strong hover:bg-accent hover:text-accent-foreground"
-          >
-            <LogOut className="h-3.5 w-3.5" />
-            Salir
-          </button>
-        </form>
+        <div className="ml-auto flex items-center gap-2">
+          {!canEdit && (
+            <span className="rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground">
+              Modo lectura
+            </span>
+          )}
+          <form action={logout}>
+            <button
+              type="submit"
+              className="press inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-[color,background-color] duration-150 ease-out-strong hover:bg-accent hover:text-accent-foreground"
+            >
+              <LogOut className="h-3.5 w-3.5" />
+              Salir
+            </button>
+          </form>
+        </div>
       </div>
     </header>
   );

@@ -3,8 +3,10 @@
 import { revalidatePath } from "next/cache";
 
 import { prisma } from "@/lib/prisma";
+import { blockedForJunior } from "@/lib/session";
 
 export async function addContact(formData: FormData) {
+  if (await blockedForJunior()) return;
   const name = String(formData.get("name") ?? "").trim();
   const role = String(formData.get("role") ?? "").trim();
   if (!name || !role) return;
@@ -31,6 +33,7 @@ export async function addContact(formData: FormData) {
 }
 
 export async function updateContact(id: string, formData: FormData) {
+  if (await blockedForJunior()) return;
   const name = String(formData.get("name") ?? "").trim();
   const role = String(formData.get("role") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim();
@@ -56,6 +59,7 @@ export async function updateContact(id: string, formData: FormData) {
 }
 
 export async function deleteContact(id: string) {
+  if (await blockedForJunior()) return;
   await prisma.contact.delete({ where: { id } });
   revalidatePath("/contactos");
 }

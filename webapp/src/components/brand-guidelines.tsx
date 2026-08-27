@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
+import { useCanEdit } from "@/components/access-context";
 
 /** Orden preferido de secciones; cualquier otra sección va después, alfabética. */
 const SECTION_ORDER = ["Lineamientos", "Colores", "Franjas", "Formatos", "Aprobación"];
@@ -52,6 +53,7 @@ function GuidelineFields({ guideline }: { guideline?: BrandGuideline }) {
 }
 
 function GuidelineCard({ guideline }: { guideline: BrandGuideline }) {
+  const canEdit = useCanEdit();
   const [editing, setEditing] = useState(false);
   const [, startTransition] = useTransition();
 
@@ -94,24 +96,26 @@ function GuidelineCard({ guideline }: { guideline: BrandGuideline }) {
         <div className="flex-1">
           <div className="flex items-start justify-between gap-2">
             <h3 className="font-semibold leading-snug">{guideline.title}</h3>
-            <div className="flex shrink-0 gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-              <button
-                type="button"
-                onClick={() => setEditing(true)}
-                className="rounded p-1 text-muted-foreground hover:bg-accent"
-                aria-label="Editar indicación"
-              >
-                <Pencil className="h-3.5 w-3.5" />
-              </button>
-              <button
-                type="button"
-                onClick={() => startTransition(() => deleteGuideline(guideline.id))}
-                className="rounded p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-                aria-label="Eliminar indicación"
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-              </button>
-            </div>
+            {canEdit && (
+              <div className="flex shrink-0 gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                <button
+                  type="button"
+                  onClick={() => setEditing(true)}
+                  className="rounded p-1 text-muted-foreground hover:bg-accent"
+                  aria-label="Editar indicación"
+                >
+                  <Pencil className="h-3.5 w-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => startTransition(() => deleteGuideline(guideline.id))}
+                  className="rounded p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                  aria-label="Eliminar indicación"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            )}
           </div>
           {guideline.colorHex && (
             <p className="mt-0.5 font-mono text-xs text-muted-foreground">{guideline.colorHex}</p>
@@ -124,6 +128,7 @@ function GuidelineCard({ guideline }: { guideline: BrandGuideline }) {
 }
 
 export function BrandGuidelines({ guidelines }: { guidelines: BrandGuideline[] }) {
+  const canEdit = useCanEdit();
   const [showForm, setShowForm] = useState(false);
 
   const sections = useMemo(() => {
@@ -149,14 +154,16 @@ export function BrandGuidelines({ guidelines }: { guidelines: BrandGuideline[] }
         ))}
       </datalist>
 
-      <div className="flex justify-end">
-        <Button size="sm" variant="outline" onClick={() => setShowForm((s) => !s)}>
-          <Plus className="h-3.5 w-3.5" />
-          Agregar indicación
-        </Button>
-      </div>
+      {canEdit && (
+        <div className="flex justify-end">
+          <Button size="sm" variant="outline" onClick={() => setShowForm((s) => !s)}>
+            <Plus className="h-3.5 w-3.5" />
+            Agregar indicación
+          </Button>
+        </div>
+      )}
 
-      {showForm && (
+      {canEdit && showForm && (
         <form
           action={async (formData) => {
             await addGuideline(formData);

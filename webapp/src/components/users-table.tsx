@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { PersonAvatar } from "@/components/person-avatar";
 import { USER_ROLE_LABEL } from "@/lib/utils";
+import { useCanEdit } from "@/components/access-context";
 
 const ROLE_OPTIONS: UserRole[] = ["MASTER", "JUNIOR_ARTES", "JUNIOR_AUXILIAR", "COORDINADOR", "DIRECTOR"];
 
@@ -28,6 +29,7 @@ function RoleSelect({ name, defaultValue }: { name: string; defaultValue?: UserR
 }
 
 function UserRow({ user }: { user: User }) {
+  const canEdit = useCanEdit();
   const [editing, setEditing] = useState(false);
   const [, startTransition] = useTransition();
 
@@ -93,42 +95,47 @@ function UserRow({ user }: { user: User }) {
         )}
       </TableCell>
       <TableCell>
-        <div className="flex justify-end gap-1">
-          <button
-            type="button"
-            onClick={() => setEditing(true)}
-            className="rounded p-1 text-muted-foreground hover:bg-accent"
-            aria-label="Editar persona"
-          >
-            <Pencil className="h-3.5 w-3.5" />
-          </button>
-          <button
-            type="button"
-            onClick={() => startTransition(() => deleteUser(user.id))}
-            className="rounded p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-            aria-label="Eliminar persona"
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-          </button>
-        </div>
+        {canEdit && (
+          <div className="flex justify-end gap-1">
+            <button
+              type="button"
+              onClick={() => setEditing(true)}
+              className="rounded p-1 text-muted-foreground hover:bg-accent"
+              aria-label="Editar persona"
+            >
+              <Pencil className="h-3.5 w-3.5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => startTransition(() => deleteUser(user.id))}
+              className="rounded p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+              aria-label="Eliminar persona"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        )}
       </TableCell>
     </TableRow>
   );
 }
 
 export function UsersTable({ users }: { users: User[] }) {
+  const canEdit = useCanEdit();
   const [showForm, setShowForm] = useState(false);
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex justify-end">
-        <Button size="sm" variant="outline" onClick={() => setShowForm((s) => !s)}>
-          <Plus className="h-3.5 w-3.5" />
-          Agregar persona
-        </Button>
-      </div>
+      {canEdit && (
+        <div className="flex justify-end">
+          <Button size="sm" variant="outline" onClick={() => setShowForm((s) => !s)}>
+            <Plus className="h-3.5 w-3.5" />
+            Agregar persona
+          </Button>
+        </div>
+      )}
 
-      {showForm && (
+      {canEdit && showForm && (
         <form
           action={async (formData) => {
             await addUser(formData);

@@ -6,9 +6,25 @@ import { FolderOpen, Pencil } from "lucide-react";
 import { updateProjectDriveLink } from "@/lib/actions/projects";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useCanEdit } from "@/components/access-context";
 
 export function DriveLinkEditor({ projectId, driveFolderUrl }: { projectId: string; driveFolderUrl: string | null }) {
+  const canEdit = useCanEdit();
   const [editing, setEditing] = useState(false);
+
+  if (!canEdit) {
+    return driveFolderUrl ? (
+      <a
+        href={driveFolderUrl}
+        target="_blank"
+        rel="noreferrer"
+        className="inline-flex items-center gap-1.5 rounded-md border border-input px-2.5 py-1 text-xs font-medium text-primary hover:bg-accent"
+      >
+        <FolderOpen className="h-3.5 w-3.5" />
+        Abrir carpeta de Drive
+      </a>
+    ) : null;
+  }
 
   if (editing) {
     return (

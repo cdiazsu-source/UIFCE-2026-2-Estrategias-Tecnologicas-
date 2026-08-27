@@ -8,8 +8,10 @@ import { updateSituationStat } from "@/lib/actions/stats";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
+import { useCanEdit } from "@/components/access-context";
 
 function StatCard({ stat }: { stat: SituationStat }) {
+  const canEdit = useCanEdit();
   const [editing, setEditing] = useState(false);
 
   if (editing) {
@@ -39,14 +41,16 @@ function StatCard({ stat }: { stat: SituationStat }) {
 
   return (
     <Card className="group relative p-4">
-      <button
-        type="button"
-        onClick={() => setEditing(true)}
-        className="absolute right-2 top-2 rounded p-1 text-muted-foreground opacity-0 transition-opacity hover:bg-accent group-hover:opacity-100"
-        aria-label={`Editar ${stat.label}`}
-      >
-        <Pencil className="h-3.5 w-3.5" />
-      </button>
+      {canEdit && (
+        <button
+          type="button"
+          onClick={() => setEditing(true)}
+          className="absolute right-2 top-2 rounded p-1 text-muted-foreground opacity-0 transition-opacity hover:bg-accent group-hover:opacity-100"
+          aria-label={`Editar ${stat.label}`}
+        >
+          <Pencil className="h-3.5 w-3.5" />
+        </button>
+      )}
       <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{stat.label}</p>
       <p className="mt-1 text-sm font-semibold leading-snug">{stat.value}</p>
     </Card>

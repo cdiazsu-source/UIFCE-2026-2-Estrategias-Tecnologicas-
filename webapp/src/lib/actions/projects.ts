@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import type { ProjectStatus } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
+import { blockedForJunior } from "@/lib/session";
 
 const PRIORITY_TAGS = ["CRÍTICO", "PRIORITARIO", "NUEVO"];
 
@@ -23,6 +24,7 @@ function slugify(text: string): string {
 }
 
 export async function createProject(formData: FormData) {
+  if (await blockedForJunior()) return;
   const title = String(formData.get("title") ?? "").trim();
   const category = String(formData.get("category") ?? "").trim();
   if (!title || !category) return;
@@ -64,6 +66,7 @@ export async function createProject(formData: FormData) {
 }
 
 export async function updateProjectStatus(projectId: string, status: ProjectStatus) {
+  if (await blockedForJunior()) return;
   await prisma.project.update({ where: { id: projectId }, data: { status } });
   revalidatePath("/");
   revalidatePath(`/proyectos/${projectId}`);
@@ -72,6 +75,7 @@ export async function updateProjectStatus(projectId: string, status: ProjectStat
 /** Edita los campos de contenido. Sólo se ofrece en la UI para proyectos
  *  creados a mano (isManual) — los que vienen del CSV se editan en el CSV. */
 export async function updateProjectContent(projectId: string, formData: FormData) {
+  if (await blockedForJunior()) return;
   const title = String(formData.get("title") ?? "").trim();
   const category = String(formData.get("category") ?? "").trim();
   const rawPriority = String(formData.get("priorityTag") ?? "").trim();
@@ -96,6 +100,7 @@ export async function updateProjectContent(projectId: string, formData: FormData
 /** Borra un proyecto creado a mano (y en cascada su checklist/notas). No debe
  *  usarse con proyectos del CSV: el próximo seed los recrearía. */
 export async function deleteManualProject(projectId: string) {
+  if (await blockedForJunior()) return;
   const project = await prisma.project.findUnique({
     where: { id: projectId },
     select: { isManual: true },
@@ -108,6 +113,7 @@ export async function deleteManualProject(projectId: string) {
 }
 
 export async function updateProjectDriveLink(projectId: string, driveFolderUrl: string) {
+  if (await blockedForJunior()) return;
   const trimmed = driveFolderUrl.trim();
   await prisma.project.update({
     where: { id: projectId },
