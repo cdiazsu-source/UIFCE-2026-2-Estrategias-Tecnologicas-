@@ -175,8 +175,6 @@ async function seedContacts() {
 }
 
 // --- Equipo ------------------------------------------------------------------
-// Directorio inicial. Los correos de placeholder ("@example.com") se editan
-// desde /equipo. Cesar Díaz queda con el correo real usado en el historial git.
 // Directorio base. El upsert por correo es aditivo y NO sobrescribe lo que ya
 // editaron las personas (update: {}) — solo crea quien falte. Los "@example.com"
 // se editan desde /equipo. Cada quien lleva un color de acento.
@@ -189,6 +187,14 @@ const SEED_USERS = [
   { name: "Daniel Moreno", email: "daniel.moreno@example.com", role: "COORDINADOR" as const, area: null, color: "#C026D3" },
   { name: "Henry", email: "henry@example.com", role: "DIRECTOR" as const, area: null, color: "#4F46E5" },
 ];
+
+function foldName(s: string): string {
+  return s
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .trim()
+    .toLowerCase();
+}
 
 async function seedUsers() {
   for (const u of SEED_USERS) {
@@ -204,6 +210,28 @@ async function seedUsers() {
     });
   }
   console.log(`Usuarios sincronizados: ${SEED_USERS.length}; colores completados: ${sinColor.length}`);
+}
+
+// Fusiona duplicados de una persona del directorio base (mismo nombre, otro
+// correo): reasigna sus notas / subtareas / proyectos de estudio a la fila
+// canónica (la del correo del SEED_USERS) y borra la sobrante.
+async function dedupeSeededPeople() {
+  const all = await prisma.user.findMany();
+  let merged = 0;
+  for (const seed of SEED_USERS) {
+    const canonical = all.find((u) => u.email === seed.email);
+    if (!canonical) continue;
+    const dups = all.filter((u) => u.id !== canonical.id && foldName(u.name) === foldName(seed.name));
+    for (const d of dups) {
+      await prisma.projectNote.updateMany({ where: { authorId: d.id }, data: { authorId: canonical.id } });
+      await prisma.checklistItem.updateMany({ where: { assigneeId: d.id }, data: { assigneeId: canonical.id } });
+      await prisma.studyProject.updateMany({ where: { ownerId: d.id }, data: { ownerId: canonical.id } });
+      await prisma.user.delete({ where: { id: d.id } });
+      merged++;
+      console.log(`Usuario duplicado fusionado: "${d.name}" <${d.email}> -> <${canonical.email}>`);
+    }
+  }
+  if (merged === 0) console.log("Sin duplicados de equipo que fusionar.");
 }
 
 // --- Proyectos de estudio --------------------------------------------------
@@ -376,6 +404,7 @@ async function main() {
   await seedTools();
   await seedContacts();
   await seedUsers();
+  await dedupeSeededPeople();
   await seedStudyProjects();
   await seedBrandGuidelines();
 }

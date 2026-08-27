@@ -33,7 +33,7 @@ async function getHomeData() {
     prisma.user.findMany({
       where: { active: true },
       orderBy: { name: "asc" },
-      select: { id: true, name: true, color: true },
+      select: { id: true, name: true, role: true, color: true },
     }),
   ]);
 
@@ -74,11 +74,16 @@ async function getHomeData() {
     projectTitle: n.project.title,
   }));
 
-  return { stats, projectCards, feedItems, people };
+  // El filtro "por responsable" del buscador solo lista al máster y a los juniors
+  // (quienes ejecutan las subtareas), no a coordinación/dirección.
+  const FILTER_ROLES = new Set(["MASTER", "JUNIOR_ARTES", "JUNIOR_AUXILIAR"]);
+  const filterPeople = people.filter((p) => FILTER_ROLES.has(p.role));
+
+  return { stats, projectCards, feedItems, filterPeople };
 }
 
 export default async function HomePage() {
-  const { stats, projectCards, feedItems, people } = await getHomeData();
+  const { stats, projectCards, feedItems, filterPeople } = await getHomeData();
 
   return (
     <div className="flex flex-col gap-8">
@@ -101,7 +106,7 @@ export default async function HomePage() {
             </h2>
             <NewProjectButton />
           </div>
-          <ProjectsGrid projects={projectCards} people={people} />
+          <ProjectsGrid projects={projectCards} people={filterPeople} />
         </div>
 
         <div className="flex flex-col gap-3">
