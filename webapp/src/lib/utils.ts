@@ -5,12 +5,20 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+// Toda la app se muestra en hora de Bogotá (America/Bogota, UTC-5, sin horario
+// de verano), sin importar la zona horaria del servidor donde corra (Vercel usa
+// UTC). Las fechas "solo día" (vencimientos, última verificación) se dejan en UTC
+// a propósito: se guardan a medianoche UTC y convertirlas a Bogotá las correría
+// un día hacia atrás.
+export const APP_TIME_ZONE = "America/Bogota";
+
 export function formatDate(date: Date | string) {
   const d = typeof date === "string" ? new Date(date) : date;
   return new Intl.DateTimeFormat("es-CO", {
     day: "2-digit",
     month: "short",
     year: "numeric",
+    timeZone: "UTC",
   }).format(d);
 }
 
@@ -22,6 +30,7 @@ export function formatDateTime(date: Date | string) {
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: APP_TIME_ZONE,
   }).format(d);
 }
 
