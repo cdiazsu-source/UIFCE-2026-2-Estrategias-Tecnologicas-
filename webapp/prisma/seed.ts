@@ -240,7 +240,17 @@ async function seedBrandGuidelines() {
     {
       section: "Lineamientos",
       title: "Identidad visual de la Universidad Nacional",
-      body: "Toda pieza conserva la fuente institucional, el escudo, los márgenes y la asociación de la Unidad con azul y amarillo. Fuera de esos mínimos hay libertad creativa: se anima a variar la línea gráfica entre semestres para romper la monotonía visual.",
+      body: "Toda pieza conserva los elementos de identidad de la UNAL: el escudo, la tipografía Ancízar, los márgenes/áreas de protección y la paleta institucional (verde Pantone 376 C como color institucional, rojo Pantone 187 C como alterno). Fuera de esos mínimos hay libertad creativa: se anima a variar la línea gráfica entre semestres para romper la monotonía visual. Guía completa: https://identidad.unal.edu.co/guia-identidad-visual/",
+    },
+    {
+      section: "Lineamientos",
+      title: "Tipografía institucional — Ancízar",
+      body: "Ancízar es la tipografía institucional exclusiva de la UNAL (familia con múltiples pesos, +500 caracteres, soporte para alfabetos latino y griego). Es la fuente por defecto de las piezas; usar otras solo como recurso puntual y nunca para el nombre de la Universidad ni de la dependencia.",
+    },
+    {
+      section: "Lineamientos",
+      title: "Escudo — tamaños y área de protección",
+      body: "Tamaño mínimo del escudo: 11 mm de alto en versiones de línea, 15 mm en versión a color. La versión a color solo va sobre fondo blanco; sobre otros fondos, versión monocromática con contraste suficiente. Área de protección alrededor del escudo: ¼ de su altura (X). Ninguna dependencia puede crear logos propios distintos a los institucionales.",
     },
     {
       section: "Lineamientos",
@@ -264,20 +274,44 @@ async function seedBrandGuidelines() {
     },
     {
       section: "Colores",
-      title: "Azul y amarillo institucionales",
-      body: "Son los colores asociados a la Unidad y a la Universidad Nacional. El amarillo funciona como acento sobre el azul; confirmar los valores exactos con el documento de Imagen Institucional antes de aplicarlos en piezas oficiales.",
+      title: "Color institucional — Pantone 376 C",
+      body: "Verde institucional de la UNAL, tomado del escudo. Es el color principal de las piezas. Equivalente aproximado: HEX #84BD00 · RGB (132, 189, 0). Sobre él, el texto debe ir en un tono oscuro (no blanco) para mantener contraste.",
+      colorHex: "#84BD00",
     },
     {
       section: "Colores",
-      title: "Azul pizarra — primario de la app",
-      body: "Color primario de \"ET en Marcha\" (botones, encabezados, enlaces). Referencia interna, no institucional.",
-      colorHex: "#263B44",
+      title: "Color alterno — Pantone 187 C",
+      body: "Rojo institucional. Sustituye al verde cuando es necesario (por contraste, legibilidad o intención de la pieza). Equivalente aproximado: HEX #A6192E · RGB (166, 25, 46).",
+      colorHex: "#A6192E",
     },
     {
       section: "Colores",
-      title: "Fondo cálido — base de la app",
-      body: "Color de fondo de \"ET en Marcha\". Referencia interna, no institucional.",
-      colorHex: "#FFF4D6",
+      title: "Complementario — Pantone 7743 C",
+      body: "Verde oscuro. Para textos, fondos sólidos y elementos que necesitan más peso visual que el verde institucional. Equivalente aproximado: HEX #4A7729 · RGB (74, 119, 41). Es el verde primario de esta app.",
+      colorHex: "#4A7729",
+    },
+    {
+      section: "Colores",
+      title: "Complementario — Pantone 188 C",
+      body: "Rojo oscuro / vino. Acompaña al rojo alterno para dar profundidad. Equivalente aproximado: HEX #76232F · RGB (118, 35, 47).",
+      colorHex: "#76232F",
+    },
+    {
+      section: "Colores",
+      title: "Complementario — Pantone 425 C",
+      body: "Gris oscuro neutro. Para textos largos, cuerpos de texto y elementos secundarios. Equivalente aproximado: HEX #54585A · RGB (84, 88, 90).",
+      colorHex: "#54585A",
+    },
+    {
+      section: "Colores",
+      title: "Complementario — Pantone 421 C",
+      body: "Gris claro neutro. Para fondos, separadores y bordes. Equivalente aproximado: HEX #C1C6C8 · RGB (193, 198, 200).",
+      colorHex: "#C1C6C8",
+    },
+    {
+      section: "Colores",
+      title: "Nota sobre los equivalentes digitales",
+      body: "Los HEX/RGB de arriba son conversiones de referencia de los Pantone para pantalla; para impresión usar siempre el Pantone o el CMYK del documento oficial de paleta de la UNAL (identidad.unal.edu.co). La app \"ET en Marcha\" usa estos mismos valores: verde #4A7729 como primario y #84BD00 para estados de \"completado\".",
     },
     {
       section: "Franjas",

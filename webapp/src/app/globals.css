@@ -4,38 +4,49 @@
 
 @layer base {
   :root {
-    /* Fondo cálido derivado de #FFF4D6 */
-    --background: 44 100% 92%;
-    --foreground: 198 20% 14%;
+    /* Paleta institucional Universidad Nacional de Colombia.
+       Ver https://identidad.unal.edu.co/guia-identidad-visual/
+       - Verde institucional  Pantone 376 C  #84BD00
+       - Rojo alterno         Pantone 187 C  #A6192E
+       - Complementarios      7743 C #4A7729 · 188 C #76232F · 425 C #54585A · 421 C #C1C6C8
+       Los valores se expresan en HSL para consumo vía hsl(var(--token)). */
+
+    /* Fondo neutro frío casi blanco (deriva de Pantone 421 C) */
+    --background: 200 20% 98%;
+    --foreground: 200 6% 18%; /* gris oscuro, deriva de Pantone 425 C */
 
     --card: 0 0% 100%;
-    --card-foreground: 198 20% 14%;
+    --card-foreground: 200 6% 18%;
 
-    /* Azul pizarra #263B44 */
-    --primary: 198 28% 21%;
+    /* Primario: verde profundo Pantone 7743 C #4A7729 (legible con texto blanco) */
+    --primary: 95 49% 31%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 44 75% 86%;
-    --secondary-foreground: 198 28% 18%;
+    /* Secundario: verde institucional muy claro */
+    --secondary: 78 44% 92%;
+    --secondary-foreground: 95 49% 20%;
 
-    --muted: 44 40% 93%;
-    --muted-foreground: 198 10% 40%;
+    --muted: 200 14% 95%;
+    --muted-foreground: 200 5% 40%;
 
-    --accent: 44 65% 88%;
-    --accent-foreground: 198 28% 18%;
+    --accent: 78 55% 90%;
+    --accent-foreground: 95 49% 20%;
 
-    --destructive: 0 72% 45%;
+    /* Destructivo / crítico: rojo alterno Pantone 187 C #A6192E */
+    --destructive: 351 74% 37%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 142 60% 32%;
-    --success-foreground: 0 0% 100%;
+    /* Éxito / completado: verde institucional Pantone 376 C #84BD00 con texto oscuro */
+    --success: 78 100% 37%;
+    --success-foreground: 96 55% 12%;
 
+    /* Advertencia / en curso: ámbar — sin equivalente institucional, se mantiene por legibilidad */
     --warning: 38 92% 40%;
     --warning-foreground: 0 0% 100%;
 
-    --border: 44 45% 80%;
-    --input: 44 45% 80%;
-    --ring: 198 28% 21%;
+    --border: 200 12% 85%; /* gris claro, deriva de Pantone 421 C */
+    --input: 200 12% 85%;
+    --ring: 78 100% 37%; /* verde institucional Pantone 376 C */
 
     --radius: 0.75rem;
   }
