@@ -20,13 +20,20 @@ const PRIORITY_BADGE_VARIANT: Record<string, "destructive" | "warning" | "outlin
 };
 
 export default async function ProjectDetailPage({ params }: { params: { id: string } }) {
-  const project = await prisma.project.findUnique({
-    where: { id: params.id },
-    include: {
-      checklistItems: true,
-      notes: true,
-    },
-  });
+  const [project, authors] = await Promise.all([
+    prisma.project.findUnique({
+      where: { id: params.id },
+      include: {
+        checklistItems: true,
+        notes: true,
+      },
+    }),
+    prisma.user.findMany({
+      where: { active: true },
+      orderBy: { name: "asc" },
+      select: { id: true, name: true, role: true },
+    }),
+  ]);
 
   if (!project) notFound();
 
@@ -75,7 +82,7 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
 
       <Checklist projectId={project.id} items={project.checklistItems} />
 
-      <NotesLog projectId={project.id} notes={project.notes} />
+      <NotesLog projectId={project.id} notes={project.notes} authors={authors} />
     </div>
   );
 }

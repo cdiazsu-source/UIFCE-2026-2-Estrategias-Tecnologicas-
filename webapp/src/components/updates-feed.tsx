@@ -7,6 +7,7 @@ export type FeedItem = {
   id: string;
   body: string;
   author: string;
+  authorRole: string | null;
   createdAt: Date;
   projectId: string;
   projectTitle: string;
@@ -30,7 +31,7 @@ export function UpdatesFeed({ items }: { items: FeedItem[] }) {
                 </Link>
                 <p className="mt-0.5 whitespace-pre-line text-sm leading-snug">{item.body}</p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  {item.author} · {formatDateTime(item.createdAt)}
+                  {[item.author, item.authorRole, formatDateTime(item.createdAt)].filter(Boolean).join(" · ")}
                 </p>
               </li>
             ))}

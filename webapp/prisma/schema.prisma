@@ -86,17 +86,26 @@ model ChecklistItem {
   @@index([projectId])
 }
 
-/// Entrada de bitácora de un proyecto.
+/// Entrada de bitácora de un proyecto. Solo la escribe alguien del equipo
+/// (se elige de la lista de User); se guarda un snapshot de nombre y cargo
+/// para que la nota histórica no cambie si el User se edita o se elimina.
 model ProjectNote {
-  id        String   @id @default(cuid())
-  projectId String
-  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  body      String   @db.Text
-  author    String
-  createdAt DateTime @default(now())
+  id         String   @id @default(cuid())
+  projectId  String
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  body       String   @db.Text
+  /// Snapshot del nombre de quien la escribió.
+  author     String
+  /// Snapshot del cargo (rol) al momento de escribir.
+  authorRole String?
+  /// Vínculo al User que la escribió, si sigue existiendo.
+  authorId   String?
+  authorUser User?    @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  createdAt  DateTime @default(now())
 
   @@index([projectId])
   @@index([createdAt])
+  @@index([authorId])
 }
 
 /// Datos fijos de la franja "situación actual" del panel principal.
@@ -158,6 +167,7 @@ model User {
   active    Boolean  @default(true)
 
   studyProjects StudyProject[]
+  projectNotes  ProjectNote[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

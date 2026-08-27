@@ -37,6 +37,7 @@ async function getHomeData() {
     id: n.id,
     body: n.body,
     author: n.author,
+    authorRole: n.authorRole,
     createdAt: n.createdAt,
     projectId: n.project.id,
     projectTitle: n.project.title,
