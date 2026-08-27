@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { AreaOverview } from "@/components/area-overview";
 import { SituationStrip } from "@/components/situation-strip";
 import { ProjectCard, type ProjectCardData } from "@/components/project-card";
 import { UpdatesFeed, type FeedItem } from "@/components/updates-feed";
@@ -49,6 +50,8 @@ export default async function HomePage() {
 
   return (
     <div className="flex flex-col gap-8">
+      <AreaOverview />
+
       <section className="flex flex-col gap-3">
         <h1 className="flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
           Situación actual
