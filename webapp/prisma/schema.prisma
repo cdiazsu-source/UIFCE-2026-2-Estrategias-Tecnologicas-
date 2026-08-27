@@ -77,13 +77,18 @@ model ChecklistItem {
   text      String    @db.Text
   order     Int
   done      Boolean   @default(false)
+  /// Snapshot del nombre del responsable (se conserva si el User cambia/desaparece).
   assignee  String?
+  /// Vínculo al User responsable, si existe. Da el color de la persona.
+  assigneeId String?
+  assigneeUser User?  @relation(fields: [assigneeId], references: [id], onDelete: SetNull)
   dueDate   DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([projectId])
+  @@index([assigneeId])
 }
 
 /// Entrada de bitácora de un proyecto. Solo la escribe alguien del equipo
@@ -164,10 +169,14 @@ model User {
   /// Nombre de archivo de la foto en webapp/public/avatares/ o URL completa.
   /// Si está vacío, la UI muestra las iniciales. Mismo criterio que Contact.photoUrl.
   photoUrl  String?
+  /// Color de acento de la persona (#RRGGBB) para identificar de un vistazo sus
+  /// actividades (subtareas, proyectos de estudio). Si está vacío se deriva del id.
+  color     String?
   active    Boolean  @default(true)
 
-  studyProjects StudyProject[]
-  projectNotes  ProjectNote[]
+  studyProjects        StudyProject[]
+  projectNotes         ProjectNote[]
+  assignedChecklistItems ChecklistItem[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

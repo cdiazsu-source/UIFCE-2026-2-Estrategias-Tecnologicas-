@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { parse } from "csv-parse/sync";
 import { PrismaClient } from "@prisma/client";
+import { personColor } from "../src/lib/person-color";
 
 const prisma = new PrismaClient();
 
@@ -176,21 +177,33 @@ async function seedContacts() {
 // --- Equipo ------------------------------------------------------------------
 // Directorio inicial. Los correos de placeholder ("@example.com") se editan
 // desde /equipo. Cesar Díaz queda con el correo real usado en el historial git.
+// Directorio base. El upsert por correo es aditivo y NO sobrescribe lo que ya
+// editaron las personas (update: {}) — solo crea quien falte. Los "@example.com"
+// se editan desde /equipo. Cada quien lleva un color de acento.
+const SEED_USERS = [
+  { name: "Cesar Diaz", email: "cdiazsu@unal.edu.co", role: "MASTER" as const, area: "ET", color: "#2563EB" },
+  { name: "Mafe", email: "mafe@example.com", role: "JUNIOR_ARTES" as const, area: "ET", color: "#DB2777" },
+  { name: "Jean", email: "jean@example.com", role: "JUNIOR_AUXILIAR" as const, area: "ET", color: "#0D9488" },
+  { name: "Lina Sanabria", email: "lina.sanabria@example.com", role: "COORDINADOR" as const, area: null, color: "#7C3AED" },
+  { name: "Santiago Parra", email: "santiago.parra@example.com", role: "COORDINADOR" as const, area: null, color: "#EA580C" },
+  { name: "Daniel Moreno", email: "daniel.moreno@example.com", role: "COORDINADOR" as const, area: null, color: "#C026D3" },
+  { name: "Henry", email: "henry@example.com", role: "DIRECTOR" as const, area: null, color: "#4F46E5" },
+];
+
 async function seedUsers() {
-  const count = await prisma.user.count();
-  if (count > 0) return;
-
-  const users = [
-    { name: "Cesar Diaz", email: "cdiazsu@unal.edu.co", role: "MASTER" as const, area: "ET" },
-    { name: "Mafe", email: "mafe@example.com", role: "JUNIOR_ARTES" as const, area: "ET" },
-    { name: "Jean", email: "jean@example.com", role: "JUNIOR_AUXILIAR" as const, area: "ET" },
-    { name: "Lina Sanabria", email: "lina.sanabria@example.com", role: "COORDINADOR" as const, area: null },
-    { name: "Santiago Parra", email: "santiago.parra@example.com", role: "COORDINADOR" as const, area: null },
-    { name: "Henry", email: "henry@example.com", role: "DIRECTOR" as const, area: null },
-  ];
-
-  await prisma.user.createMany({ data: users });
-  console.log(`Usuarios sembrados: ${users.length}`);
+  for (const u of SEED_USERS) {
+    await prisma.user.upsert({ where: { email: u.email }, update: {}, create: u });
+  }
+  // Completa el color de quien no lo tenga (persona creada antes de esa columna).
+  const sinColor = await prisma.user.findMany({ where: { color: null } });
+  for (const u of sinColor) {
+    const known = SEED_USERS.find((s) => s.email === u.email);
+    await prisma.user.update({
+      where: { id: u.id },
+      data: { color: known?.color ?? personColor({ id: u.id }) },
+    });
+  }
+  console.log(`Usuarios sincronizados: ${SEED_USERS.length}; colores completados: ${sinColor.length}`);
 }
 
 // --- Proyectos de estudio --------------------------------------------------
