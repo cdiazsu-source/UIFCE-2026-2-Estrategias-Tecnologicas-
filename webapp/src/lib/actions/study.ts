@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import type { CheckpointStatus } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
+import { blockedForJunior } from "@/lib/session";
 
 const PATH = "/proyectos-de-estudio";
 
@@ -25,6 +26,7 @@ function parseStatus(raw: FormDataEntryValue | null): CheckpointStatus {
 }
 
 export async function createStudyProject(formData: FormData) {
+  if (await blockedForJunior()) return;
   const ownerId = String(formData.get("ownerId") ?? "").trim();
   const title = String(formData.get("title") ?? "").trim();
   if (!ownerId || !title) return;
@@ -54,6 +56,7 @@ export async function createStudyProject(formData: FormData) {
 }
 
 export async function updateStudyProject(id: string, formData: FormData) {
+  if (await blockedForJunior()) return;
   const title = String(formData.get("title") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
   const schedule = String(formData.get("schedule") ?? "").trim();
@@ -71,11 +74,13 @@ export async function updateStudyProject(id: string, formData: FormData) {
 }
 
 export async function deleteStudyProject(id: string) {
+  if (await blockedForJunior()) return;
   await prisma.studyProject.delete({ where: { id } });
   revalidatePath(PATH);
 }
 
 export async function updateCheckpoint(id: string, formData: FormData) {
+  if (await blockedForJunior()) return;
   const label = String(formData.get("label") ?? "").trim();
   const notes = String(formData.get("notes") ?? "").trim();
 
@@ -93,6 +98,17 @@ export async function updateCheckpoint(id: string, formData: FormData) {
 }
 
 export async function setCheckpointStatus(id: string, status: CheckpointStatus) {
+  if (await blockedForJunior()) return;
   await prisma.studyCheckpoint.update({ where: { id }, data: { status } });
+  revalidatePath(PATH);
+}
+
+export async function updateStudyProjectDrive(id: string, driveFolderUrl: string) {
+  if (await blockedForJunior()) return;
+  const trimmed = driveFolderUrl.trim();
+  await prisma.studyProject.update({
+    where: { id },
+    data: { driveFolderUrl: trimmed.length > 0 ? trimmed : null },
+  });
   revalidatePath(PATH);
 }

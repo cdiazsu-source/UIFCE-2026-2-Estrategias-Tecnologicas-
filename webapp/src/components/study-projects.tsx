@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { CalendarClock, Pencil, Plus, Trash2 } from "lucide-react";
+import { CalendarClock, FolderOpen, Pencil, Plus, Trash2 } from "lucide-react";
 import type { CheckpointStatus, StudyCheckpoint, StudyProject } from "@prisma/client";
 
 import {
@@ -10,6 +10,7 @@ import {
   setCheckpointStatus,
   updateCheckpoint,
   updateStudyProject,
+  updateStudyProjectDrive,
 } from "@/lib/actions/study";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +19,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { InfoHint } from "@/components/info-hint";
+import { PersonAvatar } from "@/components/person-avatar";
+import { useCanEdit } from "@/components/access-context";
 import { CHECKPOINT_STATUS_LABEL, formatDate, USER_ROLE_LABEL } from "@/lib/utils";
 import { personColor } from "@/lib/person-color";
 
@@ -36,15 +39,88 @@ export type JuniorWithStudy = {
   name: string;
   role: string;
   color?: string | null;
+  photoUrl?: string | null;
   studyProjects: StudyProjectFull[];
 };
 export type JuniorOption = { id: string; name: string };
 
+/** Enlace a la carpeta de Drive donde el Junior sube los entregables. */
+function StudyDriveLink({ project }: { project: StudyProjectFull }) {
+  const canEdit = useCanEdit();
+  const [editing, setEditing] = useState(false);
+
+  const link = project.driveFolderUrl ? (
+    <a
+      href={project.driveFolderUrl}
+      target="_blank"
+      rel="noreferrer"
+      className="inline-flex items-center gap-1.5 rounded-md border border-input px-2.5 py-1 text-xs font-medium text-primary hover:bg-accent"
+    >
+      <FolderOpen className="h-3.5 w-3.5" />
+      Abrir carpeta de entregables
+    </a>
+  ) : null;
+
+  if (!canEdit) return link;
+
+  if (editing) {
+    return (
+      <form
+        action={async (formData) => {
+          await updateStudyProjectDrive(project.id, String(formData.get("driveFolderUrl") ?? ""));
+          setEditing(false);
+        }}
+        className="flex flex-wrap items-center gap-2"
+      >
+        <Input
+          name="driveFolderUrl"
+          defaultValue={project.driveFolderUrl ?? ""}
+          placeholder="https://drive.google.com/..."
+          className="h-8 w-64 text-sm"
+          autoFocus
+        />
+        <Button type="submit" size="sm">
+          Guardar
+        </Button>
+        <Button type="button" variant="ghost" size="sm" onClick={() => setEditing(false)}>
+          Cancelar
+        </Button>
+      </form>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-1">
+      {link ?? (
+        <button
+          type="button"
+          onClick={() => setEditing(true)}
+          className="inline-flex items-center gap-1.5 rounded-md border border-dashed border-input px-2.5 py-1 text-xs text-muted-foreground hover:bg-accent"
+        >
+          <Pencil className="h-3.5 w-3.5" />
+          Agregar enlace de Drive (entregables)
+        </button>
+      )}
+      {link && (
+        <button
+          type="button"
+          onClick={() => setEditing(true)}
+          className="rounded p-1 text-muted-foreground hover:bg-accent"
+          aria-label="Editar enlace de Drive"
+        >
+          <Pencil className="h-3.5 w-3.5" />
+        </button>
+      )}
+    </div>
+  );
+}
+
 function CheckpointRow({ checkpoint }: { checkpoint: StudyCheckpoint }) {
+  const canEdit = useCanEdit();
   const [editing, setEditing] = useState(false);
   const [, startTransition] = useTransition();
 
-  if (editing) {
+  if (editing && canEdit) {
     return (
       <form
         action={async (formData) => {
@@ -99,37 +175,42 @@ function CheckpointRow({ checkpoint }: { checkpoint: StudyCheckpoint }) {
           )}
         </div>
         {checkpoint.notes && <p className="mt-0.5 text-xs text-muted-foreground">{checkpoint.notes}</p>}
-        <div className="mt-1 flex flex-wrap gap-1">
-          {STATUS_OPTIONS.map((s) => (
-            <button
-              key={s}
-              type="button"
-              onClick={() => startTransition(() => setCheckpointStatus(checkpoint.id, s))}
-              className={
-                "rounded border px-1.5 py-0.5 text-[11px] transition-colors " +
-                (s === checkpoint.status
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-border text-muted-foreground hover:bg-accent")
-              }
-            >
-              {CHECKPOINT_STATUS_LABEL[s]}
-            </button>
-          ))}
-        </div>
+        {canEdit && (
+          <div className="mt-1 flex flex-wrap gap-1">
+            {STATUS_OPTIONS.map((s) => (
+              <button
+                key={s}
+                type="button"
+                onClick={() => startTransition(() => setCheckpointStatus(checkpoint.id, s))}
+                className={
+                  "rounded border px-1.5 py-0.5 text-[11px] transition-colors " +
+                  (s === checkpoint.status
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border text-muted-foreground hover:bg-accent")
+                }
+              >
+                {CHECKPOINT_STATUS_LABEL[s]}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
-      <button
-        type="button"
-        onClick={() => setEditing(true)}
-        className="rounded p-1 text-muted-foreground opacity-0 transition-opacity hover:bg-accent group-hover:opacity-100"
-        aria-label="Editar punto de corte"
-      >
-        <Pencil className="h-3.5 w-3.5" />
-      </button>
+      {canEdit && (
+        <button
+          type="button"
+          onClick={() => setEditing(true)}
+          className="rounded p-1 text-muted-foreground opacity-0 transition-opacity hover:bg-accent group-hover:opacity-100"
+          aria-label="Editar punto de corte"
+        >
+          <Pencil className="h-3.5 w-3.5" />
+        </button>
+      )}
     </li>
   );
 }
 
 function StudyProjectCard({ project }: { project: StudyProjectFull }) {
+  const canEdit = useCanEdit();
   const [editing, setEditing] = useState(false);
   const [, startTransition] = useTransition();
   const checkpoints = [...project.checkpoints].sort((a, b) => a.number - b.number);
@@ -137,7 +218,7 @@ function StudyProjectCard({ project }: { project: StudyProjectFull }) {
   return (
     <Card>
       <CardHeader className="flex-row items-start justify-between space-y-0">
-        {editing ? (
+        {editing && canEdit ? (
           <form
             action={async (formData) => {
               await updateStudyProject(project.id, formData);
@@ -165,28 +246,30 @@ function StudyProjectCard({ project }: { project: StudyProjectFull }) {
         ) : (
           <>
             <CardTitle className="text-base leading-snug">{project.title}</CardTitle>
-            <div className="flex shrink-0 gap-1">
-              <button
-                type="button"
-                onClick={() => setEditing(true)}
-                className="rounded p-1 text-muted-foreground hover:bg-accent"
-                aria-label="Editar proyecto de estudio"
-              >
-                <Pencil className="h-3.5 w-3.5" />
-              </button>
-              <button
-                type="button"
-                onClick={() => startTransition(() => deleteStudyProject(project.id))}
-                className="rounded p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-                aria-label="Eliminar proyecto de estudio"
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-              </button>
-            </div>
+            {canEdit && (
+              <div className="flex shrink-0 gap-1">
+                <button
+                  type="button"
+                  onClick={() => setEditing(true)}
+                  className="rounded p-1 text-muted-foreground hover:bg-accent"
+                  aria-label="Editar proyecto de estudio"
+                >
+                  <Pencil className="h-3.5 w-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => startTransition(() => deleteStudyProject(project.id))}
+                  className="rounded p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                  aria-label="Eliminar proyecto de estudio"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            )}
           </>
         )}
       </CardHeader>
-      {!editing && (
+      {!(editing && canEdit) && (
         <CardContent className="flex flex-col gap-4">
           {project.description && <p className="text-sm text-muted-foreground">{project.description}</p>}
           <div>
@@ -207,6 +290,12 @@ function StudyProjectCard({ project }: { project: StudyProjectFull }) {
               ))}
             </ul>
           </div>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Entregables</p>
+            <div className="mt-1">
+              <StudyDriveLink project={project} />
+            </div>
+          </div>
         </CardContent>
       )}
     </Card>
@@ -220,18 +309,21 @@ export function StudyProjects({
   juniors: JuniorWithStudy[];
   juniorOptions: JuniorOption[];
 }) {
+  const canEdit = useCanEdit();
   const [showForm, setShowForm] = useState(false);
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex justify-end">
-        <Button size="sm" variant="outline" onClick={() => setShowForm((s) => !s)}>
-          <Plus className="h-3.5 w-3.5" />
-          Agregar proyecto de estudio
-        </Button>
-      </div>
+      {canEdit && (
+        <div className="flex justify-end">
+          <Button size="sm" variant="outline" onClick={() => setShowForm((s) => !s)}>
+            <Plus className="h-3.5 w-3.5" />
+            Agregar proyecto de estudio
+          </Button>
+        </div>
+      )}
 
-      {showForm && (
+      {canEdit && showForm && (
         <form
           action={async (formData) => {
             await createStudyProject(formData);
@@ -274,32 +366,32 @@ export function StudyProjects({
       {juniors.map((junior) => {
         const color = personColor(junior);
         return (
-        <section
-          key={junior.id}
-          className="flex flex-col gap-3 border-l-2 pl-4"
-          style={{ borderColor: color }}
-        >
-          <div className="flex items-center gap-2">
-            <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: color }} aria-hidden />
-            <h2 className="text-lg font-semibold">{junior.name}</h2>
-            <Badge variant="outline">{USER_ROLE_LABEL[junior.role]}</Badge>
-            {junior.studyProjects.length !== 2 && (
-              <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-                {junior.studyProjects.length} de 2 proyectos
-                <InfoHint text="Cada Junior expone dos proyectos de estudio por semestre. Este número no coincide con 2 — revísalo." />
-              </span>
-            )}
-          </div>
-          {junior.studyProjects.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Sin proyectos de estudio todavía.</p>
-          ) : (
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-              {junior.studyProjects.map((p) => (
-                <StudyProjectCard key={p.id} project={p} />
-              ))}
+          <section
+            key={junior.id}
+            className="flex flex-col gap-3 border-l-2 pl-4"
+            style={{ borderColor: color }}
+          >
+            <div className="flex items-center gap-2.5">
+              <PersonAvatar name={junior.name} photoUrl={junior.photoUrl ?? null} />
+              <h2 className="text-lg font-semibold">{junior.name}</h2>
+              <Badge variant="outline">{USER_ROLE_LABEL[junior.role]}</Badge>
+              {junior.studyProjects.length !== 1 && (
+                <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                  {junior.studyProjects.length} de 1 proyecto
+                  <InfoHint text="Cada Junior expone un proyecto de estudio por semestre. Este número no coincide con 1 — revísalo." />
+                </span>
+              )}
             </div>
-          )}
-        </section>
+            {junior.studyProjects.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Sin proyecto de estudio todavía.</p>
+            ) : (
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                {junior.studyProjects.map((p) => (
+                  <StudyProjectCard key={p.id} project={p} />
+                ))}
+              </div>
+            )}
+          </section>
         );
       })}
     </div>

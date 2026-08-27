@@ -250,21 +250,19 @@ async function seedStudyProjects() {
 
   let made = 0;
   for (const junior of juniors) {
-    for (let i = 1; i <= 2; i++) {
-      await prisma.studyProject.create({
-        data: {
-          ownerId: junior.id,
-          title: `Proyecto de estudio ${i}`,
-          order: i - 1,
-          checkpoints: {
-            create: CHECKPOINT_LABELS.map((label, idx) => ({ number: idx + 1, label })),
-          },
+    await prisma.studyProject.create({
+      data: {
+        ownerId: junior.id,
+        title: "Proyecto de estudio",
+        order: 0,
+        checkpoints: {
+          create: CHECKPOINT_LABELS.map((label, idx) => ({ number: idx + 1, label })),
         },
-      });
-      made++;
-    }
+      },
+    });
+    made++;
   }
-  console.log(`Proyectos de estudio sembrados: ${made} (${juniors.length} Junior x 2)`);
+  console.log(`Proyectos de estudio sembrados: ${made} (1 por Junior)`);
 }
 
 // --- Línea gráfica -------------------------------------------------------------

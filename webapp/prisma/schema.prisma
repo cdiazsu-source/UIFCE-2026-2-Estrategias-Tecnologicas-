@@ -192,6 +192,8 @@ model StudyProject {
   description String?   @db.Text
   /// Cronograma en texto libre (hitos, fechas, entregas parciales).
   schedule    String?   @db.Text
+  /// Enlace a la carpeta de Drive donde el Junior sube los entregables.
+  driveFolderUrl String?
   order       Int       @default(0)
 
   checkpoints StudyCheckpoint[]

@@ -22,6 +22,7 @@ export default async function ProyectosDeEstudioPage() {
     name: j.name,
     role: j.role,
     color: j.color,
+    photoUrl: j.photoUrl,
     studyProjects: j.studyProjects,
   }));
 
@@ -34,10 +35,10 @@ export default async function ProyectosDeEstudioPage() {
       <div>
         <h1 className="flex items-center gap-1.5 text-xl font-bold">
           Proyectos de estudio
-          <InfoHint text="Cada monitor Junior expone dos proyectos de estudio en el semestre. Aquí se registra el cronograma de cada uno y sus 4 puntos de corte, con fecha y estado, para hacerles seguimiento. Los Junior se definen en la sección Equipo." />
+          <InfoHint text="Cada monitor Junior expone un proyecto de estudio en el semestre. Aquí se registra su cronograma y sus 4 puntos de corte, con fecha y estado, para hacerle seguimiento, y el enlace a la carpeta de Drive donde sube los entregables. Los Junior se definen en la sección Equipo." />
         </h1>
         <p className="text-sm text-muted-foreground">
-          Dos proyectos de estudio por Junior, con cronograma y cuatro puntos de corte para seguimiento.
+          Un proyecto de estudio por Junior, con cronograma y cuatro puntos de corte para seguimiento.
         </p>
       </div>
       <StudyProjects juniors={data} juniorOptions={juniorOptions} />
