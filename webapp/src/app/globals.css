@@ -87,4 +87,14 @@
   .press {
     @apply transition-transform duration-150 ease-out-strong active:scale-[0.97];
   }
+
+  /* "Titileo" suave para señalar la subtarea que sigue en un proyecto.
+     El bloque de prefers-reduced-motion de arriba lo neutraliza. */
+  @keyframes et-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+  .animate-et-blink {
+    animation: et-blink 1.4s ease-in-out infinite;
+  }
 }
