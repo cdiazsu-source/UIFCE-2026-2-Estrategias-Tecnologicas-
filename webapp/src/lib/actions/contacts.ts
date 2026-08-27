@@ -12,6 +12,7 @@ export async function addContact(formData: FormData) {
   const email = String(formData.get("email") ?? "").trim();
   const phone = String(formData.get("phone") ?? "").trim();
   const notes = String(formData.get("notes") ?? "").trim();
+  const photoUrl = String(formData.get("photoUrl") ?? "").trim();
   const projectId = String(formData.get("projectId") ?? "").trim();
 
   await prisma.contact.create({
@@ -21,6 +22,7 @@ export async function addContact(formData: FormData) {
       email: email.length > 0 ? email : null,
       phone: phone.length > 0 ? phone : null,
       notes: notes.length > 0 ? notes : null,
+      photoUrl: photoUrl.length > 0 ? photoUrl : null,
       projectId: projectId.length > 0 ? projectId : null,
     },
   });
@@ -34,6 +36,7 @@ export async function updateContact(id: string, formData: FormData) {
   const email = String(formData.get("email") ?? "").trim();
   const phone = String(formData.get("phone") ?? "").trim();
   const notes = String(formData.get("notes") ?? "").trim();
+  const photoUrl = String(formData.get("photoUrl") ?? "").trim();
   const projectId = String(formData.get("projectId") ?? "").trim();
 
   await prisma.contact.update({
@@ -44,6 +47,7 @@ export async function updateContact(id: string, formData: FormData) {
       email: email.length > 0 ? email : null,
       phone: phone.length > 0 ? phone : null,
       notes: notes.length > 0 ? notes : null,
+      photoUrl: photoUrl.length > 0 ? photoUrl : null,
       projectId: projectId.length > 0 ? projectId : null,
     },
   });

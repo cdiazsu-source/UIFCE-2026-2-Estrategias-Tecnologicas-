@@ -14,6 +14,40 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 export type ContactWithProject = Contact & { project: { id: string; title: string } | null };
 export type ProjectOption = { id: string; title: string };
 
+function initials(name: string) {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase() ?? "")
+    .join("");
+}
+
+/** Resuelve el valor de photoUrl: URL completa o ruta absoluta tal cual;
+ *  un nombre de archivo suelto se busca en /public/avatares/. */
+function resolvePhoto(photoUrl: string) {
+  if (/^(https?:\/\/|\/)/.test(photoUrl)) return photoUrl;
+  return `/avatares/${photoUrl}`;
+}
+
+function ContactAvatar({ name, photoUrl }: { name: string; photoUrl: string | null }) {
+  if (photoUrl && photoUrl.trim().length > 0) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={resolvePhoto(photoUrl.trim())}
+        alt={name}
+        className="h-7 w-7 shrink-0 rounded-full border border-border object-cover"
+      />
+    );
+  }
+  return (
+    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[11px] font-semibold text-primary">
+      {initials(name)}
+    </span>
+  );
+}
+
 function ContactRow({ contact, projectOptions }: { contact: ContactWithProject; projectOptions: ProjectOption[] }) {
   const [editing, setEditing] = useState(false);
   const [, startTransition] = useTransition();
@@ -33,6 +67,12 @@ function ContactRow({ contact, projectOptions }: { contact: ContactWithProject; 
             <Input name="role" defaultValue={contact.role} placeholder="Rol / institución" className="w-48" />
             <Input name="email" defaultValue={contact.email ?? ""} placeholder="Correo" className="w-48" />
             <Input name="phone" defaultValue={contact.phone ?? ""} placeholder="Teléfono" className="w-36" />
+            <Input
+              name="photoUrl"
+              defaultValue={contact.photoUrl ?? ""}
+              placeholder="Foto: archivo en /avatares/ o URL"
+              className="w-56"
+            />
             <Select name="projectId" defaultValue={contact.projectId ?? ""} className="w-52">
               <option value="">Sin proyecto vinculado</option>
               {projectOptions.map((p) => (
@@ -56,7 +96,12 @@ function ContactRow({ contact, projectOptions }: { contact: ContactWithProject; 
 
   return (
     <TableRow>
-      <TableCell className="font-medium">{contact.name}</TableCell>
+      <TableCell className="font-medium">
+        <div className="flex items-center gap-2.5">
+          <ContactAvatar name={contact.name} photoUrl={contact.photoUrl} />
+          <span>{contact.name}</span>
+        </div>
+      </TableCell>
       <TableCell className="text-muted-foreground">{contact.role}</TableCell>
       <TableCell className="text-muted-foreground">
         {contact.email && <div>{contact.email}</div>}
@@ -123,6 +168,7 @@ export function ContactsTable({
           <Input name="role" placeholder="Rol / institución" required className="w-48" />
           <Input name="email" placeholder="Correo" className="w-48" />
           <Input name="phone" placeholder="Teléfono" className="w-36" />
+          <Input name="photoUrl" placeholder="Foto: archivo en /avatares/ o URL" className="w-56" />
           <Select name="projectId" defaultValue="" className="w-52">
             <option value="">Sin proyecto vinculado</option>
             {projectOptions.map((p) => (
