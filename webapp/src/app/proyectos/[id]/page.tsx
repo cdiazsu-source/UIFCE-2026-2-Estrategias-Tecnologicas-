@@ -31,7 +31,7 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
     prisma.user.findMany({
       where: { active: true },
       orderBy: { name: "asc" },
-      select: { id: true, name: true, role: true },
+      select: { id: true, name: true, role: true, color: true },
     }),
   ]);
 
@@ -80,7 +80,7 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
         </CardContent>
       </Card>
 
-      <Checklist projectId={project.id} items={project.checklistItems} />
+      <Checklist projectId={project.id} items={project.checklistItems} people={authors} />
 
       <NotesLog projectId={project.id} notes={project.notes} authors={authors} />
     </div>

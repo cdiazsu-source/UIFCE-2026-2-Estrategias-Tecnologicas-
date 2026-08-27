@@ -5,6 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { PROJECT_STATUS_LABEL } from "@/lib/utils";
+import { personColor } from "@/lib/person-color";
+
+export type CardAssignee = { id: string; name: string; color?: string | null };
 
 const STATUS_BADGE_VARIANT: Record<ProjectStatus, "secondary" | "warning" | "success"> = {
   POR_INICIAR: "secondary",
@@ -27,6 +30,10 @@ export type ProjectCardData = {
   checklistDone: number;
   checklistTotal: number;
   isManual: boolean;
+  /** Solo para búsqueda, no se muestra. */
+  description: string;
+  /** Personas con al menos una subtarea en el proyecto. */
+  assignees: CardAssignee[];
 };
 
 export function ProjectCard({ project }: { project: ProjectCardData }) {
@@ -53,6 +60,21 @@ export function ProjectCard({ project }: { project: ProjectCardData }) {
             <Badge variant={STATUS_BADGE_VARIANT[project.status]}>{PROJECT_STATUS_LABEL[project.status]}</Badge>
           </div>
           <Progress value={progress} />
+          {project.assignees.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1" aria-label="Responsables">
+              {project.assignees.slice(0, 6).map((a) => (
+                <span
+                  key={a.id}
+                  title={a.name}
+                  className="h-2.5 w-2.5 rounded-full ring-1 ring-inset ring-black/10"
+                  style={{ backgroundColor: personColor(a) }}
+                />
+              ))}
+              {project.assignees.length > 6 && (
+                <span className="text-[10px] text-muted-foreground">+{project.assignees.length - 6}</span>
+              )}
+            </div>
+          )}
         </CardContent>
       </Card>
     </Link>

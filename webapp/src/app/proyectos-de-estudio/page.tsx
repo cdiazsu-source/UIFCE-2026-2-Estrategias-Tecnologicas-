@@ -21,6 +21,7 @@ export default async function ProyectosDeEstudioPage() {
     id: j.id,
     name: j.name,
     role: j.role,
+    color: j.color,
     studyProjects: j.studyProjects,
   }));
 

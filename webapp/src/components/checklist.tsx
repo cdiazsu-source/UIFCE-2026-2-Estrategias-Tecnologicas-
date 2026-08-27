@@ -7,11 +7,40 @@ import type { ChecklistItem } from "@prisma/client";
 import { addChecklistItem, deleteChecklistItem, toggleChecklistItem, updateChecklistItem } from "@/lib/actions/checklist";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { InfoHint } from "@/components/info-hint";
 import { cn, formatDate } from "@/lib/utils";
+import { personColor } from "@/lib/person-color";
 
-function ChecklistRow({ item, projectId }: { item: ChecklistItem; projectId: string }) {
+export type PersonOption = { id: string; name: string; color?: string | null };
+
+function AssigneeSelect({ people, defaultValue }: { people: PersonOption[]; defaultValue?: string | null }) {
+  return (
+    <Select name="assigneeId" defaultValue={defaultValue ?? ""} className="w-52">
+      <option value="">Sin responsable</option>
+      {people.map((p) => (
+        <option key={p.id} value={p.id}>
+          {p.name}
+        </option>
+      ))}
+    </Select>
+  );
+}
+
+function AssigneeTag({ item, people }: { item: ChecklistItem; people: PersonOption[] }) {
+  if (!item.assignee && !item.assigneeId) return null;
+  const person = item.assigneeId ? people.find((p) => p.id === item.assigneeId) : undefined;
+  const color = person ? personColor(person) : "hsl(var(--muted-foreground))";
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: color }} aria-hidden />
+      <span style={person ? { color } : undefined}>{person?.name ?? item.assignee}</span>
+    </span>
+  );
+}
+
+function ChecklistRow({ item, projectId, people }: { item: ChecklistItem; projectId: string; people: PersonOption[] }) {
   const [editing, setEditing] = useState(false);
   const [isPending, startTransition] = useTransition();
 
@@ -26,7 +55,7 @@ function ChecklistRow({ item, projectId }: { item: ChecklistItem; projectId: str
       >
         <Input name="text" defaultValue={item.text} />
         <div className="flex flex-wrap gap-2">
-          <Input name="assignee" defaultValue={item.assignee ?? ""} placeholder="Responsable (opcional)" className="w-48" />
+          <AssigneeSelect people={people} defaultValue={item.assigneeId} />
           <Input
             type="date"
             name="dueDate"
@@ -62,11 +91,11 @@ function ChecklistRow({ item, projectId }: { item: ChecklistItem; projectId: str
       />
       <div className="flex-1">
         <p className={cn("text-sm", item.done && "text-muted-foreground line-through")}>{item.text}</p>
-        {(item.assignee || item.dueDate) && (
-          <p className="mt-0.5 text-xs text-muted-foreground">
-            {item.assignee}
-            {item.assignee && item.dueDate && " · "}
-            {item.dueDate && `vence ${formatDate(item.dueDate)}`}
+        {(item.assignee || item.assigneeId || item.dueDate) && (
+          <p className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-xs text-muted-foreground">
+            <AssigneeTag item={item} people={people} />
+            {(item.assignee || item.assigneeId) && item.dueDate && <span>·</span>}
+            {item.dueDate && <span>vence {formatDate(item.dueDate)}</span>}
           </p>
         )}
       </div>
@@ -87,7 +116,15 @@ function ChecklistRow({ item, projectId }: { item: ChecklistItem; projectId: str
   );
 }
 
-export function Checklist({ projectId, items }: { projectId: string; items: ChecklistItem[] }) {
+export function Checklist({
+  projectId,
+  items,
+  people,
+}: {
+  projectId: string;
+  items: ChecklistItem[];
+  people: PersonOption[];
+}) {
   const [showForm, setShowForm] = useState(false);
   const sorted = [...items].sort((a, b) => a.order - b.order);
   const done = sorted.filter((i) => i.done).length;
@@ -100,7 +137,7 @@ export function Checklist({ projectId, items }: { projectId: string; items: Chec
           <span className="font-normal text-muted-foreground">
             ({done}/{sorted.length})
           </span>
-          <InfoHint text="Las subtareas de este proyecto. Se sembraron una vez desde la columna Entregables del CSV de planeación; a partir de ahí viven aquí — puedes marcarlas, editarlas, borrarlas o agregar nuevas sin que se pierdan al resincronizar." />
+          <InfoHint text="Las subtareas de este proyecto. Se sembraron una vez desde la columna Entregables del CSV de planeación; a partir de ahí viven aquí — puedes marcarlas, editarlas, borrarlas o agregar nuevas sin que se pierdan al resincronizar. El responsable se elige del Equipo y lleva su color." />
         </CardTitle>
         <Button size="sm" variant="outline" onClick={() => setShowForm((s) => !s)}>
           <Plus className="h-3.5 w-3.5" />
@@ -119,7 +156,7 @@ export function Checklist({ projectId, items }: { projectId: string; items: Chec
           >
             <Input name="text" placeholder="Descripción de la subtarea" required />
             <div className="flex flex-wrap gap-2">
-              <Input name="assignee" placeholder="Responsable (opcional)" className="w-48" />
+              <AssigneeSelect people={people} />
               <Input type="date" name="dueDate" className="w-40" />
               <Button type="submit" size="sm">
                 Agregar
@@ -133,7 +170,7 @@ export function Checklist({ projectId, items }: { projectId: string; items: Chec
         ) : (
           <ul className="flex flex-col divide-y divide-border">
             {sorted.map((item) => (
-              <ChecklistRow key={item.id} item={item} projectId={projectId} />
+              <ChecklistRow key={item.id} item={item} projectId={projectId} people={people} />
             ))}
           </ul>
         )}

@@ -10,11 +10,20 @@ function parseDueDate(raw: FormDataEntryValue | null): Date | null {
   return Number.isNaN(d.getTime()) ? null : d;
 }
 
+/** El responsable se elige de la lista de Equipo. Devuelve el vínculo y el
+ *  snapshot del nombre (o ambos null si no se eligió a nadie). */
+async function resolveAssignee(raw: FormDataEntryValue | null) {
+  const assigneeId = String(raw ?? "").trim();
+  if (!assigneeId) return { assigneeId: null, assignee: null };
+  const user = await prisma.user.findUnique({ where: { id: assigneeId }, select: { name: true } });
+  return user ? { assigneeId, assignee: user.name } : { assigneeId: null, assignee: null };
+}
+
 export async function addChecklistItem(projectId: string, formData: FormData) {
   const text = String(formData.get("text") ?? "").trim();
   if (!text) return;
 
-  const assignee = String(formData.get("assignee") ?? "").trim();
+  const { assigneeId, assignee } = await resolveAssignee(formData.get("assigneeId"));
   const dueDate = parseDueDate(formData.get("dueDate"));
 
   const last = await prisma.checklistItem.findFirst({
@@ -28,7 +37,8 @@ export async function addChecklistItem(projectId: string, formData: FormData) {
       projectId,
       text,
       order: (last?.order ?? -1) + 1,
-      assignee: assignee.length > 0 ? assignee : null,
+      assigneeId,
+      assignee,
       dueDate,
     },
   });
@@ -45,14 +55,15 @@ export async function toggleChecklistItem(itemId: string, projectId: string, don
 
 export async function updateChecklistItem(itemId: string, projectId: string, formData: FormData) {
   const text = String(formData.get("text") ?? "").trim();
-  const assignee = String(formData.get("assignee") ?? "").trim();
+  const { assigneeId, assignee } = await resolveAssignee(formData.get("assigneeId"));
   const dueDate = parseDueDate(formData.get("dueDate"));
 
   await prisma.checklistItem.update({
     where: { id: itemId },
     data: {
       ...(text.length > 0 ? { text } : {}),
-      assignee: assignee.length > 0 ? assignee : null,
+      assigneeId,
+      assignee,
       dueDate,
     },
   });

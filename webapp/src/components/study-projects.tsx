@@ -19,6 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { InfoHint } from "@/components/info-hint";
 import { CHECKPOINT_STATUS_LABEL, formatDate, USER_ROLE_LABEL } from "@/lib/utils";
+import { personColor } from "@/lib/person-color";
 
 const STATUS_OPTIONS: CheckpointStatus[] = ["PENDIENTE", "EN_CURSO", "CUMPLIDO", "ATRASADO"];
 
@@ -34,6 +35,7 @@ export type JuniorWithStudy = {
   id: string;
   name: string;
   role: string;
+  color?: string | null;
   studyProjects: StudyProjectFull[];
 };
 export type JuniorOption = { id: string; name: string };
@@ -269,9 +271,16 @@ export function StudyProjects({
         </p>
       )}
 
-      {juniors.map((junior) => (
-        <section key={junior.id} className="flex flex-col gap-3">
+      {juniors.map((junior) => {
+        const color = personColor(junior);
+        return (
+        <section
+          key={junior.id}
+          className="flex flex-col gap-3 border-l-2 pl-4"
+          style={{ borderColor: color }}
+        >
           <div className="flex items-center gap-2">
+            <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: color }} aria-hidden />
             <h2 className="text-lg font-semibold">{junior.name}</h2>
             <Badge variant="outline">{USER_ROLE_LABEL[junior.role]}</Badge>
             {junior.studyProjects.length !== 2 && (
@@ -291,7 +300,8 @@ export function StudyProjects({
             </div>
           )}
         </section>
-      ))}
+        );
+      })}
     </div>
   );
 }
