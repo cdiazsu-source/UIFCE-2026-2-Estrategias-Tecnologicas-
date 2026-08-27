@@ -49,6 +49,17 @@ const config: Config = {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      // Curvas de easing "fuertes" (ver skill emil-design-eng): las de CSS por
+      // defecto son demasiado suaves para que una interacción se sienta intencional.
+      transitionTimingFunction: {
+        "out-strong": "cubic-bezier(0.23, 1, 0.32, 1)",
+        "in-out-strong": "cubic-bezier(0.77, 0, 0.175, 1)",
+      },
+      // Sombras en dos capas (contacto + difusa), suaves — estilo Apple.
+      boxShadow: {
+        card: "0 1px 2px hsl(var(--foreground) / 0.04), 0 4px 12px hsl(var(--foreground) / 0.05)",
+        "card-hover": "0 2px 6px hsl(var(--foreground) / 0.06), 0 14px 34px hsl(var(--foreground) / 0.10)",
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],

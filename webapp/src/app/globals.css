@@ -56,7 +56,13 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Titulares: tracking ligeramente negativo (las letras "se abren" al crecer). */
+  h1, h2 {
+    letter-spacing: -0.018em;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -64,12 +70,21 @@
       animation-duration: 0.01ms !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* Si el usuario pide menos transparencia, la barra superior va sólida. */
+  @media (prefers-reduced-transparency: reduce) {
+    .site-nav {
+      background-color: hsl(var(--card)) !important;
+      backdrop-filter: none !important;
     }
   }
 }
 
 @layer utilities {
   .press {
-    @apply transition-transform duration-150 ease-out active:scale-[0.97];
+    @apply transition-transform duration-150 ease-out-strong active:scale-[0.97];
   }
 }

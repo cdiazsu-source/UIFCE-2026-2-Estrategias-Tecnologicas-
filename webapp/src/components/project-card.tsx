@@ -34,7 +34,7 @@ export function ProjectCard({ project }: { project: ProjectCardData }) {
 
   return (
     <Link href={`/proyectos/${project.id}`} className="block h-full">
-      <Card className="group h-full cursor-pointer transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg active:translate-y-0 active:scale-[0.99] active:shadow-sm">
+      <Card className="group h-full cursor-pointer transition-[transform,box-shadow,border-color] duration-200 ease-out-strong [@media(hover:hover)]:hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-card-hover active:translate-y-0 active:scale-[0.99] active:shadow-card">
         <CardHeader className="pb-2">
           <div className="flex flex-wrap items-center gap-1.5">
             <Badge variant="outline">{project.category}</Badge>

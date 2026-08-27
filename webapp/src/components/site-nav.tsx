@@ -18,9 +18,9 @@ export function SiteNav() {
   const pathname = usePathname();
 
   return (
-    <header className="border-b border-border bg-card">
-      <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 gap-y-2 px-6 py-4">
-        <Link href="/" className="text-lg font-bold text-primary">
+    <header className="site-nav sticky top-0 z-40 border-b border-border/60 bg-card/95 backdrop-blur-xl backdrop-saturate-150 supports-[backdrop-filter]:bg-card/70">
+      <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 gap-y-2 px-6 py-3.5">
+        <Link href="/" className="text-lg font-bold tracking-tight text-primary">
           ET en Marcha
         </Link>
         <nav className="flex flex-wrap gap-1">
@@ -31,8 +31,10 @@ export function SiteNav() {
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  "press rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
-                  active ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                  "press rounded-md px-3 py-1.5 text-sm font-medium transition-[color,background-color] duration-150 ease-out-strong",
+                  active
+                    ? "bg-primary text-primary-foreground shadow-card"
+                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                 )}
               >
                 {link.label}
