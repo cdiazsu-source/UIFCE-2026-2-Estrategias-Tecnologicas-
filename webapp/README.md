@@ -1,6 +1,12 @@
 # ET en Marcha
 
-App de seguimiento en vivo para la planeación de Estrategias Tecnológicas (UIFCE) 2026-2: panel principal con progreso por proyecto, detalle de proyecto con checklist y bitácora, herramientas/licencias, y directorio de contactos.
+App de seguimiento en vivo para la planeación de Estrategias Tecnológicas (UIFCE) 2026-2:
+
+- **Panel principal**: progreso por proyecto + franja "situación actual". Permite crear proyectos propios (no vienen del CSV).
+- **Detalle de proyecto**: checklist, bitácora, estado y enlace a Drive. Los proyectos propios además se editan y eliminan aquí.
+- **Proyectos de estudio**: dos por monitor Junior, con cronograma y cuatro puntos de corte (fecha + estado) para seguimiento.
+- **Línea gráfica**: guía de identidad visual (colores, franjas, formatos, lineamientos de Imagen Institucional).
+- **Herramientas y licencias**, **Contactos** y **Equipo** (directorio interno editable, con correo y rol; sin inicio de sesión).
 
 Next.js 14 (App Router) + TypeScript + Tailwind CSS + componentes estilo shadcn/ui + Prisma sobre PostgreSQL (Neon). Sin autenticación por ahora (ver `CLAUDE.md` en la raíz del repo para el porqué de estas decisiones).
 
@@ -19,11 +25,12 @@ npm install
 cp .env.example .env
 # edita .env y pega tu DATABASE_URL de Neon
 
-# 2. Crea las tablas
+# 2. Crea las tablas (aplica todas las migraciones de prisma/migrations/)
 npm run db:migrate
 
-# 3. Siembra los datos desde planeacion/planeacion_del_area.csv
-#    (proyectos + checklist inicial + herramientas/contactos de arranque)
+# 3. Siembra los datos
+#    proyectos + checklist desde planeacion/planeacion_del_area.csv, y de arranque:
+#    herramientas, contactos, equipo, proyectos de estudio y línea gráfica
 npm run db:seed
 
 # 4. Levanta la app
@@ -56,7 +63,8 @@ Abre una interfaz visual (Prisma Studio) para ver y editar las tablas directamen
 |---|---|
 | `npm run dev` | Servidor de desarrollo |
 | `npm run build` / `npm run start` | Build y servidor de producción |
-| `npm run db:migrate` | Aplica el schema de `prisma/schema.prisma` a la base de datos |
+| `npm run db:migrate` | Crea/actualiza las tablas en desarrollo (`prisma migrate dev`) |
+| `npm run db:deploy` | Aplica las migraciones ya existentes sin generar nuevas (`prisma migrate deploy`) — para producción/CI |
 | `npm run db:seed` | Sincroniza proyectos desde el CSV + siembra datos iniciales |
 | `npm run db:studio` | Explorador visual de la base de datos |
 
@@ -67,4 +75,9 @@ Abre una interfaz visual (Prisma Studio) para ver y editar las tablas directamen
 3. Agrega la variable de entorno `DATABASE_URL` (el mismo connection string de Neon) en la configuración del proyecto de Vercel.
 4. Deploy. El plan gratuito de Vercel es más que suficiente para este volumen de uso.
 
-Después del primer deploy, corre `npm run db:migrate` y `npm run db:seed` una vez desde tu máquina local apuntando al `DATABASE_URL` de producción (o usa `npx prisma migrate deploy` desde CI) para crear las tablas y sembrar los datos.
+Después del primer deploy —y cada vez que haya una migración nueva en `prisma/migrations/`— corre, apuntando al `DATABASE_URL` de producción:
+
+```bash
+npm run db:deploy   # aplica las migraciones pendientes
+npm run db:seed     # idempotente: sólo agrega lo que falte
+```

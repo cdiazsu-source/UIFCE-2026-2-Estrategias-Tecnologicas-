@@ -19,11 +19,11 @@ export function SiteNav() {
 
   return (
     <header className="border-b border-border bg-card">
-      <div className="mx-auto flex max-w-6xl items-center gap-6 px-6 py-4">
+      <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 gap-y-2 px-6 py-4">
         <Link href="/" className="text-lg font-bold text-primary">
           ET en Marcha
         </Link>
-        <nav className="flex gap-1">
+        <nav className="flex flex-wrap gap-1">
           {LINKS.map((link) => {
             const active = link.href === "/" ? pathname === "/" : pathname.startsWith(link.href);
             return (
