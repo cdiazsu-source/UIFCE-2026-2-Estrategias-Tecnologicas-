@@ -28,7 +28,7 @@ export function UpdatesFeed({ items }: { items: FeedItem[] }) {
                 <Link href={`/proyectos/${item.projectId}`} className="text-xs font-semibold text-primary hover:underline">
                   {item.projectTitle}
                 </Link>
-                <p className="mt-0.5 text-sm leading-snug">{item.body}</p>
+                <p className="mt-0.5 whitespace-pre-line text-sm leading-snug">{item.body}</p>
                 <p className="mt-1 text-xs text-muted-foreground">
                   {item.author} · {formatDateTime(item.createdAt)}
                 </p>

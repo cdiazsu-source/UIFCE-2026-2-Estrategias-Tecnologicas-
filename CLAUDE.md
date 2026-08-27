@@ -78,6 +78,7 @@ Si quien retoma esto no sabe por dónde empezar, este prompt es un punto de part
 
 Este prompt está escrito para frenar al agente antes de que empiece a generar código sin resolver las decisiones de producto primero (base de datos, autenticación, granularidad del checklist) — que son decisiones del usuario, no algo que un agente deba asumir.
 
-## 9. Agregar una iniciativa nueva a la planeación
+## 9. Plantillas de trabajo (describir en lenguaje natural → salida lista)
 
-Para incorporar un proyecto/iniciativa nuevo describiéndolo en lenguaje natural y que quede formateado e integrado (fila en `planeacion/planeacion_del_area.csv` + entrada en la lista `IDEAS` de `src/build_planeacion_2026_2_v2.py`), usar el prompt de [`planeacion/PLANTILLA_NUEVO_PROYECTO.md`](planeacion/PLANTILLA_NUEVO_PROYECTO.md). Recordar que `planeacion_del_area.csv` es la fuente de verdad que consume la app (`webapp/`); tras editarlo, `cd webapp && npm run db:seed` sincroniza sin sobrescribir lo que ya editaron las personas.
+- **Agregar una iniciativa nueva a la planeación**: prompt de [`planeacion/PLANTILLA_NUEVO_PROYECTO.md`](planeacion/PLANTILLA_NUEVO_PROYECTO.md). Produce una fila con el estilo del CSV e integra en `planeacion/planeacion_del_area.csv` + la lista `IDEAS` de `src/build_planeacion_2026_2_v2.py`. `planeacion_del_area.csv` es la fuente de verdad que consume la app; tras editarlo, `cd webapp && npm run db:seed` sincroniza sin sobrescribir lo que ya editaron las personas.
+- **Dar una actualización de avance** (sección "Últimas actualizaciones" / bitácora de la app): prompt de [`planeacion/PLANTILLA_ACTUALIZACION_PROYECTO.md`](planeacion/PLANTILLA_ACTUALIZACION_PROYECTO.md). Produce una nota corta y estructurada (Avance / Próximo / Bloqueo) lista para pegar, e indica a qué proyecto va. El feed respeta saltos de línea; autor y fecha los pone la app.

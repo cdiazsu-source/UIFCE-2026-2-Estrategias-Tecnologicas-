@@ -45,7 +45,7 @@ export function NotesLog({ projectId, notes }: { projectId: string; notes: Proje
           <ul className="flex flex-col gap-3 border-t border-border pt-3">
             {sorted.map((note) => (
               <li key={note.id} className="rounded-md bg-muted/40 p-3">
-                <p className="text-sm leading-snug">{note.body}</p>
+                <p className="whitespace-pre-line text-sm leading-snug">{note.body}</p>
                 <p className="mt-1 text-xs text-muted-foreground">
                   {note.author} · {formatDateTime(note.createdAt)}
                 </p>
