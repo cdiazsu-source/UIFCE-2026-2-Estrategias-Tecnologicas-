@@ -26,6 +26,7 @@ export type ProjectCardData = {
   status: ProjectStatus;
   checklistDone: number;
   checklistTotal: number;
+  isManual: boolean;
 };
 
 export function ProjectCard({ project }: { project: ProjectCardData }) {
@@ -40,6 +41,7 @@ export function ProjectCard({ project }: { project: ProjectCardData }) {
             {project.priorityTag && (
               <Badge variant={PRIORITY_BADGE_VARIANT[project.priorityTag] ?? "outline"}>{project.priorityTag}</Badge>
             )}
+            {project.isManual && <Badge variant="secondary">Propio</Badge>}
           </div>
           <CardTitle className="mt-1 transition-colors group-hover:text-primary">{project.title}</CardTitle>
         </CardHeader>

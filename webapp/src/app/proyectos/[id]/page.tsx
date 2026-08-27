@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DriveLinkEditor } from "@/components/drive-link-editor";
 import { ProjectStatusSelect } from "@/components/project-status-select";
+import { ManualProjectControls } from "@/components/manual-project-controls";
 import { Checklist } from "@/components/checklist";
 import { NotesLog } from "@/components/notes-log";
 
@@ -42,6 +43,7 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
           {project.priorityTag && (
             <Badge variant={PRIORITY_BADGE_VARIANT[project.priorityTag] ?? "outline"}>{project.priorityTag}</Badge>
           )}
+          {project.isManual && <Badge variant="secondary">Propio</Badge>}
         </div>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h1 className="text-2xl font-bold leading-tight">{project.title}</h1>
@@ -51,6 +53,7 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
           <span className="text-sm text-muted-foreground">Estado:</span>
           <ProjectStatusSelect projectId={project.id} status={project.status} />
         </div>
+        {project.isManual && <ManualProjectControls project={project} />}
       </div>
 
       <Card>

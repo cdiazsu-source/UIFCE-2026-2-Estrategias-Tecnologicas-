@@ -3,6 +3,7 @@ import { SituationStrip } from "@/components/situation-strip";
 import { ProjectCard, type ProjectCardData } from "@/components/project-card";
 import { UpdatesFeed, type FeedItem } from "@/components/updates-feed";
 import { InfoHint } from "@/components/info-hint";
+import { NewProjectButton } from "@/components/new-project-button";
 
 export const dynamic = "force-dynamic";
 
@@ -28,6 +29,7 @@ async function getHomeData() {
     status: p.status,
     checklistDone: p.checklistItems.filter((c) => c.done).length,
     checklistTotal: p.checklistItems.length,
+    isManual: p.isManual,
   }));
 
   const feedItems: FeedItem[] = notes.map((n) => ({
@@ -57,10 +59,13 @@ export default async function HomePage() {
 
       <section className="grid grid-cols-1 gap-8 lg:grid-cols-[2fr_1fr]">
         <div className="flex flex-col gap-3">
-          <h2 className="flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-            Proyectos ({projectCards.length})
-            <InfoHint text="Una tarjeta por cada iniciativa de la planeación del semestre. La barra de progreso cuenta subtareas del checklist marcadas como hechas. Haz clic en cualquiera para ver el detalle completo." />
-          </h2>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 className="flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+              Proyectos ({projectCards.length})
+              <InfoHint text="Una tarjeta por cada iniciativa de la planeación del semestre. La barra de progreso cuenta subtareas del checklist marcadas como hechas. Haz clic en cualquiera para ver el detalle completo. Puedes agregar proyectos propios con 'Nuevo proyecto'." />
+            </h2>
+            <NewProjectButton />
+          </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {projectCards.map((project) => (
               <ProjectCard key={project.id} project={project} />
