@@ -7,8 +7,11 @@ import { cn } from "@/lib/utils";
 
 const LINKS = [
   { href: "/", label: "Panel principal" },
+  { href: "/proyectos-de-estudio", label: "Proyectos de estudio" },
+  { href: "/linea-grafica", label: "Línea gráfica" },
   { href: "/herramientas", label: "Herramientas y licencias" },
   { href: "/contactos", label: "Contactos" },
+  { href: "/equipo", label: "Equipo" },
 ];
 
 export function SiteNav() {

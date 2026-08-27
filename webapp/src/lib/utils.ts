@@ -46,3 +46,21 @@ export const TOOL_STATUS_LABEL: Record<string, string> = {
   SIN_LICENCIA: "Sin licencia",
   GRATUITA: "Gratuita",
 };
+
+export const USER_ROLE_LABEL: Record<string, string> = {
+  MASTER: "Máster",
+  JUNIOR_ARTES: "Junior — Artes",
+  JUNIOR_AUXILIAR: "Junior — Auxiliar",
+  COORDINADOR: "Coordinación",
+  DIRECTOR: "Dirección",
+};
+
+export const CHECKPOINT_STATUS_LABEL: Record<string, string> = {
+  PENDIENTE: "Pendiente",
+  EN_CURSO: "En curso",
+  CUMPLIDO: "Cumplido",
+  ATRASADO: "Atrasado",
+};
+
+/** Roles que corresponden a un monitor Junior (tienen proyectos de estudio). */
+export const JUNIOR_ROLES = ["JUNIOR_ARTES", "JUNIOR_AUXILIAR"] as const;

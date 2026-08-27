@@ -1,0 +1,297 @@
+"use client";
+
+import { useState, useTransition } from "react";
+import { CalendarClock, Pencil, Plus, Trash2 } from "lucide-react";
+import type { CheckpointStatus, StudyCheckpoint, StudyProject } from "@prisma/client";
+
+import {
+  createStudyProject,
+  deleteStudyProject,
+  setCheckpointStatus,
+  updateCheckpoint,
+  updateStudyProject,
+} from "@/lib/actions/study";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { InfoHint } from "@/components/info-hint";
+import { CHECKPOINT_STATUS_LABEL, formatDate, USER_ROLE_LABEL } from "@/lib/utils";
+
+const STATUS_OPTIONS: CheckpointStatus[] = ["PENDIENTE", "EN_CURSO", "CUMPLIDO", "ATRASADO"];
+
+const STATUS_BADGE_VARIANT: Record<CheckpointStatus, "secondary" | "warning" | "success" | "destructive"> = {
+  PENDIENTE: "secondary",
+  EN_CURSO: "warning",
+  CUMPLIDO: "success",
+  ATRASADO: "destructive",
+};
+
+export type StudyProjectFull = StudyProject & { checkpoints: StudyCheckpoint[] };
+export type JuniorWithStudy = {
+  id: string;
+  name: string;
+  role: string;
+  studyProjects: StudyProjectFull[];
+};
+export type JuniorOption = { id: string; name: string };
+
+function CheckpointRow({ checkpoint }: { checkpoint: StudyCheckpoint }) {
+  const [editing, setEditing] = useState(false);
+  const [, startTransition] = useTransition();
+
+  if (editing) {
+    return (
+      <form
+        action={async (formData) => {
+          await updateCheckpoint(checkpoint.id, formData);
+          setEditing(false);
+        }}
+        className="flex flex-col gap-2 rounded-md border border-border p-3"
+      >
+        <div className="flex flex-wrap gap-2">
+          <Input name="label" defaultValue={checkpoint.label} placeholder="Nombre del corte" className="w-44" />
+          <Input
+            type="date"
+            name="dueDate"
+            defaultValue={checkpoint.dueDate ? checkpoint.dueDate.toISOString().slice(0, 10) : ""}
+            className="w-40"
+          />
+          <Select name="status" defaultValue={checkpoint.status} className="w-36">
+            {STATUS_OPTIONS.map((s) => (
+              <option key={s} value={s}>
+                {CHECKPOINT_STATUS_LABEL[s]}
+              </option>
+            ))}
+          </Select>
+        </div>
+        <Input name="notes" defaultValue={checkpoint.notes ?? ""} placeholder="Notas / observaciones del corte" />
+        <div className="flex gap-2">
+          <Button type="submit" size="sm">
+            Guardar
+          </Button>
+          <Button type="button" variant="ghost" size="sm" onClick={() => setEditing(false)}>
+            Cancelar
+          </Button>
+        </div>
+      </form>
+    );
+  }
+
+  return (
+    <li className="group flex items-start gap-3 rounded-md px-2 py-2 hover:bg-muted/50">
+      <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+        {checkpoint.number}
+      </span>
+      <div className="flex-1">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-sm font-medium">{checkpoint.label}</span>
+          <Badge variant={STATUS_BADGE_VARIANT[checkpoint.status]}>{CHECKPOINT_STATUS_LABEL[checkpoint.status]}</Badge>
+          {checkpoint.dueDate && (
+            <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+              <CalendarClock className="h-3.5 w-3.5" />
+              {formatDate(checkpoint.dueDate)}
+            </span>
+          )}
+        </div>
+        {checkpoint.notes && <p className="mt-0.5 text-xs text-muted-foreground">{checkpoint.notes}</p>}
+        <div className="mt-1 flex flex-wrap gap-1">
+          {STATUS_OPTIONS.map((s) => (
+            <button
+              key={s}
+              type="button"
+              onClick={() => startTransition(() => setCheckpointStatus(checkpoint.id, s))}
+              className={
+                "rounded border px-1.5 py-0.5 text-[11px] transition-colors " +
+                (s === checkpoint.status
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border text-muted-foreground hover:bg-accent")
+              }
+            >
+              {CHECKPOINT_STATUS_LABEL[s]}
+            </button>
+          ))}
+        </div>
+      </div>
+      <button
+        type="button"
+        onClick={() => setEditing(true)}
+        className="rounded p-1 text-muted-foreground opacity-0 transition-opacity hover:bg-accent group-hover:opacity-100"
+        aria-label="Editar punto de corte"
+      >
+        <Pencil className="h-3.5 w-3.5" />
+      </button>
+    </li>
+  );
+}
+
+function StudyProjectCard({ project }: { project: StudyProjectFull }) {
+  const [editing, setEditing] = useState(false);
+  const [, startTransition] = useTransition();
+  const checkpoints = [...project.checkpoints].sort((a, b) => a.number - b.number);
+
+  return (
+    <Card>
+      <CardHeader className="flex-row items-start justify-between space-y-0">
+        {editing ? (
+          <form
+            action={async (formData) => {
+              await updateStudyProject(project.id, formData);
+              setEditing(false);
+            }}
+            className="flex w-full flex-col gap-2"
+          >
+            <Input name="title" defaultValue={project.title} placeholder="Título del proyecto de estudio" />
+            <Textarea name="description" defaultValue={project.description ?? ""} placeholder="Descripción" className="min-h-[60px]" />
+            <Textarea
+              name="schedule"
+              defaultValue={project.schedule ?? ""}
+              placeholder="Cronograma: hitos, fechas y entregas parciales"
+              className="min-h-[70px]"
+            />
+            <div className="flex gap-2">
+              <Button type="submit" size="sm">
+                Guardar
+              </Button>
+              <Button type="button" variant="ghost" size="sm" onClick={() => setEditing(false)}>
+                Cancelar
+              </Button>
+            </div>
+          </form>
+        ) : (
+          <>
+            <CardTitle className="text-base leading-snug">{project.title}</CardTitle>
+            <div className="flex shrink-0 gap-1">
+              <button
+                type="button"
+                onClick={() => setEditing(true)}
+                className="rounded p-1 text-muted-foreground hover:bg-accent"
+                aria-label="Editar proyecto de estudio"
+              >
+                <Pencil className="h-3.5 w-3.5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => startTransition(() => deleteStudyProject(project.id))}
+                className="rounded p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                aria-label="Eliminar proyecto de estudio"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          </>
+        )}
+      </CardHeader>
+      {!editing && (
+        <CardContent className="flex flex-col gap-4">
+          {project.description && <p className="text-sm text-muted-foreground">{project.description}</p>}
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Cronograma</p>
+            {project.schedule ? (
+              <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed">{project.schedule}</p>
+            ) : (
+              <p className="mt-1 text-sm text-muted-foreground">Sin cronograma definido todavía.</p>
+            )}
+          </div>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Puntos de corte ({checkpoints.filter((c) => c.status === "CUMPLIDO").length}/{checkpoints.length})
+            </p>
+            <ul className="mt-1 flex flex-col divide-y divide-border">
+              {checkpoints.map((c) => (
+                <CheckpointRow key={c.id} checkpoint={c} />
+              ))}
+            </ul>
+          </div>
+        </CardContent>
+      )}
+    </Card>
+  );
+}
+
+export function StudyProjects({
+  juniors,
+  juniorOptions,
+}: {
+  juniors: JuniorWithStudy[];
+  juniorOptions: JuniorOption[];
+}) {
+  const [showForm, setShowForm] = useState(false);
+
+  return (
+    <div className="flex flex-col gap-8">
+      <div className="flex justify-end">
+        <Button size="sm" variant="outline" onClick={() => setShowForm((s) => !s)}>
+          <Plus className="h-3.5 w-3.5" />
+          Agregar proyecto de estudio
+        </Button>
+      </div>
+
+      {showForm && (
+        <form
+          action={async (formData) => {
+            await createStudyProject(formData);
+            (document.getElementById("study-add-form") as HTMLFormElement | null)?.reset();
+            setShowForm(false);
+          }}
+          id="study-add-form"
+          className="flex flex-col gap-2 rounded-md border border-dashed border-input p-4"
+        >
+          <div className="flex flex-wrap gap-2">
+            <Select name="ownerId" defaultValue="" required className="w-52">
+              <option value="" disabled>
+                ¿De qué Junior?
+              </option>
+              {juniorOptions.map((j) => (
+                <option key={j.id} value={j.id}>
+                  {j.name}
+                </option>
+              ))}
+            </Select>
+            <Input name="title" placeholder="Título del proyecto de estudio" required className="min-w-[18rem] flex-1" />
+          </div>
+          <Textarea name="description" placeholder="Descripción (opcional)" className="min-h-[60px]" />
+          <Textarea name="schedule" placeholder="Cronograma (opcional): hitos, fechas y entregas parciales" className="min-h-[70px]" />
+          <div>
+            <Button type="submit" size="sm">
+              Crear (con sus 4 puntos de corte)
+            </Button>
+          </div>
+        </form>
+      )}
+
+      {juniorOptions.length === 0 && (
+        <p className="rounded-md border border-dashed border-input p-4 text-sm text-muted-foreground">
+          Todavía no hay monitores Junior en el <a href="/equipo" className="text-primary hover:underline">Equipo</a>.
+          Agrégalos allí (rol Junior — Artes o Junior — Auxiliar) para poder registrar sus proyectos de estudio.
+        </p>
+      )}
+
+      {juniors.map((junior) => (
+        <section key={junior.id} className="flex flex-col gap-3">
+          <div className="flex items-center gap-2">
+            <h2 className="text-lg font-semibold">{junior.name}</h2>
+            <Badge variant="outline">{USER_ROLE_LABEL[junior.role]}</Badge>
+            {junior.studyProjects.length !== 2 && (
+              <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                {junior.studyProjects.length} de 2 proyectos
+                <InfoHint text="Cada Junior expone dos proyectos de estudio por semestre. Este número no coincide con 2 — revísalo." />
+              </span>
+            )}
+          </div>
+          {junior.studyProjects.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Sin proyectos de estudio todavía.</p>
+          ) : (
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+              {junior.studyProjects.map((p) => (
+                <StudyProjectCard key={p.id} project={p} />
+              ))}
+            </div>
+          )}
+        </section>
+      ))}
+    </div>
+  );
+}
