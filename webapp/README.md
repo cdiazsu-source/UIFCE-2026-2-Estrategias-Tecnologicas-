@@ -67,6 +67,25 @@ Abre una interfaz visual (Prisma Studio) para ver y editar las tablas directamen
 | `npm run db:deploy` | Aplica las migraciones ya existentes sin generar nuevas (`prisma migrate deploy`) — para producción/CI |
 | `npm run db:seed` | Sincroniza proyectos desde el CSV + siembra datos iniciales |
 | `npm run db:studio` | Explorador visual de la base de datos |
+| `npm run db:backup` | Exporta todas las tablas a `webapp/backups/backup-<fecha>.json` |
+
+## Respaldos y persistencia
+
+Los datos NO se pierden al redesplegar: viven en la base de datos gestionada de
+Neon, independiente de Vercel. Un `git push` publica código nuevo y no toca la
+base. `npm run db:seed` tampoco borra avances (ver la nota de arriba).
+
+Para robustez adicional:
+
+1. **Point-in-time restore de Neon** (recomendado, sin código): en el panel de
+   Neon → tu proyecto → **Settings → Storage / History retention**, sube la
+   ventana de retención (por defecto ~1 día; hasta 7 días en plan gratuito, más
+   en planes pagos). Con eso puedes restaurar la base a cualquier momento dentro
+   de la ventana (crea una rama desde un timestamp o restaura la principal).
+2. **Respaldo manual a archivo**: `npm run db:backup` deja un JSON con todas las
+   tablas en `webapp/backups/` (carpeta ignorada por git). Útil antes de una
+   migración grande o para archivar el cierre de semestre. La restauración desde
+   ese JSON es manual (script ad-hoc de reinserción).
 
 ## Despliegue en Vercel
 
