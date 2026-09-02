@@ -250,6 +250,16 @@ IDEAS = [
         entregables="* Excel Básico Virtualizado (CLEBV-I) — monitor: María Fernanda Celis · sem 4-8 (14 sep - 17 oct) · 5 sesiones · cupo 10-20 · prerrequisito: ninguno.\n* Excel Intermedio Virtualizado (VEA-20202) — monitor: Joel Santiago Rodríguez Guzmán · sem 4-9 (14 sep - 24 oct) · 6 sesiones · cupo 12-24 · prerrequisito: Excel Básico Virtualizado.\n* Econometría en Python (CLEPY202602) — monitor: Laura Angélica Cárdenas Cely · sem 4-8 (14 sep - 17 oct) · 5 sesiones · cupo 10-20 · prerrequisito: Introducción a la Programación o a Lógica, y estar cursando o haber cursado Econometría I.\n* Introducción a la Programación en Python y R (CLIPPYR292602) — monitor: Diego Alejandro Garnica Mamanché · sem 4-8 (14 sep - 17 oct) · 5 sesiones · cupo 10-20 · prerrequisito: ninguno.\n* Introducción a Power BI (CLIPBI202602) — monitor: Paula Sofía Bocarejo Alberto · sem 4-8 (14 sep - 17 oct) · 5 sesiones · cupo 10-20 · prerrequisito: Excel Intermedio Virtualizado.\n* Siigo Nube (CLSIN2020602) — monitor: Jean Carlos Baquero García · sem 4-8 (14 sep - 17 oct) · 5 sesiones · cupo 10-20 · prerrequisito: Contabilidad de Inversión y Financiación.",
         priority=False,
     ),
+    dict(
+        id="produccion-uifcito-reutilizable",
+        cat="Producción de contenido",
+        idea="Uifcito reutilizable — plantilla vectorial para acetato o imán",
+        hacer="Vectorizar a \"Uifcito\" (la mascota de la UIFCE) en un archivo editable de alta resolución, pensado para reproducción física en acetato o en imán (formato final por definir según costo y uso previsto). El vector debe dejar la zona de la cara aislada en su propia capa y libre de trazos fijos, para poder intercambiarla sin rehacer el resto de la figura: una misma base sirve así para versiones temáticas de Halloween, Amor y Amistad, Navidad y otras fechas. Entregar la plantilla base, un set inicial de caras y accesorios temáticos, una guía corta de uso (capas, paleta institucional, tamaños mínimos y márgenes) y la ficha técnica para el proveedor de impresión o troquelado. Pasar la pieza por el grupo \"Piezas Redes Sociales\" para el visto bueno de coordinación.",
+        espera="Un archivo vectorial de Uifcito reutilizable, aprobado y archivado en el Drive de ET, con la cara como capa independiente y al menos tres variantes temáticas listas, de modo que las campañas de temporada se resuelvan editando la cara y no rediseñando la mascota.",
+        fundamento="El principio del semestre es calidad sobre cantidad: mantener a Uifcito como activo vectorial modular evita rehacer la mascota en cada fecha especial y da una identidad reconocible y consistente a las piezas de temporada, en línea con el repositorio de material reutilizable previsto para la línea de innovación y eficiencia operativa.",
+        entregables="* Archivo vectorial base de Uifcito (editable, alta resolución) con la cara en capa independiente.\n* Set inicial de caras y accesorios temáticos (mínimo: Halloween, Amor y Amistad, Navidad).\n* Guía de uso: capas, paleta institucional, tamaños mínimos y márgenes.\n* Definición del formato físico (acetato o imán) y ficha técnica para el proveedor.\n* Visto bueno del grupo \"Piezas Redes Sociales\".",
+        priority=False,
+    ),
 ]
 
 # ---------- Sheet 1: Planeación ----------
