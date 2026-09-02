@@ -31,3 +31,24 @@ export async function addProjectNote(projectId: string, formData: FormData) {
   revalidatePath("/");
   revalidatePath(`/proyectos/${projectId}`);
 }
+
+/** Corrige el texto de una nota ya publicada. No cambia autor ni fecha:
+ *  la nota sigue atribuida a quien la escribió. Mismo nivel de acceso que
+ *  crear una nota (la bitácora la mantiene el equipo). */
+export async function updateProjectNote(noteId: string, projectId: string, formData: FormData) {
+  const body = String(formData.get("body") ?? "").trim();
+  if (!body) return;
+
+  await prisma.projectNote.update({ where: { id: noteId }, data: { body } });
+
+  revalidatePath("/");
+  revalidatePath(`/proyectos/${projectId}`);
+}
+
+/** Elimina una nota de la bitácora. */
+export async function deleteProjectNote(noteId: string, projectId: string) {
+  await prisma.projectNote.delete({ where: { id: noteId } });
+
+  revalidatePath("/");
+  revalidatePath(`/proyectos/${projectId}`);
+}
