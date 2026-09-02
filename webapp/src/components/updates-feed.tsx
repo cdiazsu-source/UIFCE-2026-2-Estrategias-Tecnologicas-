@@ -29,49 +29,69 @@ export type CheckFeedItem = {
 
 export type FeedItem = NoteFeedItem | CheckFeedItem;
 
-function ProjectLink({ id, title }: { id: string; title: string }) {
+/** Cada entrada del feed es un enlace al proyecto: el texto se recorta para no
+ *  deformar el panel y, al hacer clic, se abre el proyecto con la nota completa. */
+function RowLink({
+  projectId,
+  accent,
+  children,
+}: {
+  projectId: string;
+  accent: string;
+  children: React.ReactNode;
+}) {
   return (
-    <Link href={`/proyectos/${id}`} className="text-xs font-semibold text-primary hover:underline">
-      {title}
-    </Link>
+    <li>
+      <Link
+        href={`/proyectos/${projectId}`}
+        className={`block rounded-r-md border-l-2 ${accent} py-1 pl-3 pr-1 transition-colors hover:bg-muted/60`}
+      >
+        {children}
+      </Link>
+    </li>
   );
+}
+
+function ProjectTitle({ title }: { title: string }) {
+  return <span className="block truncate text-xs font-semibold text-primary">{title}</span>;
 }
 
 function NoteRow({ item }: { item: NoteFeedItem }) {
   return (
-    <li className="border-l-2 border-primary/30 pl-3">
-      <ProjectLink id={item.projectId} title={item.projectTitle} />
-      <p className="mt-0.5 whitespace-pre-line text-sm leading-snug">{item.body}</p>
-      <p className="mt-1 text-xs text-muted-foreground">
+    <RowLink projectId={item.projectId} accent="border-primary/30">
+      <ProjectTitle title={item.projectTitle} />
+      <p className="mt-0.5 line-clamp-4 whitespace-pre-line break-words text-sm leading-snug">{item.body}</p>
+      <p className="mt-1 truncate text-xs text-muted-foreground">
         {[item.author, item.authorRole, formatDateTime(item.at)].filter(Boolean).join(" · ")}
       </p>
-    </li>
+    </RowLink>
   );
 }
 
 function CheckRow({ item, showNext }: { item: CheckFeedItem; showNext: boolean }) {
   return (
-    <li className="border-l-2 border-success/40 pl-3">
-      <ProjectLink id={item.projectId} title={item.projectTitle} />
+    <RowLink projectId={item.projectId} accent="border-success/40">
+      <ProjectTitle title={item.projectTitle} />
       <p className="mt-0.5 flex items-start gap-1.5 text-sm leading-snug">
         <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-success" aria-hidden />
-        <span>
-          Subtarea completada: <span className="text-muted-foreground line-through">{item.text}</span>
+        <span className="min-w-0 break-words">
+          Subtarea completada:{" "}
+          <span className="text-muted-foreground line-through">{item.text}</span>
         </span>
       </p>
       <p className="mt-1 text-xs text-muted-foreground">{formatDateTime(item.at)}</p>
       {showNext && item.nextText && (
-        <p className="animate-et-blink mt-2 flex items-start gap-1.5 rounded-md border border-primary/40 bg-primary/5 px-2 py-1.5 text-xs">
+        <span className="animate-et-blink mt-2 flex items-start gap-1.5 rounded-md border border-primary/40 bg-primary/5 px-2 py-1.5 text-xs">
           <ArrowRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" aria-hidden />
-          <span>
+          <span className="min-w-0 break-words">
             <span className="font-medium text-primary">Sigue:</span> {item.nextText}
           </span>
-        </p>
+        </span>
       )}
       {showNext && !item.nextText && item.allDone && (
-        <p className="mt-2 text-xs font-medium text-success">Checklist del proyecto completo.</p>
+        <span className="mt-2 block text-xs font-medium text-success">Checklist del proyecto completo.</span>
       )}
-    </li>
+    </RowLink>
   );
 }
 
@@ -87,7 +107,7 @@ export function UpdatesFeed({ items }: { items: FeedItem[] }) {
         {items.length === 0 ? (
           <p className="text-sm text-muted-foreground">Todavía no hay actividad registrada.</p>
         ) : (
-          <ul className="flex flex-col gap-4">
+          <ul className="-mr-1 flex max-h-[34rem] flex-col gap-3 overflow-y-auto pr-1">
             {items.map((item) => {
               if (item.kind === "note") return <NoteRow key={item.id} item={item} />;
               const showNext = !nextShownFor.has(item.projectId);

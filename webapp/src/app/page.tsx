@@ -149,7 +149,7 @@ export default async function HomePage() {
         <div className="flex flex-col gap-3">
           <h2 className="flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
             Actividad
-            <InfoHint text="Lo más reciente de todos los proyectos, junto y en orden cronológico: notas de bitácora y subtareas que se marcan como hechas. Bajo una subtarea completada, titilando, aparece la que sigue en ese proyecto." />
+            <InfoHint text="Lo más reciente de todos los proyectos, junto y en orden cronológico: notas de bitácora y subtareas que se marcan como hechas. Bajo una subtarea completada, titilando, aparece la que sigue en ese proyecto. El texto largo se recorta; clic en cualquier entrada abre el proyecto." />
           </h2>
           <UpdatesFeed items={feedItems} />
         </div>
