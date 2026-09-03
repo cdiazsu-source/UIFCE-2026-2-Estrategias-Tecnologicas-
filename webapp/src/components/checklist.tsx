@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { ChevronDown, ChevronUp, Pencil, Plus, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronUp, MessageSquarePlus, Pencil, Plus, Trash2 } from "lucide-react";
 import type { ChecklistItem } from "@prisma/client";
 
 import {
@@ -18,6 +18,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { InfoHint } from "@/components/info-hint";
 import { cn, formatDate } from "@/lib/utils";
 import { personColor } from "@/lib/person-color";
+import { BITACORA_TARGET_EVENT } from "@/lib/events";
 import { useCanEdit } from "@/components/access-context";
 
 export type PersonOption = { id: string; name: string; color?: string | null };
@@ -120,39 +121,52 @@ function ChecklistRow({
           </p>
         )}
       </div>
-      {canEdit && (
-        <div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-          <button
-            type="button"
-            disabled={isFirst}
-            onClick={() => startTransition(() => moveChecklistItem(item.id, projectId, "up"))}
-            className="rounded p-1 text-muted-foreground hover:bg-accent disabled:pointer-events-none disabled:opacity-30"
-            aria-label="Subir subtarea"
-          >
-            <ChevronUp className="h-3.5 w-3.5" />
-          </button>
-          <button
-            type="button"
-            disabled={isLast}
-            onClick={() => startTransition(() => moveChecklistItem(item.id, projectId, "down"))}
-            className="rounded p-1 text-muted-foreground hover:bg-accent disabled:pointer-events-none disabled:opacity-30"
-            aria-label="Bajar subtarea"
-          >
-            <ChevronDown className="h-3.5 w-3.5" />
-          </button>
-          <button type="button" onClick={() => setEditing(true)} className="rounded p-1 text-muted-foreground hover:bg-accent" aria-label="Editar subtarea">
-            <Pencil className="h-3.5 w-3.5" />
-          </button>
-          <button
-            type="button"
-            onClick={() => startTransition(() => deleteChecklistItem(item.id, projectId))}
-            className="rounded p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-            aria-label="Eliminar subtarea"
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-          </button>
-        </div>
-      )}
+      <div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+        <button
+          type="button"
+          onClick={() =>
+            window.dispatchEvent(new CustomEvent(BITACORA_TARGET_EVENT, { detail: item.id }))
+          }
+          className="rounded p-1 text-muted-foreground hover:bg-accent"
+          aria-label="Dar una actualización de esta subtarea en la bitácora"
+          title="Actualizar en bitácora"
+        >
+          <MessageSquarePlus className="h-3.5 w-3.5" />
+        </button>
+        {canEdit && (
+          <>
+            <button
+              type="button"
+              disabled={isFirst}
+              onClick={() => startTransition(() => moveChecklistItem(item.id, projectId, "up"))}
+              className="rounded p-1 text-muted-foreground hover:bg-accent disabled:pointer-events-none disabled:opacity-30"
+              aria-label="Subir subtarea"
+            >
+              <ChevronUp className="h-3.5 w-3.5" />
+            </button>
+            <button
+              type="button"
+              disabled={isLast}
+              onClick={() => startTransition(() => moveChecklistItem(item.id, projectId, "down"))}
+              className="rounded p-1 text-muted-foreground hover:bg-accent disabled:pointer-events-none disabled:opacity-30"
+              aria-label="Bajar subtarea"
+            >
+              <ChevronDown className="h-3.5 w-3.5" />
+            </button>
+            <button type="button" onClick={() => setEditing(true)} className="rounded p-1 text-muted-foreground hover:bg-accent" aria-label="Editar subtarea">
+              <Pencil className="h-3.5 w-3.5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => startTransition(() => deleteChecklistItem(item.id, projectId))}
+              className="rounded p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+              aria-label="Eliminar subtarea"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </button>
+          </>
+        )}
+      </div>
     </li>
   );
 }

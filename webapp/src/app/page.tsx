@@ -31,7 +31,10 @@ async function getHomeData() {
     prisma.projectNote.findMany({
       orderBy: { createdAt: "desc" },
       take: 20,
-      include: { project: { select: { id: true, title: true } } },
+      include: {
+        project: { select: { id: true, title: true } },
+        checklistItem: { select: { text: true, done: true } },
+      },
     }),
     prisma.checklistItem.findMany({
       where: { done: true },
@@ -93,6 +96,8 @@ async function getHomeData() {
         at: n.createdAt,
         projectId: n.project.id,
         projectTitle: n.project.title,
+        checklistItemText: n.checklistItem?.text ?? null,
+        checklistItemDone: n.checklistItem?.done ?? false,
       }),
     ),
     ...completed.map(

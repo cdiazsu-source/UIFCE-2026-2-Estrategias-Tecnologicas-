@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Check } from "lucide-react";
+import { ArrowRight, Check, ListChecks } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDateTime } from "@/lib/utils";
@@ -13,6 +13,9 @@ export type NoteFeedItem = {
   at: Date;
   projectId: string;
   projectTitle: string;
+  /** Subtarea del checklist a la que se refiere la nota, si el autor la vinculó. */
+  checklistItemText: string | null;
+  checklistItemDone: boolean;
 };
 
 export type CheckFeedItem = {
@@ -60,6 +63,16 @@ function NoteRow({ item }: { item: NoteFeedItem }) {
   return (
     <RowLink projectId={item.projectId} accent="border-primary/30">
       <ProjectTitle title={item.projectTitle} />
+      {item.checklistItemText && (
+        <span className="mt-0.5 flex items-start gap-1 text-xs text-primary/90">
+          <ListChecks className="mt-0.5 h-3 w-3 shrink-0" aria-hidden />
+          <span className="min-w-0 truncate">
+            <span
+              className={item.checklistItemDone ? "line-through" : undefined}
+            >{item.checklistItemText}</span>
+          </span>
+        </span>
+      )}
       <p className="mt-0.5 line-clamp-4 whitespace-pre-line break-words text-sm leading-snug">{item.body}</p>
       <p className="mt-1 truncate text-xs text-muted-foreground">
         {[item.author, item.authorRole, formatDateTime(item.at)].filter(Boolean).join(" · ")}

@@ -25,7 +25,7 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
       where: { id: params.id },
       include: {
         checklistItems: true,
-        notes: true,
+        notes: { include: { checklistItem: { select: { id: true, text: true, done: true } } } },
       },
     }),
     prisma.user.findMany({
@@ -82,7 +82,12 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
 
       <Checklist projectId={project.id} items={project.checklistItems} people={authors} />
 
-      <NotesLog projectId={project.id} notes={project.notes} authors={authors} />
+      <NotesLog
+        projectId={project.id}
+        notes={project.notes}
+        authors={authors}
+        checklistItems={project.checklistItems}
+      />
     </div>
   );
 }
