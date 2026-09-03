@@ -10,6 +10,7 @@ import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { InfoHint } from "@/components/info-hint";
+import { useUndo } from "@/components/undo-banner";
 import { BITACORA_TARGET_EVENT } from "@/lib/events";
 import { formatDateTime, USER_ROLE_LABEL } from "@/lib/utils";
 
@@ -89,6 +90,7 @@ function NoteRow({
   projectId: string;
   checklistItems: ChecklistItemLite[];
 }) {
+  const undo = useUndo();
   const [editing, setEditing] = useState(false);
   const [isPending, startTransition] = useTransition();
 
@@ -97,7 +99,8 @@ function NoteRow({
       <li className="rounded-md bg-muted/40 p-3">
         <form
           action={async (formData) => {
-            await updateProjectNote(note.id, projectId, formData);
+            const u = await updateProjectNote(note.id, projectId, formData);
+            if (u) undo(u);
             setEditing(false);
           }}
           className="flex flex-col gap-2"
@@ -140,7 +143,10 @@ function NoteRow({
           disabled={isPending}
           onClick={() => {
             if (!window.confirm("¿Eliminar esta nota de la bitácora?")) return;
-            startTransition(() => deleteProjectNote(note.id, projectId));
+            startTransition(async () => {
+              const u = await deleteProjectNote(note.id, projectId);
+              if (u) undo(u);
+            });
           }}
           className="rounded p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive disabled:opacity-40"
           aria-label="Eliminar nota"

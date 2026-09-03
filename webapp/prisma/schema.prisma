@@ -41,6 +41,25 @@ enum CheckpointStatus {
   ATRASADO
 }
 
+/// Plataforma de una cuenta institucional en el panel de Redes sociales.
+enum SocialPlatform {
+  INSTAGRAM
+  LINKEDIN
+  X
+  TIKTOK
+  YOUTUBE
+  FACEBOOK
+}
+
+/// Estado operativo de una cuenta en el panel de Redes sociales.
+enum SocialChannelStatus {
+  ACTIVA
+  EN_RIESGO
+  EN_TRAMITE
+  INACTIVA
+  PERDIDA
+}
+
 /// Una iniciativa de planeacion_del_area.csv. El id coincide con la
 /// columna ID del CSV (slug estable, ver src/build_planeacion_2026_2_v2.py).
 /// Los campos de contenido (title/description/expectedOutcome/rationale) se
@@ -55,16 +74,23 @@ model Project {
   rationale       String        @db.Text
   status          ProjectStatus @default(POR_INICIAR)
   driveFolderUrl  String?
+  /// Etiquetas libres del proyecto, editables desde la app.
+  tags            String[]      @default([])
   /// Orden de la fila en el CSV, para mantener el orden original en la UI.
   /// Los proyectos creados a mano toman sourceOrder >= 1000 (ver
   /// src/lib/actions/projects.ts) para no chocar con el índice del CSV.
   sourceOrder     Int           @unique
   /// true = creado desde la app, no viene del CSV. El resync por seed lo ignora.
   isManual        Boolean       @default(false)
+  /// true = alguien editó el contenido (título/descripción/…) desde la app.
+  /// El resync desde el CSV deja de sobrescribir esos campos para no perder
+  /// la edición; el CSV sigue mandando el orden (sourceOrder).
+  editedInApp     Boolean       @default(false)
 
   checklistItems ChecklistItem[]
   notes          ProjectNote[]
   contacts       Contact[]
+  socialChannels SocialChannel[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -188,9 +214,47 @@ model User {
   studyProjects        StudyProject[]
   projectNotes         ProjectNote[]
   assignedChecklistItems ChecklistItem[]
+  socialChannels       SocialChannel[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+/// Una cuenta institucional (Instagram, LinkedIn, X, …) en el panel de Redes
+/// sociales: estado operativo, última publicación, cadencia objetivo y quién la
+/// gestiona. Una fila por plataforma.
+model SocialChannel {
+  id            String              @id @default(cuid())
+  platform      SocialPlatform      @unique
+  /// Nombre de usuario público, ej. "@uifce_un".
+  handle        String?
+  /// Enlace al perfil.
+  url           String?
+  status        SocialChannelStatus @default(ACTIVA)
+  /// true = cuenta oficializada ante la Oficina de Medios Digitales de la UNAL.
+  official      Boolean             @default(false)
+  /// Seguidores (se actualiza a mano; no se calcula).
+  followers     Int?
+  /// Cadencia objetivo de publicación, ej. "1 reel por semana".
+  cadence       String?
+  /// Fecha de la última publicación registrada.
+  lastPostAt    DateTime?
+  /// Qué fue la última publicación.
+  lastPostNote  String?             @db.Text
+  /// Próximo paso o pendiente de la cuenta.
+  nextAction    String?             @db.Text
+  notes         String?             @db.Text
+  responsibleId String?
+  responsible   User?               @relation(fields: [responsibleId], references: [id], onDelete: SetNull)
+  projectId     String?
+  project       Project?            @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  order         Int                 @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([responsibleId])
+  @@index([projectId])
 }
 
 /// Proyecto de estudio de un monitor Junior. Cada Junior expone dos por semestre.

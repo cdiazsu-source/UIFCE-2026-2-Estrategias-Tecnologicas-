@@ -6,6 +6,7 @@ import type { ProjectStatus } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
 import { blockedForJunior } from "@/lib/session";
+import type { UndoAction } from "@/lib/undo";
 
 const PRIORITY_TAGS = ["CRÍTICO", "PRIORITARIO", "NUEVO"];
 
@@ -72,10 +73,17 @@ export async function updateProjectStatus(projectId: string, status: ProjectStat
   revalidatePath(`/proyectos/${projectId}`);
 }
 
-/** Edita los campos de contenido. Sólo se ofrece en la UI para proyectos
- *  creados a mano (isManual) — los que vienen del CSV se editan en el CSV. */
-export async function updateProjectContent(projectId: string, formData: FormData) {
+/** Edita los campos de contenido de cualquier proyecto. Si el proyecto viene
+ *  del CSV, lo marca como editado en la app para que el resync deje de
+ *  sobrescribir esos campos (ver Project.editedInApp). */
+export async function updateProjectContent(
+  projectId: string,
+  formData: FormData,
+): Promise<UndoAction | void> {
   if (await blockedForJunior()) return;
+  const prev = await prisma.project.findUnique({ where: { id: projectId } });
+  if (!prev) return;
+
   const title = String(formData.get("title") ?? "").trim();
   const category = String(formData.get("category") ?? "").trim();
   const rawPriority = String(formData.get("priorityTag") ?? "").trim();
@@ -90,11 +98,50 @@ export async function updateProjectContent(projectId: string, formData: FormData
       description: String(formData.get("description") ?? "").trim(),
       expectedOutcome: String(formData.get("expectedOutcome") ?? "").trim(),
       rationale: String(formData.get("rationale") ?? "").trim(),
+      editedInApp: true,
     },
   });
 
   revalidatePath("/");
   revalidatePath(`/proyectos/${projectId}`);
+
+  return {
+    kind: "project.content",
+    id: projectId,
+    before: {
+      title: prev.title,
+      category: prev.category,
+      priorityTag: prev.priorityTag,
+      description: prev.description,
+      expectedOutcome: prev.expectedOutcome,
+      rationale: prev.rationale,
+      editedInApp: prev.editedInApp,
+    },
+  };
+}
+
+/** Reemplaza las etiquetas del proyecto (lista de textos ya normalizada). */
+export async function updateProjectTags(
+  projectId: string,
+  tags: string[],
+): Promise<UndoAction | void> {
+  if (await blockedForJunior()) return;
+  const prev = await prisma.project.findUnique({
+    where: { id: projectId },
+    select: { tags: true },
+  });
+  if (!prev) return;
+
+  const clean = Array.from(
+    new Set(tags.map((t) => t.trim()).filter((t) => t.length > 0 && t.length <= 40)),
+  ).slice(0, 12);
+
+  await prisma.project.update({ where: { id: projectId }, data: { tags: clean } });
+
+  revalidatePath("/");
+  revalidatePath(`/proyectos/${projectId}`);
+
+  return { kind: "project.tags", id: projectId, before: prev.tags };
 }
 
 /** Borra un proyecto creado a mano (y en cascada su checklist/notas). No debe

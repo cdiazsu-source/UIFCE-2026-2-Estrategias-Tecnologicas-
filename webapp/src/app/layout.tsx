@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { SiteNav } from "@/components/site-nav";
 import { AccessProvider } from "@/components/access-context";
+import { UndoProvider } from "@/components/undo-banner";
 import { canEdit } from "@/lib/session";
 
 import "./globals.css";
@@ -18,8 +19,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="es">
       <body className="min-h-screen bg-background font-sans antialiased">
         <AccessProvider canEdit={editable}>
-          <SiteNav canEdit={editable} />
-          <main className="mx-auto max-w-6xl px-6 py-8">{children}</main>
+          <UndoProvider>
+            <SiteNav canEdit={editable} />
+            <main className="mx-auto max-w-6xl px-6 py-8">{children}</main>
+          </UndoProvider>
         </AccessProvider>
       </body>
     </html>

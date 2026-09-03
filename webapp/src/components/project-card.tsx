@@ -32,6 +32,8 @@ export type ProjectCardData = {
   isManual: boolean;
   /** Solo para búsqueda, no se muestra. */
   description: string;
+  /** Etiquetas libres del proyecto. */
+  tags: string[];
   /** Personas con al menos una subtarea en el proyecto. */
   assignees: CardAssignee[];
 };
@@ -49,6 +51,14 @@ export function ProjectCard({ project }: { project: ProjectCardData }) {
               <Badge variant={PRIORITY_BADGE_VARIANT[project.priorityTag] ?? "outline"}>{project.priorityTag}</Badge>
             )}
             {project.isManual && <Badge variant="secondary">Propio</Badge>}
+            {project.tags.slice(0, 3).map((t) => (
+              <Badge key={t} variant="secondary">
+                {t}
+              </Badge>
+            ))}
+            {project.tags.length > 3 && (
+              <span className="text-[10px] text-muted-foreground">+{project.tags.length - 3}</span>
+            )}
           </div>
           <CardTitle className="mt-1 transition-colors group-hover:text-primary">{project.title}</CardTitle>
         </CardHeader>

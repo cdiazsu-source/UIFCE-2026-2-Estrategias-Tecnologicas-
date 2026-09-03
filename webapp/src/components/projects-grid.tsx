@@ -27,7 +27,7 @@ export function ProjectsGrid({ projects, people }: { projects: ProjectCardData[]
     return projects.filter((p) => {
       const matchesText =
         nq.length === 0 ||
-        [p.title, p.category, p.priorityTag ?? "", p.description].some((f) => norm(f).includes(nq));
+        [p.title, p.category, p.priorityTag ?? "", p.description, ...p.tags].some((f) => norm(f).includes(nq));
       const matchesPerson = personId.length === 0 || p.assignees.some((a) => a.id === personId);
       return matchesText && matchesPerson;
     });

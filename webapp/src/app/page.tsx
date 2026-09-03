@@ -22,6 +22,7 @@ async function getHomeData() {
         status: true,
         isManual: true,
         description: true,
+        tags: true,
         checklistItems: {
           orderBy: { order: "asc" },
           select: { done: true, order: true, text: true, assigneeId: true, assignee: true },
@@ -81,6 +82,7 @@ async function getHomeData() {
       checklistTotal: p.checklistItems.length,
       isManual: p.isManual,
       description: p.description,
+      tags: p.tags,
       assignees: [...seen.values()],
     };
   });

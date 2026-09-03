@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { prisma } from "@/lib/prisma";
 import { blockedForJunior } from "@/lib/session";
+import type { UndoAction } from "@/lib/undo";
 
 function parseDueDate(raw: FormDataEntryValue | null): Date | null {
   if (!raw || typeof raw !== "string" || raw.trim().length === 0) return null;
@@ -49,15 +50,32 @@ export async function addChecklistItem(projectId: string, formData: FormData) {
   revalidatePath(`/proyectos/${projectId}`);
 }
 
-export async function toggleChecklistItem(itemId: string, projectId: string, done: boolean) {
+export async function toggleChecklistItem(
+  itemId: string,
+  projectId: string,
+  done: boolean,
+): Promise<UndoAction | void> {
   if (await blockedForJunior()) return;
+  const prev = await prisma.checklistItem.findUnique({ where: { id: itemId }, select: { done: true } });
+  if (!prev) return;
   await prisma.checklistItem.update({ where: { id: itemId }, data: { done } });
   revalidatePath("/");
   revalidatePath(`/proyectos/${projectId}`);
+  return { kind: "checklist.toggle", id: itemId, projectId, before: prev.done };
 }
 
-export async function updateChecklistItem(itemId: string, projectId: string, formData: FormData) {
+export async function updateChecklistItem(
+  itemId: string,
+  projectId: string,
+  formData: FormData,
+): Promise<UndoAction | void> {
   if (await blockedForJunior()) return;
+  const prev = await prisma.checklistItem.findUnique({
+    where: { id: itemId },
+    select: { text: true, assignee: true, assigneeId: true, dueDate: true },
+  });
+  if (!prev) return;
+
   const text = String(formData.get("text") ?? "").trim();
   const { assigneeId, assignee } = await resolveAssignee(formData.get("assigneeId"));
   const dueDate = parseDueDate(formData.get("dueDate"));
@@ -74,13 +92,42 @@ export async function updateChecklistItem(itemId: string, projectId: string, for
 
   revalidatePath("/");
   revalidatePath(`/proyectos/${projectId}`);
+
+  return {
+    kind: "checklist.update",
+    id: itemId,
+    projectId,
+    before: {
+      text: prev.text,
+      assignee: prev.assignee,
+      assigneeId: prev.assigneeId,
+      dueDate: prev.dueDate ? prev.dueDate.toISOString() : null,
+    },
+  };
 }
 
-export async function deleteChecklistItem(itemId: string, projectId: string) {
+export async function deleteChecklistItem(itemId: string, projectId: string): Promise<UndoAction | void> {
   if (await blockedForJunior()) return;
+  const prev = await prisma.checklistItem.findUnique({ where: { id: itemId } });
+  if (!prev) return;
+
   await prisma.checklistItem.delete({ where: { id: itemId } });
   revalidatePath("/");
   revalidatePath(`/proyectos/${projectId}`);
+
+  return {
+    kind: "checklist.delete",
+    data: {
+      id: prev.id,
+      projectId: prev.projectId,
+      text: prev.text,
+      order: prev.order,
+      done: prev.done,
+      assignee: prev.assignee,
+      assigneeId: prev.assigneeId,
+      dueDate: prev.dueDate ? prev.dueDate.toISOString() : null,
+    },
+  };
 }
 
 /** Sube o baja una subtarea en el orden del checklist del proyecto,

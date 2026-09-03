@@ -20,6 +20,7 @@ import { cn, formatDate } from "@/lib/utils";
 import { personColor } from "@/lib/person-color";
 import { BITACORA_TARGET_EVENT } from "@/lib/events";
 import { useCanEdit } from "@/components/access-context";
+import { useUndo } from "@/components/undo-banner";
 
 export type PersonOption = { id: string; name: string; color?: string | null };
 
@@ -62,6 +63,7 @@ function ChecklistRow({
   isLast: boolean;
 }) {
   const canEdit = useCanEdit();
+  const undo = useUndo();
   const [editing, setEditing] = useState(false);
   const [isPending, startTransition] = useTransition();
 
@@ -69,7 +71,8 @@ function ChecklistRow({
     return (
       <form
         action={async (formData) => {
-          await updateChecklistItem(item.id, projectId, formData);
+          const u = await updateChecklistItem(item.id, projectId, formData);
+          if (u) undo(u);
           setEditing(false);
         }}
         className="flex flex-col gap-2 rounded-md border border-border p-3"
@@ -105,14 +108,17 @@ function ChecklistRow({
         onChange={(e) => {
           if (!canEdit) return;
           const done = e.target.checked;
-          startTransition(() => {
-            toggleChecklistItem(item.id, projectId, done);
+          startTransition(async () => {
+            const u = await toggleChecklistItem(item.id, projectId, done);
+            if (u) undo(u);
           });
         }}
         className="mt-1 h-4 w-4 rounded border-input accent-[hsl(var(--primary))]"
       />
       <div className="flex-1">
-        <p className={cn("text-sm", item.done && "text-muted-foreground line-through")}>{item.text}</p>
+        <p className={cn("whitespace-pre-line break-words text-sm", item.done && "text-muted-foreground line-through")}>
+          {item.text}
+        </p>
         {(item.assignee || item.assigneeId || item.dueDate) && (
           <p className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-xs text-muted-foreground">
             <AssigneeTag item={item} people={people} />
@@ -158,7 +164,12 @@ function ChecklistRow({
             </button>
             <button
               type="button"
-              onClick={() => startTransition(() => deleteChecklistItem(item.id, projectId))}
+              onClick={() =>
+                startTransition(async () => {
+                  const u = await deleteChecklistItem(item.id, projectId);
+                  if (u) undo(u);
+                })
+              }
               className="rounded p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
               aria-label="Eliminar subtarea"
             >

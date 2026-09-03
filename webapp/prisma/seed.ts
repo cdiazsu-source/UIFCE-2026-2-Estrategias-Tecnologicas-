@@ -35,6 +35,11 @@ function splitDeliverables(raw: string): string[] {
     .filter((line) => line.length > 0);
 }
 
+// Proyectos cuyo checklist lo administra una función dedicada del seed
+// (texto rico por ítem que no cabe en las viñetas del CSV). El resync no
+// toca su checklist.
+const CHECKLIST_OWNED_ELSEWHERE = new Set(["cursoslibres-piezas-primer-lanzamiento"]);
+
 async function seedProjectsFromCsv() {
   const csvText = fs.readFileSync(CSV_PATH, "utf-8");
   const rows: CsvRow[] = parse(csvText, { columns: true, skip_empty_lines: true });
@@ -43,28 +48,29 @@ async function seedProjectsFromCsv() {
     const row = rows[i];
     const { category, priorityTag } = splitCategory(row["Categoría"]);
 
+    const existingProject = await prisma.project.findUnique({
+      where: { id: row.ID },
+      select: { editedInApp: true },
+    });
+
+    const csvContent = {
+      category,
+      priorityTag,
+      title: row["Actividad"],
+      description: row["Qué se debe hacer"],
+      expectedOutcome: row["Qué se espera"],
+      rationale: row["Fundamento"],
+    };
+
+    // Si alguien editó el contenido en la app, el resync solo mantiene el
+    // orden del CSV y respeta el texto editado.
     const project = await prisma.project.upsert({
       where: { id: row.ID },
-      update: {
-        category,
-        priorityTag,
-        title: row["Actividad"],
-        description: row["Qué se debe hacer"],
-        expectedOutcome: row["Qué se espera"],
-        rationale: row["Fundamento"],
-        sourceOrder: i,
-      },
-      create: {
-        id: row.ID,
-        category,
-        priorityTag,
-        title: row["Actividad"],
-        description: row["Qué se debe hacer"],
-        expectedOutcome: row["Qué se espera"],
-        rationale: row["Fundamento"],
-        sourceOrder: i,
-      },
+      update: existingProject?.editedInApp ? { sourceOrder: i } : { ...csvContent, sourceOrder: i },
+      create: { id: row.ID, ...csvContent, sourceOrder: i },
     });
+
+    if (CHECKLIST_OWNED_ELSEWHERE.has(project.id)) continue;
 
     // Checklist: se siembra una sola vez por texto. Un resync nunca sobrescribe
     // ni borra ítems existentes (aunque el usuario los haya marcado como hechos
@@ -402,6 +408,204 @@ async function seedBrandGuidelines() {
   console.log(`Indicaciones de línea gráfica sembradas: ${guidelines.length}`);
 }
 
+// --- Checklist de Cursos Libres — Primer lanzamiento ------------------------
+// Un ítem por curso con toda su ficha (fechas, sesiones, horas, horario,
+// ubicación, prerrequisitos y nota de certificado en LinkedIn). Reemplaza las
+// viñetas genéricas que sembró el CSV en versiones anteriores.
+const CL_PROJECT_ID = "cursoslibres-piezas-primer-lanzamiento";
+
+const CL_OLD_BULLETS = [
+  "Excel Básico Virtualizado (CLEBV-I) — monitor: María Fernanda Celis · sem 4-8 (14 sep - 17 oct) · 5 sesiones · cupo 10-20 · prerrequisito: ninguno.",
+  "Excel Intermedio Virtualizado (VEA-20202) — monitor: Joel Santiago Rodríguez Guzmán · sem 4-9 (14 sep - 24 oct) · 6 sesiones · cupo 12-24 · prerrequisito: Excel Básico Virtualizado.",
+  "Econometría en Python (CLEPY202602) — monitor: Laura Angélica Cárdenas Cely · sem 4-8 (14 sep - 17 oct) · 5 sesiones · cupo 10-20 · prerrequisito: Introducción a la Programación o a Lógica, y estar cursando o haber cursado Econometría I.",
+  "Introducción a la Programación en Python y R (CLIPPYR292602) — monitor: Diego Alejandro Garnica Mamanché · sem 4-8 (14 sep - 17 oct) · 5 sesiones · cupo 10-20 · prerrequisito: ninguno.",
+  "Introducción a Power BI (CLIPBI202602) — monitor: Paula Sofía Bocarejo Alberto · sem 4-8 (14 sep - 17 oct) · 5 sesiones · cupo 10-20 · prerrequisito: Excel Intermedio Virtualizado.",
+  "Siigo Nube (CLSIN2020602) — monitor: Jean Carlos Baquero García · sem 4-8 (14 sep - 17 oct) · 5 sesiones · cupo 10-20 · prerrequisito: Contabilidad de Inversión y Financiación.",
+];
+
+const CL_COURSE_ITEMS = [
+  [
+    "Excel Básico Virtualizado — CLEBV-I",
+    "Fechas: 14 sep a 17 oct 2026 (semanas 4 a 8)",
+    "Sesiones: 10 · Horas: 20",
+    "Días y horario: virtual, sin franja fija",
+    "Ubicación: virtual",
+    "Prerrequisitos: ninguno",
+    "Certificado en LinkedIn al finalizar",
+  ].join("\n"),
+  [
+    "Excel Intermedio Virtualizado — VEA-20202",
+    "Fechas: 14 sep a 24 oct 2026 (semanas 4 a 9)",
+    "Sesiones: 12 · Horas: 24",
+    "Días y horario: virtual, sin franja fija",
+    "Ubicación: virtual",
+    "Prerrequisitos: Excel Básico Virtualizado",
+    "Certificado en LinkedIn al finalizar",
+  ].join("\n"),
+  [
+    "Econometría en Python — CLEPY202602",
+    "Fechas: 14 sep a 17 oct 2026 (semanas 4 a 8)",
+    "Sesiones: 10 · Horas: 20",
+    "Días y horario: lunes y miércoles, 11:00 a 13:00",
+    "Ubicación: Sala de Informática 6",
+    "Prerrequisitos: Introducción a la Programación o a Lógica, y estar cursando o haber cursado Econometría I",
+    "Certificado en LinkedIn al finalizar",
+  ].join("\n"),
+  [
+    "Introducción a la Programación en Python y R — CLIPPYR202602",
+    "Fechas: 14 sep a 17 oct 2026 (semanas 4 a 8)",
+    "Sesiones: 10 · Horas: 20",
+    "Días y horario: lunes y viernes, 11:00 a 13:00",
+    "Ubicación: Sala de Informática 2 y 3",
+    "Prerrequisitos: ninguno",
+    "Certificado en LinkedIn al finalizar",
+  ].join("\n"),
+  [
+    "Introducción a Power BI — CLIPBI202602",
+    "Fechas: 14 sep a 17 oct 2026 (semanas 4 a 8)",
+    "Sesiones: 10 · Horas: 20",
+    "Días y horario: martes y jueves, 16:00 a 18:00",
+    "Ubicación: Sala de Informática 3",
+    "Prerrequisitos: Excel Intermedio Virtualizado",
+    "Certificado en LinkedIn al finalizar",
+  ].join("\n"),
+  [
+    "Siigo Nube — CLSIN2020602",
+    "Fechas: 14 sep a 17 oct 2026 (semanas 4 a 8)",
+    "Sesiones: 10 · Horas: 20",
+    "Días y horario: martes y jueves, 16:00 a 18:00",
+    "Ubicación: Sala de Informática 3",
+    "Prerrequisitos: Contabilidad de Inversión y Financiación",
+    "Certificado en LinkedIn al finalizar",
+  ].join("\n"),
+];
+
+async function seedCursosLibresChecklist() {
+  const project = await prisma.project.findUnique({ where: { id: CL_PROJECT_ID }, select: { id: true } });
+  if (!project) {
+    console.log(`Checklist Cursos Libres omitido: no existe el proyecto ${CL_PROJECT_ID}.`);
+    return;
+  }
+
+  // Limpia las viñetas genéricas anteriores (solo si nadie las marcó como hechas).
+  const removed = await prisma.checklistItem.deleteMany({
+    where: { projectId: CL_PROJECT_ID, text: { in: CL_OLD_BULLETS }, done: false },
+  });
+
+  const existing = await prisma.checklistItem.findMany({
+    where: { projectId: CL_PROJECT_ID },
+    select: { text: true },
+  });
+  const have = new Set(existing.map((e) => e.text));
+
+  let order = existing.length;
+  let created = 0;
+  for (const text of CL_COURSE_ITEMS) {
+    if (have.has(text)) continue;
+    await prisma.checklistItem.create({ data: { projectId: CL_PROJECT_ID, text, order: order++ } });
+    created++;
+  }
+  console.log(`Checklist Cursos Libres: ${created} ítems por curso creados, ${removed.count} viñetas viejas retiradas.`);
+}
+
+// --- Redes sociales ---------------------------------------------------------
+async function seedSocialChannels() {
+  const count = await prisma.socialChannel.count();
+  if (count > 0) return;
+
+  const channels: {
+    platform: "INSTAGRAM" | "LINKEDIN" | "X" | "TIKTOK" | "YOUTUBE";
+    handle: string | null;
+    url: string | null;
+    status: "ACTIVA" | "EN_RIESGO" | "EN_TRAMITE" | "INACTIVA" | "PERDIDA";
+    official: boolean;
+    cadence: string | null;
+    nextAction: string | null;
+    notes: string | null;
+    projectId: string | null;
+  }[] = [
+    {
+      platform: "INSTAGRAM",
+      handle: "@uifce_un",
+      url: "https://instagram.com/uifce_un",
+      status: "PERDIDA",
+      official: true,
+      cadence: "1 reel por semana (referencia histórica)",
+      nextAction:
+        "Agotar recuperación ante Meta con apoyo de Imagen Institucional; si no se logra en 2-3 semanas, crear cuenta nueva y tramitar oficialización.",
+      notes:
+        "Canal principal de la UIFCE (25 reels, 83.649 visualizaciones el último semestre). Cuenta perdida: máxima prioridad 2026-2.",
+      projectId: "redes-instagram",
+    },
+    {
+      platform: "LINKEDIN",
+      handle: "UIFCE",
+      url: "https://www.linkedin.com/company/uifce",
+      status: "ACTIVA",
+      official: true,
+      cadence: "Aumentar frecuencia frente a 2026-1 (7 publicaciones/sem)",
+      nextAction: "Construir calendario editorial propio y decidir migración a cuenta empresa.",
+      notes: "Canal prioritario del semestre. Oficializado en 2026-1.",
+      projectId: "redes-linkedin",
+    },
+    {
+      platform: "X",
+      handle: null,
+      url: null,
+      status: "INACTIVA",
+      official: false,
+      cadence: null,
+      nextAction: "Definir si se abre cuenta institucional en X y con qué formato propio.",
+      notes: "Sin cuenta activa todavía.",
+      projectId: null,
+    },
+    {
+      platform: "TIKTOK",
+      handle: null,
+      url: null,
+      status: "EN_TRAMITE",
+      official: false,
+      cadence: null,
+      nextAction: "Crear y oficializar la cuenta; definir formato propio (no réplica de reels).",
+      notes: "Cuenta nueva del semestre. Plataforma nativa del video corto.",
+      projectId: "redes-tiktok",
+    },
+    {
+      platform: "YOUTUBE",
+      handle: null,
+      url: null,
+      status: "EN_TRAMITE",
+      official: false,
+      cadence: null,
+      nextAction: "Cerrar oficialización ante Medios Digitales UNAL y resolver titularidad de la cuenta.",
+      notes: "Trámite en curso desde 2025-2. Aloja los videos de Virtualización.",
+      projectId: "redes-youtube",
+    },
+  ];
+
+  for (let i = 0; i < channels.length; i++) {
+    const c = channels[i];
+    const project = c.projectId
+      ? await prisma.project.findUnique({ where: { id: c.projectId }, select: { id: true } })
+      : null;
+    await prisma.socialChannel.create({
+      data: {
+        platform: c.platform,
+        handle: c.handle,
+        url: c.url,
+        status: c.status,
+        official: c.official,
+        cadence: c.cadence,
+        nextAction: c.nextAction,
+        notes: c.notes,
+        projectId: project?.id ?? null,
+        order: i,
+      },
+    });
+  }
+  console.log(`Cuentas de redes sociales sembradas: ${channels.length}`);
+}
+
 async function main() {
   await seedProjectsFromCsv();
   await seedSituationStats();
@@ -411,6 +615,8 @@ async function main() {
   await dedupeSeededPeople();
   await seedStudyProjects();
   await seedBrandGuidelines();
+  await seedCursosLibresChecklist();
+  await seedSocialChannels();
 }
 
 main()

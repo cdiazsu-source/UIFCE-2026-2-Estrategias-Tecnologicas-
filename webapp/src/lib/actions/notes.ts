@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { prisma } from "@/lib/prisma";
 import { USER_ROLE_LABEL } from "@/lib/utils";
+import type { UndoAction } from "@/lib/undo";
 
 /** Devuelve el id de la subtarea elegida solo si pertenece a este proyecto;
  *  si no se eligió ninguna (o no corresponde), la nota queda como nota general. */
@@ -51,9 +52,19 @@ export async function addProjectNote(projectId: string, formData: FormData) {
 /** Corrige el texto de una nota ya publicada y su subtarea vinculada. No cambia
  *  autor ni fecha: la nota sigue atribuida a quien la escribió. Mismo nivel de
  *  acceso que crear una nota (la bitácora la mantiene el equipo). */
-export async function updateProjectNote(noteId: string, projectId: string, formData: FormData) {
+export async function updateProjectNote(
+  noteId: string,
+  projectId: string,
+  formData: FormData,
+): Promise<UndoAction | void> {
   const body = String(formData.get("body") ?? "").trim();
   if (!body) return;
+
+  const prev = await prisma.projectNote.findUnique({
+    where: { id: noteId },
+    select: { body: true, checklistItemId: true },
+  });
+  if (!prev) return;
 
   const checklistItemId = await resolveChecklistItem(formData.get("checklistItemId"), projectId);
 
@@ -64,12 +75,36 @@ export async function updateProjectNote(noteId: string, projectId: string, formD
 
   revalidatePath("/");
   revalidatePath(`/proyectos/${projectId}`);
+
+  return {
+    kind: "note.update",
+    id: noteId,
+    projectId,
+    before: { body: prev.body, checklistItemId: prev.checklistItemId },
+  };
 }
 
 /** Elimina una nota de la bitácora. */
-export async function deleteProjectNote(noteId: string, projectId: string) {
+export async function deleteProjectNote(noteId: string, projectId: string): Promise<UndoAction | void> {
+  const prev = await prisma.projectNote.findUnique({ where: { id: noteId } });
+  if (!prev) return;
+
   await prisma.projectNote.delete({ where: { id: noteId } });
 
   revalidatePath("/");
   revalidatePath(`/proyectos/${projectId}`);
+
+  return {
+    kind: "note.delete",
+    data: {
+      id: prev.id,
+      projectId: prev.projectId,
+      body: prev.body,
+      author: prev.author,
+      authorRole: prev.authorRole,
+      authorId: prev.authorId,
+      checklistItemId: prev.checklistItemId,
+      createdAt: prev.createdAt.toISOString(),
+    },
+  };
 }
