@@ -175,13 +175,15 @@ async function seedContacts() {
 }
 
 // --- Equipo ------------------------------------------------------------------
-// Directorio base. El upsert por correo es aditivo y NO sobrescribe lo que ya
-// editaron las personas (update: {}) — solo crea quien falte. Los "@example.com"
-// se editan desde /equipo. Cada quien lleva un color de acento.
+// Directorio base. El upsert por correo mantiene el nombre, el rol y el área de
+// esta lista como fuente de verdad; NO toca color, foto ni estado activo (eso se
+// edita desde /equipo). Los "@example.com" son marcadores hasta tener el correo
+// real. Cada quien lleva un color de acento.
 const SEED_USERS = [
   { name: "Cesar Diaz", email: "cdiazsu@unal.edu.co", role: "MASTER" as const, area: "ET", color: "#2563EB" },
-  { name: "Mafe", email: "mafe@example.com", role: "JUNIOR_ARTES" as const, area: "ET", color: "#DB2777" },
-  { name: "Jean", email: "jean@example.com", role: "JUNIOR_AUXILIAR" as const, area: "ET", color: "#0D9488" },
+  { name: "Maria Fernanda Celis", email: "mafe@example.com", role: "JUNIOR_ARTES" as const, area: "ET", color: "#DB2777" },
+  { name: "Jean Carlos Baquero", email: "jean@example.com", role: "JUNIOR_AUXILIAR" as const, area: "ET", color: "#0D9488" },
+  { name: "Estrategias Tecnológicas (ET)", email: "et@example.com", role: "EQUIPO" as const, area: "ET", color: "#4A7729" },
   { name: "Lina Sanabria", email: "lina.sanabria@example.com", role: "COORDINADOR" as const, area: null, color: "#7C3AED" },
   { name: "Santiago Parra", email: "santiago.parra@example.com", role: "COORDINADOR" as const, area: null, color: "#EA580C" },
   { name: "Daniel Moreno", email: "daniel.moreno@example.com", role: "COORDINADOR" as const, area: null, color: "#C026D3" },
@@ -198,7 +200,11 @@ function foldName(s: string): string {
 
 async function seedUsers() {
   for (const u of SEED_USERS) {
-    await prisma.user.upsert({ where: { email: u.email }, update: {}, create: u });
+    await prisma.user.upsert({
+      where: { email: u.email },
+      update: { name: u.name, role: u.role, area: u.area },
+      create: u,
+    });
   }
   // Completa el color de quien no lo tenga (persona creada antes de esa columna).
   const sinColor = await prisma.user.findMany({ where: { color: null } });

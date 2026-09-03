@@ -50,9 +50,10 @@ export const TOOL_STATUS_LABEL: Record<string, string> = {
 export const USER_ROLE_LABEL: Record<string, string> = {
   MASTER: "Máster",
   JUNIOR_ARTES: "Junior — Artes",
-  JUNIOR_AUXILIAR: "Junior — Auxiliar",
+  JUNIOR_AUXILIAR: "Junior — ET",
   COORDINADOR: "Coordinación",
   DIRECTOR: "Dirección",
+  EQUIPO: "Equipo",
 };
 
 export const CHECKPOINT_STATUS_LABEL: Record<string, string> = {

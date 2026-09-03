@@ -6,7 +6,7 @@ import type { UserRole } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { blockedForJunior } from "@/lib/session";
 
-const ROLES: UserRole[] = ["MASTER", "JUNIOR_ARTES", "JUNIOR_AUXILIAR", "COORDINADOR", "DIRECTOR"];
+const ROLES: UserRole[] = ["MASTER", "JUNIOR_ARTES", "JUNIOR_AUXILIAR", "COORDINADOR", "DIRECTOR", "EQUIPO"];
 
 function parseRole(raw: FormDataEntryValue | null): UserRole {
   const value = String(raw ?? "");

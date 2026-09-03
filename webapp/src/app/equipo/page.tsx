@@ -4,7 +4,7 @@ import { InfoHint } from "@/components/info-hint";
 
 export const dynamic = "force-dynamic";
 
-const ROLE_ORDER = ["MASTER", "COORDINADOR", "DIRECTOR", "JUNIOR_ARTES", "JUNIOR_AUXILIAR"];
+const ROLE_ORDER = ["MASTER", "EQUIPO", "COORDINADOR", "DIRECTOR", "JUNIOR_ARTES", "JUNIOR_AUXILIAR"];
 
 export default async function EquipoPage() {
   const users = await prisma.user.findMany();

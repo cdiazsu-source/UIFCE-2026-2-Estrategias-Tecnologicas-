@@ -22,12 +22,15 @@ enum ToolStatus {
 
 /// Rol de una persona del equipo o de su entorno cercano. El directorio de
 /// `User` es editable in-app; por ahora no hay inicio de sesión.
+/// EQUIPO representa al área entera ("Estrategias Tecnológicas (ET)") como
+/// responsable posible de una subtarea que no recae en una sola persona.
 enum UserRole {
   MASTER
   JUNIOR_ARTES
   JUNIOR_AUXILIAR
   COORDINADOR
   DIRECTOR
+  EQUIPO
 }
 
 /// Estado de cada punto de corte de un proyecto de estudio.
@@ -84,6 +87,9 @@ model ChecklistItem {
   assigneeUser User?  @relation(fields: [assigneeId], references: [id], onDelete: SetNull)
   dueDate   DateTime?
 
+  /// Notas de bitácora que se refieren específicamente a esta subtarea.
+  notes     ProjectNote[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -106,11 +112,16 @@ model ProjectNote {
   /// Vínculo al User que la escribió, si sigue existiendo.
   authorId   String?
   authorUser User?    @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  /// Subtarea del checklist a la que se refiere la nota, si el autor la vinculó.
+  /// Al borrar la subtarea la nota queda como nota general del proyecto.
+  checklistItemId String?
+  checklistItem   ChecklistItem? @relation(fields: [checklistItemId], references: [id], onDelete: SetNull)
   createdAt  DateTime @default(now())
 
   @@index([projectId])
   @@index([createdAt])
   @@index([authorId])
+  @@index([checklistItemId])
 }
 
 /// Datos fijos de la franja "situación actual" del panel principal.

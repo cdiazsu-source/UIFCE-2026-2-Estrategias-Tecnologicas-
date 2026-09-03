@@ -14,7 +14,7 @@ import { PersonAvatar } from "@/components/person-avatar";
 import { USER_ROLE_LABEL } from "@/lib/utils";
 import { useCanEdit } from "@/components/access-context";
 
-const ROLE_OPTIONS: UserRole[] = ["MASTER", "JUNIOR_ARTES", "JUNIOR_AUXILIAR", "COORDINADOR", "DIRECTOR"];
+const ROLE_OPTIONS: UserRole[] = ["MASTER", "JUNIOR_ARTES", "JUNIOR_AUXILIAR", "COORDINADOR", "DIRECTOR", "EQUIPO"];
 
 function RoleSelect({ name, defaultValue }: { name: string; defaultValue?: UserRole }) {
   return (
