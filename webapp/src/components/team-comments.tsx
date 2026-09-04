@@ -104,7 +104,7 @@ export function TeamComments({
       <CardHeader>
         <CardTitle className="flex items-center gap-1.5">
           Añade un comentario al equipo de ET
-          <InfoHint text="Cualquiera del equipo puede dejar aquí un comentario o una idea para que se revise después. Hay que identificarse eligiendo el nombre de la lista (solo personas registradas en Equipo). Coordinación/dirección puede marcar cada comentario como revisado." />
+          <InfoHint text="Un buzón para comentarios e ideas del equipo. Cómo se usa: escribe el comentario y elige quién eres de la lista (solo personas registradas en Equipo). Por defecto se ven los pendientes; con perfil completo se marca cada uno como «revisado» y se puede borrar (con Deshacer). Ejemplo: «Propuesta: unificar el pie de página de las piezas TV antes de la Semana UIFCE.»" />
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">

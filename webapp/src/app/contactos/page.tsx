@@ -18,7 +18,7 @@ export default async function ContactosPage() {
       <div>
         <h1 className="flex items-center gap-1.5 text-xl font-bold">
           Contactos
-          <InfoHint text="Personas fuera del equipo con quienes ET coordina — profesores, otras dependencias, aliados externos. Cada uno puede vincularse a un proyecto para saber a quién contactar en cada iniciativa." />
+          <InfoHint text="Personas fuera del equipo con quienes ET coordina: profesores, otras dependencias, aliados externos. Cómo se usa: con perfil completo, «Agregar contacto» o el lápiz de la fila; puedes vincular cada contacto a un proyecto. Ejemplo: «Sandra Carlos Vargas · Vicedecanatura de Investigación y Extensión · proyecto Semana UIFCE»." />
         </h1>
         <p className="text-sm text-muted-foreground">
           Directorio de personas e instituciones externas al equipo, con el proyecto al que están vinculadas.

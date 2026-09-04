@@ -204,7 +204,7 @@ export function Checklist({
           <span className="font-normal text-muted-foreground">
             ({done}/{sorted.length})
           </span>
-          <InfoHint text="Las subtareas de este proyecto. Se sembraron una vez desde la columna Entregables del CSV de planeación; a partir de ahí viven aquí — puedes marcarlas, editarlas, borrarlas o agregar nuevas sin que se pierdan al resincronizar. El responsable se elige del Equipo y lleva su color." />
+          <InfoHint text="Las subtareas de este proyecto. Cómo se usa: la casilla marca hecho, las flechas ▲▼ reordenan, el lápiz edita (texto, responsable del Equipo, vencimiento) y el globo abre la bitácora ligada a esa subtarea. «Agregar subtarea» suma una nueva; nada se pierde al resincronizar el CSV. Ejemplo: «Calendario editorial 2026-2 · Maria Fernanda Celis · vence 20 sep»." />
         </CardTitle>
         {canEdit && (
           <Button size="sm" variant="outline" onClick={() => setShowForm((s) => !s)}>

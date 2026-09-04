@@ -29,6 +29,7 @@ import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { InfoHint } from "@/components/info-hint";
 import { useCanEdit } from "@/components/access-context";
 import { useUndo } from "@/components/undo-banner";
 import { formatDate } from "@/lib/utils";
@@ -245,8 +246,9 @@ function Interactions({ channel }: { channel: SocialChannelData }) {
   return (
     <div className="mt-3 border-t border-border pt-3">
       <div className="flex items-center justify-between">
-        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           Interacciones y trazabilidad ({items.length})
+          <InfoHint text="Bitácora de números e hitos de la cuenta, con fecha, para ver su evolución. Cómo se usa: con perfil completo, «Registrar» un dato (fecha, título y, opcional, seguidores / alcance / interacciones / enlace / detalle). Se ordena del más reciente al más antiguo. Ejemplo: «12 sep 2026 · Reel de bienvenida al semestre · 1.240 alcance · 96 interacciones»." />
         </p>
         {canEdit && !adding && (
           <Button size="sm" variant="outline" onClick={() => setAdding(true)}>

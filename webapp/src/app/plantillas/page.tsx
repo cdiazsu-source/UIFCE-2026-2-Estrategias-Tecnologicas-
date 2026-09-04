@@ -22,7 +22,7 @@ export default async function PlantillasPage() {
       <div>
         <h1 className="flex items-center gap-1.5 text-xl font-bold">
           Plantillas
-          <InfoHint text="Las plantillas reutilizables del área, agrupadas por categoría: material de redes sociales, televisores de la unidad, difusión por correo, disponibilidad de salas, Cursos Libres, eventos, apoyos académicos y más. Cada plantilla lleva su formato y un enlace al archivo (Drive, Canva, Figma…)." />
+          <InfoHint text="Las plantillas reutilizables del área, agrupadas por categoría (redes sociales, televisores, difusión por correo, disponibilidad de salas, Cursos Libres, eventos, apoyos académicos…). Cómo se usa: con perfil completo, «Nueva plantilla» o el lápiz de una tarjeta; la categoría es texto libre con sugerencias y el enlace apunta al archivo real. Ejemplo: «Reel / video corto para redes · Vertical 1080×1920 · enlace a Drive»." />
         </h1>
         <p className="text-sm text-muted-foreground">
           Punto único para encontrar y mantener las plantillas de trabajo del área.

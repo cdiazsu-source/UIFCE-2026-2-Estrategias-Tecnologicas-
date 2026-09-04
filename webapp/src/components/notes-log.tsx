@@ -191,7 +191,7 @@ export function NotesLog({
       <CardHeader>
         <CardTitle className="flex items-center gap-1.5">
           Bitácora
-          <InfoHint text="El historial de avance de este proyecto. Cada nota la deja alguien del equipo (se elige de la lista) y queda con su nombre, su cargo y la fecha, de la más reciente a la más antigua. Se puede vincular a una subtarea del checklist para seguirla ordenada, y editar o borrar con los botones que aparecen al pasar el cursor. Es lo que alimenta 'Últimas actualizaciones' del panel principal." />
+          <InfoHint text="El historial de avance del proyecto, de la nota más reciente a la más antigua. Cómo se usa: escribe la nota, elige quién la deja (lista de Equipo) y, si aplica, la subtarea relacionada; al pasar el cursor sobre una nota aparecen editar y borrar. Alimenta «Últimas actualizaciones» del panel. Ejemplo: «Subtarea: Verificación de licencias (Adobe) — Confirmado que la licencia sigue vigente hasta diciembre.»" />
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">

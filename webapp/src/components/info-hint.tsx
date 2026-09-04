@@ -39,7 +39,7 @@ export function InfoHint({ text, className }: { text: string; className?: string
       {open && (
         <span
           role="tooltip"
-          className="absolute left-1/2 top-full z-20 mt-2 w-60 -translate-x-1/2 rounded-lg border border-border bg-card p-3 text-xs font-normal normal-case leading-relaxed tracking-normal text-card-foreground shadow-lg"
+          className="absolute left-1/2 top-full z-20 mt-2 w-64 max-w-[calc(100vw-2rem)] -translate-x-1/2 rounded-lg border border-border bg-card p-3 text-xs font-normal normal-case leading-relaxed tracking-normal text-card-foreground shadow-lg"
         >
           {text}
         </span>

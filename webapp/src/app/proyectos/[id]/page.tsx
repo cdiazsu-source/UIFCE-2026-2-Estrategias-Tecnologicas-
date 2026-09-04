@@ -5,6 +5,7 @@ import { ArrowLeft } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { InfoHint } from "@/components/info-hint";
 import { DriveLinkEditor } from "@/components/drive-link-editor";
 import { ProjectStatusSelect } from "@/components/project-status-select";
 import { ProjectControls } from "@/components/project-controls";
@@ -63,7 +64,10 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
           <DriveLinkEditor projectId={project.id} driveFolderUrl={project.driveFolderUrl} />
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">Estado:</span>
+          <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
+            Estado:
+            <InfoHint text="Cabecera editable del proyecto. Cómo se usa: con perfil completo cambias el estado (Por iniciar / En curso / Completado), pegas el enlace a la carpeta de Drive, gestionas etiquetas y, con «Editar contenido», ajustas título, categoría y textos. Si el proyecto viene del CSV, al editarlo queda marcado «Editado en la app» y el resync deja de sobrescribir esos textos. Ejemplo: estado «En curso» + etiqueta «semana-uifce»." />
+          </span>
           <ProjectStatusSelect projectId={project.id} status={project.status} />
         </div>
         <ProjectControls project={project} />

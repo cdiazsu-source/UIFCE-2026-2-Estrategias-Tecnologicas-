@@ -12,7 +12,7 @@ export default async function HerramientasPage() {
       <div>
         <h1 className="flex items-center gap-1.5 text-xl font-bold">
           Herramientas y licencias
-          <InfoHint text="Qué software de diseño/edición tiene el área, si la licencia está vigente, y en qué equipo o con quién está — para no depender de la memoria de una sola persona ni de licencias personales." />
+          <InfoHint text="Qué software de diseño/edición tiene el área, si la licencia está vigente y en qué equipo o con quién está. Cómo se usa: con perfil completo, «Agregar herramienta» o el lápiz de cada fila para cambiar estado y ubicación. Ejemplo: «Illustrator · Sin licencia · Equipo del monitor de artes (verificar vigencia Adobe)»." />
         </h1>
         <p className="text-sm text-muted-foreground">
           Estado de las licencias de diseño y edición del área, y quién tiene acceso a cada una.

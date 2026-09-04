@@ -66,7 +66,7 @@ export default async function RedesPage() {
       <div>
         <h1 className="flex items-center gap-1.5 text-xl font-bold">
           Redes sociales
-          <InfoHint text="Panel de control de las cuentas institucionales: estado operativo, última publicación, cadencia objetivo, responsable y próximo paso de cada canal. Se edita a mano — no se conecta con las APIs de las plataformas." />
+          <InfoHint text="Panel de control de las cuentas institucionales: estado operativo, oficialización, seguidores, última publicación, cadencia, responsable y próximo paso. Cómo se usa: con perfil completo, el lápiz de cada cuenta edita todos los campos y «Agregar cuenta» suma una plataforma. Todo se edita a mano — no consume APIs. Ejemplo: «Instagram · @ui_fce · En trámite · Oficialización en trámite»." />
         </h1>
         <p className="text-sm text-muted-foreground">
           {data.length} {data.length === 1 ? "cuenta" : "cuentas"} · {activas} activas · {enRiesgo} en riesgo o perdidas.

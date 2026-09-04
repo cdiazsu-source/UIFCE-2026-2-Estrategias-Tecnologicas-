@@ -14,7 +14,7 @@ export default async function LineaGraficaPage() {
       <div>
         <h1 className="flex items-center gap-1.5 text-xl font-bold">
           Línea gráfica
-          <InfoHint text="Las indicaciones de identidad visual que ET debe respetar en las piezas para la Facultad y la Universidad: colores, franjas institucionales, formatos, y lineamientos de Imagen Institucional / Unimedios. Es la referencia única del equipo de diseño." />
+          <InfoHint text="Las indicaciones de identidad visual que ET debe respetar: colores, franjas institucionales, formatos y lineamientos de Imagen Institucional / Unimedios. Cómo se usa: con perfil completo, «Agregar» dentro de cada sección o el lápiz de un bloque; los bloques de color muestran su muestra hex. Ejemplo: «Colores → Color institucional Pantone 376 C · #84BD00»." />
         </h1>
         <p className="text-sm text-muted-foreground">
           Colores, franjas, formatos y lineamientos para las piezas gráficas de la UIFCE. Editable en línea.
