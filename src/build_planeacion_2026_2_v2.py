@@ -260,6 +260,26 @@ IDEAS = [
         entregables="* Archivo vectorial base de Uifcito (editable, alta resolución) con la cara en capa independiente.\n* Set inicial de caras y accesorios temáticos (mínimo: Halloween, Amor y Amistad, Navidad).\n* Guía de uso: capas, paleta institucional, tamaños mínimos y márgenes.\n* Definición del formato físico (acetato o imán) y ficha técnica para el proveedor.\n* Visto bueno del grupo \"Piezas Redes Sociales\".",
         priority=False,
     ),
+    dict(
+        id="micrositio-equipo-de-trabajo",
+        cat="Proyectos en continuidad",
+        idea="Actualización de micrositio — Equipo de trabajo",
+        hacer="Actualizar la sección «Equipo de trabajo» del micrositio de la UIFCE con la información vigente del semestre: una foto grupal del área, fotos individuales de cada integrante con su cargo y su carrera (programa curricular), y una descripción corporativa del área. Coordinar con Comunicaciones una sesión de fotos institucionales (grupal por área e individuales), gestionar los consentimientos de imagen con el script ya existente en el Drive de ET, y entregar a Desarrollo (DS) los textos, las fotos nombradas y las biografías para su publicación. Verificar el resultado en el micrositio.",
+        espera="La sección «Equipo de trabajo» del micrositio publicada con el equipo vigente 2026-2: foto grupal del área, fotos individuales con cargo y carrera, y descripción del área, con los consentimientos de imagen gestionados.",
+        fundamento="El micrositio es un proceso compartido ET–DS: ET aporta el contenido y DS lo publica. La sección de equipo quedó desactualizada respecto al equipo del semestre y a la descripción del área; actualizarla es un compromiso recogido en la Guía de Empalme y en la planeación de continuidad del micrositio.",
+        entregables="* Sesión de fotos institucionales coordinada con Comunicaciones (grupal del área e individuales).\n* Consentimientos de imagen gestionados con el script del Drive de ET.\n* Foto grupal del área lista para publicar.\n* Fotos individuales con cargo y carrera de cada integrante.\n* Descripción del área redactada y aprobada.\n* Contenido entregado a Desarrollo y sección publicada y verificada.",
+        priority=False,
+    ),
+    dict(
+        id="micrositio-ex-monitores",
+        cat="Proyectos en continuidad",
+        idea="Actualización de micrositio — Ex monitores",
+        hacer="Actualizar el apartado «Ex monitores» del micrositio, dedicado a reconocer a quienes ya pasaron por la Unidad. Texto de encabezado de la sección: «Dedicado a quienes dejaron huella en nuestra UIFCE. Cada monitor ha sido una pieza fundamental en nuestro crecimiento y en el apoyo a la comunidad universitaria. A través de sus testimonios, historias y experiencias, este espacio busca reconocer su legado e inspirar a quienes hoy continúan construyendo la historia de la Unidad.» Recopilar de cada ex monitor su foto, su nombre, el rol que desempeñó y, opcionalmente, un testimonio breve, además de su enlace de LinkedIn para que al hacer clic en la foto se abra su perfil. Gestionar los consentimientos de imagen, entregar el contenido a Desarrollo (DS) para su publicación y verificar los enlaces.",
+        espera="El apartado «Ex monitores» del micrositio publicado y al día, con el texto de reconocimiento, la ficha de cada ex monitor (foto, nombre, rol) y la foto de cada uno enlazada a su perfil de LinkedIn.",
+        fundamento="El video de empalme señaló el reconocimiento a los ex monitores como palanca de atracción de nuevos monitores y de sentido de pertenencia, junto con el video de testimonios de ex-monitores. El apartado del micrositio da continuidad a ese propósito y el enlace a LinkedIn refuerza además el posicionamiento del canal.",
+        entregables="* Texto de encabezado de la sección publicado.\n* Base de ex monitores: foto, nombre, rol y enlace de LinkedIn de cada uno.\n* Consentimientos de imagen de los ex monitores gestionados.\n* Contenido entregado a Desarrollo.\n* Fotos enlazadas a LinkedIn y enlaces verificados en el micrositio.",
+        priority=False,
+    ),
 ]
 
 # ---------- Sheet 1: Planeación ----------
