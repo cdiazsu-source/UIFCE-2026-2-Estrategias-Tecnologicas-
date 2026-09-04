@@ -32,9 +32,10 @@ const PASS_FULL = process.env.SITE_PASSWORD || "ET2026";
 const PASS_JUNIOR = process.env.SITE_PASSWORD_JUNIOR || "TEAM";
 
 /** Credencial nominal del director de la unidad. Configurable por entorno en
- *  Vercel (SITE_USER_DIRECTOR / SITE_PASSWORD_DIRECTOR). */
-const DIRECTOR_USER = process.env.SITE_USER_DIRECTOR || "henry";
-const DIRECTOR_PASS = process.env.SITE_PASSWORD_DIRECTOR || "Sarmiento-ET-2026";
+ *  Vercel (SITE_USER_DIRECTOR / SITE_PASSWORD_DIRECTOR). El usuario distingue
+ *  mayúsculas. */
+const DIRECTOR_USER = process.env.SITE_USER_DIRECTOR || "HENRY";
+const DIRECTOR_PASS = process.env.SITE_PASSWORD_DIRECTOR || "UIFCEUNAL310.";
 /** Clave de identidad del director; debe coincidir con User.credentialKey. */
 export const DIRECTOR_WHO = "henry-sarmiento";
 
