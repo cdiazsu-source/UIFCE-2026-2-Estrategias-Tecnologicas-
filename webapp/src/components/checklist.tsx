@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { InfoHint } from "@/components/info-hint";
+import { MentionPicker, MentionTags } from "@/components/mention-picker";
 import { cn, formatDate } from "@/lib/utils";
 import { personColor } from "@/lib/person-color";
 import { BITACORA_TARGET_EVENT } from "@/lib/events";
@@ -87,6 +88,7 @@ function ChecklistRow({
             className="w-40"
           />
         </div>
+        <MentionPicker name="mentionIds" people={people} defaultValue={item.mentionIds} />
         <div className="flex gap-2">
           <Button type="submit" size="sm">
             Guardar
@@ -119,11 +121,13 @@ function ChecklistRow({
         <p className={cn("whitespace-pre-line break-words text-sm", item.done && "text-muted-foreground line-through")}>
           {item.text}
         </p>
-        {(item.assignee || item.assigneeId || item.dueDate) && (
-          <p className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-xs text-muted-foreground">
+        {(item.assignee || item.assigneeId || item.dueDate || item.mentionIds.length > 0) && (
+          <p className="mt-0.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs text-muted-foreground">
             <AssigneeTag item={item} people={people} />
             {(item.assignee || item.assigneeId) && item.dueDate && <span>·</span>}
             {item.dueDate && <span>vence {formatDate(item.dueDate)}</span>}
+            {item.mentionIds.length > 0 && (item.assignee || item.assigneeId || item.dueDate) && <span>·</span>}
+            <MentionTags people={people.filter((p) => item.mentionIds.includes(p.id))} />
           </p>
         )}
       </div>
@@ -193,6 +197,7 @@ export function Checklist({
 }) {
   const canEdit = useCanEdit();
   const [showForm, setShowForm] = useState(false);
+  const [addKey, setAddKey] = useState(0);
   const sorted = [...items].sort((a, b) => a.order - b.order);
   const done = sorted.filter((i) => i.done).length;
 
@@ -204,7 +209,7 @@ export function Checklist({
           <span className="font-normal text-muted-foreground">
             ({done}/{sorted.length})
           </span>
-          <InfoHint text="Las subtareas de este proyecto. Cómo se usa: la casilla marca hecho, las flechas ▲▼ reordenan, el lápiz edita (texto, responsable del Equipo, vencimiento) y el globo abre la bitácora ligada a esa subtarea. «Agregar subtarea» suma una nueva; nada se pierde al resincronizar el CSV. Ejemplo: «Calendario editorial 2026-2 · Maria Fernanda Celis · vence 20 sep»." />
+          <InfoHint text="Las subtareas de este proyecto. Cómo se usa: la casilla marca hecho, las flechas ▲▼ reordenan, el lápiz edita (texto, responsable del Equipo, vencimiento y personas etiquetadas) y el globo abre la bitácora ligada a esa subtarea. «Agregar subtarea» suma una nueva. Ejemplo: «Calendario editorial 2026-2 · Maria Fernanda Celis · vence 20 sep · @ Cesar Diaz»." />
         </CardTitle>
         {canEdit && (
           <Button size="sm" variant="outline" onClick={() => setShowForm((s) => !s)}>
@@ -216,21 +221,22 @@ export function Checklist({
       <CardContent className="flex flex-col gap-3">
         {canEdit && showForm && (
           <form
+            key={addKey}
             action={async (formData) => {
               await addChecklistItem(projectId, formData);
-              (document.getElementById("checklist-add-form") as HTMLFormElement | null)?.reset();
+              setAddKey((k) => k + 1);
             }}
-            id="checklist-add-form"
             className="flex flex-col gap-2 rounded-md border border-dashed border-input p-3"
           >
             <Input name="text" placeholder="Descripción de la subtarea" required />
             <div className="flex flex-wrap gap-2">
               <AssigneeSelect people={people} />
               <Input type="date" name="dueDate" className="w-40" />
-              <Button type="submit" size="sm">
-                Agregar
-              </Button>
             </div>
+            <MentionPicker name="mentionIds" people={people} />
+            <Button type="submit" size="sm" className="self-start">
+              Agregar
+            </Button>
           </form>
         )}
 

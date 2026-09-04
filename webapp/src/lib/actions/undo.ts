@@ -26,6 +26,7 @@ export async function applyUndo(action: UndoAction) {
           authorRole: d.authorRole,
           authorId: d.authorId,
           checklistItemId: d.checklistItemId,
+          mentionIds: d.mentionIds,
           createdAt: new Date(d.createdAt),
         },
       });
@@ -35,7 +36,11 @@ export async function applyUndo(action: UndoAction) {
     case "note.update": {
       await prisma.projectNote.update({
         where: { id: action.id },
-        data: { body: action.before.body, checklistItemId: action.before.checklistItemId },
+        data: {
+          body: action.before.body,
+          checklistItemId: action.before.checklistItemId,
+          mentionIds: action.before.mentionIds,
+        },
       });
       revalidatePath(`/proyectos/${action.projectId}`);
       break;
@@ -52,6 +57,7 @@ export async function applyUndo(action: UndoAction) {
           assignee: d.assignee,
           assigneeId: d.assigneeId,
           dueDate: d.dueDate ? new Date(d.dueDate) : null,
+          mentionIds: d.mentionIds,
         },
       });
       revalidatePath(`/proyectos/${d.projectId}`);
@@ -65,6 +71,7 @@ export async function applyUndo(action: UndoAction) {
           assignee: action.before.assignee,
           assigneeId: action.before.assigneeId,
           dueDate: action.before.dueDate ? new Date(action.before.dueDate) : null,
+          mentionIds: action.before.mentionIds,
         },
       });
       revalidatePath(`/proyectos/${action.projectId}`);

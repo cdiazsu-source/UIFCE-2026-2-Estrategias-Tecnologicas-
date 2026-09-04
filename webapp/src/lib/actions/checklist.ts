@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { prisma } from "@/lib/prisma";
 import { blockedForJunior } from "@/lib/session";
+import { resolveMentions } from "@/lib/mentions";
 import type { UndoAction } from "@/lib/undo";
 
 function parseDueDate(raw: FormDataEntryValue | null): Date | null {
@@ -28,6 +29,7 @@ export async function addChecklistItem(projectId: string, formData: FormData) {
 
   const { assigneeId, assignee } = await resolveAssignee(formData.get("assigneeId"));
   const dueDate = parseDueDate(formData.get("dueDate"));
+  const mentionIds = await resolveMentions(formData.getAll("mentionIds"));
 
   const last = await prisma.checklistItem.findFirst({
     where: { projectId },
@@ -43,6 +45,7 @@ export async function addChecklistItem(projectId: string, formData: FormData) {
       assigneeId,
       assignee,
       dueDate,
+      mentionIds,
     },
   });
 
@@ -72,13 +75,14 @@ export async function updateChecklistItem(
   if (await blockedForJunior()) return;
   const prev = await prisma.checklistItem.findUnique({
     where: { id: itemId },
-    select: { text: true, assignee: true, assigneeId: true, dueDate: true },
+    select: { text: true, assignee: true, assigneeId: true, dueDate: true, mentionIds: true },
   });
   if (!prev) return;
 
   const text = String(formData.get("text") ?? "").trim();
   const { assigneeId, assignee } = await resolveAssignee(formData.get("assigneeId"));
   const dueDate = parseDueDate(formData.get("dueDate"));
+  const mentionIds = await resolveMentions(formData.getAll("mentionIds"));
 
   await prisma.checklistItem.update({
     where: { id: itemId },
@@ -87,6 +91,7 @@ export async function updateChecklistItem(
       assigneeId,
       assignee,
       dueDate,
+      mentionIds,
     },
   });
 
@@ -102,6 +107,7 @@ export async function updateChecklistItem(
       assignee: prev.assignee,
       assigneeId: prev.assigneeId,
       dueDate: prev.dueDate ? prev.dueDate.toISOString() : null,
+      mentionIds: prev.mentionIds,
     },
   };
 }
@@ -126,6 +132,7 @@ export async function deleteChecklistItem(itemId: string, projectId: string): Pr
       assignee: prev.assignee,
       assigneeId: prev.assigneeId,
       dueDate: prev.dueDate ? prev.dueDate.toISOString() : null,
+      mentionIds: prev.mentionIds,
     },
   };
 }

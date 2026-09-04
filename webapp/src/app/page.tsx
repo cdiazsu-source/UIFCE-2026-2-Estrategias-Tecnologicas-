@@ -156,6 +156,7 @@ async function getHomeData(semesterId: string | null, includeOrphans: boolean) {
         projectTitle: n.project.title,
         checklistItemText: n.checklistItem?.text ?? null,
         checklistItemDone: n.checklistItem?.done ?? false,
+        mentions: n.mentionIds.map((id) => peopleById.get(id)?.name).filter((x): x is string => !!x),
       }),
     ),
     ...completed.map(

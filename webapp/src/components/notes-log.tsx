@@ -10,11 +10,12 @@ import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { InfoHint } from "@/components/info-hint";
+import { MentionPicker, MentionTags } from "@/components/mention-picker";
 import { useUndo } from "@/components/undo-banner";
 import { BITACORA_TARGET_EVENT } from "@/lib/events";
 import { formatDateTime, USER_ROLE_LABEL } from "@/lib/utils";
 
-export type NoteAuthorOption = { id: string; name: string; role: string };
+export type NoteAuthorOption = { id: string; name: string; role: string; color?: string | null };
 export type ChecklistItemLite = Pick<ChecklistItem, "id" | "text" | "done" | "order">;
 export type NoteWithLink = ProjectNote & {
   checklistItem: { id: string; text: string; done: boolean } | null;
@@ -85,10 +86,12 @@ function NoteRow({
   note,
   projectId,
   checklistItems,
+  authors,
 }: {
   note: NoteWithLink;
   projectId: string;
   checklistItems: ChecklistItemLite[];
+  authors: NoteAuthorOption[];
 }) {
   const undo = useUndo();
   const [editing, setEditing] = useState(false);
@@ -111,6 +114,7 @@ function NoteRow({
             items={checklistItems}
             defaultValue={note.checklistItemId ?? ""}
           />
+          <MentionPicker name="mentionIds" people={authors} defaultValue={note.mentionIds} />
           <div className="flex gap-2">
             <Button type="submit" size="sm">
               Guardar
@@ -124,10 +128,17 @@ function NoteRow({
     );
   }
 
+  const mentioned = authors.filter((a) => note.mentionIds.includes(a.id));
+
   return (
     <li className="group relative rounded-md bg-muted/40 p-3">
       <p className="whitespace-pre-line break-words text-sm leading-snug">{note.body}</p>
       {note.checklistItem && <LinkedItemTag item={note.checklistItem} />}
+      {mentioned.length > 0 && (
+        <p className="mt-1 text-xs text-muted-foreground">
+          <MentionTags people={mentioned} />
+        </p>
+      )}
       <p className="mt-1 text-xs text-muted-foreground">{noteMeta(note)}</p>
       <div className="absolute right-2 top-2 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
         <button
@@ -171,6 +182,7 @@ export function NotesLog({
 }) {
   const sorted = [...notes].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   const [targetItemId, setTargetItemId] = useState("");
+  const [addKey, setAddKey] = useState(0);
   const formRef = useRef<HTMLFormElement>(null);
   const bodyRef = useRef<HTMLTextAreaElement>(null);
 
@@ -191,7 +203,7 @@ export function NotesLog({
       <CardHeader>
         <CardTitle className="flex items-center gap-1.5">
           Bitácora
-          <InfoHint text="El historial de avance del proyecto, de la nota más reciente a la más antigua. Cómo se usa: escribe la nota, elige quién la deja (lista de Equipo) y, si aplica, la subtarea relacionada; al pasar el cursor sobre una nota aparecen editar y borrar. Alimenta «Últimas actualizaciones» del panel. Ejemplo: «Subtarea: Verificación de licencias (Adobe) — Confirmado que la licencia sigue vigente hasta diciembre.»" />
+          <InfoHint text="El historial de avance del proyecto, de la nota más reciente a la más antigua. Cómo se usa: escribe la nota, elige quién la deja (lista de Equipo), si aplica la subtarea relacionada, y con «Etiquetar a…» marca a quién involucra; al pasar el cursor sobre una nota aparecen editar y borrar. Alimenta «Últimas actualizaciones» del panel. Ejemplo: «Confirmado que la licencia de Adobe sigue vigente hasta diciembre. @ Maria Fernanda Celis»." />
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
@@ -205,11 +217,12 @@ export function NotesLog({
           </p>
         ) : (
           <form
+            key={addKey}
             ref={formRef}
             action={async (formData) => {
               await addProjectNote(projectId, formData);
-              formRef.current?.reset();
               setTargetItemId("");
+              setAddKey((k) => k + 1);
             }}
             className="flex flex-col gap-2"
           >
@@ -236,10 +249,11 @@ export function NotesLog({
                 controlledValue={targetItemId}
                 onChange={setTargetItemId}
               />
-              <Button type="submit" size="sm">
-                Publicar nota
-              </Button>
             </div>
+            <MentionPicker name="mentionIds" people={authors} />
+            <Button type="submit" size="sm" className="self-start">
+              Publicar nota
+            </Button>
           </form>
         )}
 
@@ -253,6 +267,7 @@ export function NotesLog({
                 note={note}
                 projectId={projectId}
                 checklistItems={checklistItems}
+                authors={authors}
               />
             ))}
           </ul>

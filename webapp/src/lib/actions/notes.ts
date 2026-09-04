@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { prisma } from "@/lib/prisma";
+import { resolveMentions } from "@/lib/mentions";
 import { USER_ROLE_LABEL } from "@/lib/utils";
 import type { UndoAction } from "@/lib/undo";
 
@@ -33,6 +34,7 @@ export async function addProjectNote(projectId: string, formData: FormData) {
   if (!user) return;
 
   const checklistItemId = await resolveChecklistItem(formData.get("checklistItemId"), projectId);
+  const mentionIds = await resolveMentions(formData.getAll("mentionIds"));
 
   await prisma.projectNote.create({
     data: {
@@ -42,6 +44,7 @@ export async function addProjectNote(projectId: string, formData: FormData) {
       authorRole: USER_ROLE_LABEL[user.role] ?? null,
       authorId,
       checklistItemId,
+      mentionIds,
     },
   });
 
@@ -62,15 +65,16 @@ export async function updateProjectNote(
 
   const prev = await prisma.projectNote.findUnique({
     where: { id: noteId },
-    select: { body: true, checklistItemId: true },
+    select: { body: true, checklistItemId: true, mentionIds: true },
   });
   if (!prev) return;
 
   const checklistItemId = await resolveChecklistItem(formData.get("checklistItemId"), projectId);
+  const mentionIds = await resolveMentions(formData.getAll("mentionIds"));
 
   await prisma.projectNote.update({
     where: { id: noteId },
-    data: { body, checklistItemId },
+    data: { body, checklistItemId, mentionIds },
   });
 
   revalidatePath("/");
@@ -80,7 +84,7 @@ export async function updateProjectNote(
     kind: "note.update",
     id: noteId,
     projectId,
-    before: { body: prev.body, checklistItemId: prev.checklistItemId },
+    before: { body: prev.body, checklistItemId: prev.checklistItemId, mentionIds: prev.mentionIds },
   };
 }
 
@@ -104,6 +108,7 @@ export async function deleteProjectNote(noteId: string, projectId: string): Prom
       authorRole: prev.authorRole,
       authorId: prev.authorId,
       checklistItemId: prev.checklistItemId,
+      mentionIds: prev.mentionIds,
       createdAt: prev.createdAt.toISOString(),
     },
   };

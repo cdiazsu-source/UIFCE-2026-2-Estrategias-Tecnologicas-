@@ -152,6 +152,9 @@ model ChecklistItem {
   assigneeId String?
   assigneeUser User?  @relation(fields: [assigneeId], references: [id], onDelete: SetNull)
   dueDate   DateTime?
+  /// Ids de personas del equipo etiquetadas/mencionadas en esta subtarea
+  /// (además del responsable). Sin FK: un id que ya no exista se ignora al mostrar.
+  mentionIds String[] @default([])
 
   /// Notas de bitácora que se refieren específicamente a esta subtarea.
   notes     ProjectNote[]
@@ -182,6 +185,8 @@ model ProjectNote {
   /// Al borrar la subtarea la nota queda como nota general del proyecto.
   checklistItemId String?
   checklistItem   ChecklistItem? @relation(fields: [checklistItemId], references: [id], onDelete: SetNull)
+  /// Ids de personas del equipo etiquetadas/mencionadas en la nota. Sin FK.
+  mentionIds String[] @default([])
   createdAt  DateTime @default(now())
 
   @@index([projectId])

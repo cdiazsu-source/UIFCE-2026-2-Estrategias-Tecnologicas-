@@ -14,6 +14,7 @@ export type UndoAction =
         authorRole: string | null;
         authorId: string | null;
         checklistItemId: string | null;
+        mentionIds: string[];
         createdAt: string;
       };
     }
@@ -21,7 +22,7 @@ export type UndoAction =
       kind: "note.update";
       id: string;
       projectId: string;
-      before: { body: string; checklistItemId: string | null };
+      before: { body: string; checklistItemId: string | null; mentionIds: string[] };
     }
   | {
       kind: "checklist.delete";
@@ -34,13 +35,20 @@ export type UndoAction =
         assignee: string | null;
         assigneeId: string | null;
         dueDate: string | null;
+        mentionIds: string[];
       };
     }
   | {
       kind: "checklist.update";
       id: string;
       projectId: string;
-      before: { text: string; assignee: string | null; assigneeId: string | null; dueDate: string | null };
+      before: {
+        text: string;
+        assignee: string | null;
+        assigneeId: string | null;
+        dueDate: string | null;
+        mentionIds: string[];
+      };
     }
   | { kind: "checklist.toggle"; id: string; projectId: string; before: boolean }
   | {

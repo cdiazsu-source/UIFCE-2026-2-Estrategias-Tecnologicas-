@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Check, ListChecks } from "lucide-react";
+import { ArrowRight, AtSign, Check, ListChecks } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDateTime } from "@/lib/utils";
@@ -16,6 +16,8 @@ export type NoteFeedItem = {
   /** Subtarea del checklist a la que se refiere la nota, si el autor la vinculó. */
   checklistItemText: string | null;
   checklistItemDone: boolean;
+  /** Nombres de las personas etiquetadas en la nota. */
+  mentions: string[];
 };
 
 export type CheckFeedItem = {
@@ -74,6 +76,12 @@ function NoteRow({ item }: { item: NoteFeedItem }) {
         </span>
       )}
       <p className="mt-0.5 line-clamp-4 whitespace-pre-line break-words text-sm leading-snug">{item.body}</p>
+      {item.mentions.length > 0 && (
+        <p className="mt-0.5 flex items-center gap-1 truncate text-xs text-muted-foreground">
+          <AtSign className="h-3 w-3 shrink-0" aria-hidden />
+          {item.mentions.join(", ")}
+        </p>
+      )}
       <p className="mt-1 truncate text-xs text-muted-foreground">
         {[item.author, item.authorRole, formatDateTime(item.at)].filter(Boolean).join(" · ")}
       </p>
