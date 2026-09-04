@@ -13,6 +13,11 @@ function parseRole(raw: FormDataEntryValue | null): UserRole {
   return (ROLES as string[]).includes(value) ? (value as UserRole) : "JUNIOR_AUXILIAR";
 }
 
+function optStr(fd: FormData, k: string): string | null {
+  const v = String(fd.get(k) ?? "").trim();
+  return v.length > 0 ? v : null;
+}
+
 export async function addUser(formData: FormData) {
   if (await blockedForJunior()) return;
   const name = String(formData.get("name") ?? "").trim();
@@ -20,7 +25,6 @@ export async function addUser(formData: FormData) {
   if (!name || !email) return;
 
   const area = String(formData.get("area") ?? "").trim();
-  const photoUrl = String(formData.get("photoUrl") ?? "").trim();
   const role = parseRole(formData.get("role"));
 
   await prisma.user.create({
@@ -29,13 +33,15 @@ export async function addUser(formData: FormData) {
       email,
       role,
       area: area.length > 0 ? area : null,
-      photoUrl: photoUrl.length > 0 ? photoUrl : null,
+      photoUrl: optStr(formData, "photoUrl"),
+      linkedinUrl: optStr(formData, "linkedinUrl"),
       active: formData.get("active") !== "false",
     },
   });
 
   revalidatePath("/equipo");
   revalidatePath("/proyectos-de-estudio");
+  revalidatePath("/");
 }
 
 export async function updateUser(id: string, formData: FormData) {
@@ -43,7 +49,6 @@ export async function updateUser(id: string, formData: FormData) {
   const name = String(formData.get("name") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const area = String(formData.get("area") ?? "").trim();
-  const photoUrl = String(formData.get("photoUrl") ?? "").trim();
   const role = parseRole(formData.get("role"));
 
   await prisma.user.update({
@@ -53,13 +58,23 @@ export async function updateUser(id: string, formData: FormData) {
       ...(email.length > 0 ? { email } : {}),
       role,
       area: area.length > 0 ? area : null,
-      photoUrl: photoUrl.length > 0 ? photoUrl : null,
+      photoUrl: optStr(formData, "photoUrl"),
+      linkedinUrl: optStr(formData, "linkedinUrl"),
       active: formData.get("active") !== "false",
     },
   });
 
   revalidatePath("/equipo");
   revalidatePath("/proyectos-de-estudio");
+  revalidatePath("/");
+}
+
+/** Solo el enlace de LinkedIn personal (desde el roster del panel principal). */
+export async function updateUserLinkedin(id: string, formData: FormData) {
+  if (await blockedForJunior()) return;
+  await prisma.user.update({ where: { id }, data: { linkedinUrl: optStr(formData, "linkedinUrl") } });
+  revalidatePath("/");
+  revalidatePath("/equipo");
 }
 
 export async function deleteUser(id: string) {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Linkedin, Pencil, Plus, Trash2 } from "lucide-react";
 import type { User, UserRole } from "@prisma/client";
 
 import { addUser, deleteUser, updateUser } from "@/lib/actions/users";
@@ -54,6 +54,13 @@ function UserRow({ user }: { user: User }) {
               placeholder="Foto: archivo en /avatares/ o URL"
               className="w-56"
             />
+            <Input
+              name="linkedinUrl"
+              type="url"
+              defaultValue={user.linkedinUrl ?? ""}
+              placeholder="LinkedIn (URL)"
+              className="w-56"
+            />
             <Select name="active" defaultValue={String(user.active)} className="w-32">
               <option value="true">Activo</option>
               <option value="false">Inactivo</option>
@@ -76,7 +83,20 @@ function UserRow({ user }: { user: User }) {
         <div className="flex items-center gap-2.5">
           <PersonAvatar name={user.name} photoUrl={user.photoUrl} />
           <div className="flex flex-col">
-            <span>{user.name}</span>
+            <span className="flex items-center gap-1.5">
+              {user.name}
+              {user.linkedinUrl && (
+                <a
+                  href={user.linkedinUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-primary hover:text-primary/80"
+                  aria-label={`LinkedIn de ${user.name}`}
+                >
+                  <Linkedin className="h-3.5 w-3.5" />
+                </a>
+              )}
+            </span>
             {user.credentialKey && (
               <span className="text-xs font-normal text-muted-foreground">
                 Acceso propio · última visita:{" "}
@@ -157,6 +177,7 @@ export function UsersTable({ users }: { users: User[] }) {
           <RoleSelect name="role" />
           <Input name="area" placeholder="Área (ej. ET)" defaultValue="ET" className="w-28" />
           <Input name="photoUrl" placeholder="Foto: archivo en /avatares/ o URL" className="w-56" />
+          <Input name="linkedinUrl" type="url" placeholder="LinkedIn (URL)" className="w-56" />
           <Button type="submit" size="sm">
             Agregar
           </Button>

@@ -30,7 +30,7 @@ export function SemesterObjectives({
       <div className="flex items-center justify-between">
         <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           Objetivos {semester.label}
-          <InfoHint text="Los objetivos del área para este semestre. Cambian al cambiar de semestre en las pestañas de Proyectos. Cómo se usa: con perfil completo, botón del lápiz → un objetivo por línea → Guardar. Ejemplo: «Cerrar la oficialización de YouTube ante Medios Digitales UNAL»." />
+          <InfoHint text="Los objetivos del área para el semestre seleccionado en las pestañas de arriba (distintos de los objetivos generales de «El área»). Cómo se usa: con perfil completo, el lápiz → un objetivo por línea → Guardar. Ejemplo: «Ejecutar la primera edición de la Semana UIFCE: Hackatón, microtaller y conferencia»." />
         </p>
         {canEdit && !editing && (
           <button

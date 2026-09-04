@@ -54,6 +54,28 @@ const OBJETIVOS_2026_2 = [
   "Garantizar el acompañamiento a las demás áreas de la UIFCE con niveles de servicio (SLA) definidos y un canal único de solicitudes.",
 ];
 
+// --- Ficha del área (singleton) ----------------------------------------
+const AREA_DESCRIPTION = [
+  "Estrategias Tecnológicas (ET) es el área de comunicación digital y difusión de la Unidad de Informática de la Facultad de Ciencias Económicas (UIFCE) de la Universidad Nacional de Colombia. Gestiona los canales y redes oficiales de la Unidad, produce las piezas gráficas y audiovisuales, mantiene el micrositio y organiza los microtalleres y microeventos, siempre dentro de los lineamientos de identidad visual de la Universidad y con el acompañamiento de Imagen Institucional / Unimedios.",
+  "Opera con un equipo de estudiantes —una máster que lidera el área y monitores de artes y auxiliares— y presta servicio a las demás áreas de la UIFCE a través de un canal único de solicitudes y niveles de servicio (SLA) definidos. Su principio rector es «calidad sobre cantidad»: prioriza el impacto y la consistencia de cada pieza y cada evento sobre el volumen.",
+].join("\n\n");
+
+const AREA_OBJETIVOS_GENERALES = [
+  "Sostener y hacer crecer la presencia institucional de la UIFCE en los canales oficiales, con contenido de calidad y una identidad visual coherente.",
+  "Producir y publicar piezas gráficas y audiovisuales bajo un calendario editorial único y un flujo de aprobación claro.",
+  "Acompañar a las demás áreas de la UIFCE con niveles de servicio definidos y un canal único de solicitudes.",
+  "Organizar microtalleres y microeventos que aporten valor real a la comunidad, priorizando la asistencia efectiva y la certificación.",
+  "Preservar la memoria del área: documentar procesos, activos y aprendizajes para que el conocimiento no se pierda entre semestres.",
+];
+
+async function seedAreaProfile() {
+  await prisma.areaProfile.upsert({
+    where: { id: "area" },
+    update: {},
+    create: { id: "area", description: AREA_DESCRIPTION, objectives: AREA_OBJETIVOS_GENERALES },
+  });
+}
+
 /** Crea el semestre vigente si no existe y le pone los objetivos base solo si
  *  todavía no tiene ninguno (no pisa lo que edite el equipo). Devuelve su id. */
 async function ensureCurrentSemester(): Promise<string> {
@@ -816,6 +838,7 @@ async function main() {
   await seedSocialChannels();
   await reconcileInstagramNewAccount();
   await seedTemplates();
+  await seedAreaProfile();
 
   // Cualquier proyecto sin semestre (creados antes de esta función) al vigente.
   const semesterId = await ensureCurrentSemester();

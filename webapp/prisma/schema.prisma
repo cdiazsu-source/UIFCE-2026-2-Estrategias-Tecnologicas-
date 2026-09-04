@@ -67,8 +67,18 @@ enum SocialOfficialStatus {
   SIN_OFICIALIZAR
 }
 
+/// Ficha institucional del área (singleton, id fijo "area"): descripción
+/// corporativa y objetivos generales/permanentes. Los objetivos por semestre
+/// viven en Semester.objectives.
+model AreaProfile {
+  id          String   @id @default("area")
+  description String   @db.Text
+  objectives  String[] @default([])
+  updatedAt   DateTime @updatedAt
+}
+
 /// Semestre de planeación. Los proyectos se agrupan por semestre; los
-/// objetivos del área también viven aquí. Uno está marcado como el vigente.
+/// objetivos de cada semestre también viven aquí. Uno está marcado como vigente.
 model Semester {
   id         String   @id @default(cuid())
   /// Etiqueta visible, ej. "2026-2S".
@@ -240,6 +250,8 @@ model User {
   /// actividades (subtareas, proyectos de estudio). Si está vacío se deriva del id.
   color     String?
   active    Boolean  @default(true)
+  /// Enlace al perfil de LinkedIn personal de la persona.
+  linkedinUrl String?
   /// Clave de identidad de su credencial de acceso propia, si tiene una
   /// (ver src/lib/auth.ts). Hoy solo el director.
   credentialKey String? @unique

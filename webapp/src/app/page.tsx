@@ -1,9 +1,11 @@
 import { prisma } from "@/lib/prisma";
-import { AreaOverview } from "@/components/area-overview";
+import { AreaOverview, type AreaProfileData } from "@/components/area-overview";
 import { SituationStrip } from "@/components/situation-strip";
 import { type ProjectCardData, type CardAssignee } from "@/components/project-card";
 import { ProjectsGrid } from "@/components/projects-grid";
 import { SemesterTabs, type SemesterTab } from "@/components/semester-tabs";
+import { SemesterObjectives } from "@/components/semester-objectives";
+import { TeamRoster, type RosterMember } from "@/components/team-roster";
 import { UpdatesFeed, type FeedItem } from "@/components/updates-feed";
 import { TeamComments, type TeamCommentData } from "@/components/team-comments";
 import { InfoHint } from "@/components/info-hint";
@@ -11,6 +13,8 @@ import { NewProjectButton } from "@/components/new-project-button";
 import { formatDateTime } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
+
+const ROSTER_ROLES = ["MASTER", "JUNIOR_ARTES", "JUNIOR_AUXILIAR"];
 
 async function getSemesters(semParam: string | undefined) {
   const [rows, counts] = await Promise.all([
@@ -32,10 +36,9 @@ async function getSemesters(semParam: string | undefined) {
     projectCount: (countBy.get(s.id) ?? 0) + (current && s.id === current.id ? orphanCount : 0),
   }));
 
-  const selected =
-    (semParam ? rows.find((s) => s.label === semParam) : null) ?? current;
+  const selected = (semParam ? rows.find((s) => s.label === semParam) : null) ?? current;
 
-  return { rows, tabs, selected, isSelectedCurrent: !!(selected && current && selected.id === current.id) };
+  return { tabs, selected, isSelectedCurrent: !!(selected && current && selected.id === current.id) };
 }
 
 async function getHomeData(semesterId: string | null, includeOrphans: boolean) {
@@ -46,55 +49,62 @@ async function getHomeData(semesterId: string | null, includeOrphans: boolean) {
         ? { OR: [{ semesterId }, { semesterId: null }] }
         : { semesterId };
 
-  const [stats, projects, notes, completed, people, teamComments, director] = await Promise.all([
-    prisma.situationStat.findMany({ orderBy: { order: "asc" } }),
-    prisma.project.findMany({
-      where: projectWhere,
-      orderBy: { sourceOrder: "asc" },
-      select: {
-        id: true,
-        title: true,
-        category: true,
-        priorityTag: true,
-        status: true,
-        isManual: true,
-        description: true,
-        tags: true,
-        checklistItems: {
-          orderBy: { order: "asc" },
-          select: { done: true, order: true, text: true, assigneeId: true, assignee: true },
+  const [stats, projects, notes, completed, people, roster, teamComments, director, areaProfile] =
+    await Promise.all([
+      prisma.situationStat.findMany({ orderBy: { order: "asc" } }),
+      prisma.project.findMany({
+        where: projectWhere,
+        orderBy: { sourceOrder: "asc" },
+        select: {
+          id: true,
+          title: true,
+          category: true,
+          priorityTag: true,
+          status: true,
+          isManual: true,
+          description: true,
+          tags: true,
+          checklistItems: {
+            orderBy: { order: "asc" },
+            select: { done: true, order: true, text: true, assigneeId: true, assignee: true },
+          },
         },
-      },
-    }),
-    prisma.projectNote.findMany({
-      orderBy: { createdAt: "desc" },
-      take: 20,
-      include: {
-        project: { select: { id: true, title: true } },
-        checklistItem: { select: { text: true, done: true } },
-      },
-    }),
-    prisma.checklistItem.findMany({
-      where: { done: true },
-      orderBy: { updatedAt: "desc" },
-      take: 20,
-      select: { id: true, text: true, updatedAt: true, project: { select: { id: true, title: true } } },
-    }),
-    prisma.user.findMany({
-      where: { active: true },
-      orderBy: { name: "asc" },
-      select: { id: true, name: true, role: true, color: true },
-    }),
-    prisma.teamComment.findMany({
-      orderBy: { createdAt: "desc" },
-      take: 60,
-      select: { id: true, body: true, author: true, authorRole: true, reviewed: true, createdAt: true },
-    }),
-    prisma.user.findFirst({
-      where: { credentialKey: { not: null } },
-      select: { name: true, lastSeenAt: true },
-    }),
-  ]);
+      }),
+      prisma.projectNote.findMany({
+        orderBy: { createdAt: "desc" },
+        take: 20,
+        include: {
+          project: { select: { id: true, title: true } },
+          checklistItem: { select: { text: true, done: true } },
+        },
+      }),
+      prisma.checklistItem.findMany({
+        where: { done: true },
+        orderBy: { updatedAt: "desc" },
+        take: 20,
+        select: { id: true, text: true, updatedAt: true, project: { select: { id: true, title: true } } },
+      }),
+      prisma.user.findMany({
+        where: { active: true },
+        orderBy: { name: "asc" },
+        select: { id: true, name: true, role: true, color: true },
+      }),
+      prisma.user.findMany({
+        where: { active: true, role: { in: ["MASTER", "JUNIOR_ARTES", "JUNIOR_AUXILIAR"] } },
+        orderBy: { name: "asc" },
+        select: { id: true, name: true, role: true, photoUrl: true, linkedinUrl: true },
+      }),
+      prisma.teamComment.findMany({
+        orderBy: { createdAt: "desc" },
+        take: 60,
+        select: { id: true, body: true, author: true, authorRole: true, reviewed: true, createdAt: true },
+      }),
+      prisma.user.findFirst({
+        where: { credentialKey: { not: null } },
+        select: { name: true, lastSeenAt: true },
+      }),
+      prisma.areaProfile.findUnique({ where: { id: "area" } }),
+    ]);
 
   const peopleById = new Map(people.map((u) => [u.id, u]));
 
@@ -166,27 +176,39 @@ async function getHomeData(semesterId: string | null, includeOrphans: boolean) {
 
   // El filtro "por responsable" del buscador solo lista al máster y a los juniors
   // (quienes ejecutan las subtareas), no a coordinación/dirección.
-  const FILTER_ROLES = new Set(["MASTER", "JUNIOR_ARTES", "JUNIOR_AUXILIAR"]);
+  const FILTER_ROLES = new Set(ROSTER_ROLES);
   const filterPeople = people.filter((p) => FILTER_ROLES.has(p.role));
+
+  const rosterMembers: RosterMember[] = [...roster].sort(
+    (a, b) => ROSTER_ROLES.indexOf(a.role) - ROSTER_ROLES.indexOf(b.role) || a.name.localeCompare(b.name, "es"),
+  );
 
   const commentAuthors = people.map((p) => ({ id: p.id, name: p.name, role: p.role }));
   const comments: TeamCommentData[] = teamComments;
+  const profile: AreaProfileData | null = areaProfile
+    ? { description: areaProfile.description, objectives: areaProfile.objectives }
+    : null;
 
-  return { stats, projectCards, feedItems, filterPeople, comments, commentAuthors, director };
+  return { stats, projectCards, feedItems, filterPeople, rosterMembers, comments, commentAuthors, director, profile };
 }
 
 export default async function HomePage({ searchParams }: { searchParams: { sem?: string } }) {
   const { tabs, selected, isSelectedCurrent } = await getSemesters(searchParams.sem);
-  const { stats, projectCards, feedItems, filterPeople, comments, commentAuthors, director } = await getHomeData(
-    selected?.id ?? null,
-    isSelectedCurrent,
-  );
+  const {
+    stats,
+    projectCards,
+    feedItems,
+    filterPeople,
+    rosterMembers,
+    comments,
+    commentAuthors,
+    director,
+    profile,
+  } = await getHomeData(selected?.id ?? null, isSelectedCurrent);
 
   return (
     <div className="flex flex-col gap-8">
-      <AreaOverview
-        semester={selected ? { id: selected.id, label: selected.label, objectives: selected.objectives } : null}
-      />
+      <AreaOverview profile={profile} />
 
       {director && (
         <p className="-mt-4 text-xs text-muted-foreground">
@@ -205,13 +227,17 @@ export default async function HomePage({ searchParams }: { searchParams: { sem?:
         <SituationStrip stats={stats} />
       </section>
 
-      <section className="flex flex-col gap-3">
-        <SemesterTabs semesters={tabs} selectedId={selected?.id ?? ""} />
-      </section>
-
       <section className="grid grid-cols-1 gap-8 lg:grid-cols-[2fr_1fr]">
-        <div className="flex flex-col gap-3">
-          <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-col gap-4">
+          <SemesterTabs semesters={tabs} selectedId={selected?.id ?? ""} />
+
+          <SemesterObjectives
+            semester={selected ? { id: selected.id, label: selected.label, objectives: selected.objectives } : null}
+          />
+
+          <TeamRoster people={rosterMembers} />
+
+          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-4">
             <h2 className="flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
               Proyectos {selected ? `${selected.label} ` : ""}({projectCards.length})
               <InfoHint text="Una tarjeta por iniciativa del semestre seleccionado (pestañas de arriba). Cómo se usa: busca por texto o filtra por responsable; el progreso cuenta subtareas hechas y los puntos de color son las personas con subtareas. Con perfil completo, «Nuevo proyecto» lo crea en el semestre visible. Ejemplo: escribe «hackatón» para ver solo ese proyecto." />
