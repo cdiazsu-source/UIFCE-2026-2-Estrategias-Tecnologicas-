@@ -10,7 +10,7 @@ import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useCanEdit } from "@/components/access-context";
 
-export function NewProjectButton() {
+export function NewProjectButton({ semesterId, semesterLabel }: { semesterId?: string; semesterLabel?: string }) {
   const canEdit = useCanEdit();
   const [open, setOpen] = useState(false);
 
@@ -30,6 +30,12 @@ export function NewProjectButton() {
       action={createProject}
       className="flex w-full flex-col gap-2 rounded-md border border-dashed border-input bg-card p-4"
     >
+      {semesterId && <input type="hidden" name="semesterId" value={semesterId} />}
+      {semesterLabel && (
+        <p className="text-xs text-muted-foreground">
+          Se crea en el semestre <span className="font-medium text-foreground">{semesterLabel}</span>.
+        </p>
+      )}
       <div className="flex flex-wrap gap-2">
         <Input name="title" placeholder="Título del proyecto" required className="min-w-[16rem] flex-1" />
         <Input name="category" placeholder="Categoría (ej. Producción de contenido)" required className="min-w-[14rem] flex-1" />

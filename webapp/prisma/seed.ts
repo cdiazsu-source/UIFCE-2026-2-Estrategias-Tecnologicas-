@@ -40,9 +40,42 @@ function splitDeliverables(raw: string): string[] {
 // toca su checklist.
 const CHECKLIST_OWNED_ELSEWHERE = new Set(["cursoslibres-piezas-primer-lanzamiento"]);
 
+// --- Semestres -----------------------------------------------------------
+// Los proyectos del CSV pertenecen a este semestre. El próximo semestre se
+// crea desde la app (no toca el CSV).
+const CURRENT_SEMESTER_LABEL = "2026-2S";
+
+const OBJETIVOS_2026_2 = [
+  "Restablecer y consolidar la presencia en los canales oficiales: recuperar o recrear Instagram, priorizar LinkedIn, poner en marcha TikTok y cerrar la oficialización de YouTube.",
+  "Sostener una producción de contenido constante y con estándar de calidad, bajo un calendario editorial único y con licencias institucionales de diseño y edición.",
+  "Ejecutar la primera edición de la Semana UIFCE —Hackatón, microtaller y conferencia— y racionalizar los microtalleres priorizando la asistencia efectiva y la certificación de participación.",
+  "Formalizar la gobernanza y la memoria del área: Términos y Condiciones, repositorio documental permanente y propuesta de repositorio compartido a Gestión del Conocimiento.",
+  "Incorporar inteligencia artificial como palanca de eficiencia operativa, para sostener la calidad sin aumentar la carga del equipo.",
+  "Garantizar el acompañamiento a las demás áreas de la UIFCE con niveles de servicio (SLA) definidos y un canal único de solicitudes.",
+];
+
+/** Crea el semestre vigente si no existe y le pone los objetivos base solo si
+ *  todavía no tiene ninguno (no pisa lo que edite el equipo). Devuelve su id. */
+async function ensureCurrentSemester(): Promise<string> {
+  const existing = await prisma.semester.findUnique({ where: { label: CURRENT_SEMESTER_LABEL } });
+  if (existing) {
+    if (existing.objectives.length === 0) {
+      await prisma.semester.update({ where: { id: existing.id }, data: { objectives: OBJETIVOS_2026_2 } });
+    }
+    return existing.id;
+  }
+  const created = await prisma.semester.create({
+    data: { label: CURRENT_SEMESTER_LABEL, objectives: OBJETIVOS_2026_2, isCurrent: true, order: 0 },
+  });
+  console.log(`Semestre creado: ${CURRENT_SEMESTER_LABEL}`);
+  return created.id;
+}
+
 async function seedProjectsFromCsv() {
   const csvText = fs.readFileSync(CSV_PATH, "utf-8");
   const rows: CsvRow[] = parse(csvText, { columns: true, skip_empty_lines: true });
+
+  const semesterId = await ensureCurrentSemester();
 
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i];
@@ -63,11 +96,11 @@ async function seedProjectsFromCsv() {
     };
 
     // Si alguien editó el contenido en la app, el resync solo mantiene el
-    // orden del CSV y respeta el texto editado.
+    // orden del CSV y respeta el texto editado. El semestre solo se fija al crear.
     const project = await prisma.project.upsert({
       where: { id: row.ID },
       update: existingProject?.editedInApp ? { sourceOrder: i } : { ...csvContent, sourceOrder: i },
-      create: { id: row.ID, ...csvContent, sourceOrder: i },
+      create: { id: row.ID, ...csvContent, sourceOrder: i, semesterId },
     });
 
     if (CHECKLIST_OWNED_ELSEWHERE.has(project.id)) continue;
@@ -783,6 +816,14 @@ async function main() {
   await seedSocialChannels();
   await reconcileInstagramNewAccount();
   await seedTemplates();
+
+  // Cualquier proyecto sin semestre (creados antes de esta función) al vigente.
+  const semesterId = await ensureCurrentSemester();
+  const orphans = await prisma.project.updateMany({
+    where: { semesterId: null },
+    data: { semesterId },
+  });
+  if (orphans.count > 0) console.log(`Proyectos asignados a ${CURRENT_SEMESTER_LABEL}: ${orphans.count}`);
 }
 
 main()

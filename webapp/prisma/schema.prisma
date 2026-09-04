@@ -67,6 +67,24 @@ enum SocialOfficialStatus {
   SIN_OFICIALIZAR
 }
 
+/// Semestre de planeación. Los proyectos se agrupan por semestre; los
+/// objetivos del área también viven aquí. Uno está marcado como el vigente.
+model Semester {
+  id         String   @id @default(cuid())
+  /// Etiqueta visible, ej. "2026-2S".
+  label      String   @unique
+  /// Objetivos del área para ese semestre (uno por elemento).
+  objectives String[] @default([])
+  /// true = semestre vigente (el que se muestra por defecto). Solo uno.
+  isCurrent  Boolean  @default(false)
+  order      Int      @default(0)
+
+  projects Project[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 /// Una iniciativa de planeacion_del_area.csv. El id coincide con la
 /// columna ID del CSV (slug estable, ver src/build_planeacion_2026_2_v2.py).
 /// Los campos de contenido (title/description/expectedOutcome/rationale) se
@@ -83,6 +101,9 @@ model Project {
   driveFolderUrl  String?
   /// Etiquetas libres del proyecto, editables desde la app.
   tags            String[]      @default([])
+  /// Semestre al que pertenece. El resync desde el CSV solo lo fija al crear.
+  semesterId      String?
+  semester        Semester?     @relation(fields: [semesterId], references: [id], onDelete: SetNull)
   /// Orden de la fila en el CSV, para mantener el orden original en la UI.
   /// Los proyectos creados a mano toman sourceOrder >= 1000 (ver
   /// src/lib/actions/projects.ts) para no chocar con el índice del CSV.
@@ -101,6 +122,8 @@ model Project {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([semesterId])
 }
 
 /// Subtarea del checklist de un proyecto. Se siembra una sola vez desde las

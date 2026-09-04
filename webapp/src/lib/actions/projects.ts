@@ -36,6 +36,12 @@ export async function createProject(formData: FormData) {
   const expectedOutcome = String(formData.get("expectedOutcome") ?? "").trim();
   const rationale = String(formData.get("rationale") ?? "").trim();
 
+  // Semestre: el que se eligió, si no el vigente.
+  const rawSemesterId = String(formData.get("semesterId") ?? "").trim();
+  const semester = rawSemesterId
+    ? await prisma.semester.findUnique({ where: { id: rawSemesterId }, select: { id: true } })
+    : await prisma.semester.findFirst({ where: { isCurrent: true }, select: { id: true } });
+
   const base = slugify(title) || "proyecto";
   let id = base;
   for (let n = 2; await prisma.project.findUnique({ where: { id }, select: { id: true } }); n++) {
@@ -59,6 +65,7 @@ export async function createProject(formData: FormData) {
       rationale,
       isManual: true,
       sourceOrder,
+      semesterId: semester?.id ?? null,
     },
   });
 

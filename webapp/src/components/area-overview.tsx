@@ -1,23 +1,19 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { InfoHint } from "@/components/info-hint";
+import { SemesterObjectives } from "@/components/semester-objectives";
 
-const OBJETIVOS_2026_2 = [
-  "Restablecer y consolidar la presencia en los canales oficiales: recuperar o recrear Instagram, priorizar LinkedIn, poner en marcha TikTok y cerrar la oficialización de YouTube.",
-  "Sostener una producción de contenido constante y con estándar de calidad, bajo un calendario editorial único y con licencias institucionales de diseño y edición.",
-  "Ejecutar la primera edición de la Semana UIFCE —Hackatón, microtaller y conferencia— y racionalizar los microtalleres priorizando la asistencia efectiva y la certificación de participación.",
-  "Formalizar la gobernanza y la memoria del área: Términos y Condiciones, repositorio documental permanente y propuesta de repositorio compartido a Gestión del Conocimiento.",
-  "Incorporar inteligencia artificial como palanca de eficiencia operativa, para sostener la calidad sin aumentar la carga del equipo.",
-  "Garantizar el acompañamiento a las demás áreas de la UIFCE con niveles de servicio (SLA) definidos y un canal único de solicitudes.",
-];
-
-export function AreaOverview() {
+export function AreaOverview({
+  semester,
+}: {
+  semester: { id: string; label: string; objectives: string[] } | null;
+}) {
   return (
     <section>
       <Card>
         <CardHeader className="space-y-1">
           <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             El área
-            <InfoHint text="Ficha institucional del área: su mandato dentro de la UIFCE y los objetivos definidos para el semestre 2026-2 en la planeación de inicio de semestre." />
+            <InfoHint text="Ficha institucional del área: su mandato dentro de la UIFCE y los objetivos del semestre. Cómo se usa: los objetivos se editan con el lápiz (uno por línea) y son distintos por semestre — cambian con las pestañas de Proyectos." />
           </p>
           <CardTitle className="text-lg">Estrategias Tecnológicas — Unidad de Informática (UIFCE)</CardTitle>
         </CardHeader>
@@ -31,8 +27,8 @@ export function AreaOverview() {
             </p>
             <p>
               Su propósito es posicionar institucionalmente a la UIFCE ante la comunidad académica, los egresados y los
-              aliados, mediante contenido y experiencias de calidad. Durante el semestre 2026-2 opera bajo el principio
-              rector <span className="font-medium text-foreground">&ldquo;calidad sobre cantidad&rdquo;</span>.
+              aliados, mediante contenido y experiencias de calidad, bajo el principio rector{" "}
+              <span className="font-medium text-foreground">&ldquo;calidad sobre cantidad&rdquo;</span>.
             </p>
             <p className="text-muted-foreground">
               Modelo operativo: una máster responsable del área, con monitores de artes y auxiliares, y un esquema de
@@ -40,19 +36,7 @@ export function AreaOverview() {
             </p>
           </div>
 
-          <div className="flex flex-col gap-2">
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Objetivos 2026-2</p>
-            <ol className="flex flex-col gap-2 text-sm leading-snug">
-              {OBJETIVOS_2026_2.map((objetivo, i) => (
-                <li key={i} className="flex gap-2.5">
-                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
-                    {i + 1}
-                  </span>
-                  <span>{objetivo}</span>
-                </li>
-              ))}
-            </ol>
-          </div>
+          <SemesterObjectives semester={semester} />
         </CardContent>
       </Card>
     </section>

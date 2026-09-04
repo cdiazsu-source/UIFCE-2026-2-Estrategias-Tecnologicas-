@@ -3,6 +3,7 @@ import { AreaOverview } from "@/components/area-overview";
 import { SituationStrip } from "@/components/situation-strip";
 import { type ProjectCardData, type CardAssignee } from "@/components/project-card";
 import { ProjectsGrid } from "@/components/projects-grid";
+import { SemesterTabs, type SemesterTab } from "@/components/semester-tabs";
 import { UpdatesFeed, type FeedItem } from "@/components/updates-feed";
 import { TeamComments, type TeamCommentData } from "@/components/team-comments";
 import { InfoHint } from "@/components/info-hint";
@@ -11,10 +12,44 @@ import { formatDateTime } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
-async function getHomeData() {
+async function getSemesters(semParam: string | undefined) {
+  const [rows, counts] = await Promise.all([
+    prisma.semester.findMany({ orderBy: { order: "asc" } }),
+    prisma.project.groupBy({ by: ["semesterId"], _count: { _all: true } }),
+  ]);
+
+  const countBy = new Map<string | null, number>();
+  for (const c of counts) countBy.set(c.semesterId, c._count._all);
+
+  const current = rows.find((s) => s.isCurrent) ?? rows[0] ?? null;
+  const orphanCount = countBy.get(null) ?? 0;
+
+  const tabs: SemesterTab[] = rows.map((s) => ({
+    id: s.id,
+    label: s.label,
+    isCurrent: s.isCurrent,
+    // Los proyectos sin semestre se cuentan/muestran junto al vigente.
+    projectCount: (countBy.get(s.id) ?? 0) + (current && s.id === current.id ? orphanCount : 0),
+  }));
+
+  const selected =
+    (semParam ? rows.find((s) => s.label === semParam) : null) ?? current;
+
+  return { rows, tabs, selected, isSelectedCurrent: !!(selected && current && selected.id === current.id) };
+}
+
+async function getHomeData(semesterId: string | null, includeOrphans: boolean) {
+  const projectWhere =
+    semesterId == null
+      ? {}
+      : includeOrphans
+        ? { OR: [{ semesterId }, { semesterId: null }] }
+        : { semesterId };
+
   const [stats, projects, notes, completed, people, teamComments, director] = await Promise.all([
     prisma.situationStat.findMany({ orderBy: { order: "asc" } }),
     prisma.project.findMany({
+      where: projectWhere,
       orderBy: { sourceOrder: "asc" },
       select: {
         id: true,
@@ -140,13 +175,18 @@ async function getHomeData() {
   return { stats, projectCards, feedItems, filterPeople, comments, commentAuthors, director };
 }
 
-export default async function HomePage() {
-  const { stats, projectCards, feedItems, filterPeople, comments, commentAuthors, director } =
-    await getHomeData();
+export default async function HomePage({ searchParams }: { searchParams: { sem?: string } }) {
+  const { tabs, selected, isSelectedCurrent } = await getSemesters(searchParams.sem);
+  const { stats, projectCards, feedItems, filterPeople, comments, commentAuthors, director } = await getHomeData(
+    selected?.id ?? null,
+    isSelectedCurrent,
+  );
 
   return (
     <div className="flex flex-col gap-8">
-      <AreaOverview />
+      <AreaOverview
+        semester={selected ? { id: selected.id, label: selected.label, objectives: selected.objectives } : null}
+      />
 
       {director && (
         <p className="-mt-4 text-xs text-muted-foreground">
@@ -160,28 +200,38 @@ export default async function HomePage() {
       <section className="flex flex-col gap-3">
         <h1 className="flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
           Situación actual
-          <InfoHint text="Foto fija de cómo llega el área al semestre: canales en riesgo o activos, el principio rector, y cuántas alertas críticas hay abiertas. Se edita a mano con el lápiz de cada tarjeta, no se calcula solo — actualízala cuando algo importante cambie." />
+          <InfoHint text="Foto fija de cómo llega el área al semestre: canales en riesgo o activos, el principio rector y las alertas críticas abiertas. No se calcula solo. Cómo se usa: con perfil completo, pasa el cursor por una tarjeta y usa el lápiz para editar etiqueta y valor. Ejemplo: «Canal en riesgo → Instagram (cuenta nueva en consolidación)»." />
         </h1>
         <SituationStrip stats={stats} />
+      </section>
+
+      <section className="flex flex-col gap-3">
+        <SemesterTabs semesters={tabs} selectedId={selected?.id ?? ""} />
       </section>
 
       <section className="grid grid-cols-1 gap-8 lg:grid-cols-[2fr_1fr]">
         <div className="flex flex-col gap-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h2 className="flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-              Proyectos ({projectCards.length})
-              <InfoHint text="Una tarjeta por cada iniciativa de la planeación del semestre. Busca por texto o filtra por responsable. La barra de progreso cuenta subtareas hechas; los puntos de color son las personas con subtareas en el proyecto." />
+              Proyectos {selected ? `${selected.label} ` : ""}({projectCards.length})
+              <InfoHint text="Una tarjeta por iniciativa del semestre seleccionado (pestañas de arriba). Cómo se usa: busca por texto o filtra por responsable; el progreso cuenta subtareas hechas y los puntos de color son las personas con subtareas. Con perfil completo, «Nuevo proyecto» lo crea en el semestre visible. Ejemplo: escribe «hackatón» para ver solo ese proyecto." />
             </h2>
-            <NewProjectButton />
+            <NewProjectButton semesterId={selected?.id} semesterLabel={selected?.label} />
           </div>
-          <ProjectsGrid projects={projectCards} people={filterPeople} />
+          {projectCards.length === 0 ? (
+            <p className="rounded-md border border-dashed border-input p-6 text-center text-sm text-muted-foreground">
+              {selected ? `El semestre ${selected.label} todavía no tiene proyectos.` : "No hay proyectos."}
+            </p>
+          ) : (
+            <ProjectsGrid projects={projectCards} people={filterPeople} />
+          )}
         </div>
 
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-3">
             <h2 className="flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
               Actividad
-              <InfoHint text="Lo más reciente de todos los proyectos, junto y en orden cronológico: notas de bitácora y subtareas que se marcan como hechas. Bajo una subtarea completada, titilando, aparece la que sigue en ese proyecto. El texto largo se recorta; clic en cualquier entrada abre el proyecto." />
+              <InfoHint text="Lo más reciente de todos los proyectos, en orden cronológico: notas de bitácora y subtareas marcadas como hechas. Bajo una subtarea completada, titilando, aparece la que sigue. El texto largo se recorta; clic en una entrada abre el proyecto. Se alimenta de lo que el equipo escribe en la bitácora de cada proyecto." />
             </h2>
             <UpdatesFeed items={feedItems} />
           </div>
