@@ -175,11 +175,6 @@ async function getHomeData(semesterId: string | null, includeOrphans: boolean) {
     .sort((a, b) => b.at.getTime() - a.at.getTime())
     .slice(0, 18);
 
-  // El filtro "por responsable" del buscador solo lista al máster y a los juniors
-  // (quienes ejecutan las subtareas), no a coordinación/dirección.
-  const FILTER_ROLES = new Set(ROSTER_ROLES);
-  const filterPeople = people.filter((p) => FILTER_ROLES.has(p.role));
-
   const rosterMembers: RosterMember[] = [...roster].sort(
     (a, b) => ROSTER_ROLES.indexOf(a.role) - ROSTER_ROLES.indexOf(b.role) || a.name.localeCompare(b.name, "es"),
   );
@@ -190,22 +185,13 @@ async function getHomeData(semesterId: string | null, includeOrphans: boolean) {
     ? { description: areaProfile.description, objectives: areaProfile.objectives }
     : null;
 
-  return { stats, projectCards, feedItems, filterPeople, rosterMembers, comments, commentAuthors, director, profile };
+  return { stats, projectCards, feedItems, rosterMembers, comments, commentAuthors, director, profile };
 }
 
 export default async function HomePage({ searchParams }: { searchParams: { sem?: string } }) {
   const { tabs, selected, isSelectedCurrent } = await getSemesters(searchParams.sem);
-  const {
-    stats,
-    projectCards,
-    feedItems,
-    filterPeople,
-    rosterMembers,
-    comments,
-    commentAuthors,
-    director,
-    profile,
-  } = await getHomeData(selected?.id ?? null, isSelectedCurrent);
+  const { stats, projectCards, feedItems, rosterMembers, comments, commentAuthors, director, profile } =
+    await getHomeData(selected?.id ?? null, isSelectedCurrent);
 
   return (
     <div className="flex flex-col gap-8">
@@ -241,7 +227,7 @@ export default async function HomePage({ searchParams }: { searchParams: { sem?:
           <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-4">
             <h2 className="flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
               Proyectos {selected ? `${selected.label} ` : ""}({projectCards.length})
-              <InfoHint text="Una tarjeta por iniciativa del semestre seleccionado (pestañas de arriba). Cómo se usa: busca por texto o filtra por responsable; el progreso cuenta subtareas hechas y los puntos de color son las personas con subtareas. Con perfil completo, «Nuevo proyecto» lo crea en el semestre visible. Ejemplo: escribe «hackatón» para ver solo ese proyecto." />
+              <InfoHint text="Una tarjeta por iniciativa del semestre seleccionado (pestañas de arriba). Cómo se usa: busca por texto o filtra por categoría (Redes y canales, Producción de contenido, Eventos…); el progreso cuenta subtareas hechas y los puntos de color son las personas con subtareas. Con perfil completo, «Nuevo proyecto» lo crea en el semestre visible. Ejemplo: elige «Eventos» para ver solo esos proyectos." />
             </h2>
             <NewProjectButton semesterId={selected?.id} semesterLabel={selected?.label} />
           </div>
@@ -250,7 +236,7 @@ export default async function HomePage({ searchParams }: { searchParams: { sem?:
               {selected ? `El semestre ${selected.label} todavía no tiene proyectos.` : "No hay proyectos."}
             </p>
           ) : (
-            <ProjectsGrid projects={projectCards} people={filterPeople} />
+            <ProjectsGrid projects={projectCards} />
           )}
         </div>
 

@@ -7,8 +7,6 @@ import { ProjectCard, type ProjectCardData } from "@/components/project-card";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 
-type Person = { id: string; name: string; color?: string | null };
-
 function norm(s: string) {
   return s
     .normalize("NFD")
@@ -16,22 +14,27 @@ function norm(s: string) {
     .toLowerCase();
 }
 
-export function ProjectsGrid({ projects, people }: { projects: ProjectCardData[]; people: Person[] }) {
+export function ProjectsGrid({ projects }: { projects: ProjectCardData[] }) {
   const [q, setQ] = useState("");
-  const [personId, setPersonId] = useState("");
+  const [category, setCategory] = useState("");
+
+  const categories = useMemo(
+    () => Array.from(new Set(projects.map((p) => p.category))).sort((a, b) => a.localeCompare(b, "es")),
+    [projects],
+  );
 
   const nq = norm(q.trim());
-  const filtering = nq.length > 0 || personId.length > 0;
+  const filtering = nq.length > 0 || category.length > 0;
 
   const filtered = useMemo(() => {
     return projects.filter((p) => {
       const matchesText =
         nq.length === 0 ||
         [p.title, p.category, p.priorityTag ?? "", p.description, ...p.tags].some((f) => norm(f).includes(nq));
-      const matchesPerson = personId.length === 0 || p.assignees.some((a) => a.id === personId);
-      return matchesText && matchesPerson;
+      const matchesCategory = category.length === 0 || p.category === category;
+      return matchesText && matchesCategory;
     });
-  }, [projects, nq, personId]);
+  }, [projects, nq, category]);
 
   return (
     <div className="flex flex-col gap-3">
@@ -47,15 +50,15 @@ export function ProjectsGrid({ projects, people }: { projects: ProjectCardData[]
           />
         </div>
         <Select
-          value={personId}
-          onChange={(e) => setPersonId(e.target.value)}
-          className="w-52"
-          aria-label="Filtrar por responsable"
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+          className="w-56"
+          aria-label="Filtrar por categoría"
         >
-          <option value="">Cualquier responsable</option>
-          {people.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.name}
+          <option value="">Todas las categorías</option>
+          {categories.map((c) => (
+            <option key={c} value={c}>
+              {c}
             </option>
           ))}
         </Select>
@@ -64,7 +67,7 @@ export function ProjectsGrid({ projects, people }: { projects: ProjectCardData[]
             type="button"
             onClick={() => {
               setQ("");
-              setPersonId("");
+              setCategory("");
             }}
             className="inline-flex items-center gap-1 rounded-md border border-input px-2.5 py-1.5 text-xs text-muted-foreground hover:bg-accent"
           >
