@@ -19,6 +19,7 @@ export default async function RedesPage() {
       include: {
         responsible: { select: { id: true, name: true } },
         project: { select: { id: true, title: true } },
+        interactions: { orderBy: { at: "desc" } },
       },
     }),
     prisma.user.findMany({
@@ -36,7 +37,7 @@ export default async function RedesPage() {
       handle: c.handle,
       url: c.url,
       status: c.status,
-      official: c.official,
+      officialStatus: c.officialStatus,
       followers: c.followers,
       cadence: c.cadence,
       lastPostAt: c.lastPostAt,
@@ -45,6 +46,16 @@ export default async function RedesPage() {
       notes: c.notes,
       responsible: c.responsible ? { id: c.responsible.id, name: c.responsible.name } : null,
       project: c.project ? { id: c.project.id, title: c.project.title } : null,
+      interactions: c.interactions.map((it) => ({
+        id: it.id,
+        at: it.at,
+        title: it.title,
+        detail: it.detail,
+        followers: it.followers,
+        reach: it.reach,
+        interactions: it.interactions,
+        url: it.url,
+      })),
     }));
 
   const activas = data.filter((c) => c.status === "ACTIVA").length;

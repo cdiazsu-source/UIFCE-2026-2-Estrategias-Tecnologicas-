@@ -60,6 +60,13 @@ enum SocialChannelStatus {
   PERDIDA
 }
 
+/// Estado de oficialización de una cuenta ante la Oficina de Medios Digitales UNAL.
+enum SocialOfficialStatus {
+  OFICIALIZADA
+  EN_TRAMITE
+  SIN_OFICIALIZAR
+}
+
 /// Una iniciativa de planeacion_del_area.csv. El id coincide con la
 /// columna ID del CSV (slug estable, ver src/build_planeacion_2026_2_v2.py).
 /// Los campos de contenido (title/description/expectedOutcome/rationale) se
@@ -276,8 +283,8 @@ model SocialChannel {
   /// Enlace al perfil.
   url           String?
   status        SocialChannelStatus @default(ACTIVA)
-  /// true = cuenta oficializada ante la Oficina de Medios Digitales de la UNAL.
-  official      Boolean             @default(false)
+  /// Estado de oficialización ante la Oficina de Medios Digitales de la UNAL.
+  officialStatus SocialOfficialStatus @default(SIN_OFICIALIZAR)
   /// Seguidores (se actualiza a mano; no se calcula).
   followers     Int?
   /// Cadencia objetivo de publicación, ej. "1 reel por semana".
@@ -295,11 +302,37 @@ model SocialChannel {
   project       Project?            @relation(fields: [projectId], references: [id], onDelete: SetNull)
   order         Int                 @default(0)
 
+  interactions  SocialInteraction[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([responsibleId])
   @@index([projectId])
+}
+
+/// Una interacción o hito relevante de una cuenta de redes, con fecha, para
+/// darle trazabilidad en el tiempo (publicación destacada, mención, salto de
+/// seguidores, cambio de estrategia…). Se agrega a mano y no se borra sola.
+model SocialInteraction {
+  id           String        @id @default(cuid())
+  channelId    String
+  channel      SocialChannel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  /// Fecha en que ocurrió (no necesariamente cuando se registró).
+  at           DateTime
+  /// Qué pasó, en una línea.
+  title        String
+  /// Detalle opcional.
+  detail       String?       @db.Text
+  /// Foto de números en esa fecha (opcionales, se llenan a mano).
+  followers    Int?
+  reach        Int?
+  interactions Int?
+  url          String?
+
+  createdAt DateTime @default(now())
+
+  @@index([channelId, at])
 }
 
 /// Proyecto de estudio de un monitor Junior. Cada Junior expone dos por semestre.

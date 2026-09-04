@@ -64,7 +64,7 @@ export type UndoAction =
         handle: string | null;
         url: string | null;
         status: string;
-        official: boolean;
+        officialStatus: string;
         followers: number | null;
         cadence: string | null;
         lastPostAt: string | null;
@@ -82,7 +82,7 @@ export type UndoAction =
         handle: string | null;
         url: string | null;
         status: string;
-        official: boolean;
+        officialStatus: string;
         followers: number | null;
         cadence: string | null;
         lastPostAt: string | null;
@@ -92,6 +92,33 @@ export type UndoAction =
         responsibleId: string | null;
         projectId: string | null;
         order: number;
+      };
+    }
+  | {
+      kind: "socialinteraction.update";
+      id: string;
+      before: {
+        at: string;
+        title: string;
+        detail: string | null;
+        followers: number | null;
+        reach: number | null;
+        interactions: number | null;
+        url: string | null;
+      };
+    }
+  | {
+      kind: "socialinteraction.delete";
+      data: {
+        id: string;
+        channelId: string;
+        at: string;
+        title: string;
+        detail: string | null;
+        followers: number | null;
+        reach: number | null;
+        interactions: number | null;
+        url: string | null;
       };
     }
   | {
@@ -145,6 +172,8 @@ export function undoLabel(kind: UndoAction["kind"]): string {
     "project.tags": "Etiquetas cambiadas",
     "social.update": "Cuenta editada",
     "social.delete": "Cuenta eliminada",
+    "socialinteraction.update": "Interacción editada",
+    "socialinteraction.delete": "Interacción eliminada",
     "template.update": "Plantilla editada",
     "template.delete": "Plantilla eliminada",
     "teamcomment.delete": "Comentario eliminado",

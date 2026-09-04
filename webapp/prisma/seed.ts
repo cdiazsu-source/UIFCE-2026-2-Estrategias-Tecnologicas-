@@ -538,7 +538,7 @@ async function seedSocialChannels() {
     handle: string | null;
     url: string | null;
     status: "ACTIVA" | "EN_RIESGO" | "EN_TRAMITE" | "INACTIVA" | "PERDIDA";
-    official: boolean;
+    officialStatus: "OFICIALIZADA" | "EN_TRAMITE" | "SIN_OFICIALIZAR";
     cadence: string | null;
     nextAction: string | null;
     notes: string | null;
@@ -546,15 +546,15 @@ async function seedSocialChannels() {
   }[] = [
     {
       platform: "INSTAGRAM",
-      handle: "@uifce_un",
-      url: "https://instagram.com/uifce_un",
-      status: "PERDIDA",
-      official: true,
+      handle: "@ui_fce",
+      url: "https://instagram.com/ui_fce",
+      status: "EN_TRAMITE",
+      officialStatus: "EN_TRAMITE",
       cadence: "1 reel por semana (referencia histórica)",
       nextAction:
-        "Agotar recuperación ante Meta con apoyo de Imagen Institucional; si no se logra en 2-3 semanas, crear cuenta nueva y tramitar oficialización.",
+        "Consolidar la cuenta nueva, migrar contenidos disponibles y tramitar la oficialización ante Medios Digitales UNAL.",
       notes:
-        "Canal principal de la UIFCE (25 reels, 83.649 visualizaciones el último semestre). Cuenta perdida: máxima prioridad 2026-2.",
+        "Cuenta anterior @uifce_un no se pudo recuperar. Cuenta nueva @ui_fce creada. Canal principal de la UIFCE (referencia: 25 reels, 83.649 visualizaciones el semestre pasado).",
       projectId: "redes-instagram",
     },
     {
@@ -562,7 +562,7 @@ async function seedSocialChannels() {
       handle: "UIFCE",
       url: "https://www.linkedin.com/company/uifce",
       status: "ACTIVA",
-      official: true,
+      officialStatus: "OFICIALIZADA",
       cadence: "Aumentar frecuencia frente a 2026-1 (7 publicaciones/sem)",
       nextAction: "Construir calendario editorial propio y decidir migración a cuenta empresa.",
       notes: "Canal prioritario del semestre. Oficializado en 2026-1.",
@@ -573,7 +573,7 @@ async function seedSocialChannels() {
       handle: null,
       url: null,
       status: "INACTIVA",
-      official: false,
+      officialStatus: "SIN_OFICIALIZAR",
       cadence: null,
       nextAction: "Definir si se abre cuenta institucional en X y con qué formato propio.",
       notes: "Sin cuenta activa todavía.",
@@ -584,7 +584,7 @@ async function seedSocialChannels() {
       handle: null,
       url: null,
       status: "EN_TRAMITE",
-      official: false,
+      officialStatus: "EN_TRAMITE",
       cadence: null,
       nextAction: "Crear y oficializar la cuenta; definir formato propio (no réplica de reels).",
       notes: "Cuenta nueva del semestre. Plataforma nativa del video corto.",
@@ -595,7 +595,7 @@ async function seedSocialChannels() {
       handle: null,
       url: null,
       status: "EN_TRAMITE",
-      official: false,
+      officialStatus: "EN_TRAMITE",
       cadence: null,
       nextAction: "Cerrar oficialización ante Medios Digitales UNAL y resolver titularidad de la cuenta.",
       notes: "Trámite en curso desde 2025-2. Aloja los videos de Virtualización.",
@@ -614,7 +614,7 @@ async function seedSocialChannels() {
         handle: c.handle,
         url: c.url,
         status: c.status,
-        official: c.official,
+        officialStatus: c.officialStatus,
         cadence: c.cadence,
         nextAction: c.nextAction,
         notes: c.notes,
@@ -624,6 +624,31 @@ async function seedSocialChannels() {
     });
   }
   console.log(`Cuentas de redes sociales sembradas: ${channels.length}`);
+}
+
+// La cuenta @uifce_un no se recuperó: se creó @ui_fce. Mueve la fila de
+// Instagram a la cuenta nueva SI todavía apunta a la vieja (no pisa ediciones
+// manuales a otra cosa). Corre siempre.
+async function reconcileInstagramNewAccount() {
+  const ig = await prisma.socialChannel.findUnique({ where: { platform: "INSTAGRAM" } });
+  if (!ig) return;
+  if (ig.handle === "@ui_fce") return;
+  if (ig.handle && ig.handle !== "@uifce_un") return;
+
+  await prisma.socialChannel.update({
+    where: { id: ig.id },
+    data: {
+      handle: "@ui_fce",
+      url: "https://instagram.com/ui_fce",
+      status: "EN_TRAMITE",
+      officialStatus: "EN_TRAMITE",
+      notes:
+        "Cuenta anterior @uifce_un no se pudo recuperar. Cuenta nueva @ui_fce creada. Canal principal de la UIFCE (referencia: 25 reels, 83.649 visualizaciones el semestre pasado).",
+      nextAction:
+        "Consolidar la cuenta nueva, migrar contenidos disponibles y tramitar la oficialización ante Medios Digitales UNAL.",
+    },
+  });
+  console.log("Instagram reconciliada a la cuenta nueva @ui_fce.");
 }
 
 // --- Plantillas -----------------------------------------------------------
@@ -756,6 +781,7 @@ async function main() {
   await seedBrandGuidelines();
   await seedCursosLibresChecklist();
   await seedSocialChannels();
+  await reconcileInstagramNewAccount();
   await seedTemplates();
 }
 

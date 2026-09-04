@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
-import type { SocialChannelStatus, SocialPlatform } from "@prisma/client";
+import type { SocialChannelStatus, SocialOfficialStatus, SocialPlatform } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
 import { blockedForJunior } from "@/lib/session";
@@ -93,7 +93,7 @@ export async function applyUndo(action: UndoAction) {
           handle: b.handle,
           url: b.url,
           status: b.status as SocialChannelStatus,
-          official: b.official,
+          officialStatus: b.officialStatus as SocialOfficialStatus,
           followers: b.followers,
           cadence: b.cadence,
           lastPostAt: b.lastPostAt ? new Date(b.lastPostAt) : null,
@@ -115,7 +115,7 @@ export async function applyUndo(action: UndoAction) {
           handle: d.handle,
           url: d.url,
           status: d.status as SocialChannelStatus,
-          official: d.official,
+          officialStatus: d.officialStatus as SocialOfficialStatus,
           followers: d.followers,
           cadence: d.cadence,
           lastPostAt: d.lastPostAt ? new Date(d.lastPostAt) : null,
@@ -125,6 +125,41 @@ export async function applyUndo(action: UndoAction) {
           responsibleId: d.responsibleId,
           projectId: d.projectId,
           order: d.order,
+        },
+      });
+      revalidatePath("/redes");
+      break;
+    }
+    case "socialinteraction.update": {
+      const b = action.before;
+      await prisma.socialInteraction.update({
+        where: { id: action.id },
+        data: {
+          at: new Date(b.at),
+          title: b.title,
+          detail: b.detail,
+          followers: b.followers,
+          reach: b.reach,
+          interactions: b.interactions,
+          url: b.url,
+        },
+      });
+      revalidatePath("/redes");
+      break;
+    }
+    case "socialinteraction.delete": {
+      const d = action.data;
+      await prisma.socialInteraction.create({
+        data: {
+          id: d.id,
+          channelId: d.channelId,
+          at: new Date(d.at),
+          title: d.title,
+          detail: d.detail,
+          followers: d.followers,
+          reach: d.reach,
+          interactions: d.interactions,
+          url: d.url,
         },
       });
       revalidatePath("/redes");
