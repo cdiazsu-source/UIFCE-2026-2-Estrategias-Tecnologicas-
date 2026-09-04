@@ -7,10 +7,10 @@ export function initials(name: string) {
     .join("");
 }
 
-/** Resuelve el valor de photoUrl: URL completa o ruta absoluta tal cual;
- *  un nombre de archivo suelto se busca en /public/avatares/. */
+/** Resuelve el valor de photoUrl: URL completa, data URL o ruta absoluta tal
+ *  cual; un nombre de archivo suelto se busca en /public/avatares/. */
 export function resolvePhoto(photoUrl: string) {
-  if (/^(https?:\/\/|\/)/.test(photoUrl)) return photoUrl;
+  if (/^(https?:\/\/|data:|\/)/.test(photoUrl)) return photoUrl;
   return `/avatares/${photoUrl}`;
 }
 

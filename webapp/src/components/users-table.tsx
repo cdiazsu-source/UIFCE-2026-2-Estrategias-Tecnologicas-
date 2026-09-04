@@ -11,6 +11,7 @@ import { Select } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { PersonAvatar } from "@/components/person-avatar";
+import { PhotoField } from "@/components/photo-field";
 import { USER_ROLE_LABEL, formatDateTime } from "@/lib/utils";
 import { useCanEdit } from "@/components/access-context";
 
@@ -48,12 +49,9 @@ function UserRow({ user }: { user: User }) {
             <Input name="email" type="email" defaultValue={user.email} placeholder="Correo" className="w-56" />
             <RoleSelect name="role" defaultValue={user.role} />
             <Input name="area" defaultValue={user.area ?? ""} placeholder="Área (ej. ET)" className="w-28" />
-            <Input
-              name="photoUrl"
-              defaultValue={user.photoUrl ?? ""}
-              placeholder="Foto: archivo en /avatares/ o URL"
-              className="w-56"
-            />
+            <div className="w-full sm:w-72">
+              <PhotoField name="photoUrl" defaultValue={user.photoUrl} personName={user.name} />
+            </div>
             <Input
               name="linkedinUrl"
               type="url"
@@ -176,7 +174,9 @@ export function UsersTable({ users }: { users: User[] }) {
           <Input name="email" type="email" placeholder="Correo" required className="w-56" />
           <RoleSelect name="role" />
           <Input name="area" placeholder="Área (ej. ET)" defaultValue="ET" className="w-28" />
-          <Input name="photoUrl" placeholder="Foto: archivo en /avatares/ o URL" className="w-56" />
+          <div className="w-full sm:w-72">
+            <PhotoField name="photoUrl" />
+          </div>
           <Input name="linkedinUrl" type="url" placeholder="LinkedIn (URL)" className="w-56" />
           <Button type="submit" size="sm">
             Agregar

@@ -3,10 +3,11 @@
 import { useState } from "react";
 import { Linkedin, Pencil } from "lucide-react";
 
-import { updateUserLinkedin } from "@/lib/actions/users";
+import { updateUserContact } from "@/lib/actions/users";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PersonAvatar } from "@/components/person-avatar";
+import { PhotoField } from "@/components/photo-field";
 import { InfoHint } from "@/components/info-hint";
 import { useCanEdit } from "@/components/access-context";
 import { USER_ROLE_LABEL } from "@/lib/utils";
@@ -28,27 +29,30 @@ function MemberCard({ member }: { member: RosterMember }) {
   if (editing) {
     return (
       <li className="rounded-md border border-border p-3">
-        <p className="mb-1.5 text-sm font-medium">{member.name}</p>
+        <p className="mb-2 text-sm font-medium">{member.name}</p>
         <form
           action={async (formData) => {
-            await updateUserLinkedin(member.id, formData);
+            await updateUserContact(member.id, formData);
             setEditing(false);
           }}
-          className="flex flex-wrap items-center gap-2"
+          className="flex flex-col gap-2"
         >
+          <PhotoField personName={member.name} defaultValue={member.photoUrl} />
           <Input
             name="linkedinUrl"
             type="url"
             defaultValue={member.linkedinUrl ?? ""}
-            placeholder="https://www.linkedin.com/in/…"
-            className="h-8 min-w-[14rem] flex-1 text-sm"
+            placeholder="LinkedIn: https://www.linkedin.com/in/…"
+            className="h-8 text-sm"
           />
-          <Button type="submit" size="sm">
-            Guardar
-          </Button>
-          <Button type="button" variant="ghost" size="sm" onClick={() => setEditing(false)}>
-            Cancelar
-          </Button>
+          <div className="flex gap-2">
+            <Button type="submit" size="sm">
+              Guardar
+            </Button>
+            <Button type="button" variant="ghost" size="sm" onClick={() => setEditing(false)}>
+              Cancelar
+            </Button>
+          </div>
         </form>
       </li>
     );
@@ -86,7 +90,7 @@ function MemberCard({ member }: { member: RosterMember }) {
           type="button"
           onClick={() => setEditing(true)}
           className="absolute right-2 top-2 rounded p-1 text-muted-foreground opacity-0 transition-opacity hover:bg-accent group-hover:opacity-100"
-          aria-label={`Editar LinkedIn de ${member.name}`}
+          aria-label={`Editar foto y LinkedIn de ${member.name}`}
         >
           <Pencil className="h-3.5 w-3.5" />
         </button>
@@ -102,7 +106,7 @@ export function TeamRoster({ people }: { people: RosterMember[] }) {
     <div className="flex flex-col gap-2">
       <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
         Integrantes
-        <InfoHint text="El equipo de ET que ejecuta los proyectos (máster y monitores). Cómo se usa: clic en una persona abre su LinkedIn; con perfil completo, el lápiz permite pegar o cambiar ese enlace. Ejemplo: «Cesar Diaz · Máster · linkedin.com/in/…»." />
+        <InfoHint text="El equipo de ET que ejecuta los proyectos (máster y monitores). Cómo se usa: clic en una persona abre su LinkedIn; con perfil completo, el lápiz permite subir o cambiar su foto (se comprime en el navegador) y pegar su enlace de LinkedIn. Ejemplo: «Cesar Diaz · Máster · linkedin.com/in/…»." />
       </p>
       <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {people.map((m) => (

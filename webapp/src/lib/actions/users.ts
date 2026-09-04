@@ -18,6 +18,14 @@ function optStr(fd: FormData, k: string): string | null {
   return v.length > 0 ? v : null;
 }
 
+/** photoUrl del formulario: URL, nombre de archivo de /avatares/, o data URL
+ *  (foto comprimida en el navegador). Descarta un data URL sin comprimir. */
+function photoFromForm(fd: FormData): string | null {
+  const v = optStr(fd, "photoUrl");
+  if (v && v.startsWith("data:") && v.length > 400_000) return null;
+  return v;
+}
+
 export async function addUser(formData: FormData) {
   if (await blockedForJunior()) return;
   const name = String(formData.get("name") ?? "").trim();
@@ -33,7 +41,7 @@ export async function addUser(formData: FormData) {
       email,
       role,
       area: area.length > 0 ? area : null,
-      photoUrl: optStr(formData, "photoUrl"),
+      photoUrl: photoFromForm(formData),
       linkedinUrl: optStr(formData, "linkedinUrl"),
       active: formData.get("active") !== "false",
     },
@@ -58,7 +66,7 @@ export async function updateUser(id: string, formData: FormData) {
       ...(email.length > 0 ? { email } : {}),
       role,
       area: area.length > 0 ? area : null,
-      photoUrl: optStr(formData, "photoUrl"),
+      photoUrl: photoFromForm(formData),
       linkedinUrl: optStr(formData, "linkedinUrl"),
       active: formData.get("active") !== "false",
     },
@@ -69,12 +77,18 @@ export async function updateUser(id: string, formData: FormData) {
   revalidatePath("/");
 }
 
-/** Solo el enlace de LinkedIn personal (desde el roster del panel principal). */
-export async function updateUserLinkedin(id: string, formData: FormData) {
+/** Foto y LinkedIn de una persona (desde el roster del panel principal).
+ *  photoUrl acepta una URL, un nombre de archivo de /avatares/, o un data URL
+ *  (foto subida y comprimida en el navegador). */
+export async function updateUserContact(id: string, formData: FormData) {
   if (await blockedForJunior()) return;
-  await prisma.user.update({ where: { id }, data: { linkedinUrl: optStr(formData, "linkedinUrl") } });
+  await prisma.user.update({
+    where: { id },
+    data: { photoUrl: photoFromForm(formData), linkedinUrl: optStr(formData, "linkedinUrl") },
+  });
   revalidatePath("/");
   revalidatePath("/equipo");
+  revalidatePath("/proyectos-de-estudio");
 }
 
 export async function deleteUser(id: string) {
