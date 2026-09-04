@@ -9,12 +9,12 @@ export async function login(formData: FormData) {
   const username = String(formData.get("username") ?? "");
   const password = String(formData.get("password") ?? "");
 
-  const level = checkCredentials(username, password);
-  if (!level) {
+  const cred = checkCredentials(username, password);
+  if (!cred) {
     redirect("/login?error=1");
   }
 
-  cookies().set(SESSION_COOKIE, await signToken(level), {
+  cookies().set(SESSION_COOKIE, await signToken(cred.level, cred.who), {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",

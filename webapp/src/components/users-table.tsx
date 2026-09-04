@@ -11,7 +11,7 @@ import { Select } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { PersonAvatar } from "@/components/person-avatar";
-import { USER_ROLE_LABEL } from "@/lib/utils";
+import { USER_ROLE_LABEL, formatDateTime } from "@/lib/utils";
 import { useCanEdit } from "@/components/access-context";
 
 const ROLE_OPTIONS: UserRole[] = ["MASTER", "JUNIOR_ARTES", "JUNIOR_AUXILIAR", "COORDINADOR", "DIRECTOR", "EQUIPO"];
@@ -75,7 +75,15 @@ function UserRow({ user }: { user: User }) {
       <TableCell className="font-medium">
         <div className="flex items-center gap-2.5">
           <PersonAvatar name={user.name} photoUrl={user.photoUrl} />
-          <span>{user.name}</span>
+          <div className="flex flex-col">
+            <span>{user.name}</span>
+            {user.credentialKey && (
+              <span className="text-xs font-normal text-muted-foreground">
+                Acceso propio · última visita:{" "}
+                {user.lastSeenAt ? formatDateTime(user.lastSeenAt) : "sin registro"}
+              </span>
+            )}
+          </div>
         </div>
       </TableCell>
       <TableCell className="text-muted-foreground">

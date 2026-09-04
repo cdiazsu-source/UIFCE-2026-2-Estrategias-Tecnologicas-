@@ -4,13 +4,15 @@ import { SituationStrip } from "@/components/situation-strip";
 import { type ProjectCardData, type CardAssignee } from "@/components/project-card";
 import { ProjectsGrid } from "@/components/projects-grid";
 import { UpdatesFeed, type FeedItem } from "@/components/updates-feed";
+import { TeamComments, type TeamCommentData } from "@/components/team-comments";
 import { InfoHint } from "@/components/info-hint";
 import { NewProjectButton } from "@/components/new-project-button";
+import { formatDateTime } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
 async function getHomeData() {
-  const [stats, projects, notes, completed, people] = await Promise.all([
+  const [stats, projects, notes, completed, people, teamComments, director] = await Promise.all([
     prisma.situationStat.findMany({ orderBy: { order: "asc" } }),
     prisma.project.findMany({
       orderBy: { sourceOrder: "asc" },
@@ -47,6 +49,15 @@ async function getHomeData() {
       where: { active: true },
       orderBy: { name: "asc" },
       select: { id: true, name: true, role: true, color: true },
+    }),
+    prisma.teamComment.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 60,
+      select: { id: true, body: true, author: true, authorRole: true, reviewed: true, createdAt: true },
+    }),
+    prisma.user.findFirst({
+      where: { credentialKey: { not: null } },
+      select: { name: true, lastSeenAt: true },
     }),
   ]);
 
@@ -123,15 +134,28 @@ async function getHomeData() {
   const FILTER_ROLES = new Set(["MASTER", "JUNIOR_ARTES", "JUNIOR_AUXILIAR"]);
   const filterPeople = people.filter((p) => FILTER_ROLES.has(p.role));
 
-  return { stats, projectCards, feedItems, filterPeople };
+  const commentAuthors = people.map((p) => ({ id: p.id, name: p.name, role: p.role }));
+  const comments: TeamCommentData[] = teamComments;
+
+  return { stats, projectCards, feedItems, filterPeople, comments, commentAuthors, director };
 }
 
 export default async function HomePage() {
-  const { stats, projectCards, feedItems, filterPeople } = await getHomeData();
+  const { stats, projectCards, feedItems, filterPeople, comments, commentAuthors, director } =
+    await getHomeData();
 
   return (
     <div className="flex flex-col gap-8">
       <AreaOverview />
+
+      {director && (
+        <p className="-mt-4 text-xs text-muted-foreground">
+          Último acceso del director ({director.name}):{" "}
+          <span className="font-medium text-foreground">
+            {director.lastSeenAt ? formatDateTime(director.lastSeenAt) : "sin registro todavía"}
+          </span>
+        </p>
+      )}
 
       <section className="flex flex-col gap-3">
         <h1 className="flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
@@ -153,12 +177,16 @@ export default async function HomePage() {
           <ProjectsGrid projects={projectCards} people={filterPeople} />
         </div>
 
-        <div className="flex flex-col gap-3">
-          <h2 className="flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-            Actividad
-            <InfoHint text="Lo más reciente de todos los proyectos, junto y en orden cronológico: notas de bitácora y subtareas que se marcan como hechas. Bajo una subtarea completada, titilando, aparece la que sigue en ese proyecto. El texto largo se recorta; clic en cualquier entrada abre el proyecto." />
-          </h2>
-          <UpdatesFeed items={feedItems} />
+        <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-3">
+            <h2 className="flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+              Actividad
+              <InfoHint text="Lo más reciente de todos los proyectos, junto y en orden cronológico: notas de bitácora y subtareas que se marcan como hechas. Bajo una subtarea completada, titilando, aparece la que sigue en ese proyecto. El texto largo se recorta; clic en cualquier entrada abre el proyecto." />
+            </h2>
+            <UpdatesFeed items={feedItems} />
+          </div>
+
+          <TeamComments comments={comments} authors={commentAuthors} />
         </div>
       </section>
     </div>

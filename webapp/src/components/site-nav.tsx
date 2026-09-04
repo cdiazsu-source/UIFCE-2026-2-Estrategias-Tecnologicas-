@@ -10,6 +10,7 @@ import { logout } from "@/lib/actions/auth";
 const LINKS = [
   { href: "/", label: "Panel principal" },
   { href: "/redes", label: "Redes sociales" },
+  { href: "/plantillas", label: "Plantillas" },
   { href: "/proyectos-de-estudio", label: "Proyectos de estudio" },
   { href: "/linea-grafica", label: "Línea gráfica" },
   { href: "/herramientas", label: "Herramientas y licencias" },

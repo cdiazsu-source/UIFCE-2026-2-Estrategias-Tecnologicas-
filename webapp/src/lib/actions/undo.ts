@@ -130,6 +130,37 @@ export async function applyUndo(action: UndoAction) {
       revalidatePath("/redes");
       break;
     }
+    case "template.update": {
+      await prisma.template.update({ where: { id: action.id }, data: action.before });
+      revalidatePath("/plantillas");
+      break;
+    }
+    case "template.delete": {
+      await prisma.template.create({ data: action.data });
+      revalidatePath("/plantillas");
+      break;
+    }
+    case "teamcomment.delete": {
+      const d = action.data;
+      await prisma.teamComment.create({
+        data: {
+          id: d.id,
+          body: d.body,
+          author: d.author,
+          authorRole: d.authorRole,
+          authorId: d.authorId,
+          reviewed: d.reviewed,
+          createdAt: new Date(d.createdAt),
+        },
+      });
+      revalidatePath("/");
+      break;
+    }
+    case "teamcomment.reviewed": {
+      await prisma.teamComment.update({ where: { id: action.id }, data: { reviewed: action.before } });
+      revalidatePath("/");
+      break;
+    }
   }
 
   revalidatePath("/");

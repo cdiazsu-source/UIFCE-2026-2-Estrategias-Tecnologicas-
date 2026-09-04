@@ -185,15 +185,30 @@ async function seedContacts() {
 // esta lista como fuente de verdad; NO toca color, foto ni estado activo (eso se
 // edita desde /equipo). Los "@example.com" son marcadores hasta tener el correo
 // real. Cada quien lleva un color de acento.
-const SEED_USERS = [
-  { name: "Cesar Diaz", email: "cdiazsu@unal.edu.co", role: "MASTER" as const, area: "ET", color: "#2563EB" },
-  { name: "Maria Fernanda Celis", email: "mafe@example.com", role: "JUNIOR_ARTES" as const, area: "ET", color: "#DB2777" },
-  { name: "Jean Carlos Baquero", email: "jean@example.com", role: "JUNIOR_AUXILIAR" as const, area: "ET", color: "#0D9488" },
-  { name: "Estrategias Tecnológicas (ET)", email: "et@example.com", role: "EQUIPO" as const, area: "ET", color: "#4A7729" },
-  { name: "Lina Sanabria", email: "lina.sanabria@example.com", role: "COORDINADOR" as const, area: null, color: "#7C3AED" },
-  { name: "Santiago Parra", email: "santiago.parra@example.com", role: "COORDINADOR" as const, area: null, color: "#EA580C" },
-  { name: "Daniel Moreno", email: "daniel.moreno@example.com", role: "COORDINADOR" as const, area: null, color: "#C026D3" },
-  { name: "Henry", email: "henry@example.com", role: "DIRECTOR" as const, area: null, color: "#4F46E5" },
+const SEED_USERS: {
+  name: string;
+  email: string;
+  role: "MASTER" | "JUNIOR_ARTES" | "JUNIOR_AUXILIAR" | "EQUIPO" | "COORDINADOR" | "DIRECTOR";
+  area: string | null;
+  color: string;
+  credentialKey?: string;
+}[] = [
+  { name: "Cesar Diaz", email: "cdiazsu@unal.edu.co", role: "MASTER", area: "ET", color: "#2563EB" },
+  { name: "Maria Fernanda Celis", email: "mafe@example.com", role: "JUNIOR_ARTES", area: "ET", color: "#DB2777" },
+  { name: "Jean Carlos Baquero", email: "jean@example.com", role: "JUNIOR_AUXILIAR", area: "ET", color: "#0D9488" },
+  { name: "Estrategias Tecnológicas (ET)", email: "et@example.com", role: "EQUIPO", area: "ET", color: "#4A7729" },
+  { name: "Lina Sanabria", email: "lina.sanabria@example.com", role: "COORDINADOR", area: null, color: "#7C3AED" },
+  { name: "Santiago Parra", email: "santiago.parra@example.com", role: "COORDINADOR", area: null, color: "#EA580C" },
+  { name: "Daniel Moreno", email: "daniel.moreno@example.com", role: "COORDINADOR", area: null, color: "#C026D3" },
+  {
+    name: "Henry Sarmiento",
+    email: "henry@example.com",
+    role: "DIRECTOR",
+    area: null,
+    color: "#4F46E5",
+    // Casa con DIRECTOR_WHO en src/lib/auth.ts: habilita el registro de última visita.
+    credentialKey: "henry-sarmiento",
+  },
 ];
 
 function foldName(s: string): string {
@@ -208,7 +223,12 @@ async function seedUsers() {
   for (const u of SEED_USERS) {
     await prisma.user.upsert({
       where: { email: u.email },
-      update: { name: u.name, role: u.role, area: u.area },
+      update: {
+        name: u.name,
+        role: u.role,
+        area: u.area,
+        ...(u.credentialKey ? { credentialKey: u.credentialKey } : {}),
+      },
       create: u,
     });
   }
@@ -606,6 +626,125 @@ async function seedSocialChannels() {
   console.log(`Cuentas de redes sociales sembradas: ${channels.length}`);
 }
 
+// --- Plantillas -----------------------------------------------------------
+async function seedTemplates() {
+  const count = await prisma.template.count();
+  if (count > 0) return;
+
+  const templates: { name: string; category: string; format?: string; description?: string; notes?: string }[] = [
+    {
+      name: "Reel / video corto para redes",
+      category: "Redes sociales",
+      format: "Vertical 1080×1920",
+      description: "Formato de mayor alcance del área. Cadencia de referencia: un reel por semana.",
+      notes: "Pasa por el grupo \"Piezas Redes Sociales\" antes de publicar.",
+    },
+    {
+      name: "Pieza gráfica para feed",
+      category: "Redes sociales",
+      format: "Cuadrada 1080×1080 / Vertical 1080×1350",
+      description: "Cadencia de referencia: una pieza cada 15 días. Aplica paleta y tipografía institucional.",
+    },
+    {
+      name: "Historia / Story",
+      category: "Redes sociales",
+      format: "Vertical 1080×1920",
+      description: "Avisos rápidos, encuestas y difusión de eventos.",
+    },
+    {
+      name: "Video de lanzamiento de Curso Libre",
+      category: "Cursos Libres ofertados",
+      format: "Vertical, ~20-30 s",
+      description:
+        "Guion estándar: \"Hola, soy [nombre]. Inscríbete al curso libre de [tema]. Vas a aprender [contenido].\" Se anima a variar el formato.",
+    },
+    {
+      name: "Pieza de inscripción de Curso Libre",
+      category: "Cursos Libres ofertados",
+      format: "Cuadrada 1080×1080",
+      description: "Nombre del curso, código, fechas, sesiones, horario, cupo y enlace de inscripción. Línea gráfica modular de CL.",
+    },
+    {
+      name: "Plantilla de certificado",
+      category: "Cursos Libres ofertados",
+      format: "Horizontal A4",
+      description: "Certificado de participación conforme a Imagen Institucional. Misma plantilla para microtalleres.",
+    },
+    {
+      name: "Pieza para pantallas de oficina y pasillo",
+      category: "Televisores de la unidad",
+      format: "Horizontal 1920×1080",
+      description: "Plantillas activas en la carpeta \"Piezas TV\" del Drive de ET.",
+    },
+    {
+      name: "Cartelera digital edificios 310 y 311",
+      category: "Televisores de la unidad",
+      format: "Horizontal 1920×1080",
+      description: "En articulación con la Dependencia de Comunicaciones de la Facultad.",
+    },
+    {
+      name: "Correo de difusión",
+      category: "Difusión por correo",
+      format: "Correo HTML / texto",
+      description: "Anuncio de evento, curso o convocatoria a la comunidad UIFCE. Asunto claro y un solo llamado a la acción.",
+    },
+    {
+      name: "Boletín Digital UIFCE",
+      category: "Difusión por correo",
+      format: "Correo HTML",
+      description: "Plantilla del boletín con secciones por área. Tres números por semestre.",
+    },
+    {
+      name: "Pieza de disponibilidad de software por sala",
+      category: "Disponibilidad de salas",
+      format: "Horizontal para pantalla / A4 impreso",
+      description: "Software disponible por sala. Tono informativo, evitar lenguaje restrictivo tipo \"prohibido\".",
+    },
+    {
+      name: "Señalética de sala",
+      category: "Disponibilidad de salas",
+      format: "A4 / A3",
+      description: "Normas de uso y horarios de la sala en tono informativo.",
+    },
+    {
+      name: "Kit gráfico de evento",
+      category: "Eventos",
+      format: "Pieza feed + historia + pendón + certificado",
+      description: "Set base para microtalleres, Semana UIFCE y Hackatón: anuncio, recordatorio, agenda y certificado.",
+    },
+    {
+      name: "Registro de asistencia de evento",
+      category: "Eventos",
+      format: "Formulario / hoja de cálculo",
+      description: "Control de asistencia efectiva para emitir certificados.",
+    },
+    {
+      name: "Pieza de apoyo académico",
+      category: "Apoyos académicos",
+      format: "Cuadrada / Vertical",
+      description: "Difusión de monitorías, asesorías y material de apoyo académico de la Facultad.",
+    },
+    {
+      name: "Hack informático",
+      category: "Apoyos académicos",
+      format: "Vertical, video corto",
+      description: "Tip o truco breve. Aplica la rúbrica de calificación de 2026-1 (duración, vigencia, calidad audiovisual).",
+    },
+  ];
+
+  await prisma.template.createMany({
+    data: templates.map((t, i) => ({
+      name: t.name,
+      category: t.category,
+      format: t.format ?? null,
+      description: t.description ?? null,
+      notes: t.notes ?? null,
+      order: i,
+    })),
+  });
+  console.log(`Plantillas sembradas: ${templates.length}`);
+}
+
 async function main() {
   await seedProjectsFromCsv();
   await seedSituationStats();
@@ -617,6 +756,7 @@ async function main() {
   await seedBrandGuidelines();
   await seedCursosLibresChecklist();
   await seedSocialChannels();
+  await seedTemplates();
 }
 
 main()

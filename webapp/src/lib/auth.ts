@@ -1,14 +1,18 @@
 /**
- * Autenticación mínima: acceso compartido con dos perfiles, ambos con el mismo
- * usuario. Protege TODO el sitio (middleware.ts): sin cookie válida → /login.
+ * Autenticación mínima: acceso compartido con dos perfiles + una credencial
+ * nominal para el director. Protege TODO el sitio (middleware.ts): sin cookie
+ * válida → /login.
  *
- *  - Perfil "full"  (contraseña ET2026): edita todo.
- *  - Perfil "junior" (contraseña TEAM):  ve todo, pero solo puede agregar notas
- *    de bitácora a los proyectos. El resto es de solo lectura.
+ *  - Perfil "full"   (usuario UIFCE / contraseña ET2026): edita todo.
+ *  - Perfil "junior" (usuario UIFCE / contraseña TEAM):   ve todo, solo agrega
+ *    notas de bitácora. El resto es de solo lectura.
+ *  - Director        (usuario/contraseña propios de Henry Sarmiento): acceso
+ *    total, pero identificado — su cookie lleva `who` y el layout registra su
+ *    última visita en User.lastSeenAt (por credentialKey).
  *
- * El nivel viaja firmado en la cookie. Diseñado para pasar más adelante a enlace
- * mágico por correo + cuentas por persona sin tocar los call-sites: `getSession()`
- * pasará a devolver { userId, role } y `canEdit()` aplicará la matriz por rol.
+ * El nivel y la identidad viajan firmados en la cookie. Diseñado para pasar más
+ * adelante a enlace mágico por correo + cuentas por persona sin tocar los
+ * call-sites.
  *
  * Este módulo NO importa `next/headers` para poder usarse también en el
  * middleware (Edge). El acceso a cookies vive en src/lib/session.ts.
@@ -18,9 +22,22 @@ export const SESSION_MAX_AGE = 60 * 60 * 24 * 30; // 30 días
 
 export type AccessLevel = "full" | "junior";
 
+/** Resultado de validar credenciales: nivel de acceso y, si la credencial es
+ *  nominal, una clave estable de identidad (`who`) que casa con
+ *  User.credentialKey. Las credenciales compartidas devuelven who = null. */
+export type CredentialCheck = { level: AccessLevel; who: string | null };
+
 export const SITE_USER = process.env.SITE_USER || "UIFCE";
 const PASS_FULL = process.env.SITE_PASSWORD || "ET2026";
 const PASS_JUNIOR = process.env.SITE_PASSWORD_JUNIOR || "TEAM";
+
+/** Credencial nominal del director de la unidad. Configurable por entorno en
+ *  Vercel (SITE_USER_DIRECTOR / SITE_PASSWORD_DIRECTOR). */
+const DIRECTOR_USER = process.env.SITE_USER_DIRECTOR || "henry";
+const DIRECTOR_PASS = process.env.SITE_PASSWORD_DIRECTOR || "Sarmiento-ET-2026";
+/** Clave de identidad del director; debe coincidir con User.credentialKey. */
+export const DIRECTOR_WHO = "henry-sarmiento";
+
 const SECRET = process.env.AUTH_SECRET || "et-en-marcha-dev-secret-cambiar-en-vercel";
 
 const enc = new TextEncoder();
@@ -44,23 +61,33 @@ async function hmac(data: string): Promise<string> {
   return b64url(sig);
 }
 
-/** Devuelve el nivel de acceso si usuario+contraseña son válidos, o null. */
-export function checkCredentials(username: string, password: string): AccessLevel | null {
-  if (username.trim() !== SITE_USER) return null;
-  if (password === PASS_FULL) return "full";
-  if (password === PASS_JUNIOR) return "junior";
+/** Devuelve nivel + identidad si usuario+contraseña son válidos, o null. */
+export function checkCredentials(username: string, password: string): CredentialCheck | null {
+  const user = username.trim();
+
+  if (user === DIRECTOR_USER && password === DIRECTOR_PASS) {
+    return { level: "full", who: DIRECTOR_WHO };
+  }
+  if (user === SITE_USER) {
+    if (password === PASS_FULL) return { level: "full", who: null };
+    if (password === PASS_JUNIOR) return { level: "junior", who: null };
+  }
   return null;
 }
 
-/** Token firmado para la cookie de sesión, con el nivel de acceso. */
-export async function signToken(level: AccessLevel): Promise<string> {
-  const payload = b64url(enc.encode(JSON.stringify({ v: 1, t: Date.now(), a: level })).buffer);
+/** Token firmado para la cookie de sesión, con el nivel de acceso y el `who`. */
+export async function signToken(level: AccessLevel, who: string | null): Promise<string> {
+  const payload = b64url(
+    enc.encode(JSON.stringify({ v: 2, t: Date.now(), a: level, w: who ?? null })).buffer,
+  );
   return `${payload}.${await hmac(payload)}`;
 }
 
-/** Nivel de acceso del token si es válido (firma + antigüedad), o null.
- *  Sirve en Edge (middleware) y en Node. */
-export async function verifyToken(token: string | undefined | null): Promise<AccessLevel | null> {
+export type VerifiedToken = { level: AccessLevel; who: string | null };
+
+/** Nivel + identidad del token si es válido (firma + antigüedad), o null.
+ *  Sirve en Edge (middleware) y en Node. Acepta tokens v1 (sin `who`). */
+export async function verifyToken(token: string | undefined | null): Promise<VerifiedToken | null> {
   if (!token || !token.includes(".")) return null;
   const [payload, sig] = token.split(".");
   if (!payload || !sig) return null;
@@ -69,7 +96,10 @@ export async function verifyToken(token: string | undefined | null): Promise<Acc
     const json = JSON.parse(atob(payload.replace(/-/g, "+").replace(/_/g, "/")));
     if (typeof json.t !== "number") return null;
     if (Date.now() - json.t >= SESSION_MAX_AGE * 1000) return null;
-    return json.a === "junior" ? "junior" : "full";
+    return {
+      level: json.a === "junior" ? "junior" : "full",
+      who: typeof json.w === "string" && json.w.length > 0 ? json.w : null,
+    };
   } catch {
     return null;
   }

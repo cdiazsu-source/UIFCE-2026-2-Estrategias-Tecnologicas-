@@ -210,14 +210,59 @@ model User {
   /// actividades (subtareas, proyectos de estudio). Si está vacío se deriva del id.
   color     String?
   active    Boolean  @default(true)
+  /// Clave de identidad de su credencial de acceso propia, si tiene una
+  /// (ver src/lib/auth.ts). Hoy solo el director.
+  credentialKey String? @unique
+  /// Última vez que esa persona entró al aplicativo con su credencial propia.
+  lastSeenAt    DateTime?
 
   studyProjects        StudyProject[]
   projectNotes         ProjectNote[]
   assignedChecklistItems ChecklistItem[]
   socialChannels       SocialChannel[]
+  teamComments         TeamComment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+/// Comentario o idea que cualquiera del equipo deja en el panel principal para
+/// que se revise después. El autor se elige de la lista de User (equipo).
+model TeamComment {
+  id         String   @id @default(cuid())
+  body       String   @db.Text
+  /// Snapshot del nombre y cargo de quien lo dejó.
+  author     String
+  authorRole String?
+  authorId   String?
+  authorUser User?    @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  /// true = ya lo revisó alguien del equipo.
+  reviewed   Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([authorId])
+}
+
+/// Una plantilla reutilizable del área, agrupada por categoría (redes sociales,
+/// televisores, difusión por correo, disponibilidad de salas, Cursos Libres,
+/// eventos, apoyos académicos, …). Editable desde /plantillas.
+model Template {
+  id          String   @id @default(cuid())
+  name        String
+  category    String
+  description String?  @db.Text
+  /// Enlace a la plantilla (Drive, Canva, Figma, documento…).
+  url         String?
+  /// Formato o medida, ej. "Reel 1080×1920", "Correo HTML", "Póster A3".
+  format      String?
+  notes       String?  @db.Text
+  order       Int      @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([category])
 }
 
 /// Una cuenta institucional (Instagram, LinkedIn, X, …) en el panel de Redes

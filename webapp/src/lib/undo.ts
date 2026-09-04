@@ -93,7 +93,45 @@ export type UndoAction =
         projectId: string | null;
         order: number;
       };
-    };
+    }
+  | {
+      kind: "template.update";
+      id: string;
+      before: {
+        name: string;
+        category: string;
+        description: string | null;
+        url: string | null;
+        format: string | null;
+        notes: string | null;
+      };
+    }
+  | {
+      kind: "template.delete";
+      data: {
+        id: string;
+        name: string;
+        category: string;
+        description: string | null;
+        url: string | null;
+        format: string | null;
+        notes: string | null;
+        order: number;
+      };
+    }
+  | {
+      kind: "teamcomment.delete";
+      data: {
+        id: string;
+        body: string;
+        author: string;
+        authorRole: string | null;
+        authorId: string | null;
+        reviewed: boolean;
+        createdAt: string;
+      };
+    }
+  | { kind: "teamcomment.reviewed"; id: string; before: boolean };
 
 /** Etiqueta corta para el banner "Deshacer". */
 export function undoLabel(kind: UndoAction["kind"]): string {
@@ -107,6 +145,10 @@ export function undoLabel(kind: UndoAction["kind"]): string {
     "project.tags": "Etiquetas cambiadas",
     "social.update": "Cuenta editada",
     "social.delete": "Cuenta eliminada",
+    "template.update": "Plantilla editada",
+    "template.delete": "Plantilla eliminada",
+    "teamcomment.delete": "Comentario eliminado",
+    "teamcomment.reviewed": "Comentario actualizado",
   };
   return map[kind];
 }

@@ -3,7 +3,8 @@ import type { Metadata } from "next";
 import { SiteNav } from "@/components/site-nav";
 import { AccessProvider } from "@/components/access-context";
 import { UndoProvider } from "@/components/undo-banner";
-import { canEdit } from "@/lib/session";
+import { getSession } from "@/lib/session";
+import { touchLastSeen } from "@/lib/presence";
 
 import "./globals.css";
 
@@ -13,7 +14,9 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const editable = await canEdit();
+  const session = await getSession();
+  const editable = session.authed && session.level === "full";
+  if (session.authed) await touchLastSeen(session.who);
 
   return (
     <html lang="es">
