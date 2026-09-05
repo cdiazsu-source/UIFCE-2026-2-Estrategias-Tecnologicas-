@@ -32,6 +32,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { InfoHint } from "@/components/info-hint";
 import { useCanEdit } from "@/components/access-context";
 import { useUndo } from "@/components/undo-banner";
+import { SocialMetricsPanel, type SocialMetricData } from "@/components/social-metrics";
 import { formatDate } from "@/lib/utils";
 
 export type SocialInteractionData = {
@@ -61,6 +62,7 @@ export type SocialChannelData = {
   responsible: { id: string; name: string } | null;
   project: { id: string; title: string } | null;
   interactions: SocialInteractionData[];
+  metrics: SocialMetricData[];
 };
 
 const PLATFORM_LABEL: Record<SocialPlatform, string> = {
@@ -488,6 +490,12 @@ function ChannelCard({
               )}
             </div>
             <Interactions channel={channel} />
+            {(channel.platform === "INSTAGRAM" || channel.platform === "LINKEDIN") && (
+              <SocialMetricsPanel
+                channel={{ id: channel.id, platform: channel.platform, metrics: channel.metrics }}
+                people={people}
+              />
+            )}
           </>
         )}
       </CardContent>

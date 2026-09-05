@@ -16,12 +16,14 @@ export const metadata: Metadata = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();
   const editable = session.authed && session.level === "full";
+  // El perfil junior también puede registrar mediciones de KPIs de redes.
+  const canRecordMetrics = session.authed;
   if (session.authed) await touchLastSeen(session.who);
 
   return (
     <html lang="es">
       <body className="min-h-screen bg-background font-sans antialiased">
-        <AccessProvider canEdit={editable}>
+        <AccessProvider canEdit={editable} canRecordMetrics={canRecordMetrics}>
           <UndoProvider>
             <SiteNav canEdit={editable} />
             <main className="mx-auto max-w-6xl px-6 py-8">{children}</main>

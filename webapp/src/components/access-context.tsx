@@ -6,10 +6,32 @@ import { createContext, useContext } from "react";
  *  agregar notas de bitácora). */
 const CanEditContext = createContext(false);
 
-export function AccessProvider({ canEdit, children }: { canEdit: boolean; children: React.ReactNode }) {
-  return <CanEditContext.Provider value={canEdit}>{children}</CanEditContext.Provider>;
+/** true = la sesión puede registrar mediciones de KPIs de redes. Lo cumplen
+ *  tanto el perfil completo como el junior (ver src/lib/session.ts). */
+const CanRecordMetricsContext = createContext(false);
+
+export function AccessProvider({
+  canEdit,
+  canRecordMetrics = false,
+  children,
+}: {
+  canEdit: boolean;
+  canRecordMetrics?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <CanEditContext.Provider value={canEdit}>
+      <CanRecordMetricsContext.Provider value={canRecordMetrics}>
+        {children}
+      </CanRecordMetricsContext.Provider>
+    </CanEditContext.Provider>
+  );
 }
 
 export function useCanEdit() {
   return useContext(CanEditContext);
+}
+
+export function useCanRecordMetrics() {
+  return useContext(CanRecordMetricsContext);
 }

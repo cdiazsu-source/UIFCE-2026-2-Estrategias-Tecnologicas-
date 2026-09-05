@@ -130,6 +130,28 @@ export type UndoAction =
       };
     }
   | {
+      kind: "socialmetric.update";
+      id: string;
+      before: {
+        at: string;
+        note: string | null;
+        values: Record<string, number | null>;
+      };
+    }
+  | {
+      kind: "socialmetric.delete";
+      data: {
+        id: string;
+        channelId: string;
+        platform: string;
+        at: string;
+        recordedById: string | null;
+        recordedByName: string | null;
+        note: string | null;
+        values: Record<string, number | null>;
+      };
+    }
+  | {
       kind: "template.update";
       id: string;
       before: {
@@ -182,6 +204,8 @@ export function undoLabel(kind: UndoAction["kind"]): string {
     "social.delete": "Cuenta eliminada",
     "socialinteraction.update": "Interacción editada",
     "socialinteraction.delete": "Interacción eliminada",
+    "socialmetric.update": "Medición editada",
+    "socialmetric.delete": "Medición eliminada",
     "template.update": "Plantilla editada",
     "template.delete": "Plantilla eliminada",
     "teamcomment.delete": "Comentario eliminado",

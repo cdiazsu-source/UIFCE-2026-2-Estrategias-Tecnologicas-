@@ -267,6 +267,7 @@ model User {
   projectNotes         ProjectNote[]
   assignedChecklistItems ChecklistItem[]
   socialChannels       SocialChannel[]
+  socialMetrics        SocialMetric[]
   teamComments         TeamComment[]
 
   createdAt DateTime @default(now())
@@ -343,6 +344,7 @@ model SocialChannel {
   order         Int                 @default(0)
 
   interactions  SocialInteraction[]
+  metrics       SocialMetric[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -373,6 +375,45 @@ model SocialInteraction {
   createdAt DateTime @default(now())
 
   @@index([channelId, at])
+}
+
+/// Medición de KPIs de una cuenta de redes en una fecha concreta. La registra
+/// alguien del equipo (perfil junior o completo) para llevar la evolución de las
+/// métricas en el tiempo. Los campos son específicos por plataforma: en cada
+/// fila se llenan solo los de la cuenta correspondiente (Instagram o LinkedIn).
+model SocialMetric {
+  id        String        @id @default(cuid())
+  channelId String
+  channel   SocialChannel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  /// Se copia de la cuenta al registrar; evita un join para filtrar por red.
+  platform  SocialPlatform
+  /// Fecha a la que corresponde la medición (no necesariamente cuándo se cargó).
+  at        DateTime
+  /// Quién registró la medición. Se elige de la lista de equipo (el perfil
+  /// junior compartido no lleva identidad propia). Snapshot del nombre aparte.
+  recordedById   String?
+  recordedByUser User?   @relation(fields: [recordedById], references: [id], onDelete: SetNull)
+  recordedByName String?
+  note      String?       @db.Text
+
+  // --- Instagram ---
+  igFollowers     Int?
+  igReach         Int?
+  igImpressions   Int?
+  igInteractions  Int?
+  igProfileVisits Int?
+
+  // --- LinkedIn ---
+  liFollowers         Int?
+  liProfileViews      Int?
+  liPostImpressions   Int?
+  liInteractions      Int?
+  liSearchAppearances Int?
+
+  createdAt DateTime @default(now())
+
+  @@index([channelId, at])
+  @@index([recordedById])
 }
 
 /// Proyecto de estudio de un monitor Junior. Cada Junior expone dos por semestre.

@@ -20,6 +20,7 @@ export default async function RedesPage() {
         responsible: { select: { id: true, name: true } },
         project: { select: { id: true, title: true } },
         interactions: { orderBy: { at: "desc" } },
+        metrics: { orderBy: { at: "desc" } },
       },
     }),
     prisma.user.findMany({
@@ -55,6 +56,24 @@ export default async function RedesPage() {
         reach: it.reach,
         interactions: it.interactions,
         url: it.url,
+      })),
+      metrics: c.metrics.map((m) => ({
+        id: m.id,
+        at: m.at,
+        recordedByName: m.recordedByName,
+        note: m.note,
+        values: {
+          igFollowers: m.igFollowers,
+          igReach: m.igReach,
+          igImpressions: m.igImpressions,
+          igInteractions: m.igInteractions,
+          igProfileVisits: m.igProfileVisits,
+          liFollowers: m.liFollowers,
+          liProfileViews: m.liProfileViews,
+          liPostImpressions: m.liPostImpressions,
+          liInteractions: m.liInteractions,
+          liSearchAppearances: m.liSearchAppearances,
+        },
       })),
     }));
 

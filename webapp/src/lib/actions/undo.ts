@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
+import { Prisma } from "@prisma/client";
 import type { SocialChannelStatus, SocialOfficialStatus, SocialPlatform } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
@@ -11,8 +12,9 @@ import type { UndoAction } from "@/lib/undo";
 /** Revierte la última acción a partir del descriptor que guardó el banner. */
 export async function applyUndo(action: UndoAction) {
   const junior = await blockedForJunior();
-  // El perfil junior solo puede deshacer lo que puede hacer: notas de bitácora.
-  if (junior && !action.kind.startsWith("note.")) return;
+  // El perfil junior solo puede deshacer lo que puede hacer: notas de bitácora
+  // y la edición de mediciones de KPIs de redes.
+  if (junior && !action.kind.startsWith("note.") && action.kind !== "socialmetric.update") return;
 
   switch (action.kind) {
     case "note.delete": {
@@ -169,6 +171,30 @@ export async function applyUndo(action: UndoAction) {
           url: d.url,
         },
       });
+      revalidatePath("/redes");
+      break;
+    }
+    case "socialmetric.update": {
+      const b = action.before;
+      const data: Prisma.SocialMetricUncheckedUpdateInput = { at: new Date(b.at), note: b.note };
+      for (const [k, v] of Object.entries(b.values)) (data as Record<string, unknown>)[k] = v;
+      await prisma.socialMetric.update({ where: { id: action.id }, data });
+      revalidatePath("/redes");
+      break;
+    }
+    case "socialmetric.delete": {
+      const d = action.data;
+      const data: Prisma.SocialMetricUncheckedCreateInput = {
+        id: d.id,
+        channelId: d.channelId,
+        platform: d.platform as SocialPlatform,
+        at: new Date(d.at),
+        recordedById: d.recordedById,
+        recordedByName: d.recordedByName,
+        note: d.note,
+      };
+      for (const [k, v] of Object.entries(d.values)) (data as Record<string, unknown>)[k] = v;
+      await prisma.socialMetric.create({ data });
       revalidatePath("/redes");
       break;
     }

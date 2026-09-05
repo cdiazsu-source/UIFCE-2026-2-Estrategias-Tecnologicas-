@@ -24,3 +24,11 @@ export async function canEdit(): Promise<boolean> {
 export async function blockedForJunior(): Promise<boolean> {
   return !(await canEdit());
 }
+
+/** ¿La sesión puede registrar mediciones de KPIs de redes? A diferencia del
+ *  resto de escrituras, aquí el perfil "junior" SÍ tiene permiso (crear y
+ *  editar); el borrado sigue reservado al perfil completo. Cualquier sesión
+ *  autenticada (completa o junior) puede registrar. */
+export async function canRecordMetrics(): Promise<boolean> {
+  return (await getSession()).authed;
+}
