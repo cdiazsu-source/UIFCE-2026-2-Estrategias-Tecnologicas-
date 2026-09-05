@@ -264,9 +264,9 @@ const SEED_USERS: {
   color: string;
   credentialKey?: string;
 }[] = [
-  { name: "Cesar Diaz", email: "cdiazsu@unal.edu.co", role: "MASTER", area: "ET", color: "#2563EB" },
+  { name: "Cesar Diaz", email: "cdiazsu@unal.edu.co", role: "MASTER", area: "ET", color: "#1E40AF" },
   { name: "Maria Fernanda Celis", email: "mafe@example.com", role: "JUNIOR_ARTES", area: "ET", color: "#DB2777" },
-  { name: "Jean Carlos Baquero", email: "jean@example.com", role: "JUNIOR_AUXILIAR", area: "ET", color: "#0D9488" },
+  { name: "Jean Carlos Baquero", email: "jean@example.com", role: "JUNIOR_AUXILIAR", area: "ET", color: "#15803D" },
   { name: "Estrategias Tecnológicas (ET)", email: "et@example.com", role: "EQUIPO", area: "ET", color: "#4A7729" },
   { name: "Lina Sanabria", email: "lina.sanabria@example.com", role: "COORDINADOR", area: null, color: "#7C3AED" },
   { name: "Santiago Parra", email: "santiago.parra@example.com", role: "COORDINADOR", area: null, color: "#EA580C" },

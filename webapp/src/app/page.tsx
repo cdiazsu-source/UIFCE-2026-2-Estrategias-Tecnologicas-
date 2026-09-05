@@ -92,7 +92,7 @@ async function getHomeData(semesterId: string | null, includeOrphans: boolean) {
       prisma.user.findMany({
         where: { active: true, role: { in: ["MASTER", "JUNIOR_ARTES", "JUNIOR_AUXILIAR"] } },
         orderBy: { name: "asc" },
-        select: { id: true, name: true, role: true, photoUrl: true, linkedinUrl: true },
+        select: { id: true, name: true, role: true, photoUrl: true, linkedinUrl: true, color: true },
       }),
       prisma.teamComment.findMany({
         orderBy: { createdAt: "desc" },
@@ -111,10 +111,20 @@ async function getHomeData(semesterId: string | null, includeOrphans: boolean) {
   // Por proyecto: la siguiente subtarea pendiente (la que "sigue") y si ya está todo hecho.
   const nextPending = new Map<string, string>();
   const allDone = new Map<string, boolean>();
+  // Por persona: cuántos proyectos activos en «❗ Atención Inmediata» tiene a cargo
+  // (para el atajo titilante de la ficha del integrante).
+  const urgentByPerson = new Map<string, number>();
   for (const p of projects) {
     const next = p.checklistItems.find((c) => !c.done);
     if (next) nextPending.set(p.id, next.text);
     allDone.set(p.id, p.checklistItems.length > 0 && p.checklistItems.every((c) => c.done));
+
+    if (p.priorityTag === "ATENCION_INMEDIATA" && p.status !== "COMPLETADO") {
+      const ids = new Set(
+        p.checklistItems.map((c) => c.assigneeId).filter((x): x is string => !!x),
+      );
+      for (const id of ids) urgentByPerson.set(id, (urgentByPerson.get(id) ?? 0) + 1);
+    }
   }
 
   const projectCards: ProjectCardData[] = projects.map((p) => {
@@ -175,9 +185,11 @@ async function getHomeData(semesterId: string | null, includeOrphans: boolean) {
     .sort((a, b) => b.at.getTime() - a.at.getTime())
     .slice(0, 18);
 
-  const rosterMembers: RosterMember[] = [...roster].sort(
-    (a, b) => ROSTER_ROLES.indexOf(a.role) - ROSTER_ROLES.indexOf(b.role) || a.name.localeCompare(b.name, "es"),
-  );
+  const rosterMembers: RosterMember[] = [...roster]
+    .sort(
+      (a, b) => ROSTER_ROLES.indexOf(a.role) - ROSTER_ROLES.indexOf(b.role) || a.name.localeCompare(b.name, "es"),
+    )
+    .map((m) => ({ ...m, urgentCount: urgentByPerson.get(m.id) ?? 0 }));
 
   const commentAuthors = people.map((p) => ({ id: p.id, name: p.name, role: p.role }));
   const comments: TeamCommentData[] = teamComments;
@@ -188,10 +200,19 @@ async function getHomeData(semesterId: string | null, includeOrphans: boolean) {
   return { stats, projectCards, feedItems, rosterMembers, comments, commentAuthors, director, profile };
 }
 
-export default async function HomePage({ searchParams }: { searchParams: { sem?: string } }) {
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: { sem?: string; focus?: string };
+}) {
   const { tabs, selected, isSelectedCurrent } = await getSemesters(searchParams.sem);
   const { stats, projectCards, feedItems, rosterMembers, comments, commentAuthors, director, profile } =
     await getHomeData(selected?.id ?? null, isSelectedCurrent);
+
+  // ?focus=<id>: enfoca la grilla en los pendientes de atención de esa persona.
+  const focusPerson = searchParams.focus
+    ? commentAuthors.find((p) => p.id === searchParams.focus) ?? null
+    : null;
 
   return (
     <div className="flex flex-col gap-8">
@@ -224,10 +245,13 @@ export default async function HomePage({ searchParams }: { searchParams: { sem?:
 
           <TeamRoster people={rosterMembers} />
 
-          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-4">
+          <div
+            id="proyectos"
+            className="flex scroll-mt-20 flex-wrap items-center justify-between gap-2 border-t border-border pt-4"
+          >
             <h2 className="flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
               Proyectos {selected ? `${selected.label} ` : ""}({projectCards.length})
-              <InfoHint text="Una tarjeta por iniciativa del semestre seleccionado (pestañas de arriba). Cómo se usa: busca por texto o filtra por categoría (Redes y canales, Producción de contenido, Eventos…); el progreso cuenta subtareas hechas y los puntos de color son las personas con subtareas. Con perfil completo, «Nuevo proyecto» lo crea en el semestre visible. Ejemplo: elige «Eventos» para ver solo esos proyectos." />
+              <InfoHint text="Una tarjeta por iniciativa del semestre seleccionado (pestañas de arriba). Cómo se usa: busca por texto o filtra por categoría (Redes y canales, Producción de contenido, Eventos…); el progreso cuenta subtareas hechas y la franja de color a la izquierda es la persona asignada — titila si el proyecto está en «❗ Atención Inmediata». Con perfil completo, «Nuevo proyecto» lo crea en el semestre visible. Ejemplo: elige «Eventos» para ver solo esos proyectos." />
             </h2>
             <NewProjectButton semesterId={selected?.id} semesterLabel={selected?.label} />
           </div>
@@ -236,7 +260,11 @@ export default async function HomePage({ searchParams }: { searchParams: { sem?:
               {selected ? `El semestre ${selected.label} todavía no tiene proyectos.` : "No hay proyectos."}
             </p>
           ) : (
-            <ProjectsGrid projects={projectCards} />
+            <ProjectsGrid
+              projects={projectCards}
+              focusPersonId={focusPerson?.id}
+              focusPersonName={focusPerson?.name}
+            />
           )}
         </div>
 

@@ -36,13 +36,28 @@ export type ProjectCardData = {
 export function ProjectCard({ project }: { project: ProjectCardData }) {
   const progress = project.checklistTotal > 0 ? (project.checklistDone / project.checklistTotal) * 100 : 0;
 
+  // Alerta por persona: franja de color con el acento de quien está asignado
+  // (siempre visible), que titila solo cuando el proyecto está en «❗ Atención
+  // Inmediata» (requiere atención directa).
+  const assigned = project.assignees.length > 0;
+  const accent =
+    project.assignees.length === 1 ? personColor(project.assignees[0]) : null;
+  const urgent = assigned && project.priorityTag === "ATENCION_INMEDIATA";
+
   return (
     <Link href={`/proyectos/${project.id}`} className="block h-full">
-      <Card className="group h-full cursor-pointer transition-[transform,box-shadow,border-color] duration-200 ease-out-strong [@media(hover:hover)]:hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-card-hover active:translate-y-0 active:scale-[0.99] active:shadow-card">
+      <Card className="group relative h-full cursor-pointer transition-[transform,box-shadow,border-color] duration-200 ease-out-strong [@media(hover:hover)]:hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-card-hover active:translate-y-0 active:scale-[0.99] active:shadow-card">
+        {assigned && (
+          <span
+            aria-hidden
+            className={`absolute left-0 top-4 bottom-4 w-1 rounded-r-full ${urgent ? "animate-et-blink" : ""}`}
+            style={{ backgroundColor: accent ?? "hsl(var(--primary))" }}
+          />
+        )}
         <CardHeader className="pb-2">
           <div className="flex flex-wrap items-center gap-1.5">
             <Badge variant="outline">{project.category}</Badge>
-            <PriorityTag tag={project.priorityTag} />
+            <PriorityTag tag={project.priorityTag} className={urgent ? "animate-et-blink" : ""} />
             {project.isManual && <Badge variant="secondary">Propio</Badge>}
             {project.tags.slice(0, 3).map((t) => (
               <Badge key={t} variant="secondary">

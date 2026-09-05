@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Linkedin, Pencil } from "lucide-react";
+import { AlertTriangle, Linkedin, Pencil } from "lucide-react";
 
 import { updateUserContact } from "@/lib/actions/users";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { PersonAvatar } from "@/components/person-avatar";
 import { PhotoField } from "@/components/photo-field";
 import { InfoHint } from "@/components/info-hint";
 import { useCanEdit } from "@/components/access-context";
+import { personColor } from "@/lib/person-color";
 import { USER_ROLE_LABEL } from "@/lib/utils";
 
 export type RosterMember = {
@@ -18,7 +19,26 @@ export type RosterMember = {
   role: string;
   photoUrl: string | null;
   linkedinUrl: string | null;
+  color: string | null;
+  /** Proyectos activos en «❗ Atención Inmediata» donde tiene alguna subtarea. */
+  urgentCount: number;
 };
+
+/** Atajo titilante en el color de la persona: lleva al panel filtrado a sus
+ *  proyectos que requieren atención (?focus=<id>). */
+function FocusPill({ member }: { member: RosterMember }) {
+  const color = personColor(member);
+  return (
+    <a
+      href={`/?focus=${member.id}#proyectos`}
+      className="animate-et-blink inline-flex w-fit items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium"
+      style={{ color, borderColor: `${color}66`, backgroundColor: `${color}14` }}
+    >
+      <AlertTriangle className="h-3 w-3 shrink-0" aria-hidden />
+      {member.urgentCount} {member.urgentCount === 1 ? "requiere" : "requieren"} tu atención
+    </a>
+  );
+}
 
 function MemberCard({ member }: { member: RosterMember }) {
   const canEdit = useCanEdit();
@@ -72,7 +92,7 @@ function MemberCard({ member }: { member: RosterMember }) {
   );
 
   return (
-    <li className="group relative">
+    <li className="group relative flex flex-col gap-1.5">
       {member.linkedinUrl ? (
         <a
           href={member.linkedinUrl}
@@ -85,6 +105,7 @@ function MemberCard({ member }: { member: RosterMember }) {
       ) : (
         <div className="flex items-center gap-3 rounded-md border border-border p-3">{inner}</div>
       )}
+      {member.urgentCount > 0 && <FocusPill member={member} />}
       {canEdit && (
         <button
           type="button"
