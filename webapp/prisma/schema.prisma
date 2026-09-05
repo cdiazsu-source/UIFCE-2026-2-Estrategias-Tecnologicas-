@@ -31,6 +31,7 @@ enum UserRole {
   COORDINADOR
   DIRECTOR
   EQUIPO
+  LIDER
 }
 
 /// Estado de cada punto de corte de un proyecto de estudio.

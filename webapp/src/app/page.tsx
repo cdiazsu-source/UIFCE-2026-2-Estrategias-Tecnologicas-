@@ -90,7 +90,9 @@ async function getHomeData(semesterId: string | null, includeOrphans: boolean) {
         select: { id: true, name: true, role: true, color: true },
       }),
       prisma.user.findMany({
-        where: { active: true, role: { in: ["MASTER", "JUNIOR_ARTES", "JUNIOR_AUXILIAR"] } },
+        // Panel principal → «Integrantes»: SOLO el equipo de ET (área "ET").
+        // Los máster/líderes de otras áreas quedan fuera aunque tengan rol MASTER.
+        where: { active: true, area: "ET", role: { in: ["MASTER", "JUNIOR_ARTES", "JUNIOR_AUXILIAR"] } },
         orderBy: { name: "asc" },
         select: { id: true, name: true, role: true, photoUrl: true, linkedinUrl: true, color: true },
       }),

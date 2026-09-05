@@ -15,7 +15,15 @@ import { PhotoField } from "@/components/photo-field";
 import { USER_ROLE_LABEL, formatDateTime } from "@/lib/utils";
 import { useCanEdit } from "@/components/access-context";
 
-const ROLE_OPTIONS: UserRole[] = ["MASTER", "JUNIOR_ARTES", "JUNIOR_AUXILIAR", "COORDINADOR", "DIRECTOR", "EQUIPO"];
+const ROLE_OPTIONS: UserRole[] = [
+  "MASTER",
+  "JUNIOR_ARTES",
+  "JUNIOR_AUXILIAR",
+  "COORDINADOR",
+  "DIRECTOR",
+  "EQUIPO",
+  "LIDER",
+];
 
 function RoleSelect({ name, defaultValue }: { name: string; defaultValue?: UserRole }) {
   return (

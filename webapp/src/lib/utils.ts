@@ -76,6 +76,7 @@ export const USER_ROLE_LABEL: Record<string, string> = {
   COORDINADOR: "Coordinación",
   DIRECTOR: "Dirección",
   EQUIPO: "Equipo",
+  LIDER: "Líder",
 };
 
 export const CHECKPOINT_STATUS_LABEL: Record<string, string> = {

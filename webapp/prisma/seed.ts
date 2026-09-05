@@ -259,7 +259,7 @@ async function seedContacts() {
 const SEED_USERS: {
   name: string;
   email: string;
-  role: "MASTER" | "JUNIOR_ARTES" | "JUNIOR_AUXILIAR" | "EQUIPO" | "COORDINADOR" | "DIRECTOR";
+  role: "MASTER" | "JUNIOR_ARTES" | "JUNIOR_AUXILIAR" | "EQUIPO" | "COORDINADOR" | "DIRECTOR" | "LIDER";
   area: string | null;
   color: string;
   credentialKey?: string;
@@ -280,6 +280,13 @@ const SEED_USERS: {
     // Casa con DIRECTOR_WHO en src/lib/auth.ts: habilita el registro de última visita.
     credentialKey: "henry-sarmiento",
   },
+  // Másters y líderes de otras áreas de la UIFCE (contrapartes interárea). NO
+  // aparecen en «Integrantes» del panel principal (ese bloque filtra por área "ET").
+  { name: "Diego Lopez", email: "diego.lopez@example.com", role: "MASTER", area: "CL", color: "#0284C7" },
+  { name: "Sebastian Quiroga", email: "sebastian.quiroga@example.com", role: "MASTER", area: "GC", color: "#0D9488" },
+  { name: "Juan Esteban Laguna", email: "juan.laguna@example.com", role: "MASTER", area: "VA", color: "#2563EB" },
+  { name: "Yony Chaparro", email: "yony.chaparro@example.com", role: "MASTER", area: "DS", color: "#9333EA" },
+  { name: "Brayan Sandoval", email: "brayan.sandoval@example.com", role: "LIDER", area: "DS", color: "#4338CA" },
 ];
 
 function foldName(s: string): string {
