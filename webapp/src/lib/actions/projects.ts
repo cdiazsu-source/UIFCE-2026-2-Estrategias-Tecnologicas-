@@ -7,8 +7,12 @@ import type { ProjectStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { blockedForJunior } from "@/lib/session";
 import type { UndoAction } from "@/lib/undo";
+import { PRIORITY_TAGS, WIP_ATENCION_INMEDIATA } from "@/lib/utils";
 
-const PRIORITY_TAGS = ["CRÍTICO", "PRIORITARIO", "NUEVO"];
+const PRIORITY_VALUES = PRIORITY_TAGS as readonly string[];
+
+/** Mensaje exacto que ve quien intenta un cuarto proyecto en «Atención Inmediata». */
+const WIP_MESSAGE = "Límite de WIP alcanzado: Resuelve o reclasifica una tarea de Atención Inmediata actual.";
 
 /** sourceOrder de los proyectos creados a mano: empieza alto para no chocar
  *  con el índice del CSV (0..N-1) que reescribe el seed en cada resync. */
@@ -31,7 +35,7 @@ export async function createProject(formData: FormData) {
   if (!title || !category) return;
 
   const rawPriority = String(formData.get("priorityTag") ?? "").trim();
-  const priorityTag = PRIORITY_TAGS.includes(rawPriority) ? rawPriority : null;
+  const priorityTag = PRIORITY_VALUES.includes(rawPriority) ? rawPriority : null;
   const description = String(formData.get("description") ?? "").trim();
   const expectedOutcome = String(formData.get("expectedOutcome") ?? "").trim();
   const rationale = String(formData.get("rationale") ?? "").trim();
@@ -80,6 +84,62 @@ export async function updateProjectStatus(projectId: string, status: ProjectStat
   revalidatePath(`/proyectos/${projectId}`);
 }
 
+/** Nombre de la primera persona asignada a `projectId` (por subtarea) que ya
+ *  llegó al tope de proyectos activos en «❗ Atención Inmediata», o null si
+ *  nadie lo alcanza. Un proyecto "activo" = estado distinto de COMPLETADO. */
+export async function wipBlockedBy(projectId: string): Promise<string | null> {
+  const items = await prisma.checklistItem.findMany({
+    where: { projectId, assigneeId: { not: null } },
+    select: { assigneeId: true },
+  });
+  const ids = [...new Set(items.map((i) => i.assigneeId).filter((x): x is string => !!x))];
+
+  for (const id of ids) {
+    const count = await prisma.project.count({
+      where: {
+        id: { not: projectId },
+        priorityTag: "ATENCION_INMEDIATA",
+        status: { not: "COMPLETADO" },
+        checklistItems: { some: { assigneeId: id } },
+      },
+    });
+    if (count >= WIP_ATENCION_INMEDIATA) {
+      const u = await prisma.user.findUnique({ where: { id }, select: { name: true } });
+      return u?.name ?? "Una persona del equipo";
+    }
+  }
+  return null;
+}
+
+/** Cambia la etiqueta de urgencia. Bloqueado para el perfil junior. Si se
+ *  intenta poner «❗ Atención Inmediata» y alguna persona asignada ya está en
+ *  el límite WIP, no escribe y devuelve { error } para que la UI muestre la
+ *  alerta. */
+export async function updateProjectPriority(
+  projectId: string,
+  rawTag: string,
+): Promise<UndoAction | { error: string } | void> {
+  if (await blockedForJunior()) return;
+
+  const tag = PRIORITY_VALUES.includes(rawTag) ? rawTag : null;
+  const prev = await prisma.project.findUnique({
+    where: { id: projectId },
+    select: { priorityTag: true },
+  });
+  if (!prev || prev.priorityTag === tag) return;
+
+  if (tag === "ATENCION_INMEDIATA") {
+    const blockedBy = await wipBlockedBy(projectId);
+    if (blockedBy) return { error: WIP_MESSAGE };
+  }
+
+  await prisma.project.update({ where: { id: projectId }, data: { priorityTag: tag } });
+  revalidatePath("/");
+  revalidatePath(`/proyectos/${projectId}`);
+
+  return { kind: "project.priority", id: projectId, before: prev.priorityTag };
+}
+
 /** Edita los campos de contenido de cualquier proyecto. Si el proyecto viene
  *  del CSV, lo marca como editado en la app para que el resync deje de
  *  sobrescribir esos campos (ver Project.editedInApp). */
@@ -93,15 +153,14 @@ export async function updateProjectContent(
 
   const title = String(formData.get("title") ?? "").trim();
   const category = String(formData.get("category") ?? "").trim();
-  const rawPriority = String(formData.get("priorityTag") ?? "").trim();
-  const priorityTag = PRIORITY_TAGS.includes(rawPriority) ? rawPriority : null;
+  // La urgencia (`priorityTag`) ya no se edita aquí: tiene su propio selector con
+  // control de límite WIP (ver updateProjectPriority).
 
   await prisma.project.update({
     where: { id: projectId },
     data: {
       ...(title.length > 0 ? { title } : {}),
       ...(category.length > 0 ? { category } : {}),
-      priorityTag,
       description: String(formData.get("description") ?? "").trim(),
       expectedOutcome: String(formData.get("expectedOutcome") ?? "").trim(),
       rationale: String(formData.get("rationale") ?? "").trim(),

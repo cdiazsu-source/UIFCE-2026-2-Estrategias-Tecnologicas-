@@ -65,6 +65,7 @@ export type UndoAction =
       };
     }
   | { kind: "project.tags"; id: string; before: string[] }
+  | { kind: "project.priority"; id: string; before: string | null }
   | {
       kind: "social.update";
       id: string;
@@ -200,6 +201,7 @@ export function undoLabel(kind: UndoAction["kind"]): string {
     "checklist.toggle": "Subtarea marcada",
     "project.content": "Proyecto editado",
     "project.tags": "Etiquetas cambiadas",
+    "project.priority": "Urgencia cambiada",
     "social.update": "Cuenta editada",
     "social.delete": "Cuenta eliminada",
     "socialinteraction.update": "Interacción editada",

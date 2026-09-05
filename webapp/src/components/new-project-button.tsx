@@ -39,11 +39,11 @@ export function NewProjectButton({ semesterId, semesterLabel }: { semesterId?: s
       <div className="flex flex-wrap gap-2">
         <Input name="title" placeholder="Título del proyecto" required className="min-w-[16rem] flex-1" />
         <Input name="category" placeholder="Categoría (ej. Producción de contenido)" required className="min-w-[14rem] flex-1" />
-        <Select name="priorityTag" defaultValue="" className="w-40">
-          <option value="">Sin etiqueta</option>
-          <option value="CRÍTICO">Crítico</option>
-          <option value="PRIORITARIO">Prioritario</option>
-          <option value="NUEVO">Nuevo</option>
+        <Select name="priorityTag" defaultValue="" className="w-52">
+          <option value="">Sin etiqueta de urgencia</option>
+          <option value="ATENCION_INMEDIATA">❗ Atención Inmediata</option>
+          <option value="PROXIMO_CICLO">📅 Próximo Ciclo</option>
+          <option value="BACKLOG">⏸️ Backlog</option>
         </Select>
       </div>
       <Textarea name="description" placeholder="Qué se debe hacer (opcional)" className="min-h-[60px]" />

@@ -20,10 +20,26 @@ type CsvRow = {
   Entregables: string;
 };
 
+// La columna "Categoría" del CSV puede venir como "Categoría — <urgencia>".
+// Se acepta la palabra legible del CSV, el código, y (por compatibilidad) el
+// vocabulario anterior CRÍTICO/PRIORITARIO/NUEVO.
+const PRIORITY_FROM_CSV: Record<string, string> = {
+  "Atención inmediata": "ATENCION_INMEDIATA",
+  "Próximo ciclo": "PROXIMO_CICLO",
+  Backlog: "BACKLOG",
+  ATENCION_INMEDIATA: "ATENCION_INMEDIATA",
+  PROXIMO_CICLO: "PROXIMO_CICLO",
+  BACKLOG: "BACKLOG",
+  CRÍTICO: "ATENCION_INMEDIATA",
+  PRIORITARIO: "PROXIMO_CICLO",
+  NUEVO: "BACKLOG",
+};
+
 function splitCategory(raw: string): { category: string; priorityTag: string | null } {
   const parts = raw.split(" — ");
-  if (parts.length === 2 && ["CRÍTICO", "PRIORITARIO", "NUEVO"].includes(parts[1].trim())) {
-    return { category: parts[0].trim(), priorityTag: parts[1].trim() };
+  if (parts.length === 2) {
+    const code = PRIORITY_FROM_CSV[parts[1].trim()];
+    if (code) return { category: parts[0].trim(), priorityTag: code };
   }
   return { category: raw.trim(), priorityTag: null };
 }

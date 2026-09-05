@@ -40,6 +40,28 @@ export const PROJECT_STATUS_LABEL: Record<string, string> = {
   COMPLETADO: "Completado",
 };
 
+/** Etiquetas de urgencia del proyecto: fase temporal, independiente del estado.
+ *  Se guarda el código (`priorityTag`); el emoji y el color mate van en el
+ *  render (ver components/priority-tag.tsx). Doble codificación: emoji + color. */
+export const PRIORITY_TAGS = ["ATENCION_INMEDIATA", "PROXIMO_CICLO", "BACKLOG"] as const;
+export type PriorityTag = (typeof PRIORITY_TAGS)[number];
+
+export const PRIORITY_TAG_LABEL: Record<string, string> = {
+  ATENCION_INMEDIATA: "❗ Atención Inmediata",
+  PROXIMO_CICLO: "📅 Próximo Ciclo",
+  BACKLOG: "⏸️ Backlog",
+};
+
+/** Color mate por etiqueta (rojo teja / amarillo ocre / gris pizarra). */
+export const PRIORITY_TAG_COLOR: Record<string, string> = {
+  ATENCION_INMEDIATA: "#b23a2a",
+  PROXIMO_CICLO: "#c49a00",
+  BACKLOG: "#708090",
+};
+
+/** Tope de proyectos activos en «❗ Atención Inmediata» por persona (límite WIP). */
+export const WIP_ATENCION_INMEDIATA = 3;
+
 export const TOOL_STATUS_LABEL: Record<string, string> = {
   ACTIVA: "Activa",
   VENCIDA: "Vencida",

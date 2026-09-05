@@ -4,6 +4,7 @@ import type { ProjectStatus } from "@prisma/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { PriorityTag } from "@/components/priority-tag";
 import { PROJECT_STATUS_LABEL } from "@/lib/utils";
 import { personColor } from "@/lib/person-color";
 
@@ -13,12 +14,6 @@ const STATUS_BADGE_VARIANT: Record<ProjectStatus, "secondary" | "warning" | "suc
   POR_INICIAR: "secondary",
   EN_CURSO: "warning",
   COMPLETADO: "success",
-};
-
-const PRIORITY_BADGE_VARIANT: Record<string, "destructive" | "warning" | "outline"> = {
-  CRÍTICO: "destructive",
-  PRIORITARIO: "warning",
-  NUEVO: "outline",
 };
 
 export type ProjectCardData = {
@@ -47,9 +42,7 @@ export function ProjectCard({ project }: { project: ProjectCardData }) {
         <CardHeader className="pb-2">
           <div className="flex flex-wrap items-center gap-1.5">
             <Badge variant="outline">{project.category}</Badge>
-            {project.priorityTag && (
-              <Badge variant={PRIORITY_BADGE_VARIANT[project.priorityTag] ?? "outline"}>{project.priorityTag}</Badge>
-            )}
+            <PriorityTag tag={project.priorityTag} />
             {project.isManual && <Badge variant="secondary">Propio</Badge>}
             {project.tags.slice(0, 3).map((t) => (
               <Badge key={t} variant="secondary">

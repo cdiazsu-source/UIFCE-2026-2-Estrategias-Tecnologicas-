@@ -94,6 +94,11 @@ export async function applyUndo(action: UndoAction) {
       revalidatePath(`/proyectos/${action.id}`);
       break;
     }
+    case "project.priority": {
+      await prisma.project.update({ where: { id: action.id }, data: { priorityTag: action.before } });
+      revalidatePath(`/proyectos/${action.id}`);
+      break;
+    }
     case "social.update": {
       const b = action.before;
       await prisma.socialChannel.update({

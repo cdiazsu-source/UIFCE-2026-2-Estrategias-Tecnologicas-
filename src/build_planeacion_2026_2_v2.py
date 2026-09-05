@@ -22,7 +22,7 @@ PRIORITY_FILL = PatternFill(start_color="FCE9CE", end_color="FCE9CE", fill_type=
 IDEAS = [
     dict(
         id="redes-instagram",
-        cat="Redes y canales — CRÍTICO",
+        cat="Redes y canales — Atención inmediata",
         idea="Recuperación o recreación de la cuenta de Instagram @uifce_un",
         hacer="Agotar primero las vías de recuperación de la cuenta @uifce_un (verificación de identidad ante Meta, apoyo de Imagen Institucional/Unimedios, revisión de correos y dispositivos con sesión activa) e insistir por distintos canales con la persona con la que se ha intentado retomar contacto. Si no se logra recuperar en un plazo máximo de 2-3 semanas, escalar pidiendo la intermediación directa del profesor a cargo del área y, en paralelo, crear una cuenta nueva oficial, tramitar su oficialización ante la Oficina de Medios Digitales de la UNAL (mismo procedimiento ya usado con Instagram y LinkedIn en 2025-2) y migrar de inmediato los contenidos disponibles.",
         espera="Contar, a más tardar en la semana 4 del semestre, con una cuenta de Instagram activa y oficial (recuperada o nueva) desde la cual retomar el calendario editorial sin perder la continuidad de la estrategia de difusión.",
@@ -32,7 +32,7 @@ IDEAS = [
     ),
     dict(
         id="redes-linkedin",
-        cat="Redes y canales — PRIORITARIO",
+        cat="Redes y canales — Próximo ciclo",
         idea="Posicionamiento prioritario de LinkedIn UIFCE",
         hacer="Definir LinkedIn como canal prioritario del semestre: construir un calendario editorial propio (logros de monitores y egresados, proyectos de estudio, contenido profesional/técnico), aumentar la frecuencia de publicación frente a 2026-1 y evaluar la migración de contenido desde la cuenta personal hacia la cuenta empresa de la Unidad, pendiente según la Guía de Empalme.",
         espera="Superar de manera sostenida las cifras de 2026-1 (7 publicaciones, 1.491 impresiones, 42 reacciones), consolidando a LinkedIn como el canal de posicionamiento profesional e institucional de la UIFCE ante egresados, empresas y otras dependencias académicas.",
@@ -42,7 +42,7 @@ IDEAS = [
     ),
     dict(
         id="redes-tiktok",
-        cat="Redes y canales — NUEVO",
+        cat="Redes y canales — Backlog",
         idea="Creación de la cuenta de TikTok UIFCE",
         hacer="Solicitar ante Imagen Institucional/Unimedios los lineamientos para cuentas institucionales en nuevas plataformas, crear y oficializar la cuenta de TikTok siguiendo el mismo trámite usado en 2026-1 para Instagram y LinkedIn, y definir un formato de contenido propio (no una simple réplica de los reels de Instagram). Complementar el lanzamiento con difusión \"análoga\" presencial (volantes/folletos entregados directamente a estudiantes en la Facultad, siguiendo la lógica de negocios cercanos que reparten volantes con promociones), en lugar de depender solo de que la audiencia encuentre la cuenta por su cuenta en redes.",
         espera="Contar con una cuenta de TikTok oficial y activa hacia la mitad del semestre, con un primer lote de publicaciones que permita evaluar su aporte real de alcance antes de comprometer más capacidad de producción del área.",
@@ -172,7 +172,7 @@ IDEAS = [
     ),
     dict(
         id="estrategicos-boletin-digital",
-        cat="Proyectos estratégicos — NUEVO",
+        cat="Proyectos estratégicos — Backlog",
         idea="Boletín Digital UIFCE",
         hacer="Diseñar la plantilla del boletín, definir el protocolo de recolección de contenido con cada área (AA, GC, DS, Virtualización, CL) y publicar tres números durante el semestre.",
         espera="Tres ediciones publicadas con contenido aportado por al menos tres áreas distintas de la UIFCE en cada número.",
@@ -182,7 +182,7 @@ IDEAS = [
     ),
     dict(
         id="estrategicos-red-aliados-academicos",
-        cat="Proyectos estratégicos — NUEVO",
+        cat="Proyectos estratégicos — Backlog",
         idea="Red de Aliados Académicos UIFCE",
         hacer="Construir un listado vivo de profesores y asignaturas aliadas por programa curricular (administración, economía, contaduría) que faciliten la convocatoria presencial a eventos y servicios de la UIFCE.",
         espera="Red activa y utilizada como mecanismo formal de convocatoria para la Semana UIFCE y los microtalleres del semestre.",
@@ -192,7 +192,7 @@ IDEAS = [
     ),
     dict(
         id="innovacion-repositorio-ia",
-        cat="Innovación y eficiencia operativa — NUEVO",
+        cat="Innovación y eficiencia operativa — Backlog",
         idea="Repositorio de material con IA y automatización de producción de video",
         hacer="Evaluar y adoptar herramientas de inteligencia artificial en dos frentes: (1) un repositorio de material clasificado y buscable (piezas, hacks, videos, documentos de proyectos), y (2) automatización de tareas repetitivas de edición de video (subtitulado, recortes por plataforma, primeros cortes). Articular el repositorio con el soporte documental permanente del área (idea siguiente).",
         espera="Un repositorio de material en operación que reduzca el tiempo de búsqueda frente a la práctica actual en Drive, y al menos un flujo de edición de video con una etapa automatizada funcionando de forma regular hacia el final del semestre.",
@@ -202,7 +202,7 @@ IDEAS = [
     ),
     dict(
         id="documentacion-repositorio-permanente",
-        cat="Documentación y memoria institucional — NUEVO",
+        cat="Documentación y memoria institucional — Backlog",
         idea="Repositorio documental permanente de Estrategias Tecnológicas",
         hacer="Diseñar y poner en marcha un repositorio propio de ET (carpeta estructurada en Drive con convención de nombres y metadatos mínimos: fecha, tipo de pieza, campaña, autor) donde se archive de forma permanente todo el material del área —piezas gráficas, videos, documentos de proyectos, credenciales y evidencias de gestión de redes— más allá de cada semestre, en articulación con el repositorio general que ya lidera Gestión del Conocimiento (GC). Adoptar el mecanismo propuesto en el empalme: que cada máster entrante tome accesos directos al repositorio único en lugar de copiar carpetas completas semestre a semestre, y mantener un asistente de IA con contexto del Drive (ej. Gemini) que permita ubicar cualquier archivo por consulta en lenguaje natural.",
         espera="Un soporte documental único y organizado, disponible para cualquier monitor entrante desde el primer día de empalme, que reduzca el riesgo de pérdidas como la de la cuenta de Instagram y evite que el conocimiento del área se disperse entre semestres.",
@@ -212,7 +212,7 @@ IDEAS = [
     ),
     dict(
         id="documentacion-propuesta-drive-gc",
-        cat="Documentación y memoria institucional — NUEVO",
+        cat="Documentación y memoria institucional — Backlog",
         idea="Propuesta de reorganización del Drive UIFCE ante Gestión del Conocimiento (GC)",
         hacer="Presentar a GC la propuesta formal de repositorio documental permanente para todo el Drive de UIFCE: separar el contenido vigente de cada semestre del contenido permanente por proyecto de continuidad, con convención común de nomenclatura y uso de accesos directos en lugar de copias, tomando como piloto la carpeta ya reorganizada de ET 2026-2. Acordar con GC qué proyectos migran primero al repositorio permanente y quién lidera la migración del material disperso ya existente.",
         espera="Aval de GC sobre el modelo propuesto, creación de la carpeta piloto \"ET — Repositorio Permanente\" dentro del Drive general, y un plan de migración acordado en conjunto para el contenido histórico disperso.",
@@ -232,7 +232,7 @@ IDEAS = [
     ),
     dict(
         id="documentacion-memorias-2026-2",
-        cat="Documentación y memoria institucional — NUEVO",
+        cat="Documentación y memoria institucional — Backlog",
         idea="Memorias UIFCE 2026-2S",
         hacer="Construir un repositorio de memorias del semestre 2026-2 del área —piezas destacadas, eventos, métricas de canales, hitos, decisiones y aprendizajes— recopilando el material de forma continua durante el semestre y no al cierre, con una estructura de carpetas y una convención de nombres consistentes con el repositorio documental permanente. Producir, a partir de ese material, un video final que resuma la gestión del área en el semestre (línea de tiempo de logros, cifras y testimonios del equipo), aplicando la línea gráfica vigente y el flujo de aprobación por el grupo Piezas Redes Sociales.",
         espera="Al cierre del semestre, un repositorio de memorias 2026-2S organizado y navegable, y un video final publicado y enlazado desde ese repositorio, que sirva de cierre de gestión y de insumo directo para el empalme con el equipo entrante.",

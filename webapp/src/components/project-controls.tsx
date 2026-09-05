@@ -7,7 +7,6 @@ import type { Project } from "@prisma/client";
 import { deleteManualProject, updateProjectContent, updateProjectTags } from "@/lib/actions/projects";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useCanEdit } from "@/components/access-context";
 import { useUndo } from "@/components/undo-banner";
@@ -137,13 +136,11 @@ export function ProjectControls({ project }: { project: Project }) {
               placeholder="Categoría"
               className="min-w-[14rem] flex-1"
             />
-            <Select name="priorityTag" defaultValue={project.priorityTag ?? ""} className="w-40">
-              <option value="">Sin etiqueta</option>
-              <option value="CRÍTICO">Crítico</option>
-              <option value="PRIORITARIO">Prioritario</option>
-              <option value="NUEVO">Nuevo</option>
-            </Select>
           </div>
+          <p className="text-xs text-muted-foreground">
+            La urgencia (❗ Atención Inmediata / 📅 Próximo Ciclo / ⏸️ Backlog) se cambia en el selector «Urgencia» de
+            la cabecera.
+          </p>
           <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             Qué se debe hacer
           </label>

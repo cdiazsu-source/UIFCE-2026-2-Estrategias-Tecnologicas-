@@ -6,6 +6,7 @@ import { Search, X } from "lucide-react";
 import { ProjectCard, type ProjectCardData } from "@/components/project-card";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
+import { PRIORITY_TAG_LABEL } from "@/lib/utils";
 
 function norm(s: string) {
   return s
@@ -30,7 +31,9 @@ export function ProjectsGrid({ projects }: { projects: ProjectCardData[] }) {
     return projects.filter((p) => {
       const matchesText =
         nq.length === 0 ||
-        [p.title, p.category, p.priorityTag ?? "", p.description, ...p.tags].some((f) => norm(f).includes(nq));
+        [p.title, p.category, PRIORITY_TAG_LABEL[p.priorityTag ?? ""] ?? "", p.description, ...p.tags].some((f) =>
+          norm(f).includes(nq),
+        );
       const matchesCategory = category.length === 0 || p.category === category;
       return matchesText && matchesCategory;
     });
