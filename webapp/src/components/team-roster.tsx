@@ -80,7 +80,12 @@ function MemberCard({ member }: { member: RosterMember }) {
 
   const inner = (
     <>
-      <PersonAvatar name={member.name} photoUrl={member.photoUrl} size="md" />
+      <PersonAvatar
+        name={member.name}
+        photoUrl={member.photoUrl}
+        size="md"
+        ringColor={personColor(member)}
+      />
       <div className="min-w-0">
         <p className="flex items-center gap-1 truncate text-sm font-medium">
           {member.name}
@@ -127,7 +132,7 @@ export function TeamRoster({ people }: { people: RosterMember[] }) {
     <div className="flex flex-col gap-2">
       <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
         Integrantes
-        <InfoHint text="El equipo de ET que ejecuta los proyectos (máster y monitores). Cómo se usa: clic en una persona abre su LinkedIn; con perfil completo, el lápiz permite subir o cambiar su foto (se comprime en el navegador) y pegar su enlace de LinkedIn. Ejemplo: «Cesar Diaz · Máster · linkedin.com/in/…»." />
+        <InfoHint text="El equipo de ET que ejecuta los proyectos (máster y monitores); solo se listan integrantes del área ET. El anillo alrededor de la foto es el color de acento de esa persona: el mismo que identifica sus subtareas y proyectos en el resto del panel. Cómo se usa: clic en una persona abre su LinkedIn; con perfil completo, el lápiz permite subir o cambiar su foto (se comprime en el navegador) y pegar su enlace de LinkedIn. Ejemplo: «Cesar Diaz · Máster · linkedin.com/in/…»." />
       </p>
       <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {people.map((m) => (

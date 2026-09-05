@@ -1,13 +1,22 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { ChevronDown, ChevronUp, MessageSquarePlus, Pencil, Plus, Trash2 } from "lucide-react";
+import { useEffect, useMemo, useState, useTransition } from "react";
+import {
+  ChevronDown,
+  ChevronUp,
+  GripVertical,
+  MessageSquarePlus,
+  Pencil,
+  Plus,
+  Trash2,
+} from "lucide-react";
 import type { ChecklistItem } from "@prisma/client";
 
 import {
   addChecklistItem,
   deleteChecklistItem,
   moveChecklistItem,
+  reorderChecklist,
   toggleChecklistItem,
   updateChecklistItem,
 } from "@/lib/actions/checklist";
@@ -56,12 +65,26 @@ function ChecklistRow({
   people,
   isFirst,
   isLast,
+  dragEnabled,
+  dragging,
+  over,
+  onDragStartId,
+  onDragEnterId,
+  onDropId,
+  onDragEndDrag,
 }: {
   item: ChecklistItem;
   projectId: string;
   people: PersonOption[];
   isFirst: boolean;
   isLast: boolean;
+  dragEnabled: boolean;
+  dragging: boolean;
+  over: boolean;
+  onDragStartId: (id: string) => void;
+  onDragEnterId: (id: string) => void;
+  onDropId: (id: string) => void;
+  onDragEndDrag: () => void;
 }) {
   const canEdit = useCanEdit();
   const undo = useUndo();
@@ -102,7 +125,40 @@ function ChecklistRow({
   }
 
   return (
-    <li className="group flex items-start gap-3 rounded-md px-2 py-2 hover:bg-muted/50">
+    <li
+      draggable={dragEnabled}
+      onDragStart={(e) => {
+        e.dataTransfer.effectAllowed = "move";
+        e.dataTransfer.setData("text/plain", item.id);
+        onDragStartId(item.id);
+      }}
+      onDragEnter={() => onDragEnterId(item.id)}
+      onDragOver={(e) => {
+        if (!dragEnabled) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+      }}
+      onDrop={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onDropId(item.id);
+      }}
+      onDragEnd={onDragEndDrag}
+      className={cn(
+        "group flex items-start gap-2 rounded-md px-2 py-2 hover:bg-muted/50",
+        dragging && "opacity-40",
+        over && !dragging && "shadow-[inset_0_2px_0_0_hsl(var(--primary))]",
+      )}
+    >
+      {dragEnabled && (
+        <span
+          className="mt-0.5 shrink-0 cursor-grab text-muted-foreground opacity-40 transition-opacity group-hover:opacity-100 active:cursor-grabbing"
+          aria-hidden
+          title="Arrastra para reordenar"
+        >
+          <GripVertical className="h-3.5 w-3.5" />
+        </span>
+      )}
       <input
         type="checkbox"
         checked={item.done}
@@ -198,8 +254,48 @@ export function Checklist({
   const canEdit = useCanEdit();
   const [showForm, setShowForm] = useState(false);
   const [addKey, setAddKey] = useState(0);
-  const sorted = [...items].sort((a, b) => a.order - b.order);
-  const done = sorted.filter((i) => i.done).length;
+  const [, startReorder] = useTransition();
+
+  const sorted = useMemo(() => [...items].sort((a, b) => a.order - b.order), [items]);
+  const [order, setOrder] = useState<string[]>(() => sorted.map((i) => i.id));
+  const [draggingId, setDraggingId] = useState<string | null>(null);
+  const [overId, setOverId] = useState<string | null>(null);
+
+  // Re-sincroniza el orden local cuando cambian las subtareas (alta / baja /
+  // revalidación tras arrastrar o usar las flechas).
+  useEffect(() => {
+    setOrder(sorted.map((i) => i.id));
+  }, [sorted]);
+
+  const byId = useMemo(() => new Map(sorted.map((i) => [i.id, i])), [sorted]);
+  const displayed = useMemo(() => {
+    const known = order.filter((id) => byId.has(id));
+    const extras = sorted.filter((i) => !order.includes(i.id)).map((i) => i.id);
+    return [...known, ...extras].map((id) => byId.get(id)!);
+  }, [order, byId, sorted]);
+
+  const done = displayed.filter((i) => i.done).length;
+
+  function handleDropOn(targetId: string | null) {
+    const dragId = draggingId;
+    setDraggingId(null);
+    setOverId(null);
+    if (!dragId) return;
+
+    const current = displayed.map((i) => i.id);
+    const ids = current.filter((id) => id !== dragId);
+    if (targetId && targetId !== dragId) {
+      const at = ids.indexOf(targetId);
+      ids.splice(at < 0 ? ids.length : at, 0, dragId);
+    } else {
+      ids.push(dragId); // soltar en el hueco = mover al final
+    }
+
+    if (ids.join() !== current.join()) {
+      setOrder(ids);
+      startReorder(() => reorderChecklist(projectId, ids));
+    }
+  }
 
   return (
     <Card>
@@ -207,9 +303,9 @@ export function Checklist({
         <CardTitle className="flex items-center gap-1.5">
           Checklist{" "}
           <span className="font-normal text-muted-foreground">
-            ({done}/{sorted.length})
+            ({done}/{displayed.length})
           </span>
-          <InfoHint text="Las subtareas de este proyecto. Cómo se usa: la casilla marca hecho, las flechas ▲▼ reordenan, el lápiz edita (texto, responsable del Equipo, vencimiento y personas etiquetadas) y el globo abre la bitácora ligada a esa subtarea. «Agregar subtarea» suma una nueva. Ejemplo: «Calendario editorial 2026-2 · Maria Fernanda Celis · vence 20 sep · @ Cesar Diaz»." />
+          <InfoHint text="Las subtareas de este proyecto. Cómo se usa: la casilla marca hecho; para reordenar, arrástralas por el asa (⠿) o usa las flechas ▲▼; el lápiz edita (texto, responsable del Equipo, vencimiento y personas etiquetadas) y el globo abre la bitácora ligada a esa subtarea. «Agregar subtarea» suma una nueva. Ejemplo: «Calendario editorial 2026-2 · Maria Fernanda Celis · vence 20 sep · @ Cesar Diaz»." />
         </CardTitle>
         {canEdit && (
           <Button size="sm" variant="outline" onClick={() => setShowForm((s) => !s)}>
@@ -240,18 +336,38 @@ export function Checklist({
           </form>
         )}
 
-        {sorted.length === 0 ? (
+        {displayed.length === 0 ? (
           <p className="text-sm text-muted-foreground">Este proyecto todavía no tiene subtareas.</p>
         ) : (
-          <ul className="flex flex-col divide-y divide-border">
-            {sorted.map((item, i) => (
+          <ul
+            className="flex flex-col divide-y divide-border"
+            onDragOver={(e) => {
+              if (draggingId) e.preventDefault();
+            }}
+            onDrop={(e) => {
+              if (!draggingId) return;
+              e.preventDefault();
+              handleDropOn(null);
+            }}
+          >
+            {displayed.map((item, i) => (
               <ChecklistRow
                 key={item.id}
                 item={item}
                 projectId={projectId}
                 people={people}
                 isFirst={i === 0}
-                isLast={i === sorted.length - 1}
+                isLast={i === displayed.length - 1}
+                dragEnabled={canEdit}
+                dragging={draggingId === item.id}
+                over={overId === item.id}
+                onDragStartId={setDraggingId}
+                onDragEnterId={setOverId}
+                onDropId={handleDropOn}
+                onDragEndDrag={() => {
+                  setDraggingId(null);
+                  setOverId(null);
+                }}
               />
             ))}
           </ul>

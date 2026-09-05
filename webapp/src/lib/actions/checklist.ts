@@ -137,6 +137,28 @@ export async function deleteChecklistItem(itemId: string, projectId: string): Pr
   };
 }
 
+/** Reordena todo el checklist a partir de la lista de ids ya ordenada (para
+ *  arrastrar y soltar). `orderedIds` debe cubrir exactamente las subtareas del
+ *  proyecto; si no, no hace nada. Normaliza `order` a 0..n-1. */
+export async function reorderChecklist(projectId: string, orderedIds: string[]) {
+  if (await blockedForJunior()) return;
+
+  const items = await prisma.checklistItem.findMany({
+    where: { projectId },
+    select: { id: true },
+  });
+  const known = new Set(items.map((i) => i.id));
+  const clean = orderedIds.filter((id) => known.has(id));
+  if (clean.length !== items.length || new Set(clean).size !== items.length) return;
+
+  await prisma.$transaction(
+    clean.map((id, idx) => prisma.checklistItem.update({ where: { id }, data: { order: idx } })),
+  );
+
+  revalidatePath("/");
+  revalidatePath(`/proyectos/${projectId}`);
+}
+
 /** Sube o baja una subtarea en el orden del checklist del proyecto,
  *  intercambiando su `order` con el de la vecina. */
 export async function moveChecklistItem(itemId: string, projectId: string, dir: "up" | "down") {

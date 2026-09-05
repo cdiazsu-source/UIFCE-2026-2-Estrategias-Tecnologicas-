@@ -20,29 +20,39 @@ const SIZES = {
 } as const;
 
 /** Avatar circular: la foto si hay photoUrl, o las iniciales si no.
- *  `size` "sm" (28px, por defecto) o "md" (44px). */
+ *  `size` "sm" (28px, por defecto) o "md" (44px). Si se pasa `ringColor`,
+ *  rodea el avatar con un anillo de ese color (identifica el color de acento
+ *  de la persona de un vistazo). */
 export function PersonAvatar({
   name,
   photoUrl,
   size = "sm",
+  ringColor = null,
 }: {
   name: string;
   photoUrl: string | null;
   size?: keyof typeof SIZES;
+  ringColor?: string | null;
 }) {
   const s = SIZES[size];
+  const ringStyle = ringColor
+    ? { boxShadow: `0 0 0 2px hsl(var(--card)), 0 0 0 4px ${ringColor}` }
+    : undefined;
+
   if (photoUrl && photoUrl.trim().length > 0) {
     return (
       // eslint-disable-next-line @next/next/no-img-element
       <img
         src={resolvePhoto(photoUrl.trim())}
         alt={name}
+        style={ringStyle}
         className={`${s.box} shrink-0 rounded-full border border-border object-cover`}
       />
     );
   }
   return (
     <span
+      style={ringStyle}
       className={`${s.box} ${s.text} flex shrink-0 items-center justify-center rounded-full bg-primary/10 font-semibold text-primary`}
     >
       {initials(name)}
