@@ -241,6 +241,16 @@ IDEAS = [
         priority=False,
     ),
     dict(
+        id="memoria-institucional-audiovisual",
+        cat="Documentación y memoria institucional — Próximo ciclo",
+        idea="Memoria institucional audiovisual del equipo y del semestre 2026-2S",
+        hacer="Organizar el archivo fotográfico y audiovisual del equipo y del semestre a partir del material ya subido a Drive (una carpeta por persona con su nombre y una carpeta de fotos y videos grupales de 2026-2S). Definir una convención de nombres, una estructura de carpetas y unos metadatos mínimos (fecha, tipo, persona o grupo, evento, autor) alineados con el repositorio documental permanente. Hacer una selección curada por persona y una del material grupal del semestre, y dejar el archivo listo para alimentar los micrositios (equipo de trabajo y ex monitores) y el video de cierre de gestión. Publicar una guía breve de captación para el resto del semestre.",
+        espera="Un archivo fotográfico y audiovisual organizado y navegable por persona y por semestre, con una selección curada lista para los micrositios y el video de cierre, que no haya que reconstruir cada semestre.",
+        fundamento="El diagnóstico señala que los activos y la memoria del área se pierden si no se organizan. Los micrositios de equipo y de ex monitores y el video de cierre necesitan material por persona y grupal ya curado; hoy el material está en Drive sin convención común. Este proyecto ordena ese insumo y se articula con Memorias UIFCE 2026-2S y con el repositorio documental permanente.",
+        entregables="* Convención de nombres, estructura de carpetas y metadatos mínimos para el archivo por persona y grupal.\n* Inventario del material ya subido a Drive (carpeta por persona + carpeta de grupales 2026-2S).\n* Selección curada de fotos y videos por persona para su ficha en el micrositio.\n* Selección curada de material grupal del semestre (foto de equipo, eventos, hitos).\n* Archivo enlazado con los micrositios (equipo y ex monitores) y con Memorias UIFCE 2026-2S.\n* Guía breve de captación para el resto del semestre.",
+        priority=False,
+    ),
+    dict(
         id="cursoslibres-piezas-primer-lanzamiento",
         cat="Acompañamiento a Cursos Libres",
         idea="Elaboración de piezas gráficas de Cursos Libres — Primer lanzamiento",
