@@ -16,6 +16,22 @@ function norm(s: string) {
     .toLowerCase();
 }
 
+/** Menor = más urgente. Sin etiqueta va al final. */
+const PRIORITY_RANK: Record<string, number> = {
+  ATENCION_INMEDIATA: 0,
+  PROXIMO_CICLO: 1,
+  BACKLOG: 2,
+};
+
+function byUrgency(a: ProjectCardData, b: ProjectCardData) {
+  const ca = a.status === "COMPLETADO" ? 1 : 0;
+  const cb = b.status === "COMPLETADO" ? 1 : 0;
+  if (ca !== cb) return ca - cb;
+  const ra = PRIORITY_RANK[a.priorityTag ?? ""] ?? 3;
+  const rb = PRIORITY_RANK[b.priorityTag ?? ""] ?? 3;
+  return ra - rb || a.sortIndex - b.sortIndex;
+}
+
 export function ProjectsGrid({
   projects,
   focusPersonId,
@@ -29,6 +45,7 @@ export function ProjectsGrid({
 }) {
   const [q, setQ] = useState("");
   const [category, setCategory] = useState("");
+  const [sortMode, setSortMode] = useState<"urgency" | "plan">("urgency");
 
   // Lista base: todo, o solo los pendientes de atención de la persona enfocada.
   const base = useMemo(() => {
@@ -39,16 +56,23 @@ export function ProjectsGrid({
     );
   }, [projects, focusPersonId]);
 
+  // Orden automático: por urgencia (por defecto) u orden de planeación.
+  const ordered = useMemo(() => {
+    const arr = [...base];
+    arr.sort(sortMode === "plan" ? (a, b) => a.sortIndex - b.sortIndex : byUrgency);
+    return arr;
+  }, [base, sortMode]);
+
   const categories = useMemo(
-    () => Array.from(new Set(base.map((p) => p.category))).sort((a, b) => a.localeCompare(b, "es")),
-    [base],
+    () => Array.from(new Set(ordered.map((p) => p.category))).sort((a, b) => a.localeCompare(b, "es")),
+    [ordered],
   );
 
   const nq = norm(q.trim());
   const filtering = nq.length > 0 || category.length > 0;
 
   const filtered = useMemo(() => {
-    return base.filter((p) => {
+    return ordered.filter((p) => {
       const matchesText =
         nq.length === 0 ||
         [p.title, p.category, PRIORITY_TAG_LABEL[p.priorityTag ?? ""] ?? "", p.description, ...p.tags].some((f) =>
@@ -57,7 +81,7 @@ export function ProjectsGrid({
       const matchesCategory = category.length === 0 || p.category === category;
       return matchesText && matchesCategory;
     });
-  }, [base, nq, category]);
+  }, [ordered, nq, category]);
 
   return (
     <div className="flex flex-col gap-3">
@@ -97,6 +121,15 @@ export function ProjectsGrid({
             </option>
           ))}
         </Select>
+        <Select
+          value={sortMode}
+          onChange={(e) => setSortMode(e.target.value as "urgency" | "plan")}
+          className="w-52"
+          aria-label="Ordenar proyectos"
+        >
+          <option value="urgency">Orden: por urgencia</option>
+          <option value="plan">Orden: de planeación</option>
+        </Select>
         {filtering && (
           <button
             type="button"
@@ -114,7 +147,7 @@ export function ProjectsGrid({
 
       {filtering && (
         <p className="text-xs text-muted-foreground">
-          {filtered.length} de {base.length} proyectos
+          {filtered.length} de {ordered.length} proyectos
         </p>
       )}
 

@@ -129,31 +129,53 @@ async function getHomeData(semesterId: string | null, includeOrphans: boolean) {
     }
   }
 
-  const projectCards: ProjectCardData[] = projects.map((p) => {
-    const seen = new Map<string, CardAssignee>();
-    for (const c of p.checklistItems) {
-      if (c.assigneeId && !seen.has(c.assigneeId)) {
-        const u = peopleById.get(c.assigneeId);
-        seen.set(
-          c.assigneeId,
-          u ? { id: u.id, name: u.name, color: u.color } : { id: c.assigneeId, name: c.assignee ?? "—", color: null },
-        );
+  // Rango de urgencia para ordenar: primero «❗ Atención Inmediata», luego
+  // «📅 Próximo Ciclo», luego «⏸️ Backlog», luego sin etiqueta.
+  const PRIORITY_RANK: Record<string, number> = {
+    ATENCION_INMEDIATA: 0,
+    PROXIMO_CICLO: 1,
+    BACKLOG: 2,
+  };
+
+  const projectCards: ProjectCardData[] = projects
+    .map((p, i) => {
+      const seen = new Map<string, CardAssignee>();
+      for (const c of p.checklistItems) {
+        if (c.assigneeId && !seen.has(c.assigneeId)) {
+          const u = peopleById.get(c.assigneeId);
+          seen.set(
+            c.assigneeId,
+            u
+              ? { id: u.id, name: u.name, color: u.color }
+              : { id: c.assigneeId, name: c.assignee ?? "—", color: null },
+          );
+        }
       }
-    }
-    return {
-      id: p.id,
-      title: p.title,
-      category: p.category,
-      priorityTag: p.priorityTag,
-      status: p.status,
-      checklistDone: p.checklistItems.filter((c) => c.done).length,
-      checklistTotal: p.checklistItems.length,
-      isManual: p.isManual,
-      description: p.description,
-      tags: p.tags,
-      assignees: [...seen.values()],
-    };
-  });
+      return {
+        id: p.id,
+        title: p.title,
+        category: p.category,
+        priorityTag: p.priorityTag,
+        status: p.status,
+        checklistDone: p.checklistItems.filter((c) => c.done).length,
+        checklistTotal: p.checklistItems.length,
+        isManual: p.isManual,
+        description: p.description,
+        tags: p.tags,
+        assignees: [...seen.values()],
+        sortIndex: i,
+      };
+    })
+    // Orden por defecto: los que requieren atención más urgente primero; los
+    // completados al final; el orden de planeación como desempate.
+    .sort((a, b) => {
+      const ca = a.status === "COMPLETADO" ? 1 : 0;
+      const cb = b.status === "COMPLETADO" ? 1 : 0;
+      if (ca !== cb) return ca - cb;
+      const ra = PRIORITY_RANK[a.priorityTag ?? ""] ?? 3;
+      const rb = PRIORITY_RANK[b.priorityTag ?? ""] ?? 3;
+      return ra - rb || a.sortIndex - b.sortIndex;
+    });
 
   const feedItems: FeedItem[] = [
     ...notes.map(
@@ -253,7 +275,7 @@ export default async function HomePage({
           >
             <h2 className="flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
               Proyectos {selected ? `${selected.label} ` : ""}({projectCards.length})
-              <InfoHint text="Una tarjeta por iniciativa del semestre seleccionado (pestañas de arriba). Cómo se usa: busca por texto o filtra por categoría (Redes y canales, Producción de contenido, Eventos…); el progreso cuenta subtareas hechas y la franja de color a la izquierda es la persona asignada — titila si el proyecto está en «❗ Atención Inmediata». Con perfil completo, «Nuevo proyecto» lo crea en el semestre visible. Ejemplo: elige «Eventos» para ver solo esos proyectos." />
+              <InfoHint text="Una tarjeta por iniciativa del semestre seleccionado (pestañas de arriba). Por defecto se ordenan por urgencia (primero «❗ Atención Inmediata», luego «📅 Próximo Ciclo», luego «⏸️ Backlog»; los completados al final); el desplegable «Orden» permite volver al orden de planeación. Cómo se usa: busca por texto o filtra por categoría; el progreso cuenta subtareas hechas y la franja de color a la izquierda es la persona asignada — titila si el proyecto está en «❗ Atención Inmediata». Con perfil completo, «Nuevo proyecto» lo crea en el semestre visible. Ejemplo: elige «Eventos» para ver solo esos proyectos." />
             </h2>
             <NewProjectButton semesterId={selected?.id} semesterLabel={selected?.label} />
           </div>

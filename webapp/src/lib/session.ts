@@ -32,3 +32,11 @@ export async function blockedForJunior(): Promise<boolean> {
 export async function canRecordMetrics(): Promise<boolean> {
   return (await getSession()).authed;
 }
+
+/** ¿La sesión puede gestionar el checklist (crear / editar / reordenar / marcar
+ *  subtareas)? El perfil completo y el junior sí. El junior tiene una
+ *  restricción extra: como responsable solo puede poner a un monitor Junior
+ *  (se aplica en src/lib/actions/checklist.ts) y no puede borrar. */
+export async function canManageChecklist(): Promise<boolean> {
+  return (await getSession()).authed;
+}

@@ -3,9 +3,13 @@
 import { revalidatePath } from "next/cache";
 
 import { prisma } from "@/lib/prisma";
-import { blockedForJunior } from "@/lib/session";
+import { blockedForJunior, canEdit, canManageChecklist } from "@/lib/session";
 import { resolveMentions } from "@/lib/mentions";
 import type { UndoAction } from "@/lib/undo";
+
+/** Roles del directorio que cuentan como "monitor Junior". El perfil junior
+ *  solo puede asignar subtareas a personas con uno de estos roles. */
+const JUNIOR_ROLES = ["JUNIOR_ARTES", "JUNIOR_AUXILIAR"];
 
 function parseDueDate(raw: FormDataEntryValue | null): Date | null {
   if (!raw || typeof raw !== "string" || raw.trim().length === 0) return null;
@@ -14,20 +18,28 @@ function parseDueDate(raw: FormDataEntryValue | null): Date | null {
 }
 
 /** El responsable se elige de la lista de Equipo. Devuelve el vínculo y el
- *  snapshot del nombre (o ambos null si no se eligió a nadie). */
-async function resolveAssignee(raw: FormDataEntryValue | null) {
+ *  snapshot del nombre (o ambos null si no se eligió a nadie o si el perfil
+ *  junior intentó asignar a alguien que no es monitor Junior). */
+async function resolveAssignee(raw: FormDataEntryValue | null, restrictToJuniors: boolean) {
   const assigneeId = String(raw ?? "").trim();
   if (!assigneeId) return { assigneeId: null, assignee: null };
-  const user = await prisma.user.findUnique({ where: { id: assigneeId }, select: { name: true } });
-  return user ? { assigneeId, assignee: user.name } : { assigneeId: null, assignee: null };
+  const user = await prisma.user.findUnique({
+    where: { id: assigneeId },
+    select: { name: true, role: true },
+  });
+  if (!user) return { assigneeId: null, assignee: null };
+  if (restrictToJuniors && !JUNIOR_ROLES.includes(user.role)) {
+    return { assigneeId: null, assignee: null };
+  }
+  return { assigneeId, assignee: user.name };
 }
 
 export async function addChecklistItem(projectId: string, formData: FormData) {
-  if (await blockedForJunior()) return;
+  if (!(await canManageChecklist())) return;
   const text = String(formData.get("text") ?? "").trim();
   if (!text) return;
 
-  const { assigneeId, assignee } = await resolveAssignee(formData.get("assigneeId"));
+  const { assigneeId, assignee } = await resolveAssignee(formData.get("assigneeId"), !(await canEdit()));
   const dueDate = parseDueDate(formData.get("dueDate"));
   const mentionIds = await resolveMentions(formData.getAll("mentionIds"));
 
@@ -58,7 +70,7 @@ export async function toggleChecklistItem(
   projectId: string,
   done: boolean,
 ): Promise<UndoAction | void> {
-  if (await blockedForJunior()) return;
+  if (!(await canManageChecklist())) return;
   const prev = await prisma.checklistItem.findUnique({ where: { id: itemId }, select: { done: true } });
   if (!prev) return;
   await prisma.checklistItem.update({ where: { id: itemId }, data: { done } });
@@ -72,7 +84,7 @@ export async function updateChecklistItem(
   projectId: string,
   formData: FormData,
 ): Promise<UndoAction | void> {
-  if (await blockedForJunior()) return;
+  if (!(await canManageChecklist())) return;
   const prev = await prisma.checklistItem.findUnique({
     where: { id: itemId },
     select: { text: true, assignee: true, assigneeId: true, dueDate: true, mentionIds: true },
@@ -80,7 +92,17 @@ export async function updateChecklistItem(
   if (!prev) return;
 
   const text = String(formData.get("text") ?? "").trim();
-  const { assigneeId, assignee } = await resolveAssignee(formData.get("assigneeId"));
+  const full = await canEdit();
+  let { assigneeId, assignee } = await resolveAssignee(formData.get("assigneeId"), !full);
+  // Un junior no puede reasignar a alguien que no sea monitor Junior; pero si no
+  // tocó el responsable (mandó el mismo id que ya tenía), se conserva.
+  if (!full && assigneeId === null) {
+    const submitted = String(formData.get("assigneeId") ?? "").trim();
+    if (submitted && submitted === prev.assigneeId) {
+      assigneeId = prev.assigneeId;
+      assignee = prev.assignee;
+    }
+  }
   const dueDate = parseDueDate(formData.get("dueDate"));
   const mentionIds = await resolveMentions(formData.getAll("mentionIds"));
 
@@ -141,7 +163,7 @@ export async function deleteChecklistItem(itemId: string, projectId: string): Pr
  *  arrastrar y soltar). `orderedIds` debe cubrir exactamente las subtareas del
  *  proyecto; si no, no hace nada. Normaliza `order` a 0..n-1. */
 export async function reorderChecklist(projectId: string, orderedIds: string[]) {
-  if (await blockedForJunior()) return;
+  if (!(await canManageChecklist())) return;
 
   const items = await prisma.checklistItem.findMany({
     where: { projectId },
@@ -162,7 +184,7 @@ export async function reorderChecklist(projectId: string, orderedIds: string[]) 
 /** Sube o baja una subtarea en el orden del checklist del proyecto,
  *  intercambiando su `order` con el de la vecina. */
 export async function moveChecklistItem(itemId: string, projectId: string, dir: "up" | "down") {
-  if (await blockedForJunior()) return;
+  if (!(await canManageChecklist())) return;
 
   const items = await prisma.checklistItem.findMany({
     where: { projectId },

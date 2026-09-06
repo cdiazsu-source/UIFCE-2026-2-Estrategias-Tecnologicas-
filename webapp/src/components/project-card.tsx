@@ -31,6 +31,9 @@ export type ProjectCardData = {
   tags: string[];
   /** Personas con al menos una subtarea en el proyecto. */
   assignees: CardAssignee[];
+  /** Posición en el orden de planeación (CSV / creación). Para el modo de orden
+   *  «Orden de planeación» y como desempate estable en «Por urgencia». */
+  sortIndex: number;
 };
 
 export function ProjectCard({ project }: { project: ProjectCardData }) {

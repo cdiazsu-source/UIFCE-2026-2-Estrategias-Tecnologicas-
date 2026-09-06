@@ -29,18 +29,36 @@ import { MentionPicker, MentionTags } from "@/components/mention-picker";
 import { cn, formatDate } from "@/lib/utils";
 import { personColor } from "@/lib/person-color";
 import { BITACORA_TARGET_EVENT } from "@/lib/events";
-import { useCanEdit } from "@/components/access-context";
+import { useCanEdit, useCanManageChecklist } from "@/components/access-context";
 import { useUndo } from "@/components/undo-banner";
 
-export type PersonOption = { id: string; name: string; color?: string | null };
+export type PersonOption = { id: string; name: string; role?: string | null; color?: string | null };
 
-function AssigneeSelect({ people, defaultValue }: { people: PersonOption[]; defaultValue?: string | null }) {
+const JUNIOR_ROLES = new Set(["JUNIOR_ARTES", "JUNIOR_AUXILIAR"]);
+const isJuniorPerson = (p: PersonOption) => !!p.role && JUNIOR_ROLES.has(p.role);
+
+/** `juniorsOnly` (perfil junior): el desplegable solo lista monitores Junior.
+ *  El responsable actual se conserva como opción aunque no sea Junior, para que
+ *  editar el texto no lo borre. */
+function AssigneeSelect({
+  people,
+  defaultValue,
+  juniorsOnly = false,
+}: {
+  people: PersonOption[];
+  defaultValue?: string | null;
+  juniorsOnly?: boolean;
+}) {
+  const base = juniorsOnly ? people.filter(isJuniorPerson) : people;
+  const current = defaultValue ? people.find((p) => p.id === defaultValue) : undefined;
+  const list = current && !base.some((p) => p.id === current.id) ? [current, ...base] : base;
   return (
     <Select name="assigneeId" defaultValue={defaultValue ?? ""} className="w-52">
       <option value="">Sin responsable</option>
-      {people.map((p) => (
+      {list.map((p) => (
         <option key={p.id} value={p.id}>
           {p.name}
+          {juniorsOnly && !isJuniorPerson(p) ? " (actual)" : ""}
         </option>
       ))}
     </Select>
@@ -87,11 +105,12 @@ function ChecklistRow({
   onDragEndDrag: () => void;
 }) {
   const canEdit = useCanEdit();
+  const canManage = useCanManageChecklist();
   const undo = useUndo();
   const [editing, setEditing] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  if (editing && canEdit) {
+  if (editing && canManage) {
     return (
       <form
         action={async (formData) => {
@@ -103,7 +122,7 @@ function ChecklistRow({
       >
         <Input name="text" defaultValue={item.text} />
         <div className="flex flex-wrap gap-2">
-          <AssigneeSelect people={people} defaultValue={item.assigneeId} />
+          <AssigneeSelect people={people} defaultValue={item.assigneeId} juniorsOnly={!canEdit} />
           <Input
             type="date"
             name="dueDate"
@@ -162,9 +181,9 @@ function ChecklistRow({
       <input
         type="checkbox"
         checked={item.done}
-        disabled={isPending || !canEdit}
+        disabled={isPending || !canManage}
         onChange={(e) => {
-          if (!canEdit) return;
+          if (!canManage) return;
           const done = e.target.checked;
           startTransition(async () => {
             const u = await toggleChecklistItem(item.id, projectId, done);
@@ -199,7 +218,7 @@ function ChecklistRow({
         >
           <MessageSquarePlus className="h-3.5 w-3.5" />
         </button>
-        {canEdit && (
+        {canManage && (
           <>
             <button
               type="button"
@@ -222,20 +241,22 @@ function ChecklistRow({
             <button type="button" onClick={() => setEditing(true)} className="rounded p-1 text-muted-foreground hover:bg-accent" aria-label="Editar subtarea">
               <Pencil className="h-3.5 w-3.5" />
             </button>
-            <button
-              type="button"
-              onClick={() =>
-                startTransition(async () => {
-                  const u = await deleteChecklistItem(item.id, projectId);
-                  if (u) undo(u);
-                })
-              }
-              className="rounded p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-              aria-label="Eliminar subtarea"
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </button>
           </>
+        )}
+        {canEdit && (
+          <button
+            type="button"
+            onClick={() =>
+              startTransition(async () => {
+                const u = await deleteChecklistItem(item.id, projectId);
+                if (u) undo(u);
+              })
+            }
+            className="rounded p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+            aria-label="Eliminar subtarea"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </button>
         )}
       </div>
     </li>
@@ -252,6 +273,7 @@ export function Checklist({
   people: PersonOption[];
 }) {
   const canEdit = useCanEdit();
+  const canManage = useCanManageChecklist();
   const [showForm, setShowForm] = useState(false);
   const [addKey, setAddKey] = useState(0);
   const [, startReorder] = useTransition();
@@ -305,9 +327,9 @@ export function Checklist({
           <span className="font-normal text-muted-foreground">
             ({done}/{displayed.length})
           </span>
-          <InfoHint text="Las subtareas de este proyecto. Cómo se usa: la casilla marca hecho; para reordenar, arrástralas por el asa (⠿) o usa las flechas ▲▼; el lápiz edita (texto, responsable del Equipo, vencimiento y personas etiquetadas) y el globo abre la bitácora ligada a esa subtarea. «Agregar subtarea» suma una nueva. Ejemplo: «Calendario editorial 2026-2 · Maria Fernanda Celis · vence 20 sep · @ Cesar Diaz»." />
+          <InfoHint text="Las subtareas de este proyecto. Cómo se usa: la casilla marca hecho; para reordenar, arrástralas por el asa (⠿) o usa las flechas ▲▼; el lápiz edita (texto, responsable del Equipo, vencimiento y personas etiquetadas) y el globo abre la bitácora ligada a esa subtarea. «Agregar subtarea» suma una nueva. El perfil junior puede crear, editar y marcar subtareas, pero solo puede poner de responsable a un monitor Junior; borrar es solo del perfil completo. Ejemplo: «Calendario editorial 2026-2 · Maria Fernanda Celis · vence 20 sep · @ Cesar Diaz»." />
         </CardTitle>
-        {canEdit && (
+        {canManage && (
           <Button size="sm" variant="outline" onClick={() => setShowForm((s) => !s)}>
             <Plus className="h-3.5 w-3.5" />
             Agregar subtarea
@@ -315,7 +337,7 @@ export function Checklist({
         )}
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
-        {canEdit && showForm && (
+        {canManage && showForm && (
           <form
             key={addKey}
             action={async (formData) => {
@@ -326,7 +348,7 @@ export function Checklist({
           >
             <Input name="text" placeholder="Descripción de la subtarea" required />
             <div className="flex flex-wrap gap-2">
-              <AssigneeSelect people={people} />
+              <AssigneeSelect people={people} juniorsOnly={!canEdit} />
               <Input type="date" name="dueDate" className="w-40" />
             </div>
             <MentionPicker name="mentionIds" people={people} />
@@ -358,7 +380,7 @@ export function Checklist({
                 people={people}
                 isFirst={i === 0}
                 isLast={i === displayed.length - 1}
-                dragEnabled={canEdit}
+                dragEnabled={canManage}
                 dragging={draggingId === item.id}
                 over={overId === item.id}
                 onDragStartId={setDraggingId}
