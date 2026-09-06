@@ -90,7 +90,8 @@ model Semester {
   isCurrent  Boolean  @default(false)
   order      Int      @default(0)
 
-  projects Project[]
+  projects      Project[]
+  studyProjects StudyProject[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -492,6 +493,9 @@ model StudyProject {
   /// Enlace a la carpeta de Drive donde el Junior sube los entregables.
   driveFolderUrl String?
   order       Int       @default(0)
+  /// Semestre al que pertenece; se muestra agrupado por semestre en el panel.
+  semesterId  String?
+  semester    Semester? @relation(fields: [semesterId], references: [id], onDelete: SetNull)
 
   checkpoints StudyCheckpoint[]
 
@@ -499,6 +503,7 @@ model StudyProject {
   updatedAt DateTime @updatedAt
 
   @@index([ownerId])
+  @@index([semesterId])
 }
 
 /// Uno de los 4 puntos de corte de un proyecto de estudio. Se crean los 4 al

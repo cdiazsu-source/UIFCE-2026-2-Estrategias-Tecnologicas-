@@ -6,11 +6,12 @@ import { ProjectsGrid } from "@/components/projects-grid";
 import { SemesterTabs, type SemesterTab } from "@/components/semester-tabs";
 import { SemesterObjectives } from "@/components/semester-objectives";
 import { TeamRoster, type RosterMember } from "@/components/team-roster";
+import { StudyProjects, type JuniorWithStudy } from "@/components/study-projects";
 import { UpdatesFeed, type FeedItem } from "@/components/updates-feed";
 import { TeamComments, type TeamCommentData } from "@/components/team-comments";
 import { InfoHint } from "@/components/info-hint";
 import { NewProjectButton } from "@/components/new-project-button";
-import { formatDateTime } from "@/lib/utils";
+import { formatDateTime, JUNIOR_ROLES } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -49,7 +50,7 @@ async function getHomeData(semesterId: string | null, includeOrphans: boolean) {
         ? { OR: [{ semesterId }, { semesterId: null }] }
         : { semesterId };
 
-  const [stats, projects, notes, completed, people, roster, teamComments, director, areaProfile] =
+  const [stats, projects, notes, completed, people, roster, teamComments, director, areaProfile, studyJuniors] =
     await Promise.all([
       prisma.situationStat.findMany({ orderBy: { order: "asc" } }),
       prisma.project.findMany({
@@ -106,9 +107,32 @@ async function getHomeData(semesterId: string | null, includeOrphans: boolean) {
         select: { name: true, lastSeenAt: true },
       }),
       prisma.areaProfile.findUnique({ where: { id: "area" } }),
+      prisma.user.findMany({
+        where: { role: { in: [...JUNIOR_ROLES] } },
+        orderBy: [{ role: "asc" }, { name: "asc" }],
+        include: {
+          studyProjects: {
+            where: projectWhere,
+            orderBy: { order: "asc" },
+            include: { checkpoints: { orderBy: { number: "asc" } } },
+          },
+        },
+      }),
     ]);
 
   const peopleById = new Map(people.map((u) => [u.id, u]));
+
+  const studyProjectsData: JuniorWithStudy[] = studyJuniors.map((j) => ({
+    id: j.id,
+    name: j.name,
+    role: j.role,
+    color: j.color,
+    photoUrl: j.photoUrl,
+    studyProjects: j.studyProjects,
+  }));
+  const studyJuniorOptions = studyJuniors
+    .filter((j) => j.active)
+    .map((j) => ({ id: j.id, name: j.name }));
 
   // Por proyecto: la siguiente subtarea pendiente (la que "sigue") y si ya está todo hecho.
   const nextPending = new Map<string, string>();
@@ -221,7 +245,18 @@ async function getHomeData(semesterId: string | null, includeOrphans: boolean) {
     ? { description: areaProfile.description, objectives: areaProfile.objectives }
     : null;
 
-  return { stats, projectCards, feedItems, rosterMembers, comments, commentAuthors, director, profile };
+  return {
+    stats,
+    projectCards,
+    feedItems,
+    rosterMembers,
+    comments,
+    commentAuthors,
+    director,
+    profile,
+    studyProjectsData,
+    studyJuniorOptions,
+  };
 }
 
 export default async function HomePage({
@@ -230,8 +265,18 @@ export default async function HomePage({
   searchParams: { sem?: string; focus?: string };
 }) {
   const { tabs, selected, isSelectedCurrent } = await getSemesters(searchParams.sem);
-  const { stats, projectCards, feedItems, rosterMembers, comments, commentAuthors, director, profile } =
-    await getHomeData(selected?.id ?? null, isSelectedCurrent);
+  const {
+    stats,
+    projectCards,
+    feedItems,
+    rosterMembers,
+    comments,
+    commentAuthors,
+    director,
+    profile,
+    studyProjectsData,
+    studyJuniorOptions,
+  } = await getHomeData(selected?.id ?? null, isSelectedCurrent);
 
   // ?focus=<id>: enfoca la grilla en los pendientes de atención de esa persona.
   const focusPerson = searchParams.focus
@@ -290,6 +335,19 @@ export default async function HomePage({
               focusPersonName={focusPerson?.name}
             />
           )}
+
+          <div className="flex flex-col gap-2 border-t border-border pt-4">
+            <h2 className="flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+              Proyectos de estudio {selected ? `${selected.label} ` : ""}
+              <InfoHint text="Los proyectos de estudio de los monitores Junior del semestre seleccionado, agrupados por Junior, cada uno con su cronograma y sus 4 puntos de corte. Un Junior puede tener varios. Cómo se usa: con perfil completo, «Agregar proyecto de estudio» lo crea en el semestre visible; edita cada punto de corte (fecha y estado) y pega el enlace de la carpeta de Drive de entregables. Los Junior se definen en Equipo." />
+            </h2>
+            <StudyProjects
+              juniors={studyProjectsData}
+              juniorOptions={studyJuniorOptions}
+              semesterId={selected?.id}
+              semesterLabel={selected?.label}
+            />
+          </div>
         </div>
 
         <div className="flex flex-col gap-6">

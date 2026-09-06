@@ -6,7 +6,12 @@ import type { CheckpointStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { blockedForJunior } from "@/lib/session";
 
-const PATH = "/proyectos-de-estudio";
+// Los proyectos de estudio se ven en el panel principal (por semestre); se
+// revalida "/" además de la ruta antigua por si sigue enlazada.
+const PATHS = ["/", "/proyectos-de-estudio"];
+function revalidateStudy() {
+  for (const p of PATHS) revalidatePath(p);
+}
 
 const CHECKPOINT_STATUSES: CheckpointStatus[] = ["PENDIENTE", "EN_CURSO", "CUMPLIDO", "ATRASADO"];
 
@@ -34,6 +39,12 @@ export async function createStudyProject(formData: FormData) {
   const description = String(formData.get("description") ?? "").trim();
   const schedule = String(formData.get("schedule") ?? "").trim();
 
+  // Semestre: el que se eligió (viene del panel), si no el vigente.
+  const rawSemesterId = String(formData.get("semesterId") ?? "").trim();
+  const semester = rawSemesterId
+    ? await prisma.semester.findUnique({ where: { id: rawSemesterId }, select: { id: true } })
+    : await prisma.semester.findFirst({ where: { isCurrent: true }, select: { id: true } });
+
   const count = await prisma.studyProject.count({ where: { ownerId } });
 
   await prisma.studyProject.create({
@@ -42,6 +53,7 @@ export async function createStudyProject(formData: FormData) {
       title,
       description: description.length > 0 ? description : null,
       schedule: schedule.length > 0 ? schedule : null,
+      semesterId: semester?.id ?? null,
       order: count,
       checkpoints: {
         create: DEFAULT_CHECKPOINT_LABELS.map((label, i) => ({
@@ -52,7 +64,7 @@ export async function createStudyProject(formData: FormData) {
     },
   });
 
-  revalidatePath(PATH);
+  revalidateStudy();
 }
 
 export async function updateStudyProject(id: string, formData: FormData) {
@@ -70,13 +82,13 @@ export async function updateStudyProject(id: string, formData: FormData) {
     },
   });
 
-  revalidatePath(PATH);
+  revalidateStudy();
 }
 
 export async function deleteStudyProject(id: string) {
   if (await blockedForJunior()) return;
   await prisma.studyProject.delete({ where: { id } });
-  revalidatePath(PATH);
+  revalidateStudy();
 }
 
 export async function updateCheckpoint(id: string, formData: FormData) {
@@ -94,13 +106,13 @@ export async function updateCheckpoint(id: string, formData: FormData) {
     },
   });
 
-  revalidatePath(PATH);
+  revalidateStudy();
 }
 
 export async function setCheckpointStatus(id: string, status: CheckpointStatus) {
   if (await blockedForJunior()) return;
   await prisma.studyCheckpoint.update({ where: { id }, data: { status } });
-  revalidatePath(PATH);
+  revalidateStudy();
 }
 
 export async function updateStudyProjectDrive(id: string, driveFolderUrl: string) {
@@ -110,5 +122,5 @@ export async function updateStudyProjectDrive(id: string, driveFolderUrl: string
     where: { id },
     data: { driveFolderUrl: trimmed.length > 0 ? trimmed : null },
   });
-  revalidatePath(PATH);
+  revalidateStudy();
 }

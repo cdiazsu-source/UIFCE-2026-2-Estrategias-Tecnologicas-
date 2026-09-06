@@ -18,7 +18,6 @@ import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { InfoHint } from "@/components/info-hint";
 import { PersonAvatar } from "@/components/person-avatar";
 import { useCanEdit } from "@/components/access-context";
 import { CHECKPOINT_STATUS_LABEL, formatDate, USER_ROLE_LABEL } from "@/lib/utils";
@@ -305,9 +304,14 @@ function StudyProjectCard({ project }: { project: StudyProjectFull }) {
 export function StudyProjects({
   juniors,
   juniorOptions,
+  semesterId,
+  semesterLabel,
 }: {
   juniors: JuniorWithStudy[];
   juniorOptions: JuniorOption[];
+  /** Semestre en el que se crean los nuevos proyectos de estudio (panel principal). */
+  semesterId?: string;
+  semesterLabel?: string;
 }) {
   const canEdit = useCanEdit();
   const [showForm, setShowForm] = useState(false);
@@ -333,6 +337,12 @@ export function StudyProjects({
           id="study-add-form"
           className="flex flex-col gap-2 rounded-md border border-dashed border-input p-4"
         >
+          {semesterId && <input type="hidden" name="semesterId" value={semesterId} />}
+          {semesterLabel && (
+            <p className="text-xs text-muted-foreground">
+              Se crea en el semestre <span className="font-medium text-foreground">{semesterLabel}</span>.
+            </p>
+          )}
           <div className="flex flex-wrap gap-2">
             <Select name="ownerId" defaultValue="" required className="w-52">
               <option value="" disabled>
@@ -375,12 +385,10 @@ export function StudyProjects({
               <PersonAvatar name={junior.name} photoUrl={junior.photoUrl ?? null} />
               <h2 className="text-lg font-semibold">{junior.name}</h2>
               <Badge variant="outline">{USER_ROLE_LABEL[junior.role]}</Badge>
-              {junior.studyProjects.length !== 1 && (
-                <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-                  {junior.studyProjects.length} de 1 proyecto
-                  <InfoHint text="Cada Junior expone un proyecto de estudio por semestre. Este número no coincide con 1 — revísalo." />
-                </span>
-              )}
+              <span className="text-xs text-muted-foreground">
+                {junior.studyProjects.length}{" "}
+                {junior.studyProjects.length === 1 ? "proyecto de estudio" : "proyectos de estudio"}
+              </span>
             </div>
             {junior.studyProjects.length === 0 ? (
               <p className="text-sm text-muted-foreground">Sin proyecto de estudio todavía.</p>

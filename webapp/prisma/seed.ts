@@ -922,13 +922,20 @@ async function main() {
   await seedAreaProfile();
   await seedLinkedInTrackees();
 
-  // Cualquier proyecto sin semestre (creados antes de esta función) al vigente.
+  // Proyectos y proyectos de estudio sin semestre (creados antes de agrupar por
+  // semestre) → al vigente.
   const semesterId = await ensureCurrentSemester();
   const orphans = await prisma.project.updateMany({
     where: { semesterId: null },
     data: { semesterId },
   });
   if (orphans.count > 0) console.log(`Proyectos asignados a ${CURRENT_SEMESTER_LABEL}: ${orphans.count}`);
+  const studyOrphans = await prisma.studyProject.updateMany({
+    where: { semesterId: null },
+    data: { semesterId },
+  });
+  if (studyOrphans.count > 0)
+    console.log(`Proyectos de estudio asignados a ${CURRENT_SEMESTER_LABEL}: ${studyOrphans.count}`);
 }
 
 main()
