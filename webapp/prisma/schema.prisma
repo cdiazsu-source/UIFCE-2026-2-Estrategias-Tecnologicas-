@@ -126,6 +126,10 @@ model Project {
   /// El resync desde el CSV deja de sobrescribir esos campos para no perder
   /// la edición; el CSV sigue mandando el orden (sourceOrder).
   editedInApp     Boolean       @default(false)
+  /// Persona responsable del proyecto (asignación a nivel de proyecto, aparte de
+  /// los responsables de cada subtarea). Da el color del proyecto en el panel.
+  assigneeId      String?
+  assignee        User?         @relation(fields: [assigneeId], references: [id], onDelete: SetNull)
 
   checklistItems ChecklistItem[]
   notes          ProjectNote[]
@@ -136,6 +140,7 @@ model Project {
   updatedAt DateTime @updatedAt
 
   @@index([semesterId])
+  @@index([assigneeId])
 }
 
 /// Subtarea del checklist de un proyecto. Se siembra una sola vez desde las
@@ -267,6 +272,7 @@ model User {
 
   studyProjects        StudyProject[]
   projectNotes         ProjectNote[]
+  assignedProjects     Project[]
   assignedChecklistItems ChecklistItem[]
   socialChannels       SocialChannel[]
   socialMetrics        SocialMetric[]

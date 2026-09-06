@@ -65,6 +65,8 @@ async function getHomeData(semesterId: string | null, includeOrphans: boolean) {
           isManual: true,
           description: true,
           tags: true,
+          assigneeId: true,
+          assignee: { select: { id: true, name: true, color: true } },
           checklistItems: {
             orderBy: { order: "asc" },
             select: { done: true, order: true, text: true, assigneeId: true, assignee: true },
@@ -149,6 +151,7 @@ async function getHomeData(semesterId: string | null, includeOrphans: boolean) {
       const ids = new Set(
         p.checklistItems.map((c) => c.assigneeId).filter((x): x is string => !!x),
       );
+      if (p.assigneeId) ids.add(p.assigneeId);
       for (const id of ids) urgentByPerson.set(id, (urgentByPerson.get(id) ?? 0) + 1);
     }
   }
@@ -163,7 +166,11 @@ async function getHomeData(semesterId: string | null, includeOrphans: boolean) {
 
   const projectCards: ProjectCardData[] = projects
     .map((p, i) => {
+      const directAssignee: CardAssignee | null = p.assignee
+        ? { id: p.assignee.id, name: p.assignee.name, color: p.assignee.color }
+        : null;
       const seen = new Map<string, CardAssignee>();
+      if (directAssignee) seen.set(directAssignee.id, directAssignee);
       for (const c of p.checklistItems) {
         if (c.assigneeId && !seen.has(c.assigneeId)) {
           const u = peopleById.get(c.assigneeId);
@@ -185,6 +192,7 @@ async function getHomeData(semesterId: string | null, includeOrphans: boolean) {
         checklistTotal: p.checklistItems.length,
         isManual: p.isManual,
         description: p.description,
+        assignee: directAssignee,
         tags: p.tags,
         assignees: [...seen.values()],
         sortIndex: i,

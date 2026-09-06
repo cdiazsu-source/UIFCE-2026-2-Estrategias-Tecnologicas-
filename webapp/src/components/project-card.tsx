@@ -29,8 +29,11 @@ export type ProjectCardData = {
   description: string;
   /** Etiquetas libres del proyecto. */
   tags: string[];
-  /** Personas con al menos una subtarea en el proyecto. */
+  /** Personas con al menos una subtarea en el proyecto (incluye al responsable). */
   assignees: CardAssignee[];
+  /** Responsable del proyecto (asignación a nivel de proyecto), si hay. Da el
+   *  color de la franja de la tarjeta. */
+  assignee: CardAssignee | null;
   /** Posición en el orden de planeación (CSV / creación). Para el modo de orden
    *  «Orden de planeación» y como desempate estable en «Por urgencia». */
   sortIndex: number;
@@ -39,12 +42,13 @@ export type ProjectCardData = {
 export function ProjectCard({ project }: { project: ProjectCardData }) {
   const progress = project.checklistTotal > 0 ? (project.checklistDone / project.checklistTotal) * 100 : 0;
 
-  // Alerta por persona: franja de color con el acento de quien está asignado
-  // (siempre visible), que titila solo cuando el proyecto está en «❗ Atención
-  // Inmediata» (requiere atención directa).
-  const assigned = project.assignees.length > 0;
-  const accent =
-    project.assignees.length === 1 ? personColor(project.assignees[0]) : null;
+  // Franja de color de la tarjeta: el acento del responsable del proyecto; si no
+  // hay, el de la única persona con subtareas. Titila solo cuando el proyecto
+  // está en «❗ Atención Inmediata».
+  const accentPerson =
+    project.assignee ?? (project.assignees.length === 1 ? project.assignees[0] : null);
+  const assigned = !!project.assignee || project.assignees.length > 0;
+  const accent = accentPerson ? personColor(accentPerson) : null;
   const urgent = assigned && project.priorityTag === "ATENCION_INMEDIATA";
 
   return (

@@ -140,6 +140,35 @@ export async function updateProjectPriority(
   return { kind: "project.priority", id: projectId, before: prev.priorityTag };
 }
 
+/** Asigna el proyecto a una persona del equipo (o lo deja sin responsable).
+ *  Bloqueado para el perfil junior — solo los roles distintos de Junior asignan
+ *  proyectos. El color de esa persona identifica el proyecto en el panel. */
+export async function updateProjectAssignee(
+  projectId: string,
+  rawUserId: string,
+): Promise<UndoAction | void> {
+  if (await blockedForJunior()) return;
+
+  const prev = await prisma.project.findUnique({
+    where: { id: projectId },
+    select: { assigneeId: true },
+  });
+  if (!prev) return;
+
+  const id = rawUserId.trim();
+  const user = id
+    ? await prisma.user.findFirst({ where: { id, active: true }, select: { id: true } })
+    : null;
+  const assigneeId = user?.id ?? null;
+  if (prev.assigneeId === assigneeId) return;
+
+  await prisma.project.update({ where: { id: projectId }, data: { assigneeId } });
+  revalidatePath("/");
+  revalidatePath(`/proyectos/${projectId}`);
+
+  return { kind: "project.assignee", id: projectId, before: prev.assigneeId };
+}
+
 /** Edita los campos de contenido de cualquier proyecto. Si el proyecto viene
  *  del CSV, lo marca como editado en la app para que el resync deje de
  *  sobrescribir esos campos (ver Project.editedInApp). */

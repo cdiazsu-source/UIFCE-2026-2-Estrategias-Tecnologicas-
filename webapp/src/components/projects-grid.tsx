@@ -52,7 +52,8 @@ export function ProjectsGrid({
     if (!focusPersonId) return projects;
     return projects.filter(
       (p) =>
-        p.priorityTag === "ATENCION_INMEDIATA" && p.assignees.some((a) => a.id === focusPersonId),
+        p.priorityTag === "ATENCION_INMEDIATA" &&
+        (p.assignee?.id === focusPersonId || p.assignees.some((a) => a.id === focusPersonId)),
     );
   }, [projects, focusPersonId]);
 
