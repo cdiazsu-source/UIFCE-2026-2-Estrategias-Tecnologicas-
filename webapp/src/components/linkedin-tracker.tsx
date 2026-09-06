@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
-import { Check, ChevronDown, Linkedin, Pencil, Plus, Trash2 } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, Check, ChevronDown, ExternalLink, Linkedin, Pencil, Plus, Trash2 } from "lucide-react";
 
 import {
   addLinkedInSnapshot,
@@ -19,6 +20,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { PersonAvatar } from "@/components/person-avatar";
 import { useCanEdit, useCanRecordMetrics } from "@/components/access-context";
 import { useUndo } from "@/components/undo-banner";
+import { formatDate } from "@/lib/utils";
 
 export type SnapshotData = {
   id: string;
@@ -67,6 +69,22 @@ const LEVEL_LABEL: Record<string, string> = {
   junior: "Junior",
 };
 const LEVEL_OPTIONS = ["direction", "coordination", "lead", "master", "junior"];
+/** Orden de aparición: Dirección → Coordinación → Liderazgo → Máster → resto. */
+const LEVEL_RANK: Record<string, number> = {
+  direction: 0,
+  coordination: 1,
+  lead: 2,
+  master: 3,
+  junior: 4,
+};
+
+export type OrgSummary = {
+  handle: string | null;
+  url: string | null;
+  followers: number | null;
+  metricAt: Date | null;
+  metrics: { label: string; value: number | null }[];
+} | null;
 
 function num(v: number | boolean | null | undefined): string {
   if (typeof v === "number") return v.toLocaleString("es-CO");
@@ -471,15 +489,84 @@ function TrackeeCard({
   );
 }
 
+/** Tarjeta de la página institucional de LinkedIn: resumen de solo lectura de
+ *  la última medición registrada en Redes sociales. Ocupa el ancho de dos
+ *  tarjetas y va primera. */
+function OrgCard({ org }: { org: NonNullable<OrgSummary> }) {
+  return (
+    <Card className="border-primary/30 lg:col-span-2">
+      <CardHeader className="flex-row items-start justify-between gap-2 space-y-0 pb-3">
+        <div className="flex min-w-0 items-center gap-2.5">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+            <Linkedin className="h-5 w-5" />
+          </span>
+          <div className="min-w-0">
+            <p className="truncate font-semibold">LinkedIn de la Unidad de Informática (UIFCE)</p>
+            <p className="text-xs text-muted-foreground">
+              {org.url ? (
+                <a
+                  href={org.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1 hover:text-foreground hover:underline"
+                >
+                  {org.handle ?? "Página institucional"}
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              ) : (
+                org.handle ?? "Página institucional"
+              )}
+              {org.metricAt ? ` · última medición ${formatDate(org.metricAt)}` : " · sin mediciones aún"}
+            </p>
+          </div>
+        </div>
+        <Link
+          href="/redes"
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-input px-2.5 py-1.5 text-xs font-medium text-primary hover:bg-accent"
+        >
+          Editar en Redes sociales
+          <ArrowRight className="h-3.5 w-3.5" />
+        </Link>
+      </CardHeader>
+      <CardContent>
+        <div className="flex flex-wrap gap-x-6 gap-y-2">
+          {org.followers != null && (
+            <span className="text-sm">
+              <span className="text-muted-foreground">Seguidores:</span>{" "}
+              <span className="font-medium">{num(org.followers)}</span>
+            </span>
+          )}
+          {org.metrics
+            .filter((m) => m.value != null)
+            .map((m) => (
+              <span key={m.label} className="text-sm">
+                <span className="text-muted-foreground">{m.label}:</span>{" "}
+                <span className="font-medium">{num(m.value)}</span>
+              </span>
+            ))}
+          {org.followers == null && org.metrics.every((m) => m.value == null) && (
+            <span className="text-sm text-muted-foreground">
+              Aún no hay métricas de la página. Se registran en la tarjeta de LinkedIn de Redes sociales.
+            </span>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function LinkedInTracker({
   trackees,
   people,
+  org,
 }: {
   trackees: TrackeeData[];
   people: { id: string; name: string }[];
+  org: OrgSummary;
 }) {
   const canEdit = useCanEdit();
   const [adding, setAdding] = useState(false);
+  const [area, setArea] = useState("");
 
   const months = useMemo(() => {
     const set = new Set<string>();
@@ -490,27 +577,57 @@ export function LinkedInTracker({
 
   const [month, setMonth] = useState(months[0]);
 
-  const active = trackees.filter((t) => t.active !== false);
-  const inactive = trackees.filter((t) => t.active === false);
+  const areas = useMemo(
+    () => [...new Set(trackees.map((t) => t.area).filter((a): a is string => !!a))].sort(),
+    [trackees],
+  );
+
+  // Orden: Dirección → Coordinación → Liderazgo → Máster → resto; luego por nombre.
+  const ordered = useMemo(
+    () =>
+      [...trackees].sort(
+        (a, b) =>
+          (LEVEL_RANK[a.level ?? ""] ?? 9) - (LEVEL_RANK[b.level ?? ""] ?? 9) ||
+          a.name.localeCompare(b.name, "es"),
+      ),
+    [trackees],
+  );
+
+  const shown = area ? ordered.filter((t) => t.area === area) : ordered;
+  const active = shown.filter((t) => t.active !== false);
+  const inactive = shown.filter((t) => t.active === false);
 
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-sm text-muted-foreground">Mes:</span>
-        <Select value={month} onChange={(e) => setMonth(e.target.value)} className="w-44" aria-label="Mes">
+        <Select value={month} onChange={(e) => setMonth(e.target.value)} className="w-40" aria-label="Mes">
           {months.map((m) => (
             <option key={m} value={m}>
               {monthLabel(m)}
             </option>
           ))}
         </Select>
+        <Select
+          value={area}
+          onChange={(e) => setArea(e.target.value)}
+          className="w-44"
+          aria-label="Filtrar por área"
+        >
+          <option value="">Todas las áreas</option>
+          {areas.map((a) => (
+            <option key={a} value={a}>
+              {a}
+            </option>
+          ))}
+        </Select>
         <span className="text-xs text-muted-foreground">
-          {trackees.length} personas en seguimiento · datos manuales, sin API. Las métricas de la página de la Unidad
-          están en la tarjeta de LinkedIn de Redes sociales.
+          {shown.length} personas · datos manuales, sin API.
         </span>
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        {org && !area && <OrgCard org={org} />}
         {active.map((t) => (
           <TrackeeCard key={t.id} trackee={t} month={month} people={people} />
         ))}

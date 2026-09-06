@@ -272,7 +272,7 @@ const SEED_USERS: {
   { name: "David Santiago Parra Herrera", email: "santiago.parra@example.com", role: "COORDINADOR", area: null, color: "#EA580C" },
   { name: "Daniel Moreno", email: "daniel.moreno@example.com", role: "COORDINADOR", area: null, color: "#C026D3" },
   {
-    name: "Henry Sarmiento",
+    name: "Henry Martinez Sarmiento",
     email: "henry@example.com",
     role: "DIRECTOR",
     area: null,
@@ -854,6 +854,7 @@ async function seedTemplates() {
 // /linkedin; se usan los códigos de área del proyecto de LinkedIn
 // (DIR/COORD/ET/CL/AA/VIRT/GC/DEV) por consistencia con esa taxonomía.
 const LINKEDIN_TRACKEES: { name: string; area?: string; level?: string }[] = [
+  { name: "Henry Martinez Sarmiento", area: "DIR", level: "direction" },
   { name: "Lina Fernanda Sanabria Muñoz", area: "COORD", level: "coordination" },
   { name: "David Santiago Parra Herrera", area: "COORD", level: "coordination" },
   { name: "Brayan Santiago Maldonado Aparicio", area: "DEV", level: "lead" },
@@ -878,53 +879,54 @@ const LINKEDIN_TRACKEES: { name: string; area?: string; level?: string }[] = [
   { name: "Yony Sebastian Chaparro Mesa", area: "DEV", level: "master" },
 ];
 
+// Aditivo: crea las filas que falten (por nombre) sin duplicar ni tocar las
+// que ya existen, para poder sumar personas nuevas en re-corridas del seed.
 async function seedLinkedInTrackees() {
-  if ((await prisma.linkedInTrackee.count()) > 0) {
-    console.log("Tracker de LinkedIn: ya tiene filas, no se toca.");
-    return;
-  }
-
   const users = await prisma.user.findMany({ select: { id: true, name: true } });
   const byName = new Map(users.map((u) => [foldName(u.name), u.id]));
+  const existing = new Set(
+    (await prisma.linkedInTrackee.findMany({ select: { name: true } })).map((t) => foldName(t.name)),
+  );
 
-  let linked = 0;
+  let made = 0;
   for (let i = 0; i < LINKEDIN_TRACKEES.length; i++) {
     const t = LINKEDIN_TRACKEES[i];
-    const userId = byName.get(foldName(t.name)) ?? null;
-    if (userId) linked++;
+    if (existing.has(foldName(t.name))) continue;
     await prisma.linkedInTrackee.create({
       data: {
         name: t.name,
         area: t.area ?? null,
         level: t.level ?? null,
-        userId,
+        userId: byName.get(foldName(t.name)) ?? null,
         order: i + 1,
       },
     });
+    made++;
   }
   // Las métricas de la PÁGINA de la UIFCE viven en SocialMetric (canal LINKEDIN).
-  console.log(`Tracker de LinkedIn: ${LINKEDIN_TRACKEES.length} personas (${linked} enlazadas al directorio).`);
+  console.log(`Tracker de LinkedIn: ${made} personas nuevas (total esperado ${LINKEDIN_TRACKEES.length}).`);
 }
 
 // Panel de consentimientos de uso de imagen para el micrositio: una fila por
-// integrante de la UIFCE (misma lista que el tracker de LinkedIn).
+// integrante del EQUIPO (la misma lista, sin la Dirección). Aditivo.
 async function seedConsentSignatories() {
-  if ((await prisma.consentSignatory.count()) > 0) {
-    console.log("Consentimientos: ya tienen filas, no se tocan.");
-    return;
-  }
-
+  const people = LINKEDIN_TRACKEES.filter((t) => t.level !== "direction");
   const users = await prisma.user.findMany({ select: { id: true, name: true } });
   const byName = new Map(users.map((u) => [foldName(u.name), u.id]));
+  const existing = new Set(
+    (await prisma.consentSignatory.findMany({ select: { name: true } })).map((c) => foldName(c.name)),
+  );
 
-  let linked = 0;
-  for (let i = 0; i < LINKEDIN_TRACKEES.length; i++) {
-    const name = LINKEDIN_TRACKEES[i].name;
-    const userId = byName.get(foldName(name)) ?? null;
-    if (userId) linked++;
-    await prisma.consentSignatory.create({ data: { name, userId, order: i + 1 } });
+  let made = 0;
+  for (let i = 0; i < people.length; i++) {
+    const name = people[i].name;
+    if (existing.has(foldName(name))) continue;
+    await prisma.consentSignatory.create({
+      data: { name, userId: byName.get(foldName(name)) ?? null, order: i + 1 },
+    });
+    made++;
   }
-  console.log(`Consentimientos: ${LINKEDIN_TRACKEES.length} integrantes (${linked} enlazados al directorio).`);
+  console.log(`Consentimientos: ${made} integrantes nuevos (total esperado ${people.length}).`);
 }
 
 async function main() {
