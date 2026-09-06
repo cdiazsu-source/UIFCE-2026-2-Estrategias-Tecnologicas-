@@ -272,6 +272,7 @@ model User {
   socialMetrics        SocialMetric[]
   linkedInTrackees     LinkedInTrackee[]
   linkedInSnapshots    LinkedInSnapshot[]
+  consentSignatures    ConsentSignatory[]
   teamComments         TeamComment[]
 
   createdAt DateTime @default(now())
@@ -478,6 +479,31 @@ model LinkedInSnapshot {
   @@unique([trackeeId, month])
   @@index([trackeeId, month])
   @@index([recordedById])
+}
+
+/// Estado de firma del consentimiento de uso de imagen para el micrositio
+/// (proyecto "consentimiento-imagen-micrositio"). Una fila por integrante de la
+/// UIFCE: si firmó el documento y si ya se le dio acceso a su carpeta de fotos
+/// en Drive. Lista curada, aparte del directorio de `User` (`userId` la enlaza
+/// opcionalmente para reusar foto y color).
+model ConsentSignatory {
+  id            String    @id @default(cuid())
+  name          String
+  signed        Boolean   @default(false)
+  signedAt      DateTime?
+  driveAccess   Boolean   @default(false)
+  driveAccessAt DateTime?
+  /// Carpeta de Drive con las fotos de esa persona (destino del botón).
+  driveFolderUrl String?
+  userId        String?
+  user          User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  order         Int       @default(0)
+  active        Boolean   @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
 }
 
 /// Proyecto de estudio de un monitor Junior. Cada Junior expone dos por semestre.

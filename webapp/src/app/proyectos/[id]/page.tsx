@@ -13,12 +13,16 @@ import { PriorityTag } from "@/components/priority-tag";
 import { ProjectControls } from "@/components/project-controls";
 import { Checklist } from "@/components/checklist";
 import { NotesLog } from "@/components/notes-log";
+import { ConsentPanel, type ConsentRow } from "@/components/consent-panel";
 import { wipBlockedBy } from "@/lib/actions/projects";
+import { CONSENT_PROJECT_ID } from "@/lib/consent";
 
 export const dynamic = "force-dynamic";
 
 export default async function ProjectDetailPage({ params }: { params: { id: string } }) {
-  const [project, authors] = await Promise.all([
+  const isConsent = params.id === CONSENT_PROJECT_ID;
+
+  const [project, authors, consentRows] = await Promise.all([
     prisma.project.findUnique({
       where: { id: params.id },
       include: {
@@ -31,9 +35,29 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
       orderBy: { name: "asc" },
       select: { id: true, name: true, role: true, color: true },
     }),
+    isConsent
+      ? prisma.consentSignatory.findMany({
+          orderBy: { order: "asc" },
+          include: { user: { select: { photoUrl: true, color: true, area: true } } },
+        })
+      : Promise.resolve([]),
   ]);
 
   if (!project) notFound();
+
+  const consentData: ConsentRow[] = consentRows.map((c) => ({
+    id: c.id,
+    name: c.name,
+    signed: c.signed,
+    signedAt: c.signedAt,
+    driveAccess: c.driveAccess,
+    driveAccessAt: c.driveAccessAt,
+    driveFolderUrl: c.driveFolderUrl,
+    active: c.active,
+    isET: c.user?.area === "ET",
+    photoUrl: c.user?.photoUrl ?? null,
+    color: c.user?.color ?? null,
+  }));
 
   // Para el bloqueo de WIP en el selector de urgencia (validación también en frontend).
   const wipBlocked =
@@ -94,6 +118,8 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
           </div>
         </CardContent>
       </Card>
+
+      {isConsent && <ConsentPanel signatories={consentData} />}
 
       <Checklist projectId={project.id} items={project.checklistItems} people={authors} />
 

@@ -906,6 +906,27 @@ async function seedLinkedInTrackees() {
   console.log(`Tracker de LinkedIn: ${LINKEDIN_TRACKEES.length} personas (${linked} enlazadas al directorio).`);
 }
 
+// Panel de consentimientos de uso de imagen para el micrositio: una fila por
+// integrante de la UIFCE (misma lista que el tracker de LinkedIn).
+async function seedConsentSignatories() {
+  if ((await prisma.consentSignatory.count()) > 0) {
+    console.log("Consentimientos: ya tienen filas, no se tocan.");
+    return;
+  }
+
+  const users = await prisma.user.findMany({ select: { id: true, name: true } });
+  const byName = new Map(users.map((u) => [foldName(u.name), u.id]));
+
+  let linked = 0;
+  for (let i = 0; i < LINKEDIN_TRACKEES.length; i++) {
+    const name = LINKEDIN_TRACKEES[i].name;
+    const userId = byName.get(foldName(name)) ?? null;
+    if (userId) linked++;
+    await prisma.consentSignatory.create({ data: { name, userId, order: i + 1 } });
+  }
+  console.log(`Consentimientos: ${LINKEDIN_TRACKEES.length} integrantes (${linked} enlazados al directorio).`);
+}
+
 async function main() {
   await seedProjectsFromCsv();
   await seedSituationStats();
@@ -921,6 +942,7 @@ async function main() {
   await seedTemplates();
   await seedAreaProfile();
   await seedLinkedInTrackees();
+  await seedConsentSignatories();
 
   // Proyectos y proyectos de estudio sin semestre (creados antes de agrupar por
   // semestre) → al vigente.

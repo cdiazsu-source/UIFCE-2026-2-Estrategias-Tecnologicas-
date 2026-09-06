@@ -251,6 +251,16 @@ IDEAS = [
         priority=False,
     ),
     dict(
+        id="consentimiento-imagen-micrositio",
+        cat="Normativa — Próximo ciclo",
+        idea="Consentimiento de uso de imagen para el micrositio 2026-2S",
+        hacer="Recolectar de cada integrante de la UIFCE la firma del documento de autorización de uso de su imagen, nombre y cargo en el micrositio del equipo 2026-2S, y dar a cada persona acceso a su carpeta de Drive con sus fotos. El texto del documento está fijado (Bogotá D.C., 31 de agosto de 2026; autorización para la presentación del equipo en el micrositio de la Facultad de Ciencias Económicas). El seguimiento persona por persona (firmó / acceso a Drive) y el avance visual se llevan en el panel del proyecto.",
+        espera="El 100% de los integrantes con consentimiento firmado y con acceso a su carpeta de fotos antes de publicar el micrositio del equipo 2026-2S.",
+        fundamento="El micrositio del equipo publica foto, nombre y cargo de cada integrante; se requiere autorización expresa y por escrito de uso de imagen de cada persona antes de publicarla. Se articula con los proyectos de actualización del micrositio (equipo de trabajo y ex monitores) y con la memoria institucional audiovisual.",
+        entregables="* Documento de consentimiento definido y enviado a cada integrante.\n* Carpeta de Drive con una subcarpeta de fotos por persona y acceso otorgado.\n* Panel de seguimiento con el estado de firma y de acceso por persona.\n* Consentimientos firmados archivados en el repositorio documental permanente.",
+        priority=False,
+    ),
+    dict(
         id="cursoslibres-piezas-primer-lanzamiento",
         cat="Acompañamiento a Cursos Libres",
         idea="Elaboración de piezas gráficas de Cursos Libres — Primer lanzamiento",
