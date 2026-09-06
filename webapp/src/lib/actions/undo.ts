@@ -12,9 +12,14 @@ import type { UndoAction } from "@/lib/undo";
 /** Revierte la última acción a partir del descriptor que guardó el banner. */
 export async function applyUndo(action: UndoAction) {
   const junior = await blockedForJunior();
-  // El perfil junior solo puede deshacer lo que puede hacer: notas de bitácora
-  // y la edición de mediciones de KPIs de redes.
-  if (junior && !action.kind.startsWith("note.") && action.kind !== "socialmetric.update") return;
+  // El perfil junior solo puede deshacer lo que puede hacer: notas de bitácora,
+  // subtareas del checklist, y la edición de mediciones (KPIs de redes / LinkedIn).
+  const juniorAllowed =
+    action.kind.startsWith("note.") ||
+    action.kind.startsWith("checklist.") ||
+    action.kind === "socialmetric.update" ||
+    action.kind === "linkedinsnapshot.update";
+  if (junior && !juniorAllowed) return;
 
   switch (action.kind) {
     case "note.delete": {
@@ -201,6 +206,29 @@ export async function applyUndo(action: UndoAction) {
       for (const [k, v] of Object.entries(d.values)) (data as Record<string, unknown>)[k] = v;
       await prisma.socialMetric.create({ data });
       revalidatePath("/redes");
+      break;
+    }
+    case "linkedinsnapshot.update": {
+      const b = action.before;
+      const data: Prisma.LinkedInSnapshotUncheckedUpdateInput = { month: b.month, note: b.note };
+      for (const [k, v] of Object.entries(b.values)) (data as Record<string, unknown>)[k] = v;
+      await prisma.linkedInSnapshot.update({ where: { id: action.id }, data });
+      revalidatePath("/linkedin");
+      break;
+    }
+    case "linkedinsnapshot.delete": {
+      const d = action.data;
+      const data: Prisma.LinkedInSnapshotUncheckedCreateInput = {
+        id: d.id,
+        trackeeId: d.trackeeId,
+        month: d.month,
+        note: d.note,
+        recordedById: d.recordedById,
+        recordedByName: d.recordedByName,
+      };
+      for (const [k, v] of Object.entries(d.values)) (data as Record<string, unknown>)[k] = v;
+      await prisma.linkedInSnapshot.create({ data });
+      revalidatePath("/linkedin");
       break;
     }
     case "template.update": {

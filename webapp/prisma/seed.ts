@@ -264,12 +264,12 @@ const SEED_USERS: {
   color: string;
   credentialKey?: string;
 }[] = [
-  { name: "Cesar Diaz", email: "cdiazsu@unal.edu.co", role: "MASTER", area: "ET", color: "#1E40AF" },
-  { name: "Maria Fernanda Celis", email: "mafe@example.com", role: "JUNIOR_ARTES", area: "ET", color: "#DB2777" },
-  { name: "Jean Carlos Baquero", email: "jean@example.com", role: "JUNIOR_AUXILIAR", area: "ET", color: "#15803D" },
+  { name: "Cesar Steven Diaz Suarez", email: "cdiazsu@unal.edu.co", role: "MASTER", area: "ET", color: "#1E40AF" },
+  { name: "María Fernanda Celis Mora", email: "mafe@example.com", role: "JUNIOR_ARTES", area: "ET", color: "#DB2777" },
+  { name: "Jean Carlos Baquero Garcia", email: "jean@example.com", role: "JUNIOR_AUXILIAR", area: "ET", color: "#15803D" },
   { name: "Estrategias Tecnológicas (ET)", email: "et@example.com", role: "EQUIPO", area: "ET", color: "#4A7729" },
-  { name: "Lina Sanabria", email: "lina.sanabria@example.com", role: "COORDINADOR", area: null, color: "#7C3AED" },
-  { name: "Santiago Parra", email: "santiago.parra@example.com", role: "COORDINADOR", area: null, color: "#EA580C" },
+  { name: "Lina Fernanda Sanabria Muñoz", email: "lina.sanabria@example.com", role: "COORDINADOR", area: null, color: "#7C3AED" },
+  { name: "David Santiago Parra Herrera", email: "santiago.parra@example.com", role: "COORDINADOR", area: null, color: "#EA580C" },
   { name: "Daniel Moreno", email: "daniel.moreno@example.com", role: "COORDINADOR", area: null, color: "#C026D3" },
   {
     name: "Henry Sarmiento",
@@ -282,11 +282,11 @@ const SEED_USERS: {
   },
   // Másters y líderes de otras áreas de la UIFCE (contrapartes interárea). NO
   // aparecen en «Integrantes» del panel principal (ese bloque filtra por área "ET").
-  { name: "Diego Lopez", email: "diego.lopez@example.com", role: "MASTER", area: "CL", color: "#0284C7" },
-  { name: "Sebastian Quiroga", email: "sebastian.quiroga@example.com", role: "MASTER", area: "GC", color: "#0D9488" },
-  { name: "Juan Esteban Laguna", email: "juan.laguna@example.com", role: "MASTER", area: "VA", color: "#2563EB" },
-  { name: "Yony Chaparro", email: "yony.chaparro@example.com", role: "MASTER", area: "DS", color: "#9333EA" },
-  { name: "Brayan Sandoval", email: "brayan.sandoval@example.com", role: "LIDER", area: "DS", color: "#4338CA" },
+  { name: "Diego Fernando López Abril", email: "diego.lopez@example.com", role: "MASTER", area: "CL", color: "#0284C7" },
+  { name: "Sebastian Stiff Quiroga Rios", email: "sebastian.quiroga@example.com", role: "MASTER", area: "GC", color: "#0D9488" },
+  { name: "Juan Esteban Laguna Beltrán", email: "juan.laguna@example.com", role: "MASTER", area: "VA", color: "#2563EB" },
+  { name: "Yony Sebastian Chaparro Mesa", email: "yony.chaparro@example.com", role: "MASTER", area: "DS", color: "#9333EA" },
+  { name: "Brayan Santiago Maldonado Aparicio", email: "brayan.sandoval@example.com", role: "LIDER", area: "DS", color: "#4338CA" },
 ];
 
 function foldName(s: string): string {
@@ -848,6 +848,76 @@ async function seedTemplates() {
   console.log(`Plantillas sembradas: ${templates.length}`);
 }
 
+// Lista curada de personas a las que se les hace seguimiento en LinkedIn
+// (marca empleadora de la UIFCE), en el orden dado por el usuario. Más la
+// página institucional. area/level son una primera aproximación editable desde
+// /linkedin; se usan los códigos de área del proyecto de LinkedIn
+// (DIR/COORD/ET/CL/AA/VIRT/GC/DEV) por consistencia con esa taxonomía.
+const LINKEDIN_TRACKEES: { name: string; area?: string; level?: string }[] = [
+  { name: "Lina Fernanda Sanabria Muñoz", area: "COORD", level: "coordination" },
+  { name: "David Santiago Parra Herrera", area: "COORD", level: "coordination" },
+  { name: "Brayan Santiago Maldonado Aparicio", area: "DEV", level: "lead" },
+  { name: "Laura Angélica Cárdenas Cely", area: "CL", level: "junior" },
+  { name: "Juan David Delgado Moreno" },
+  { name: "Paula Sofia Bocarejo Alberto", area: "CL", level: "junior" },
+  { name: "Angel Stiven Gutierrez Diaz" },
+  { name: "Jean Carlos Baquero Garcia", area: "ET", level: "junior" },
+  { name: "Diego Alejandro Garnica Mamanché", area: "CL", level: "junior" },
+  { name: "María Fernanda Celis Mora", area: "ET", level: "junior" },
+  { name: "Camilo Alejandro Lagos Malaver" },
+  { name: "Diego Fernando Mellizo Pedraza" },
+  { name: "Nicolas Daniel Ramirez Camargo" },
+  { name: "Jeferson David Anzola Grajales" },
+  { name: "Angel David Ruiz Barbosa" },
+  { name: "Joel Santiago Rodríguez Guzmán", area: "CL", level: "junior" },
+  { name: "Sebastian Stiff Quiroga Rios", area: "GC", level: "master" },
+  { name: "Ángela Lucía Fierro Aponte" },
+  { name: "Diego Fernando López Abril", area: "CL", level: "master" },
+  { name: "Cesar Steven Diaz Suarez", area: "ET", level: "master" },
+  { name: "Juan Esteban Laguna Beltrán", area: "VIRT", level: "master" },
+  { name: "Yony Sebastian Chaparro Mesa", area: "DEV", level: "master" },
+];
+
+async function seedLinkedInTrackees() {
+  if ((await prisma.linkedInTrackee.count()) > 0) {
+    console.log("Tracker de LinkedIn: ya tiene filas, no se toca.");
+    return;
+  }
+
+  const users = await prisma.user.findMany({ select: { id: true, name: true } });
+  const byName = new Map(users.map((u) => [foldName(u.name), u.id]));
+
+  await prisma.linkedInTrackee.create({
+    data: {
+      kind: "ORG",
+      name: "Unidad de Informática FCE (UIFCE)",
+      linkedinUrl: "https://www.linkedin.com/company/uifce",
+      area: "DIR",
+      order: 0,
+    },
+  });
+
+  let linked = 0;
+  for (let i = 0; i < LINKEDIN_TRACKEES.length; i++) {
+    const t = LINKEDIN_TRACKEES[i];
+    const userId = byName.get(foldName(t.name)) ?? null;
+    if (userId) linked++;
+    await prisma.linkedInTrackee.create({
+      data: {
+        kind: "PERSON",
+        name: t.name,
+        area: t.area ?? null,
+        level: t.level ?? null,
+        userId,
+        order: i + 1,
+      },
+    });
+  }
+  console.log(
+    `Tracker de LinkedIn: 1 página + ${LINKEDIN_TRACKEES.length} personas (${linked} enlazadas al directorio).`,
+  );
+}
+
 async function main() {
   await seedProjectsFromCsv();
   await seedSituationStats();
@@ -862,6 +932,7 @@ async function main() {
   await reconcileInstagramNewAccount();
   await seedTemplates();
   await seedAreaProfile();
+  await seedLinkedInTrackees();
 
   // Cualquier proyecto sin semestre (creados antes de esta función) al vigente.
   const semesterId = await ensureCurrentSemester();

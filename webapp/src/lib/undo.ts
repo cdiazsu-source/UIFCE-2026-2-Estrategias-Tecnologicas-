@@ -153,6 +153,23 @@ export type UndoAction =
       };
     }
   | {
+      kind: "linkedinsnapshot.update";
+      id: string;
+      before: { month: string; note: string | null; values: Record<string, number | boolean | null> };
+    }
+  | {
+      kind: "linkedinsnapshot.delete";
+      data: {
+        id: string;
+        trackeeId: string;
+        month: string;
+        note: string | null;
+        recordedById: string | null;
+        recordedByName: string | null;
+        values: Record<string, number | boolean | null>;
+      };
+    }
+  | {
       kind: "template.update";
       id: string;
       before: {
@@ -208,6 +225,8 @@ export function undoLabel(kind: UndoAction["kind"]): string {
     "socialinteraction.delete": "Interacción eliminada",
     "socialmetric.update": "Medición editada",
     "socialmetric.delete": "Medición eliminada",
+    "linkedinsnapshot.update": "Medición de LinkedIn editada",
+    "linkedinsnapshot.delete": "Medición de LinkedIn eliminada",
     "template.update": "Plantilla editada",
     "template.delete": "Plantilla eliminada",
     "teamcomment.delete": "Comentario eliminado",

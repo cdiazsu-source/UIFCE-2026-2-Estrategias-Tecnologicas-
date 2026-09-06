@@ -68,6 +68,13 @@ enum SocialOfficialStatus {
   SIN_OFICIALIZAR
 }
 
+/// Qué representa una fila del tracker de LinkedIn: una persona o la página de
+/// la Unidad (organización).
+enum LinkedInTrackeeKind {
+  PERSON
+  ORG
+}
+
 /// Ficha institucional del área (singleton, id fijo "area"): descripción
 /// corporativa y objetivos generales/permanentes. Los objetivos por semestre
 /// viven en Semester.objectives.
@@ -269,6 +276,8 @@ model User {
   assignedChecklistItems ChecklistItem[]
   socialChannels       SocialChannel[]
   socialMetrics        SocialMetric[]
+  linkedInTrackees     LinkedInTrackee[]
+  linkedInSnapshots    LinkedInSnapshot[]
   teamComments         TeamComment[]
 
   createdAt DateTime @default(now())
@@ -414,6 +423,72 @@ model SocialMetric {
   createdAt DateTime @default(now())
 
   @@index([channelId, at])
+  @@index([recordedById])
+}
+
+/// Una fila del tracker de LinkedIn: una persona del equipo/Unidad o la página
+/// institucional. Lista curada (se define en el seed y se ajusta en /linkedin),
+/// separada del directorio de `User` para no llenar los desplegables del resto
+/// de la app. `userId` la enlaza opcionalmente a una persona del directorio
+/// (para reusar su foto y color).
+model LinkedInTrackee {
+  id          String              @id @default(cuid())
+  kind        LinkedInTrackeeKind @default(PERSON)
+  name        String
+  linkedinUrl String?
+  /// Área de la UIFCE (código libre: "ET", "CL", "GC"…). Editable en la app.
+  area        String?
+  /// Nivel: direction / coordination / lead / master / junior. Editable.
+  level       String?
+  userId      String?
+  user        User?               @relation(fields: [userId], references: [id], onDelete: SetNull)
+  order       Int                 @default(0)
+  active      Boolean             @default(true)
+
+  snapshots   LinkedInSnapshot[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+/// Medición mensual de LinkedIn de un `LinkedInTrackee`. Una fila por trackee y
+/// mes ("YYYY-MM"). Los campos de persona y los de página conviven; se llenan
+/// los que apliquen según el `kind` del trackee. Entrada manual, sin API.
+model LinkedInSnapshot {
+  id        String          @id @default(cuid())
+  trackeeId String
+  trackee   LinkedInTrackee @relation(fields: [trackeeId], references: [id], onDelete: Cascade)
+  month     String
+
+  // --- Persona ---
+  profileScore     Int?
+  connections      Int?
+  followers        Int?
+  ssi              Int?
+  postsLast30      Int?
+  engagementLast30 Int?
+  recommendations  Int?
+  certsPublished   Int?
+  uifceExperience  Boolean @default(false)
+  creatorMode      Boolean @default(false)
+
+  // --- Página / organización ---
+  pageViews     Int?
+  impressions   Int?
+  engagementRate Float?
+
+  note           String?  @db.Text
+  recordedById   String?
+  recordedByUser User?    @relation(fields: [recordedById], references: [id], onDelete: SetNull)
+  recordedByName String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([trackeeId, month])
+  @@index([trackeeId, month])
   @@index([recordedById])
 }
 
