@@ -1,10 +1,7 @@
--- CreateEnum
-CREATE TYPE "LinkedInTrackeeKind" AS ENUM ('PERSON', 'ORG');
-
--- CreateTable: lista curada de personas/organización a las que se les hace tracking en LinkedIn
+-- CreateTable: personas a las que se les hace seguimiento de LinkedIn.
+-- Las métricas de la PÁGINA institucional viven en SocialMetric (canal LINKEDIN).
 CREATE TABLE "LinkedInTrackee" (
     "id" TEXT NOT NULL,
-    "kind" "LinkedInTrackeeKind" NOT NULL DEFAULT 'PERSON',
     "name" TEXT NOT NULL,
     "linkedinUrl" TEXT,
     "area" TEXT,
@@ -18,7 +15,7 @@ CREATE TABLE "LinkedInTrackee" (
     CONSTRAINT "LinkedInTrackee_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable: medición mensual de LinkedIn de un trackee
+-- CreateTable: medición mensual de LinkedIn de una persona
 CREATE TABLE "LinkedInSnapshot" (
     "id" TEXT NOT NULL,
     "trackeeId" TEXT NOT NULL,
@@ -33,9 +30,6 @@ CREATE TABLE "LinkedInSnapshot" (
     "certsPublished" INTEGER,
     "uifceExperience" BOOLEAN NOT NULL DEFAULT false,
     "creatorMode" BOOLEAN NOT NULL DEFAULT false,
-    "pageViews" INTEGER,
-    "impressions" INTEGER,
-    "engagementRate" DOUBLE PRECISION,
     "note" TEXT,
     "recordedById" TEXT,
     "recordedByName" TEXT,

@@ -887,16 +887,6 @@ async function seedLinkedInTrackees() {
   const users = await prisma.user.findMany({ select: { id: true, name: true } });
   const byName = new Map(users.map((u) => [foldName(u.name), u.id]));
 
-  await prisma.linkedInTrackee.create({
-    data: {
-      kind: "ORG",
-      name: "Unidad de Informática FCE (UIFCE)",
-      linkedinUrl: "https://www.linkedin.com/company/uifce",
-      area: "DIR",
-      order: 0,
-    },
-  });
-
   let linked = 0;
   for (let i = 0; i < LINKEDIN_TRACKEES.length; i++) {
     const t = LINKEDIN_TRACKEES[i];
@@ -904,7 +894,6 @@ async function seedLinkedInTrackees() {
     if (userId) linked++;
     await prisma.linkedInTrackee.create({
       data: {
-        kind: "PERSON",
         name: t.name,
         area: t.area ?? null,
         level: t.level ?? null,
@@ -913,9 +902,8 @@ async function seedLinkedInTrackees() {
       },
     });
   }
-  console.log(
-    `Tracker de LinkedIn: 1 página + ${LINKEDIN_TRACKEES.length} personas (${linked} enlazadas al directorio).`,
-  );
+  // Las métricas de la PÁGINA de la UIFCE viven en SocialMetric (canal LINKEDIN).
+  console.log(`Tracker de LinkedIn: ${LINKEDIN_TRACKEES.length} personas (${linked} enlazadas al directorio).`);
 }
 
 async function main() {

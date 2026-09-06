@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { Prisma } from "@prisma/client";
-import type { LinkedInSnapshot, LinkedInTrackeeKind } from "@prisma/client";
+import type { LinkedInSnapshot } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
 import { blockedForJunior, canRecordMetrics } from "@/lib/session";
@@ -17,8 +17,6 @@ const NUM_FIELDS = [
   "engagementLast30",
   "recommendations",
   "certsPublished",
-  "pageViews",
-  "impressions",
 ] as const;
 const BOOL_FIELDS = ["uifceExperience", "creatorMode"] as const;
 
@@ -41,25 +39,15 @@ function bool(fd: FormData, k: string): boolean {
   return v != null && v !== "false" && v !== "";
 }
 
-function floatOrNull(fd: FormData, k: string): number | null {
-  const raw = String(fd.get(k) ?? "").trim();
-  if (raw.length === 0) return null;
-  const n = Number(raw.replace(",", "."));
-  return Number.isFinite(n) ? Math.max(0, n) : null;
-}
-
 function monthOrNull(fd: FormData): string | null {
   const raw = String(fd.get("month") ?? "").trim();
   return /^\d{4}-\d{2}$/.test(raw) ? raw : null;
 }
 
-/** Lee del formulario todos los campos numéricos/booleanos; los que la
- *  plataforma no renderiza para ese `kind` quedan en null/false. */
 function readValues(fd: FormData): Record<string, number | boolean | null> {
   const out: Record<string, number | boolean | null> = {};
   for (const k of NUM_FIELDS) out[k] = int(fd, k);
   for (const k of BOOL_FIELDS) out[k] = bool(fd, k);
-  out.engagementRate = floatOrNull(fd, "engagementRate");
   return out;
 }
 
@@ -67,13 +55,12 @@ function pickValues(row: LinkedInSnapshot): Record<string, number | boolean | nu
   const out: Record<string, number | boolean | null> = {};
   for (const k of NUM_FIELDS) out[k] = row[k as (typeof NUM_FIELDS)[number]];
   for (const k of BOOL_FIELDS) out[k] = row[k as (typeof BOOL_FIELDS)[number]];
-  out.engagementRate = row.engagementRate;
   return out;
 }
 
-// --- Mediciones ------------------------------------------------------------
+// --- Mediciones ----------------------------------------------------------------
 
-/** Registra (o sobrescribe) la medición de un trackee para un mes. Perfil
+/** Registra (o sobrescribe) la medición de una persona para un mes. Perfil
  *  completo y junior (el junior coordinador es quien hace el seguimiento). */
 export async function addLinkedInSnapshot(trackeeId: string, formData: FormData) {
   if (!(await canRecordMetrics())) return;
@@ -164,22 +151,18 @@ export async function deleteLinkedInSnapshot(id: string): Promise<UndoAction | v
   };
 }
 
-// --- Lista de trackees (solo perfil completo) -----------------------------
+// --- Lista de personas (solo perfil completo) ---------------------------------
 
 export async function addLinkedInTrackee(formData: FormData) {
   if (await blockedForJunior()) return;
   const name = String(formData.get("name") ?? "").trim();
   if (!name) return;
 
-  const rawKind = String(formData.get("kind") ?? "PERSON");
-  const kind: LinkedInTrackeeKind = rawKind === "ORG" ? "ORG" : "PERSON";
   const rawLevel = String(formData.get("level") ?? "").trim();
-
   const top = await prisma.linkedInTrackee.findFirst({ orderBy: { order: "desc" }, select: { order: true } });
 
   await prisma.linkedInTrackee.create({
     data: {
-      kind,
       name,
       linkedinUrl: str(formData, "linkedinUrl"),
       area: str(formData, "area"),

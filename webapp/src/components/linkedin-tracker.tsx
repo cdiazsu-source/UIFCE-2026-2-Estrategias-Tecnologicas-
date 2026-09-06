@@ -15,10 +15,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { PersonAvatar } from "@/components/person-avatar";
-import { InfoHint } from "@/components/info-hint";
 import { useCanEdit, useCanRecordMetrics } from "@/components/access-context";
 import { useUndo } from "@/components/undo-banner";
 
@@ -32,12 +30,13 @@ export type SnapshotData = {
 
 export type TrackeeData = {
   id: string;
-  kind: "PERSON" | "ORG";
   name: string;
   linkedinUrl: string | null;
   area: string | null;
   level: string | null;
   active: boolean;
+  /** true si es del área ET (para el anillo de color del avatar). */
+  isET: boolean;
   photoUrl: string | null;
   color: string | null;
   snapshots: SnapshotData[];
@@ -45,7 +44,7 @@ export type TrackeeData = {
 
 type FieldDef = { key: string; label: string; max?: number };
 
-const PERSON_FIELDS: FieldDef[] = [
+const NUM_FIELDS: FieldDef[] = [
   { key: "profileScore", label: "Profile score (0–100)", max: 100 },
   { key: "connections", label: "Conexiones" },
   { key: "followers", label: "Seguidores" },
@@ -55,16 +54,9 @@ const PERSON_FIELDS: FieldDef[] = [
   { key: "recommendations", label: "Recomendaciones" },
   { key: "certsPublished", label: "Certificados publicados" },
 ];
-const PERSON_BOOLS: FieldDef[] = [
+const BOOL_FIELDS: FieldDef[] = [
   { key: "uifceExperience", label: "Tiene a la UIFCE como experiencia" },
   { key: "creatorMode", label: "Modo creador activo" },
-];
-const ORG_FIELDS: FieldDef[] = [
-  { key: "followers", label: "Seguidores de la página" },
-  { key: "pageViews", label: "Visitas a la página" },
-  { key: "impressions", label: "Impresiones" },
-  { key: "postsLast30", label: "Publicaciones (últimos 30 d)" },
-  { key: "engagementLast30", label: "Interacciones (últimos 30 d)" },
 ];
 
 const LEVEL_LABEL: Record<string, string> = {
@@ -75,10 +67,6 @@ const LEVEL_LABEL: Record<string, string> = {
   junior: "Junior",
 };
 const LEVEL_OPTIONS = ["direction", "coordination", "lead", "master", "junior"];
-
-function fieldsFor(kind: "PERSON" | "ORG"): FieldDef[] {
-  return kind === "ORG" ? ORG_FIELDS : PERSON_FIELDS;
-}
 
 function num(v: number | boolean | null | undefined): string {
   if (typeof v === "number") return v.toLocaleString("es-CO");
@@ -119,8 +107,7 @@ function Spark({ points }: { points: number[] }) {
   );
 }
 
-function SnapshotFields({ kind, snapshot }: { kind: "PERSON" | "ORG"; snapshot?: SnapshotData }) {
-  const fields = fieldsFor(kind);
+function SnapshotFields({ snapshot }: { snapshot?: SnapshotData }) {
   return (
     <>
       <Input
@@ -132,7 +119,7 @@ function SnapshotFields({ kind, snapshot }: { kind: "PERSON" | "ORG"; snapshot?:
         aria-label="Mes de la medición"
       />
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-        {fields.map((f) => (
+        {NUM_FIELDS.map((f) => (
           <label key={f.key} className="flex flex-col gap-0.5 text-xs text-muted-foreground">
             {f.label}
             <Input
@@ -147,36 +134,20 @@ function SnapshotFields({ kind, snapshot }: { kind: "PERSON" | "ORG"; snapshot?:
             />
           </label>
         ))}
-        {kind === "ORG" && (
-          <label className="flex flex-col gap-0.5 text-xs text-muted-foreground">
-            Tasa de interacción (%)
-            <Input
-              name="engagementRate"
-              type="number"
-              min={0}
-              step="0.1"
-              defaultValue={(snapshot?.values.engagementRate as number | undefined) ?? ""}
-              placeholder="0"
-              className="h-8"
-            />
-          </label>
-        )}
       </div>
-      {kind === "PERSON" && (
-        <div className="flex flex-wrap gap-4">
-          {PERSON_BOOLS.map((b) => (
-            <label key={b.key} className="flex items-center gap-1.5 text-xs">
-              <input
-                type="checkbox"
-                name={b.key}
-                defaultChecked={snapshot?.values[b.key] === true}
-                className="h-3.5 w-3.5 rounded border-input accent-[hsl(var(--primary))]"
-              />
-              {b.label}
-            </label>
-          ))}
-        </div>
-      )}
+      <div className="flex flex-wrap gap-4">
+        {BOOL_FIELDS.map((b) => (
+          <label key={b.key} className="flex items-center gap-1.5 text-xs">
+            <input
+              type="checkbox"
+              name={b.key}
+              defaultChecked={snapshot?.values[b.key] === true}
+              className="h-3.5 w-3.5 rounded border-input accent-[hsl(var(--primary))]"
+            />
+            {b.label}
+          </label>
+        ))}
+      </div>
       <Textarea name="note" defaultValue={snapshot?.note ?? ""} placeholder="Nota (opcional)" className="min-h-[42px]" />
     </>
   );
@@ -201,7 +172,6 @@ function HistoryRow({ trackee, snapshot }: { trackee: TrackeeData; snapshot: Sna
   const undo = useUndo();
   const [editing, setEditing] = useState(false);
   const [isPending, startTransition] = useTransition();
-  const fields = fieldsFor(trackee.kind);
 
   if (editing) {
     return (
@@ -214,7 +184,7 @@ function HistoryRow({ trackee, snapshot }: { trackee: TrackeeData; snapshot: Sna
           }}
           className="flex flex-col gap-2"
         >
-          <SnapshotFields kind={trackee.kind} snapshot={snapshot} />
+          <SnapshotFields snapshot={snapshot} />
           <div className="flex gap-2">
             <Button type="submit" size="sm">
               Guardar
@@ -233,7 +203,7 @@ function HistoryRow({ trackee, snapshot }: { trackee: TrackeeData; snapshot: Sna
       <div className="min-w-0">
         <span className="font-medium text-muted-foreground">{monthLabel(snapshot.month)}</span>
         <span className="ml-2 flex flex-wrap gap-x-3 gap-y-0.5">
-          {fields.map((f) =>
+          {NUM_FIELDS.map((f) =>
             snapshot.values[f.key] != null ? (
               <span key={f.key}>
                 <span className="text-muted-foreground">{f.label.split(" (")[0]}:</span>{" "}
@@ -241,22 +211,10 @@ function HistoryRow({ trackee, snapshot }: { trackee: TrackeeData; snapshot: Sna
               </span>
             ) : null,
           )}
-          {trackee.kind === "ORG" && snapshot.values.engagementRate != null && (
-            <span>
-              <span className="text-muted-foreground">Tasa:</span>{" "}
-              <span className="font-medium">{snapshot.values.engagementRate}%</span>
-            </span>
-          )}
-          {trackee.kind === "PERSON" && snapshot.values.uifceExperience === true && (
-            <span className="text-success">UIFCE en experiencia</span>
-          )}
-          {trackee.kind === "PERSON" && snapshot.values.creatorMode === true && (
-            <span className="text-success">modo creador</span>
-          )}
+          {snapshot.values.uifceExperience === true && <span className="text-success">UIFCE en experiencia</span>}
+          {snapshot.values.creatorMode === true && <span className="text-success">modo creador</span>}
         </span>
-        {snapshot.recordedByName && (
-          <span className="ml-2 text-muted-foreground">· {snapshot.recordedByName}</span>
-        )}
+        {snapshot.recordedByName && <span className="ml-2 text-muted-foreground">· {snapshot.recordedByName}</span>}
         {snapshot.note && <p className="mt-0.5 text-muted-foreground">{snapshot.note}</p>}
       </div>
       {(canRecord || canEdit) && (
@@ -315,9 +273,7 @@ function TrackeeCard({
   const asc = [...trackee.snapshots].sort((a, b) => a.month.localeCompare(b.month));
   const desc = [...asc].reverse();
   const forMonth = asc.find((s) => s.month === month) ?? null;
-  const fields = fieldsFor(trackee.kind);
-  const headlineKey = trackee.kind === "ORG" ? "followers" : "profileScore";
-  const trend = asc.map((s) => s.values[headlineKey]).filter((v): v is number => typeof v === "number");
+  const trend = asc.map((s) => s.values.profileScore).filter((v): v is number => typeof v === "number");
 
   if (editingCard) {
     return (
@@ -342,13 +298,8 @@ function TrackeeCard({
                 ))}
               </Select>
             </div>
-            <Input
-              name="linkedinUrl"
-              type="url"
-              defaultValue={trackee.linkedinUrl ?? ""}
-              placeholder="URL de LinkedIn"
-            />
-            <Select name="active" defaultValue="true" className="w-32">
+            <Input name="linkedinUrl" type="url" defaultValue={trackee.linkedinUrl ?? ""} placeholder="URL de LinkedIn" />
+            <Select name="active" defaultValue={String(trackee.active)} className="w-32">
               <option value="true">Activo</option>
               <option value="false">Inactivo</option>
             </Select>
@@ -370,18 +321,12 @@ function TrackeeCard({
     <Card>
       <CardHeader className="flex-row items-start justify-between gap-2 space-y-0 pb-3">
         <div className="flex min-w-0 items-center gap-2.5">
-          {trackee.kind === "PERSON" ? (
-            <PersonAvatar
-              name={trackee.name}
-              photoUrl={trackee.photoUrl}
-              size="md"
-              ringColor={trackee.color}
-            />
-          ) : (
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-              <Linkedin className="h-5 w-5" />
-            </span>
-          )}
+          <PersonAvatar
+            name={trackee.name}
+            photoUrl={trackee.photoUrl}
+            size="md"
+            ringColor={trackee.isET ? trackee.color : null}
+          />
           <div className="min-w-0">
             <p className="flex items-center gap-1.5 truncate font-semibold">
               {trackee.linkedinUrl ? (
@@ -399,7 +344,6 @@ function TrackeeCard({
               {trackee.linkedinUrl && <Linkedin className="h-3.5 w-3.5 shrink-0 text-primary" aria-hidden />}
             </p>
             <p className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
-              {trackee.kind === "ORG" && <Badge variant="secondary">Página de la Unidad</Badge>}
               {trackee.level && <span>{LEVEL_LABEL[trackee.level] ?? trackee.level}</span>}
               {trackee.area && <span>· {trackee.area}</span>}
             </p>
@@ -434,23 +378,13 @@ function TrackeeCard({
       <CardContent className="flex flex-col gap-2">
         {forMonth ? (
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
-            {trackee.kind === "PERSON" && typeof forMonth.values.profileScore === "number" && (
-              <ScoreBar score={forMonth.values.profileScore} />
-            )}
-            {fields
-              .filter((f) => f.key !== "profileScore" && forMonth.values[f.key] != null)
-              .map((f) => (
-                <span key={f.key} className="text-xs">
-                  <span className="text-muted-foreground">{f.label.split(" (")[0]}:</span>{" "}
-                  <span className="font-medium">{num(forMonth.values[f.key])}</span>
-                </span>
-              ))}
-            {trackee.kind === "ORG" && forMonth.values.engagementRate != null && (
-              <span className="text-xs">
-                <span className="text-muted-foreground">Tasa:</span>{" "}
-                <span className="font-medium">{forMonth.values.engagementRate}%</span>
+            {typeof forMonth.values.profileScore === "number" && <ScoreBar score={forMonth.values.profileScore} />}
+            {NUM_FIELDS.filter((f) => f.key !== "profileScore" && forMonth.values[f.key] != null).map((f) => (
+              <span key={f.key} className="text-xs">
+                <span className="text-muted-foreground">{f.label.split(" (")[0]}:</span>{" "}
+                <span className="font-medium">{num(forMonth.values[f.key])}</span>
               </span>
-            )}
+            ))}
           </div>
         ) : (
           <p className="text-xs text-muted-foreground">Sin medición para {monthLabel(month)}.</p>
@@ -460,7 +394,7 @@ function TrackeeCard({
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <Spark points={trend} />
             <span>
-              {trackee.kind === "ORG" ? "Seguidores" : "Profile score"}: {num(trend[0])} → {num(trend[trend.length - 1])}
+              Profile score: {num(trend[0])} → {num(trend[trend.length - 1])}
             </span>
           </div>
         )}
@@ -503,7 +437,7 @@ function TrackeeCard({
             }}
             className="flex flex-col gap-2 rounded-md border border-dashed border-input p-3"
           >
-            <SnapshotFields kind={trackee.kind} snapshot={forMonth ?? undefined} />
+            <SnapshotFields snapshot={forMonth ?? undefined} />
             <Select name="recordedById" defaultValue="" required className="w-full sm:w-60" aria-label="Quién registra">
               <option value="" disabled>
                 ¿Quién registra?
@@ -556,10 +490,8 @@ export function LinkedInTracker({
 
   const [month, setMonth] = useState(months[0]);
 
-  const orgs = trackees.filter((t) => t.kind === "ORG" && t.active !== false);
-  const persons = trackees.filter((t) => t.kind === "PERSON");
-  const active = persons.filter((t) => t.active !== false);
-  const inactive = persons.filter((t) => t.active === false);
+  const active = trackees.filter((t) => t.active !== false);
+  const inactive = trackees.filter((t) => t.active === false);
 
   return (
     <div className="flex flex-col gap-5">
@@ -573,17 +505,10 @@ export function LinkedInTracker({
           ))}
         </Select>
         <span className="text-xs text-muted-foreground">
-          {trackees.length} en seguimiento · datos manuales, sin API
+          {trackees.length} personas en seguimiento · datos manuales, sin API. Las métricas de la página de la Unidad
+          están en la tarjeta de LinkedIn de Redes sociales.
         </span>
       </div>
-
-      {orgs.length > 0 && (
-        <div className="grid grid-cols-1 gap-4">
-          {orgs.map((t) => (
-            <TrackeeCard key={t.id} trackee={t} month={month} people={people} />
-          ))}
-        </div>
-      )}
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         {active.map((t) => (
@@ -613,10 +538,6 @@ export function LinkedInTracker({
               className="flex flex-wrap items-end gap-2 rounded-md border border-dashed border-input p-3"
             >
               <Input name="name" placeholder="Nombre" required className="w-48" />
-              <Select name="kind" defaultValue="PERSON" className="w-36">
-                <option value="PERSON">Persona</option>
-                <option value="ORG">Página</option>
-              </Select>
               <Input name="area" placeholder="Área" className="w-24" />
               <Select name="level" defaultValue="" className="w-36">
                 <option value="">Sin nivel</option>
@@ -637,7 +558,7 @@ export function LinkedInTracker({
           ) : (
             <Button size="sm" variant="outline" onClick={() => setAdding(true)}>
               <Plus className="h-3.5 w-3.5" />
-              Agregar al tracker
+              Agregar persona al tracker
             </Button>
           )}
         </div>

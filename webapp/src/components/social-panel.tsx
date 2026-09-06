@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import {
+  ArrowRight,
   AtSign,
   ExternalLink,
   Instagram,
@@ -11,6 +12,7 @@ import {
   Plus,
   Radio,
   Trash2,
+  Users,
   Youtube,
 } from "lucide-react";
 import type { SocialChannelStatus, SocialOfficialStatus, SocialPlatform } from "@prisma/client";
@@ -495,6 +497,22 @@ function ChannelCard({
                 channel={{ id: channel.id, platform: channel.platform, metrics: channel.metrics }}
                 people={people}
               />
+            )}
+            {channel.platform === "LINKEDIN" && (
+              <div className="mt-3 border-t border-border pt-3">
+                <Link
+                  href="/linkedin"
+                  className="inline-flex items-center gap-1.5 rounded-md border border-input px-2.5 py-1.5 text-sm font-medium text-primary hover:bg-accent"
+                >
+                  <Users className="h-4 w-4" />
+                  Seguimiento del equipo en LinkedIn
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Arriba, las métricas de la <strong>página</strong> de la Unidad. El LinkedIn de cada persona del
+                  equipo se mide en su propio panel.
+                </p>
+              </div>
             )}
           </>
         )}
