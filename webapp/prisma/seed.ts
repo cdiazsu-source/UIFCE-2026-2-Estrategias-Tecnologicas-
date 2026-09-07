@@ -491,40 +491,63 @@ async function seedEtJuniorStudyProjects() {
     let sp = await prisma.studyProject.findFirst({
       where: { ownerId: user.id },
       orderBy: { order: "asc" },
-      select: { id: true, title: true, description: true },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        schedule: true,
+        checkpoints: { select: { label: true } },
+      },
     });
     if (!sp) {
-      const created = await prisma.studyProject.create({
+      sp = await prisma.studyProject.create({
         data: {
           ownerId: user.id,
           title: "Proyecto de estudio",
           order: 0,
           checkpoints: { create: CHECKPOINT_LABELS.map((label, idx) => ({ number: idx + 1, label })) },
         },
-        select: { id: true, title: true, description: true },
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          schedule: true,
+          checkpoints: { select: { label: true } },
+        },
       });
-      sp = created;
     }
-    // Se aplica el contenido del seed mientras el proyecto no tenga un objetivo
-    // escrito. En cuanto el/la Junior escribe la descripción, el seed no lo toca.
-    if (sp.description && sp.description.trim().length > 0) continue;
 
-    await prisma.studyProject.update({
-      where: { id: sp.id },
-      data: {
-        // Respeta un título ya puesto a mano; solo pone el del seed si sigue el de siembra.
-        ...(sp.title === "Proyecto de estudio" ? { title: s.title } : {}),
-        description: s.description,
-        schedule: s.schedule,
-      },
-    });
-    for (const c of s.checkpoints) {
-      // dueDate queda sin definir a propósito (se pone luego en la app).
-      await prisma.studyCheckpoint.upsert({
-        where: { studyProjectId_number: { studyProjectId: sp.id, number: c.number } },
-        update: { label: c.label, notes: c.notes, dueDate: null },
-        create: { studyProjectId: sp.id, number: c.number, label: c.label, notes: c.notes },
-      });
+    // Cada trozo se aplica solo si nadie lo ha personalizado todavía:
+    //  - título: solo si sigue el de siembra ("Proyecto de estudio").
+    //  - descripción: solo si está vacía.
+    //  - cronograma: solo si está vacío.
+    //  - cortes: solo si los 4 labels siguen siendo los genéricos del seed.
+    const cortesGenericos =
+      sp.checkpoints.length > 0 &&
+      sp.checkpoints.every((c) => (CHECKPOINT_LABELS as string[]).includes(c.label));
+    const data: {
+      title?: string;
+      description?: string;
+      schedule?: string;
+    } = {};
+    if (sp.title === "Proyecto de estudio") data.title = s.title;
+    if (!sp.description || sp.description.trim().length === 0) data.description = s.description;
+    if ((!sp.schedule || sp.schedule.trim().length === 0) && cortesGenericos) data.schedule = s.schedule;
+
+    if (Object.keys(data).length === 0 && !cortesGenericos) continue;
+
+    if (Object.keys(data).length > 0) {
+      await prisma.studyProject.update({ where: { id: sp.id }, data });
+    }
+    if (cortesGenericos) {
+      for (const c of s.checkpoints) {
+        // dueDate queda sin definir a propósito (se pone luego en la app).
+        await prisma.studyCheckpoint.upsert({
+          where: { studyProjectId_number: { studyProjectId: sp.id, number: c.number } },
+          update: { label: c.label, notes: c.notes, dueDate: null },
+          create: { studyProjectId: sp.id, number: c.number, label: c.label, notes: c.notes },
+        });
+      }
     }
     touched++;
   }
