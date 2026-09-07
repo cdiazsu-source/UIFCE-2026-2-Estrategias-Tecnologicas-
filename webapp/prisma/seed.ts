@@ -491,7 +491,7 @@ async function seedEtJuniorStudyProjects() {
     let sp = await prisma.studyProject.findFirst({
       where: { ownerId: user.id },
       orderBy: { order: "asc" },
-      select: { id: true, title: true },
+      select: { id: true, title: true, description: true },
     });
     if (!sp) {
       const created = await prisma.studyProject.create({
@@ -501,17 +501,22 @@ async function seedEtJuniorStudyProjects() {
           order: 0,
           checkpoints: { create: CHECKPOINT_LABELS.map((label, idx) => ({ number: idx + 1, label })) },
         },
-        select: { id: true, title: true },
+        select: { id: true, title: true, description: true },
       });
       sp = created;
     }
-    // Se re-aplica si el título es el de siembra o el que fija este seed;
-    // si alguien lo renombró a otra cosa, no se toca.
-    if (sp.title !== "Proyecto de estudio" && sp.title !== s.title) continue;
+    // Se aplica el contenido del seed mientras el proyecto no tenga un objetivo
+    // escrito. En cuanto el/la Junior escribe la descripción, el seed no lo toca.
+    if (sp.description && sp.description.trim().length > 0) continue;
 
     await prisma.studyProject.update({
       where: { id: sp.id },
-      data: { title: s.title, description: s.description, schedule: s.schedule },
+      data: {
+        // Respeta un título ya puesto a mano; solo pone el del seed si sigue el de siembra.
+        ...(sp.title === "Proyecto de estudio" ? { title: s.title } : {}),
+        description: s.description,
+        schedule: s.schedule,
+      },
     });
     for (const c of s.checkpoints) {
       // dueDate queda sin definir a propósito (se pone luego en la app).
