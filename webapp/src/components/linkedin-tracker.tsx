@@ -9,6 +9,7 @@ import {
   addLinkedInTrackee,
   deleteLinkedInSnapshot,
   deleteLinkedInTrackee,
+  setLinkedInTrackeeUrl,
   updateLinkedInSnapshot,
   updateLinkedInTrackee,
 } from "@/lib/actions/linkedin";
@@ -181,6 +182,62 @@ function ScoreBar({ score }: { score: number }) {
       </div>
       <span className="text-xs font-medium">{pct}</span>
     </div>
+  );
+}
+
+/** Editor solo del enlace de LinkedIn. Lo puede usar cualquiera con sesión
+ *  (perfil completo o junior), no solo el perfil completo. */
+function LinkedInUrlEdit({ trackee }: { trackee: TrackeeData }) {
+  const canRecord = useCanRecordMetrics();
+  const [editing, setEditing] = useState(false);
+
+  if (!canRecord) return null;
+
+  if (editing) {
+    return (
+      <form
+        action={async (formData) => {
+          await setLinkedInTrackeeUrl(trackee.id, String(formData.get("linkedinUrl") ?? ""));
+          setEditing(false);
+        }}
+        className="mt-1 flex items-center gap-1"
+      >
+        <Input
+          name="linkedinUrl"
+          type="url"
+          defaultValue={trackee.linkedinUrl ?? ""}
+          placeholder="https://www.linkedin.com/in/…"
+          className="h-7 w-64 text-xs"
+          autoFocus
+        />
+        <Button type="submit" size="sm">
+          Guardar
+        </Button>
+        <Button type="button" variant="ghost" size="sm" onClick={() => setEditing(false)}>
+          Cancelar
+        </Button>
+      </form>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={() => setEditing(true)}
+      className="mt-0.5 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary"
+    >
+      {trackee.linkedinUrl ? (
+        <>
+          <Pencil className="h-3 w-3" />
+          Editar LinkedIn
+        </>
+      ) : (
+        <>
+          <Plus className="h-3 w-3" />
+          Agregar LinkedIn
+        </>
+      )}
+    </button>
   );
 }
 
@@ -365,6 +422,7 @@ function TrackeeCard({
               {trackee.level && <span>{LEVEL_LABEL[trackee.level] ?? trackee.level}</span>}
               {trackee.area && <span>· {trackee.area}</span>}
             </p>
+            <LinkedInUrlEdit trackee={trackee} />
           </div>
         </div>
         {canEdit && (

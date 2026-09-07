@@ -151,7 +151,22 @@ export async function deleteLinkedInSnapshot(id: string): Promise<UndoAction | v
   };
 }
 
-// --- Lista de personas (solo perfil completo) ---------------------------------
+// --- Lista de personas -------------------------------------------------------
+
+/** Solo el enlace de LinkedIn de una persona: lo puede poner o cambiar
+ *  cualquiera con sesión (perfil completo o junior), no solo el perfil completo.
+ *  El resto de la ficha (nombre, área, nivel) sigue siendo del perfil completo. */
+export async function setLinkedInTrackeeUrl(id: string, url: string) {
+  if (!(await canRecordMetrics())) return;
+  const trimmed = url.trim();
+  await prisma.linkedInTrackee.update({
+    where: { id },
+    data: { linkedinUrl: trimmed.length > 0 ? trimmed : null },
+  });
+  revalidatePath("/linkedin");
+}
+
+// --- Resto de la ficha (solo perfil completo) --------------------------------
 
 export async function addLinkedInTrackee(formData: FormData) {
   if (await blockedForJunior()) return;
