@@ -376,15 +376,16 @@ async function seedStudyProjects() {
 }
 
 // Proyecto de estudio de cada Junior de ET, con su cronograma y sus 4 cortes.
-// Tiempo: ~3,5 meses a ~12 h/semana (2026-2S). Solo se aplica mientras el
-// proyecto siga con el título de siembra ("Proyecto de estudio"); una vez fijado
-// no se vuelve a tocar, para no pisar lo que edite el/la Junior en la app.
+// Tiempo: ~3,5 meses a ~12 h/semana (2026-2S). Las FECHAS de los cortes quedan
+// sin definir (se ponen luego en la app). Se re-aplica mientras el título sea el
+// de siembra o el que fija este seed; si alguien lo renombra a otra cosa, no se
+// toca (para no pisar ediciones propias del/de la Junior).
 const ET_JUNIOR_STUDY: {
   email: string;
   title: string;
   description: string;
   schedule: string;
-  checkpoints: { number: number; label: string; dueDate: string; notes: string }[];
+  checkpoints: { number: number; label: string; notes: string }[];
 }[] = [
   {
     email: "jean@example.com",
@@ -392,16 +393,15 @@ const ET_JUNIOR_STUDY: {
     description:
       "Desarrollar conocimiento sobre modelado y reporte de datos públicos con herramientas integradas (Power BI, Excel, Power Query, Python y afines) y construir un banco curado de datos abiertos de Colombia listo para usar en la docencia de la Facultad de Ciencias Económicas.",
     schedule:
-      "Dedicación: ~12 h/semana durante ~3,5 meses (2026-2S), en 4 cortes de ~4 semanas.\n\n" +
-      "Corte 1 (3 oct 2026): fundamentos de modelado y DAX + arranque del banco.\n" +
-      "Corte 2 (31 oct 2026): los 3 laboratorios + librería de 10 medidas DAX completa.\n" +
-      "Corte 3 (28 nov 2026): banco de 8–12 datasets completo + guía de ingesta + incorporación al Material Repositorio.\n" +
-      "Corte 4 (19 dic 2026): caso de estudio (dashboard ejecutivo ventas+finanzas) + microtaller dictado y socializado.",
+      "Dedicación: ~12 h/semana durante ~3,5 meses (2026-2S), en 4 cortes de ~4 semanas. Fechas de los cortes por definir.\n\n" +
+      "Corte 1: fundamentos de modelado y DAX + arranque del banco.\n" +
+      "Corte 2: los 3 laboratorios + librería de 10 medidas DAX completa.\n" +
+      "Corte 3: banco de 8–12 datasets completo + guía de ingesta + incorporación al Material Repositorio.\n" +
+      "Corte 4: caso de estudio (dashboard ejecutivo ventas+finanzas) + microtaller dictado y socializado.",
     checkpoints: [
       {
         number: 1,
         label: "Corte 1 · Fundamentos de modelado/DAX y arranque del banco",
-        dueDate: "2026-10-03",
         notes:
           "• Guía de modelado de datos y DAX terminada: medidas, columnas calculadas y funciones de time intelligence, con ejemplos reproducibles.\n" +
           "• Primeras 4–5 medidas de la librería DAX, documentadas y probadas sobre un modelo de prueba.\n" +
@@ -411,7 +411,6 @@ const ET_JUNIOR_STUDY: {
       {
         number: 2,
         label: "Corte 2 · Laboratorios y librería DAX completa",
-        dueDate: "2026-10-31",
         notes:
           "• Los 3 laboratorios listos (modelo estrella, seguridad a nivel de fila, optimización de performance), cada uno con enunciado, solución y notas.\n" +
           "• Librería de 10 medidas DAX reutilizables para reportes financieros/comerciales, documentada.\n" +
@@ -420,7 +419,6 @@ const ET_JUNIOR_STUDY: {
       {
         number: 3,
         label: "Corte 3 · Banco de datos completo, guía de ingesta y repositorio",
-        dueDate: "2026-11-28",
         notes:
           "• Banco de 8 a 12 datasets curados (cruda + limpia + diccionario + ficha de uso).\n" +
           "• Guía de ingesta y actualización por fuente: dónde y cómo descargar, cómo versionar, cada cuánto refrescar.\n" +
@@ -430,7 +428,6 @@ const ET_JUNIOR_STUDY: {
       {
         number: 4,
         label: "Corte 4 · Caso de estudio y microtaller",
-        dueDate: "2026-12-19",
         notes:
           "• Caso de estudio: dashboard ejecutivo integrando datos de ventas y finanzas, documentado, usando el banco y la librería DAX.\n" +
           "• Microtaller «Dónde están los datos de Colombia y cómo usarlos»: diapositivas + guión + dictado a los monitores instructores, con acta/registro de la socialización.\n" +
@@ -444,16 +441,15 @@ const ET_JUNIOR_STUDY: {
     description:
       "Desarrollar competencias en Blender (modelado, texturizado, iluminación, animación y renderizado 3D) para crear recursos audiovisuales reutilizables por las áreas de la UIFCE en enseñanza, divulgación, comunicación y presentación de servicios.",
     schedule:
-      "Dedicación: ~12 h/semana durante ~3,5 meses (2026-2S), en 4 cortes de ~4 semanas.\n\n" +
-      "Corte 1 (3 oct 2026): guía introductoria de Blender + primeros modelos base de marca.\n" +
-      "Corte 2 (31 oct 2026): guía integral de Blender (modelado→animación).\n" +
-      "Corte 3 (28 nov 2026): banco de ≥8 recursos 3D nuevos + incorporación al Pack UIFCE.\n" +
-      "Corte 4 (19 dic 2026): piezas audiovisuales animadas de difusión, aprobadas.",
+      "Dedicación: ~12 h/semana durante ~3,5 meses (2026-2S), en 4 cortes de ~4 semanas. Fechas de los cortes por definir.\n\n" +
+      "Corte 1: guía introductoria de Blender + primeros modelos base de marca.\n" +
+      "Corte 2: guía integral de Blender (modelado→animación).\n" +
+      "Corte 3: banco de ≥8 recursos 3D nuevos + incorporación al Pack UIFCE.\n" +
+      "Corte 4: piezas audiovisuales animadas de difusión, aprobadas.",
     checkpoints: [
       {
         number: 1,
         label: "Corte 1 · Guía introductoria y modelos base",
-        dueDate: "2026-10-03",
         notes:
           "• Guía introductoria de Blender: interfaz, herramientas y flujo de trabajo, con capturas, para alguien sin experiencia.\n" +
           "• 2–3 modelos 3D base (Uifcito y 1–2 elementos de marca), texturizados e iluminados, siguiendo la identidad visual.\n" +
@@ -462,7 +458,6 @@ const ET_JUNIOR_STUDY: {
       {
         number: 2,
         label: "Corte 2 · Guía integral de Blender",
-        dueDate: "2026-10-31",
         notes:
           "• Guía integral: modelado 3D, creación/edición de objetos, materiales, texturas, iluminación, cámaras y fundamentos de animación, con ejercicios.\n" +
           "• 5–6 recursos 3D acumulados.\n" +
@@ -471,7 +466,6 @@ const ET_JUNIOR_STUDY: {
       {
         number: 3,
         label: "Corte 3 · Banco de recursos 3D y Pack UIFCE",
-        dueDate: "2026-11-28",
         notes:
           "• Banco de al menos 8 recursos 3D nuevos reutilizables (UIFCE, Uifcito, áreas, servicios, actividades), organizados.\n" +
           "• Material incorporado al Material Repositorio (Pack UIFCE) con nomenclatura y organización estandarizada.\n" +
@@ -480,7 +474,6 @@ const ET_JUNIOR_STUDY: {
       {
         number: 4,
         label: "Corte 4 · Piezas audiovisuales animadas de difusión",
-        dueDate: "2026-12-19",
         notes:
           "• Piezas audiovisuales animadas para difundir servicios, proyectos y actividades de la UIFCE (cantidad a acordar con el máster; sugerido 2–3 piezas cortas), aprobadas por el grupo Piezas Redes Sociales.\n" +
           "Aprobación: las piezas usan el banco de recursos, aplican la línea gráfica y quedan publicadas o listas para publicar.",
@@ -512,24 +505,20 @@ async function seedEtJuniorStudyProjects() {
       });
       sp = created;
     }
-    // Solo mientras siga con el título de siembra: no pisar ediciones en la app.
-    if (sp.title !== "Proyecto de estudio") continue;
+    // Se re-aplica si el título es el de siembra o el que fija este seed;
+    // si alguien lo renombró a otra cosa, no se toca.
+    if (sp.title !== "Proyecto de estudio" && sp.title !== s.title) continue;
 
     await prisma.studyProject.update({
       where: { id: sp.id },
       data: { title: s.title, description: s.description, schedule: s.schedule },
     });
     for (const c of s.checkpoints) {
+      // dueDate queda sin definir a propósito (se pone luego en la app).
       await prisma.studyCheckpoint.upsert({
         where: { studyProjectId_number: { studyProjectId: sp.id, number: c.number } },
-        update: { label: c.label, dueDate: new Date(c.dueDate), notes: c.notes },
-        create: {
-          studyProjectId: sp.id,
-          number: c.number,
-          label: c.label,
-          dueDate: new Date(c.dueDate),
-          notes: c.notes,
-        },
+        update: { label: c.label, notes: c.notes, dueDate: null },
+        create: { studyProjectId: sp.id, number: c.number, label: c.label, notes: c.notes },
       });
     }
     touched++;
