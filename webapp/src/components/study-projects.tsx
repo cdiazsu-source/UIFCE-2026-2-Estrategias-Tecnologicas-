@@ -393,7 +393,7 @@ export function StudyProjects({
             {junior.studyProjects.length === 0 ? (
               <p className="text-sm text-muted-foreground">Sin proyecto de estudio todavía.</p>
             ) : (
-              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+              <div className="flex flex-col gap-4">
                 {junior.studyProjects.map((p) => (
                   <StudyProjectCard key={p.id} project={p} />
                 ))}
