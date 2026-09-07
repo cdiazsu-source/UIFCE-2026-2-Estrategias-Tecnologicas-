@@ -375,6 +375,168 @@ async function seedStudyProjects() {
   console.log(`Proyectos de estudio sembrados: ${made} (1 por Junior)`);
 }
 
+// Proyecto de estudio de cada Junior de ET, con su cronograma y sus 4 cortes.
+// Tiempo: ~3,5 meses a ~12 h/semana (2026-2S). Solo se aplica mientras el
+// proyecto siga con el título de siembra ("Proyecto de estudio"); una vez fijado
+// no se vuelve a tocar, para no pisar lo que edite el/la Junior en la app.
+const ET_JUNIOR_STUDY: {
+  email: string;
+  title: string;
+  description: string;
+  schedule: string;
+  checkpoints: { number: number; label: string; dueDate: string; notes: string }[];
+}[] = [
+  {
+    email: "jean@example.com",
+    title: "Modelado de Datos — Banco de datos abiertos de Colombia para la docencia de la FCE",
+    description:
+      "Desarrollar conocimiento sobre modelado y reporte de datos públicos con herramientas integradas (Power BI, Excel, Power Query, Python y afines) y construir un banco curado de datos abiertos de Colombia listo para usar en la docencia de la Facultad de Ciencias Económicas.",
+    schedule:
+      "Dedicación: ~12 h/semana durante ~3,5 meses (2026-2S), en 4 cortes de ~4 semanas.\n\n" +
+      "Corte 1 (3 oct 2026): fundamentos de modelado y DAX + arranque del banco.\n" +
+      "Corte 2 (31 oct 2026): los 3 laboratorios + librería de 10 medidas DAX completa.\n" +
+      "Corte 3 (28 nov 2026): banco de 8–12 datasets completo + guía de ingesta + incorporación al Material Repositorio.\n" +
+      "Corte 4 (19 dic 2026): caso de estudio (dashboard ejecutivo ventas+finanzas) + microtaller dictado y socializado.",
+    checkpoints: [
+      {
+        number: 1,
+        label: "Corte 1 · Fundamentos de modelado/DAX y arranque del banco",
+        dueDate: "2026-10-03",
+        notes:
+          "• Guía de modelado de datos y DAX terminada: medidas, columnas calculadas y funciones de time intelligence, con ejemplos reproducibles.\n" +
+          "• Primeras 4–5 medidas de la librería DAX, documentadas y probadas sobre un modelo de prueba.\n" +
+          "• 3–4 datasets curados (versión cruda + limpia + diccionario de datos + ficha de uso) y lista priorizada de fuentes.\n" +
+          "Aprobación: la guía es autosuficiente para un monitor nuevo y las medidas funcionan sin ajustes.",
+      },
+      {
+        number: 2,
+        label: "Corte 2 · Laboratorios y librería DAX completa",
+        dueDate: "2026-10-31",
+        notes:
+          "• Los 3 laboratorios listos (modelo estrella, seguridad a nivel de fila, optimización de performance), cada uno con enunciado, solución y notas.\n" +
+          "• Librería de 10 medidas DAX reutilizables para reportes financieros/comerciales, documentada.\n" +
+          "Aprobación: los laboratorios se ejecutan de principio a fin y la librería se probó en al menos 2 modelos distintos.",
+      },
+      {
+        number: 3,
+        label: "Corte 3 · Banco de datos completo, guía de ingesta y repositorio",
+        dueDate: "2026-11-28",
+        notes:
+          "• Banco de 8 a 12 datasets curados (cruda + limpia + diccionario + ficha de uso).\n" +
+          "• Guía de ingesta y actualización por fuente: dónde y cómo descargar, cómo versionar, cada cuánto refrescar.\n" +
+          "• Banco incorporado al Material Repositorio con nomenclatura estandarizada y búsqueda funcional probada.\n" +
+          "Aprobación: alguien ajeno al proyecto ubica y usa un dataset solo con su ficha de uso.",
+      },
+      {
+        number: 4,
+        label: "Corte 4 · Caso de estudio y microtaller",
+        dueDate: "2026-12-19",
+        notes:
+          "• Caso de estudio: dashboard ejecutivo integrando datos de ventas y finanzas, documentado, usando el banco y la librería DAX.\n" +
+          "• Microtaller «Dónde están los datos de Colombia y cómo usarlos»: diapositivas + guión + dictado a los monitores instructores, con acta/registro de la socialización.\n" +
+          "Aprobación: el dashboard reproduce resultados con el banco y el microtaller quedó dictado y registrado.",
+      },
+    ],
+  },
+  {
+    email: "mafe@example.com",
+    title: "Modelado y animación 3D en Blender para material audiovisual y de difusión de la UIFCE",
+    description:
+      "Desarrollar competencias en Blender (modelado, texturizado, iluminación, animación y renderizado 3D) para crear recursos audiovisuales reutilizables por las áreas de la UIFCE en enseñanza, divulgación, comunicación y presentación de servicios.",
+    schedule:
+      "Dedicación: ~12 h/semana durante ~3,5 meses (2026-2S), en 4 cortes de ~4 semanas.\n\n" +
+      "Corte 1 (3 oct 2026): guía introductoria de Blender + primeros modelos base de marca.\n" +
+      "Corte 2 (31 oct 2026): guía integral de Blender (modelado→animación).\n" +
+      "Corte 3 (28 nov 2026): banco de ≥8 recursos 3D nuevos + incorporación al Pack UIFCE.\n" +
+      "Corte 4 (19 dic 2026): piezas audiovisuales animadas de difusión, aprobadas.",
+    checkpoints: [
+      {
+        number: 1,
+        label: "Corte 1 · Guía introductoria y modelos base",
+        dueDate: "2026-10-03",
+        notes:
+          "• Guía introductoria de Blender: interfaz, herramientas y flujo de trabajo, con capturas, para alguien sin experiencia.\n" +
+          "• 2–3 modelos 3D base (Uifcito y 1–2 elementos de marca), texturizados e iluminados, siguiendo la identidad visual.\n" +
+          "Aprobación: con la guía una persona nueva abre Blender y produce un modelo simple.",
+      },
+      {
+        number: 2,
+        label: "Corte 2 · Guía integral de Blender",
+        dueDate: "2026-10-31",
+        notes:
+          "• Guía integral: modelado 3D, creación/edición de objetos, materiales, texturas, iluminación, cámaras y fundamentos de animación, con ejercicios.\n" +
+          "• 5–6 recursos 3D acumulados.\n" +
+          "Aprobación: la guía cubre de principio a fin la producción de una escena animada corta.",
+      },
+      {
+        number: 3,
+        label: "Corte 3 · Banco de recursos 3D y Pack UIFCE",
+        dueDate: "2026-11-28",
+        notes:
+          "• Banco de al menos 8 recursos 3D nuevos reutilizables (UIFCE, Uifcito, áreas, servicios, actividades), organizados.\n" +
+          "• Material incorporado al Material Repositorio (Pack UIFCE) con nomenclatura y organización estandarizada.\n" +
+          "Aprobación: cada recurso tiene .blend + export reutilizable y se ubica por búsqueda en el Pack UIFCE.",
+      },
+      {
+        number: 4,
+        label: "Corte 4 · Piezas audiovisuales animadas de difusión",
+        dueDate: "2026-12-19",
+        notes:
+          "• Piezas audiovisuales animadas para difundir servicios, proyectos y actividades de la UIFCE (cantidad a acordar con el máster; sugerido 2–3 piezas cortas), aprobadas por el grupo Piezas Redes Sociales.\n" +
+          "Aprobación: las piezas usan el banco de recursos, aplican la línea gráfica y quedan publicadas o listas para publicar.",
+      },
+    ],
+  },
+];
+
+async function seedEtJuniorStudyProjects() {
+  let touched = 0;
+  for (const s of ET_JUNIOR_STUDY) {
+    const user = await prisma.user.findUnique({ where: { email: s.email }, select: { id: true } });
+    if (!user) continue;
+
+    let sp = await prisma.studyProject.findFirst({
+      where: { ownerId: user.id },
+      orderBy: { order: "asc" },
+      select: { id: true, title: true },
+    });
+    if (!sp) {
+      const created = await prisma.studyProject.create({
+        data: {
+          ownerId: user.id,
+          title: "Proyecto de estudio",
+          order: 0,
+          checkpoints: { create: CHECKPOINT_LABELS.map((label, idx) => ({ number: idx + 1, label })) },
+        },
+        select: { id: true, title: true },
+      });
+      sp = created;
+    }
+    // Solo mientras siga con el título de siembra: no pisar ediciones en la app.
+    if (sp.title !== "Proyecto de estudio") continue;
+
+    await prisma.studyProject.update({
+      where: { id: sp.id },
+      data: { title: s.title, description: s.description, schedule: s.schedule },
+    });
+    for (const c of s.checkpoints) {
+      await prisma.studyCheckpoint.upsert({
+        where: { studyProjectId_number: { studyProjectId: sp.id, number: c.number } },
+        update: { label: c.label, dueDate: new Date(c.dueDate), notes: c.notes },
+        create: {
+          studyProjectId: sp.id,
+          number: c.number,
+          label: c.label,
+          dueDate: new Date(c.dueDate),
+          notes: c.notes,
+        },
+      });
+    }
+    touched++;
+  }
+  console.log(`Proyectos de estudio de Junior ET definidos: ${touched}.`);
+}
+
 // --- Línea gráfica -------------------------------------------------------------
 async function seedBrandGuidelines() {
   const count = await prisma.brandGuideline.count();
@@ -937,6 +1099,7 @@ async function main() {
   await seedUsers();
   await dedupeSeededPeople();
   await seedStudyProjects();
+  await seedEtJuniorStudyProjects();
   await seedBrandGuidelines();
   await seedCursosLibresChecklist();
   await seedSocialChannels();
