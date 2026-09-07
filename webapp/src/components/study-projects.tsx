@@ -144,7 +144,12 @@ function CheckpointRow({ checkpoint }: { checkpoint: StudyCheckpoint }) {
             ))}
           </Select>
         </div>
-        <Input name="notes" defaultValue={checkpoint.notes ?? ""} placeholder="Notas / observaciones del corte" />
+        <Textarea
+          name="notes"
+          defaultValue={checkpoint.notes ?? ""}
+          placeholder="Notas / observaciones del corte (entregables y criterio de aprobación)"
+          className="min-h-[90px]"
+        />
         <div className="flex gap-2">
           <Button type="submit" size="sm">
             Guardar
@@ -173,7 +178,11 @@ function CheckpointRow({ checkpoint }: { checkpoint: StudyCheckpoint }) {
             </span>
           )}
         </div>
-        {checkpoint.notes && <p className="mt-0.5 text-xs text-muted-foreground">{checkpoint.notes}</p>}
+        {checkpoint.notes && (
+          <p className="mt-0.5 whitespace-pre-line text-xs leading-relaxed text-muted-foreground">
+            {checkpoint.notes}
+          </p>
+        )}
         {canEdit && (
           <div className="mt-1 flex flex-wrap gap-1">
             {STATUS_OPTIONS.map((s) => (
