@@ -271,6 +271,16 @@ IDEAS = [
         priority=False,
     ),
     dict(
+        id="ds-solicitudes-uifce-tarjetas",
+        cat="Acompañamiento interárea — Próximo ciclo",
+        idea="Rediseño de tarjetas del aplicativo Solicitudes UIFCE (apoyo a Desarrollo)",
+        hacer="A solicitud de Desarrollo (Yony Sebastian Chaparro Mesa, máster de DS), apoyar el aplicativo Solicitudes UIFCE con dos frentes: (1) una imagen o foto por cada servicio y (2) el rediseño de las tarjetas de servicio, con libertad total en la proporción. Se parte de una captura de pantalla del aplicativo actual que envía Desarrollo. Aplicar la línea gráfica vigente y entregar las piezas listas para integrar. Tiempo estimado: aproximadamente dos semanas.",
+        espera="Un set de imágenes por servicio y una propuesta de tarjeta de servicio rediseñada, aprobadas y entregadas a Desarrollo en cerca de dos semanas, listas para integrar en el aplicativo Solicitudes UIFCE.",
+        fundamento="Solicitud formal de Desarrollo a ET dentro del acompañamiento interárea. El aplicativo Solicitudes UIFCE es un punto de contacto de la Unidad con estudiantes y docentes; una imagen por servicio y mejores tarjetas hacen la oferta más clara y usable.",
+        entregables="* Recibir de Desarrollo la captura del aplicativo actual y la lista de servicios.\n* Definir con Desarrollo el alcance del rediseño y las medidas o proporción de las tarjetas.\n* Una imagen o foto por cada servicio, con la línea gráfica vigente.\n* Propuesta de tarjeta de servicio rediseñada (libertad total en proporción).\n* Aprobación de las piezas por el grupo Piezas Redes Sociales y por Desarrollo.\n* Entrega de los archivos finales a Desarrollo para integrarlos al aplicativo.",
+        priority=False,
+    ),
+    dict(
         id="cursoslibres-piezas-primer-lanzamiento",
         cat="Acompañamiento a Cursos Libres",
         idea="Elaboración de piezas gráficas de Cursos Libres — Primer lanzamiento",
