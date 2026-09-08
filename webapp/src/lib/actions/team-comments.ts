@@ -8,17 +8,18 @@ import { USER_ROLE_LABEL } from "@/lib/utils";
 import type { UndoAction } from "@/lib/undo";
 
 /** Cualquiera del equipo puede dejar un comentario o idea. El autor se elige de
- *  la lista de User (equipo): solo se acepta si existe y está activo. */
-export async function addTeamComment(formData: FormData) {
+ *  la lista de User (equipo): solo se acepta si existe y está activo.
+ *  Devuelve `{ ok }` para que el formulario sepa si limpiar el borrador local. */
+export async function addTeamComment(formData: FormData): Promise<{ ok: boolean }> {
   const body = String(formData.get("body") ?? "").trim();
   const authorId = String(formData.get("authorId") ?? "").trim();
-  if (!body || !authorId) return;
+  if (!body || !authorId) return { ok: false };
 
   const user = await prisma.user.findFirst({
     where: { id: authorId, active: true },
     select: { name: true, role: true },
   });
-  if (!user) return;
+  if (!user) return { ok: false };
 
   await prisma.teamComment.create({
     data: {
@@ -30,6 +31,7 @@ export async function addTeamComment(formData: FormData) {
   });
 
   revalidatePath("/");
+  return { ok: true };
 }
 
 export async function toggleTeamCommentReviewed(

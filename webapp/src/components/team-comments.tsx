@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { Check, Trash2 } from "lucide-react";
 
 import {
@@ -17,6 +17,10 @@ import { InfoHint } from "@/components/info-hint";
 import { useCanEdit } from "@/components/access-context";
 import { useUndo } from "@/components/undo-banner";
 import { formatDateTime, USER_ROLE_LABEL } from "@/lib/utils";
+
+/** El texto sin enviar se guarda aquí para que no se pierda si se cierra la
+ *  página o se olvida pulsar «Enviar». Es por navegador; se borra al publicar. */
+const DRAFT_KEY = "et:team-comment-draft";
 
 export type TeamCommentAuthor = { id: string; name: string; role: string };
 export type TeamCommentData = {
@@ -94,6 +98,30 @@ export function TeamComments({
 }) {
   const formRef = useRef<HTMLFormElement>(null);
   const [showReviewed, setShowReviewed] = useState(false);
+  const [draft, setDraft] = useState("");
+  const [draftLoaded, setDraftLoaded] = useState(false);
+
+  // Restaurar el borrador guardado (si lo hay) al abrir la página.
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(DRAFT_KEY);
+      if (saved) setDraft(saved);
+    } catch {
+      /* localStorage no disponible: seguimos sin borrador */
+    }
+    setDraftLoaded(true);
+  }, []);
+
+  // Guardar en cada cambio: sobrevive a recargar o cerrar la pestaña.
+  useEffect(() => {
+    if (!draftLoaded) return;
+    try {
+      if (draft.trim()) localStorage.setItem(DRAFT_KEY, draft);
+      else localStorage.removeItem(DRAFT_KEY);
+    } catch {
+      /* sin persistencia; no es crítico */
+    }
+  }, [draft, draftLoaded]);
 
   const pending = comments.filter((c) => !c.reviewed);
   const reviewed = comments.filter((c) => c.reviewed);
@@ -120,12 +148,26 @@ export function TeamComments({
           <form
             ref={formRef}
             action={async (formData) => {
-              await addTeamComment(formData);
-              formRef.current?.reset();
+              const res = await addTeamComment(formData);
+              if (res?.ok) {
+                formRef.current?.reset();
+                setDraft("");
+                try {
+                  localStorage.removeItem(DRAFT_KEY);
+                } catch {
+                  /* nada que limpiar */
+                }
+              }
             }}
             className="flex flex-col gap-2"
           >
-            <Textarea name="body" placeholder="Escribe tu comentario o idea para el equipo…" required />
+            <Textarea
+              name="body"
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              placeholder="Escribe tu comentario o idea para el equipo…"
+              required
+            />
             <div className="flex flex-wrap items-center gap-2">
               <Select name="authorId" defaultValue="" required className="w-64">
                 <option value="" disabled>
@@ -141,6 +183,11 @@ export function TeamComments({
                 Enviar
               </Button>
             </div>
+            {draft.trim() && (
+              <p className="text-xs text-muted-foreground">
+                Borrador guardado en este navegador; no se pierde si cierras la página. Pulsa «Enviar» para publicarlo.
+              </p>
+            )}
           </form>
         )}
 
