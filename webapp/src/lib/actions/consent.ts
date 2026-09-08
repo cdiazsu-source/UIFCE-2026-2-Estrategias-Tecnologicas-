@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { prisma } from "@/lib/prisma";
-import { blockedForJunior } from "@/lib/session";
+import { canManageConsent } from "@/lib/session";
 import { CONSENT_PROJECT_ID } from "@/lib/consent";
 
 function str(fd: FormData, k: string): string | null {
@@ -17,7 +17,7 @@ function revalidate() {
 }
 
 export async function setConsentSigned(id: string, signed: boolean) {
-  if (await blockedForJunior()) return;
+  if (!(await canManageConsent())) return;
   await prisma.consentSignatory.update({
     where: { id },
     data: { signed, signedAt: signed ? new Date() : null },
@@ -26,7 +26,7 @@ export async function setConsentSigned(id: string, signed: boolean) {
 }
 
 export async function setConsentDriveAccess(id: string, driveAccess: boolean) {
-  if (await blockedForJunior()) return;
+  if (!(await canManageConsent())) return;
   await prisma.consentSignatory.update({
     where: { id },
     data: { driveAccess, driveAccessAt: driveAccess ? new Date() : null },
@@ -35,7 +35,7 @@ export async function setConsentDriveAccess(id: string, driveAccess: boolean) {
 }
 
 export async function updateConsentDriveUrl(id: string, driveFolderUrl: string) {
-  if (await blockedForJunior()) return;
+  if (!(await canManageConsent())) return;
   const trimmed = driveFolderUrl.trim();
   await prisma.consentSignatory.update({
     where: { id },
@@ -45,7 +45,7 @@ export async function updateConsentDriveUrl(id: string, driveFolderUrl: string) 
 }
 
 export async function addConsentSignatory(formData: FormData) {
-  if (await blockedForJunior()) return;
+  if (!(await canManageConsent())) return;
   const name = String(formData.get("name") ?? "").trim();
   if (!name) return;
 
@@ -61,7 +61,7 @@ export async function addConsentSignatory(formData: FormData) {
 }
 
 export async function updateConsentSignatory(id: string, formData: FormData) {
-  if (await blockedForJunior()) return;
+  if (!(await canManageConsent())) return;
   const name = String(formData.get("name") ?? "").trim();
   await prisma.consentSignatory.update({
     where: { id },
@@ -75,7 +75,7 @@ export async function updateConsentSignatory(id: string, formData: FormData) {
 }
 
 export async function deleteConsentSignatory(id: string) {
-  if (await blockedForJunior()) return;
+  if (!(await canManageConsent())) return;
   await prisma.consentSignatory.delete({ where: { id } });
   revalidate();
 }

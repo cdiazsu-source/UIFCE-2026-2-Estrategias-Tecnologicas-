@@ -17,7 +17,7 @@ import { Select } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PersonAvatar } from "@/components/person-avatar";
 import { InfoHint } from "@/components/info-hint";
-import { useCanEdit } from "@/components/access-context";
+import { useCanManageConsent } from "@/components/access-context";
 import { CONSENT_DOC_TEXT, consentTextFor } from "@/lib/consent";
 import { formatDate } from "@/lib/utils";
 
@@ -144,7 +144,7 @@ function Toggle({
 }
 
 function DriveButton({ row }: { row: ConsentRow }) {
-  const canEdit = useCanEdit();
+  const canEdit = useCanManageConsent();
   const [editing, setEditing] = useState(false);
 
   if (editing && canEdit) {
@@ -216,7 +216,7 @@ function DriveButton({ row }: { row: ConsentRow }) {
 }
 
 function SignatoryRow({ row }: { row: ConsentRow }) {
-  const canEdit = useCanEdit();
+  const canEdit = useCanManageConsent();
   const [editing, setEditing] = useState(false);
   const [copied, setCopied] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -323,7 +323,7 @@ function SignatoryRow({ row }: { row: ConsentRow }) {
 }
 
 export function ConsentPanel({ signatories }: { signatories: ConsentRow[] }) {
-  const canEdit = useCanEdit();
+  const canEdit = useCanManageConsent();
   const [adding, setAdding] = useState(false);
 
   const active = signatories.filter((s) => s.active);

@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LogOut } from "lucide-react";
+import { Eye, LogOut } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { logout } from "@/lib/actions/auth";
+import { setJuniorView } from "@/lib/actions/view";
 
 const LINKS = [
   { href: "/", label: "Panel principal" },
@@ -17,7 +18,15 @@ const LINKS = [
   { href: "/equipo", label: "Equipo" },
 ];
 
-export function SiteNav({ canEdit = true }: { canEdit?: boolean }) {
+export function SiteNav({
+  canEdit = true,
+  viewingAsJunior = false,
+  canUseJuniorView = false,
+}: {
+  canEdit?: boolean;
+  viewingAsJunior?: boolean;
+  canUseJuniorView?: boolean;
+}) {
   const pathname = usePathname();
 
   if (pathname === "/login") return null;
@@ -48,11 +57,32 @@ export function SiteNav({ canEdit = true }: { canEdit?: boolean }) {
           })}
         </nav>
         <div className="ml-auto flex items-center gap-2">
-          {!canEdit && (
+          {viewingAsJunior ? (
+            <form action={setJuniorView.bind(null, false)}>
+              <button
+                type="submit"
+                className="press inline-flex items-center gap-1.5 rounded-full border border-warning/50 bg-warning/15 px-2.5 py-1 text-xs font-medium text-warning hover:bg-warning/25"
+              >
+                <Eye className="h-3.5 w-3.5" />
+                Vista Junior · salir
+              </button>
+            </form>
+          ) : canUseJuniorView ? (
+            <form action={setJuniorView.bind(null, true)}>
+              <button
+                type="submit"
+                className="press inline-flex items-center gap-1.5 rounded-full border border-input px-2.5 py-1 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                title="Ver la app como la ve un monitor Junior"
+              >
+                <Eye className="h-3.5 w-3.5" />
+                Vista Junior
+              </button>
+            </form>
+          ) : !canEdit ? (
             <span className="rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground">
               Modo lectura
             </span>
-          )}
+          ) : null}
           <form action={logout}>
             <button
               type="submit"

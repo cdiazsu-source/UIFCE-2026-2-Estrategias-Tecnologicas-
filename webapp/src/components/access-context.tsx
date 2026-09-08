@@ -15,22 +15,30 @@ const CanRecordMetricsContext = createContext(false);
  *  (solo asigna a monitores Junior, no borra). */
 const CanManageChecklistContext = createContext(false);
 
+/** true = la sesión puede gestionar el panel de consentimientos de uso de
+ *  imagen. Perfil completo y junior. */
+const CanManageConsentContext = createContext(false);
+
 export function AccessProvider({
   canEdit,
   canRecordMetrics = false,
   canManageChecklist = false,
+  canManageConsent = false,
   children,
 }: {
   canEdit: boolean;
   canRecordMetrics?: boolean;
   canManageChecklist?: boolean;
+  canManageConsent?: boolean;
   children: React.ReactNode;
 }) {
   return (
     <CanEditContext.Provider value={canEdit}>
       <CanRecordMetricsContext.Provider value={canRecordMetrics}>
         <CanManageChecklistContext.Provider value={canManageChecklist}>
-          {children}
+          <CanManageConsentContext.Provider value={canManageConsent}>
+            {children}
+          </CanManageConsentContext.Provider>
         </CanManageChecklistContext.Provider>
       </CanRecordMetricsContext.Provider>
     </CanEditContext.Provider>
@@ -47,4 +55,8 @@ export function useCanRecordMetrics() {
 
 export function useCanManageChecklist() {
   return useContext(CanManageChecklistContext);
+}
+
+export function useCanManageConsent() {
+  return useContext(CanManageConsentContext);
 }

@@ -20,6 +20,11 @@
 export const SESSION_COOKIE = "et_session";
 export const SESSION_MAX_AGE = 60 * 60 * 24 * 30; // 30 días
 
+/** Cookie de "Vista Junior": si vale "junior" y la sesión real es completa y no
+ *  es la del director, la app se comporta como si fuera perfil junior (para que
+ *  el máster pueda revisar qué ven y qué pueden hacer los monitores). */
+export const VIEW_COOKIE = "et_view";
+
 export type AccessLevel = "full" | "junior";
 
 /** Resultado de validar credenciales: nivel de acceso y, si la credencial es
