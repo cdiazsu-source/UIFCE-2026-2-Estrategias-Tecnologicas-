@@ -82,3 +82,34 @@ Este prompt está escrito para frenar al agente antes de que empiece a generar c
 
 - **Agregar una iniciativa nueva a la planeación**: prompt de [`planeacion/PLANTILLA_NUEVO_PROYECTO.md`](planeacion/PLANTILLA_NUEVO_PROYECTO.md). Produce una fila con el estilo del CSV e integra en `planeacion/planeacion_del_area.csv` + la lista `IDEAS` de `src/build_planeacion_2026_2_v2.py`. `planeacion_del_area.csv` es la fuente de verdad que consume la app; tras editarlo, `cd webapp && npm run db:seed` sincroniza sin sobrescribir lo que ya editaron las personas.
 - **Dar una actualización de avance** (sección "Últimas actualizaciones" / bitácora de la app): prompt de [`planeacion/PLANTILLA_ACTUALIZACION_PROYECTO.md`](planeacion/PLANTILLA_ACTUALIZACION_PROYECTO.md). Produce una nota corta y estructurada (Avance / Próximo / Bloqueo) lista para pegar, e indica a qué proyecto va. El feed respeta saltos de línea; autor y fecha los pone la app.
+
+## 10. Estado de la webapp `webapp/` (leer si se va a tocar la app)
+
+La fase de la sección 6 ya está construida y en producción: **"ET en Marcha"**, una app **Next.js 14 (App Router) + Prisma + Postgres (Neon)** desplegada en **Vercel** (Production sigue la rama `main`; redespliega solo con cada `git push`). URL: `https://uifce-2026-2-estrategias-tecnologic-theta.vercel.app`. Toda la UI en español, tono corporativo.
+
+**Estado a 2026-09-08:** rama `main` sincronizada con `origin/main`; las migraciones de `webapp/prisma/migrations/` (hasta `20260916120000_project_assignee`) están **todas aplicadas** en la BD de Neon de producción; el `db:seed` ya se corrió (hay usuarios, proyectos, proyectos de estudio con cortes, redes, tracker de LinkedIn, consentimientos). No hay nada pendiente de desplegar salvo lo que se cambie a partir de ahora.
+
+**Reglas duras (no negociables):**
+
+1. **Identidad de git: `Juan Diego Peña <tucorreo@ejemplo.com>`. No cambiarla nunca.** Es un correo de marcador deliberado (repo público). En una máquina nueva, fijarla *local* al repo: `git config user.name "Juan Diego Peña"` y `git config user.email "tucorreo@ejemplo.com"` — eso es preservarla, no cambiarla.
+2. **El agente NO corre `prisma migrate`, `db:deploy`, `db:seed` ni `npx tsx prisma/seed.ts`** — el clasificador de permisos del harness lo bloquea y va contra producción. Las migraciones se escriben **a mano** como `webapp/prisma/migrations/AAAAMMDDHHMMSS_nombre/migration.sql` (+ actualizar `schema.prisma`); **el usuario** corre `db:deploy` + `db:seed`.
+3. El repo de GitHub es **público**: nada de contraseñas ni secretos reales en el código. Las credenciales van como variables de entorno en Vercel (`SITE_PASSWORD`, `SITE_PASSWORD_JUNIOR`, `SITE_USER_DIRECTOR` / `SITE_PASSWORD_DIRECTOR`, `AUTH_SECRET`).
+4. `webapp/.env` (git-ignored) apunta al **mismo** Neon de producción que usa Vercel. Cualquier script que escriba en BD impacta producción.
+5. Mensajes de commit terminan con `Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>`. Un commit por feature. PowerShell 5.1 no acepta `&&` (comandos separados).
+
+**Flujo de trabajo:**
+
+- Fuente de verdad de proyectos: `planeacion/planeacion_del_area.csv` (LF). Un proyecto nuevo = fila ahí + fila en `planeacion/planeacion.csv` (CRLF) + entrada en la lista `IDEAS` de `src/build_planeacion_2026_2_v2.py`; se agregan con scripts Node que preservan el fin de línea y se verifican con `csv-parse`. Después el usuario corre `db:seed` (idempotente/aditivo; no sobrescribe lo editado en la app).
+- Desplegar un cambio: (1) si hay migración nueva, el usuario corre `cd webapp && npm run db:deploy && npm run db:seed` contra Neon; (2) `git push` desde la raíz → Vercel redespliega; (3) verificar con Ctrl+Shift+R.
+- Gráficas: SVG inline a mano, sin librería de charts.
+
+**Acceso (`/login`, login compartido):** `UIFCE` / `ET2026` = perfil completo (edita todo); `UIFCE` / `TEAM` = perfil junior (registra KPIs, gestiona checklist y consentimientos; no edita el resto); `HENRY` / `UIFCEUNAL310.` = director. La **"Vista Junior"** (cookie `et_view`) deja al perfil completo ver la app como un junior. Todo overridable por entorno.
+
+**Backlog conocido (no empezar sin que el usuario lo pida):**
+
+- LinkedIn "Capa 2": descripciones de rol editables ES/EN (`roles.json`) + checklist de perfil de 100 pts (`profile-checklist.json`). La Capa 1 (tracker por persona en `/linkedin`, dentro de "Redes sociales") ya está.
+- Fotos del equipo: van a `webapp/public/avatares/` y su nombre de archivo al campo "Foto" de cada persona.
+- Auth fase 2: enlace mágico por correo + rol real por persona (`getSession()` daría `{userId, role}`).
+- Verificar el nombre completo de "Brayan Sandoval" (se asumió "Brayan Santiago Maldonado Aparicio").
+
+> El historial detallado sesión a sesión de esta app vivía en la memoria de Claude Code, que no se traslada entre máquinas ni cuentas. Esta sección es el resumen durable; para el detalle de un cambio concreto, `git log` sobre `webapp/`.
