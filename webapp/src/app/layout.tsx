@@ -15,6 +15,16 @@ export const metadata: Metadata = {
   description: "Seguimiento en vivo de la planeación de Estrategias Tecnológicas — UIFCE 2026-2",
 };
 
+// Fecha y hora de la compilación/deploy (ver next.config.mjs). Se formatea en
+// hora de Colombia con orden ISO (sv-SE => "2026-09-17 14:32"). Cambia con cada
+// push, así el pie refleja siempre la última versión publicada.
+const BUILD_ISO = process.env.BUILD_TIME ?? new Date().toISOString();
+const BUILD_LABEL = new Date(BUILD_ISO).toLocaleString("sv-SE", {
+  timeZone: "America/Bogota",
+  dateStyle: "short",
+  timeStyle: "short",
+});
+
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();
   // `level` es el efectivo: con la Vista Junior activa, editable = false.
@@ -52,8 +62,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               </div>
             )}
             <main className="mx-auto max-w-6xl px-6 py-8">{children}</main>
-            <footer className="mx-auto max-w-6xl px-6 pb-8 text-xs text-muted-foreground">
-              Versión 2026-09-08
+            <footer
+              className="mx-auto max-w-6xl px-6 pb-8 text-xs text-muted-foreground"
+              title="Fecha y hora de la última publicación (hora de Colombia)"
+            >
+              Versión {BUILD_LABEL}
             </footer>
           </UndoProvider>
         </AccessProvider>
