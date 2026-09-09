@@ -15,7 +15,7 @@ Todo el contenido de `docs/` y `planeacion/` fue construido a partir de fuentes 
 - Nombre correcto: **UIFCE** (mayúsculas), no "uifce" ni "Uifce" — fue una inconsistencia detectada explícitamente en el diagnóstico.
 - **Hackatón** (no "Jacatón" — es un error de transcripción que aparece en fuentes de audio, corregido en todos los entregables).
 - El área se refiere a sí misma como **ET** o **Estrategias Tecnológicas**; a la persona que la lidera cada semestre como **máster**; a los estudiantes que trabajan bajo ella como **monitores** (con roles como monitor de artes).
-- Las cuentas institucionales relevantes: Instagram (**@uifce_un**, cuenta perdida — máxima prioridad 2026-2), LinkedIn (prioritario), TikTok (nueva, se crea este semestre), YouTube (en proceso de oficialización).
+- Las cuentas institucionales relevantes: Instagram (**@ui_fce** — cuenta nueva 2026-2; la anterior **@uifce_un** se perdió y no se recuperó), LinkedIn (prioritario), TikTok (nueva, se crea este semestre), YouTube (en proceso de oficialización).
 - Principio rector explícito del semestre 2026-2: **"calidad sobre cantidad"**, para posicionar la Unidad — aparece repetido en Manual, Portafolio y Planeación. Cualquier iniciativa nueva que se proponga debería enmarcarse en este principio.
 
 ## 3. Los seis documentos de `docs/` y qué resuelve cada uno

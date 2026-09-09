@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { ExternalLink, Pencil, Plus, Trash2 } from "lucide-react";
+import { Download, ExternalLink, Pencil, Plus, Trash2 } from "lucide-react";
 
 import { addTemplate, deleteTemplate, updateTemplate } from "@/lib/actions/templates";
 import { Button } from "@/components/ui/button";
@@ -36,6 +36,11 @@ export const TEMPLATE_CATEGORIES = [
 function categoryRank(c: string): number {
   const i = TEMPLATE_CATEGORIES.indexOf(c);
   return i === -1 ? TEMPLATE_CATEGORIES.length : i;
+}
+
+/** El enlace apunta a una imagen (asset del propio sitio o URL externa). */
+function isImageUrl(u: string): boolean {
+  return /\.(png|jpe?g|webp|gif|svg)(\?.*)?$/i.test(u);
 }
 
 function Fields({ t }: { t?: TemplateData }) {
@@ -131,7 +136,27 @@ function TemplateCard({ template }: { template: TemplateData }) {
       </CardHeader>
       <CardContent className="flex flex-col gap-2 text-sm">
         {template.description && <p className="whitespace-pre-line text-muted-foreground">{template.description}</p>}
-        {template.url && (
+        {template.url && isImageUrl(template.url) && (
+          <div className="flex flex-col gap-2">
+            <a href={template.url} target="_blank" rel="noreferrer" className="block w-fit">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={template.url}
+                alt={template.name}
+                className="max-h-48 w-fit rounded-md border border-border bg-white object-contain p-1"
+              />
+            </a>
+            <a
+              href={template.url}
+              download
+              className="inline-flex w-fit items-center gap-1 text-primary hover:underline"
+            >
+              Descargar imagen
+              <Download className="h-3.5 w-3.5" />
+            </a>
+          </div>
+        )}
+        {template.url && !isImageUrl(template.url) && (
           <a
             href={template.url}
             target="_blank"
