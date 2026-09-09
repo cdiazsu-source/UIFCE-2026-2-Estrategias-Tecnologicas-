@@ -298,10 +298,17 @@ model TeamComment {
   authorUser User?    @relation(fields: [authorId], references: [id], onDelete: SetNull)
   /// true = ya lo revisó alguien del equipo.
   reviewed   Boolean  @default(false)
+  /// Comentario al que responde esta fila, si es una respuesta. Un solo nivel de
+  /// anidado: al responder a una respuesta, se cuelga del comentario raíz. Si se
+  /// borra el comentario padre, sus respuestas quedan como comentarios sueltos.
+  parentId   String?
+  parent     TeamComment?  @relation("TeamCommentReplies", fields: [parentId], references: [id], onDelete: SetNull)
+  replies    TeamComment[] @relation("TeamCommentReplies")
   createdAt  DateTime @default(now())
 
   @@index([createdAt])
   @@index([authorId])
+  @@index([parentId])
 }
 
 /// Una plantilla reutilizable del área, agrupada por categoría (redes sociales,
@@ -317,6 +324,10 @@ model Template {
   /// Formato o medida, ej. "Reel 1080×1920", "Correo HTML", "Póster A3".
   format      String?
   notes       String?  @db.Text
+  /// Captura de pantalla / miniatura de la pieza. Normalmente una data URL con
+  /// la imagen ya reducida (~640px) que pega quien edita; también admite un
+  /// enlace o un archivo en /public. Se muestra como vista previa en la tarjeta.
+  screenshot  String?  @db.Text
   order       Int      @default(0)
 
   createdAt DateTime @default(now())

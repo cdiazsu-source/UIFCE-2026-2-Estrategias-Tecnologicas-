@@ -13,6 +13,17 @@ function str(fd: FormData, k: string): string | null {
   return v.length > 0 ? v : null;
 }
 
+/** Tope defensivo para la captura: quien edita ya la reduce a ~640px en el
+ *  navegador (ver templates-panel.tsx); esto solo evita filas gigantes si
+ *  alguien pega una imagen sin reducir. ~1.2M chars ≈ 900 KB de data URL. */
+const SCREENSHOT_MAX = 1_200_000;
+
+function screenshot(fd: FormData): string | null {
+  const v = str(fd, "screenshot");
+  if (!v) return null;
+  return v.length <= SCREENSHOT_MAX ? v : null;
+}
+
 export async function addTemplate(formData: FormData) {
   if (await blockedForJunior()) return;
   const name = String(formData.get("name") ?? "").trim();
@@ -28,6 +39,7 @@ export async function addTemplate(formData: FormData) {
       url: str(formData, "url"),
       format: str(formData, "format"),
       notes: str(formData, "notes"),
+      screenshot: screenshot(formData),
       order: (last?.order ?? -1) + 1,
     },
   });
@@ -51,6 +63,7 @@ export async function updateTemplate(id: string, formData: FormData): Promise<Un
       url: str(formData, "url"),
       format: str(formData, "format"),
       notes: str(formData, "notes"),
+      screenshot: screenshot(formData),
     },
   });
   revalidatePath(PATH);
@@ -65,6 +78,7 @@ export async function updateTemplate(id: string, formData: FormData): Promise<Un
       url: prev.url,
       format: prev.format,
       notes: prev.notes,
+      screenshot: prev.screenshot,
     },
   };
 }
@@ -87,6 +101,7 @@ export async function deleteTemplate(id: string): Promise<UndoAction | void> {
       url: prev.url,
       format: prev.format,
       notes: prev.notes,
+      screenshot: prev.screenshot,
       order: prev.order,
     },
   };

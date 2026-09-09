@@ -13,6 +13,7 @@ import type { UndoAction } from "@/lib/undo";
 export async function addTeamComment(formData: FormData): Promise<{ ok: boolean }> {
   const body = String(formData.get("body") ?? "").trim();
   const authorId = String(formData.get("authorId") ?? "").trim();
+  const rawParentId = String(formData.get("parentId") ?? "").trim();
   if (!body || !authorId) return { ok: false };
 
   const user = await prisma.user.findFirst({
@@ -21,12 +22,24 @@ export async function addTeamComment(formData: FormData): Promise<{ ok: boolean 
   });
   if (!user) return { ok: false };
 
+  // Si es una respuesta: se cuelga del comentario raíz (un solo nivel de anidado).
+  let parentId: string | null = null;
+  if (rawParentId) {
+    const parent = await prisma.teamComment.findUnique({
+      where: { id: rawParentId },
+      select: { id: true, parentId: true },
+    });
+    if (!parent) return { ok: false };
+    parentId = parent.parentId ?? parent.id;
+  }
+
   await prisma.teamComment.create({
     data: {
       body,
       author: user.name,
       authorRole: USER_ROLE_LABEL[user.role] ?? null,
       authorId,
+      parentId,
     },
   });
 
@@ -65,6 +78,7 @@ export async function deleteTeamComment(id: string): Promise<UndoAction | void> 
       authorRole: prev.authorRole,
       authorId: prev.authorId,
       reviewed: prev.reviewed,
+      parentId: prev.parentId,
       createdAt: prev.createdAt.toISOString(),
     },
   };

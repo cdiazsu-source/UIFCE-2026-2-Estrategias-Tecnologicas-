@@ -101,8 +101,16 @@ async function getHomeData(semesterId: string | null, includeOrphans: boolean) {
       }),
       prisma.teamComment.findMany({
         orderBy: { createdAt: "desc" },
-        take: 60,
-        select: { id: true, body: true, author: true, authorRole: true, reviewed: true, createdAt: true },
+        take: 150,
+        select: {
+          id: true,
+          body: true,
+          author: true,
+          authorRole: true,
+          reviewed: true,
+          parentId: true,
+          createdAt: true,
+        },
       }),
       prisma.user.findFirst({
         where: { credentialKey: { not: null } },

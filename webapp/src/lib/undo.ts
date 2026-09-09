@@ -180,6 +180,7 @@ export type UndoAction =
         url: string | null;
         format: string | null;
         notes: string | null;
+        screenshot: string | null;
       };
     }
   | {
@@ -192,6 +193,7 @@ export type UndoAction =
         url: string | null;
         format: string | null;
         notes: string | null;
+        screenshot: string | null;
         order: number;
       };
     }
@@ -204,6 +206,7 @@ export type UndoAction =
         authorRole: string | null;
         authorId: string | null;
         reviewed: boolean;
+        parentId: string | null;
         createdAt: string;
       };
     }

@@ -248,6 +248,13 @@ export async function applyUndo(action: UndoAction) {
     }
     case "teamcomment.delete": {
       const d = action.data;
+      // Solo se re-vincula al padre si sigue existiendo (el banner de deshacer
+      // es efímero, así que en la práctica siempre está).
+      const parentId =
+        d.parentId &&
+        (await prisma.teamComment.findUnique({ where: { id: d.parentId }, select: { id: true } }))
+          ? d.parentId
+          : null;
       await prisma.teamComment.create({
         data: {
           id: d.id,
@@ -256,6 +263,7 @@ export async function applyUndo(action: UndoAction) {
           authorRole: d.authorRole,
           authorId: d.authorId,
           reviewed: d.reviewed,
+          parentId,
           createdAt: new Date(d.createdAt),
         },
       });
