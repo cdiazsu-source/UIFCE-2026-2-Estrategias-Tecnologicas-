@@ -52,6 +52,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               </div>
             )}
             <main className="mx-auto max-w-6xl px-6 py-8">{children}</main>
+            <footer className="mx-auto max-w-6xl px-6 pb-8 text-xs text-muted-foreground">
+              Versión 2026-09-08
+            </footer>
           </UndoProvider>
         </AccessProvider>
       </body>
