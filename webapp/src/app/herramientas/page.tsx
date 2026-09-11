@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { ToolsTable } from "@/components/tools-table";
+import { HerramientasTabs } from "@/components/herramientas-tabs";
 import { InfoHint } from "@/components/info-hint";
 
 export const dynamic = "force-dynamic";
@@ -12,13 +12,13 @@ export default async function HerramientasPage() {
       <div>
         <h1 className="flex items-center gap-1.5 text-xl font-bold">
           Herramientas y licencias
-          <InfoHint text="Qué software de diseño/edición tiene el área, si la licencia está vigente y en qué equipo o con quién está. Cómo se usa: con perfil completo, «Agregar herramienta» o el lápiz de cada fila para cambiar estado y ubicación. Ejemplo: «Illustrator · Sin licencia · Equipo del monitor de artes (verificar vigencia Adobe)»." />
+          <InfoHint text="Qué software tiene el área y las salas de cómputo, y en dónde. «UIFCE» son las licencias del área (edita quien tiene perfil completo, como antes). «Sala 1/2/3» son las salas de la unidad: por ahora Sala 1 es un boceto interactivo — elige un programa y se iluminan los equipos donde está instalado — con datos de ejemplo, para probar la idea antes de cargar la disposición real." />
         </h1>
         <p className="text-sm text-muted-foreground">
-          Estado de las licencias de diseño y edición del área, y quién tiene acceso a cada una.
+          Licencias del área y disponibilidad de software por sala de cómputo.
         </p>
       </div>
-      <ToolsTable tools={tools} />
+      <HerramientasTabs tools={tools} />
     </div>
   );
 }
