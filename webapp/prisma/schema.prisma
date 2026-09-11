@@ -131,6 +131,19 @@ model Project {
   /// los responsables de cada subtarea). Da el color del proyecto en el panel.
   assigneeId      String?
   assignee        User?         @relation(fields: [assigneeId], references: [id], onDelete: SetNull)
+  /// Fecha/hora de inicio y fin, solo para proyectos que son (o incluyen) un
+  /// evento con horario concreto. Alimenta /horario; la mayoría de proyectos
+  /// se quedan en null (sin horario fijo).
+  startAt         DateTime?
+  endAt           DateTime?
+  /// Lugar del evento (salón, edificio, aforo…), texto libre.
+  location        String?
+  /// Proyecto "principal" del que esta fila es una actividad/parte, ej. cada
+  /// actividad de la Semana UIFCE cuelga del proyecto "Semana UIFCE". Si el
+  /// principal se borra, esta fila queda suelta (no se borra en cascada).
+  mainProjectId   String?
+  mainProject     Project?        @relation("ProjectMain", fields: [mainProjectId], references: [id], onDelete: SetNull)
+  relatedProjects Project[]       @relation("ProjectMain")
 
   checklistItems ChecklistItem[]
   notes          ProjectNote[]
@@ -142,6 +155,8 @@ model Project {
 
   @@index([semesterId])
   @@index([assigneeId])
+  @@index([mainProjectId])
+  @@index([startAt])
 }
 
 /// Subtarea del checklist de un proyecto. Se siembra una sola vez desde las

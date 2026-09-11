@@ -109,6 +109,32 @@ export async function applyUndo(action: UndoAction) {
       revalidatePath(`/proyectos/${action.id}`);
       break;
     }
+    case "project.title": {
+      await prisma.project.update({ where: { id: action.id }, data: action.before });
+      revalidatePath(`/proyectos/${action.id}`);
+      revalidatePath("/horario");
+      break;
+    }
+    case "project.schedule": {
+      const b = action.before;
+      await prisma.project.update({
+        where: { id: action.id },
+        data: {
+          startAt: b.startAt ? new Date(b.startAt) : null,
+          endAt: b.endAt ? new Date(b.endAt) : null,
+          location: b.location,
+        },
+      });
+      revalidatePath(`/proyectos/${action.id}`);
+      revalidatePath("/horario");
+      break;
+    }
+    case "project.mainProject": {
+      await prisma.project.update({ where: { id: action.id }, data: { mainProjectId: action.before } });
+      revalidatePath(`/proyectos/${action.id}`);
+      if (action.before) revalidatePath(`/proyectos/${action.before}`);
+      break;
+    }
     case "social.update": {
       const b = action.before;
       await prisma.socialChannel.update({

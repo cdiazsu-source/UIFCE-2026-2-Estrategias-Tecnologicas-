@@ -12,22 +12,36 @@ import { ProjectPrioritySelect } from "@/components/project-priority-select";
 import { ProjectAssigneeSelect } from "@/components/project-assignee-select";
 import { PriorityTag } from "@/components/priority-tag";
 import { ProjectControls } from "@/components/project-controls";
+import { ProjectTitleEditor } from "@/components/project-title-editor";
+import { ProjectEventControls } from "@/components/project-event-controls";
 import { Checklist } from "@/components/checklist";
 import { NotesLog } from "@/components/notes-log";
 import { ConsentPanel, type ConsentRow } from "@/components/consent-panel";
 import { wipBlockedBy } from "@/lib/actions/projects";
 import { CONSENT_PROJECT_ID } from "@/lib/consent";
+import { formatDayHeader, formatTimeRange, PROJECT_STATUS_LABEL } from "@/lib/utils";
+
+const STATUS_BADGE_VARIANT: Record<string, "secondary" | "warning" | "success"> = {
+  POR_INICIAR: "secondary",
+  EN_CURSO: "warning",
+  COMPLETADO: "success",
+};
 
 export const dynamic = "force-dynamic";
 
 export default async function ProjectDetailPage({ params }: { params: { id: string } }) {
   const isConsent = params.id === CONSENT_PROJECT_ID;
 
-  const [project, authors, consentRows] = await Promise.all([
+  const [project, authors, consentRows, candidateMains] = await Promise.all([
     prisma.project.findUnique({
       where: { id: params.id },
       include: {
         assignee: { select: { id: true, name: true, color: true } },
+        mainProject: { select: { id: true, title: true } },
+        relatedProjects: {
+          select: { id: true, title: true, status: true, startAt: true, endAt: true, location: true },
+          orderBy: [{ startAt: "asc" }, { title: "asc" }],
+        },
         checklistItems: true,
         notes: { include: { checklistItem: { select: { id: true, text: true, done: true } } } },
       },
@@ -43,6 +57,14 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
           include: { user: { select: { photoUrl: true, color: true, area: true } } },
         })
       : Promise.resolve([]),
+    // Proyectos elegibles como "principal": los que no son ya, a su vez, una
+    // actividad de otro (un solo nivel de anidado, igual que las respuestas
+    // a comentarios).
+    prisma.project.findMany({
+      where: { mainProjectId: null, id: { not: params.id } },
+      select: { id: true, title: true },
+      orderBy: { title: "asc" },
+    }),
   ]);
 
   if (!project) notFound();
@@ -85,13 +107,13 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
           ))}
         </div>
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h1 className="text-2xl font-bold leading-tight">{project.title}</h1>
+          <ProjectTitleEditor project={project} />
           <DriveLinkEditor projectId={project.id} driveFolderUrl={project.driveFolderUrl} />
         </div>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
           <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
             Estado:
-            <InfoHint text="Cabecera editable del proyecto. El estado (Por iniciar / En curso / Completado) es la fase; la urgencia (❗ Atención Inmediata / 📅 Próximo Ciclo / ⏸️ Backlog) marca la prioridad temporal; el responsable es la persona a cargo del proyecto y su color identifica el proyecto en el panel. Cómo se usa: los roles distintos de Junior (perfil completo) cambian estado, urgencia y responsable, pegan el enlace de Drive, gestionan etiquetas y, con «Editar contenido», ajustan título, categoría y textos. Límite: nadie puede tener más de 3 proyectos activos en «❗ Atención Inmediata». Ejemplo: «En curso · 📅 Próximo Ciclo · María Fernanda Celis»." />
+            <InfoHint text="Cabecera editable del proyecto. El estado (Por iniciar / En curso / Completado) es la fase; la urgencia (❗ Atención Inmediata / 📅 Próximo Ciclo / ⏸️ Backlog) marca la prioridad temporal; el responsable es la persona a cargo del proyecto y su color identifica el proyecto en el panel. Cómo se usa: los roles distintos de Junior (perfil completo) cambian estado, urgencia y responsable, pegan el enlace de Drive, gestionan etiquetas y, con «Editar contenido», ajustan título, categoría y textos; el nombre se edita con un clic directo sobre el título. Límite: nadie puede tener más de 3 proyectos activos en «❗ Atención Inmediata». Ejemplo: «En curso · 📅 Próximo Ciclo · María Fernanda Celis»." />
           </span>
           <ProjectStatusSelect projectId={project.id} status={project.status} />
           <span className="text-sm text-muted-foreground">Urgencia:</span>
@@ -103,6 +125,7 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
           <span className="text-sm text-muted-foreground">Responsable:</span>
           <ProjectAssigneeSelect projectId={project.id} assignee={project.assignee} people={authors} />
         </div>
+        <ProjectEventControls project={project} candidateMains={candidateMains} mainProject={project.mainProject} />
         <ProjectControls project={project} />
       </div>
 
@@ -122,6 +145,37 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
           </div>
         </CardContent>
       </Card>
+
+      {project.relatedProjects.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-1.5">
+              Actividades de este proyecto
+              <InfoHint text="Proyectos que cuelgan de este como su «proyecto principal» — por ejemplo, cada actividad de la Semana UIFCE. Se vinculan desde el horario de cada actividad. En orden cronológico." />
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-2">
+            {project.relatedProjects.map((r) => (
+              <Link
+                key={r.id}
+                href={`/proyectos/${r.id}`}
+                className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-border p-2.5 text-sm transition-colors hover:border-primary/40 hover:bg-accent"
+              >
+                <span className="font-medium">{r.title}</span>
+                <span className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                  {r.startAt && (
+                    <span>
+                      {formatDayHeader(r.startAt)} · {formatTimeRange(r.startAt, r.endAt)}
+                    </span>
+                  )}
+                  {r.location && <span>{r.location}</span>}
+                  <Badge variant={STATUS_BADGE_VARIANT[r.status]}>{PROJECT_STATUS_LABEL[r.status]}</Badge>
+                </span>
+              </Link>
+            ))}
+          </CardContent>
+        </Card>
+      )}
 
       {isConsent && <ConsentPanel signatories={consentData} />}
 

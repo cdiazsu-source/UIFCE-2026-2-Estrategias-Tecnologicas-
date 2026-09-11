@@ -67,6 +67,13 @@ export type UndoAction =
   | { kind: "project.tags"; id: string; before: string[] }
   | { kind: "project.priority"; id: string; before: string | null }
   | { kind: "project.assignee"; id: string; before: string | null }
+  | { kind: "project.title"; id: string; before: { title: string; editedInApp: boolean } }
+  | {
+      kind: "project.schedule";
+      id: string;
+      before: { startAt: string | null; endAt: string | null; location: string | null };
+    }
+  | { kind: "project.mainProject"; id: string; before: string | null }
   | {
       kind: "social.update";
       id: string;
@@ -224,6 +231,9 @@ export function undoLabel(kind: UndoAction["kind"]): string {
     "project.tags": "Etiquetas cambiadas",
     "project.priority": "Urgencia cambiada",
     "project.assignee": "Responsable cambiado",
+    "project.title": "Nombre del proyecto editado",
+    "project.schedule": "Horario del proyecto editado",
+    "project.mainProject": "Proyecto principal cambiado",
     "social.update": "Cuenta editada",
     "social.delete": "Cuenta eliminada",
     "socialinteraction.update": "Interacción editada",

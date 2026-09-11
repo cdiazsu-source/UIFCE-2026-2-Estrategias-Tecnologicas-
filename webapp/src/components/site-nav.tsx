@@ -10,6 +10,7 @@ import { setJuniorView } from "@/lib/actions/view";
 
 const LINKS = [
   { href: "/", label: "Panel principal" },
+  { href: "/horario", label: "Horario" },
   { href: "/redes", label: "Redes sociales" },
   { href: "/plantillas", label: "Plantillas" },
   { href: "/linea-grafica", label: "Línea gráfica" },

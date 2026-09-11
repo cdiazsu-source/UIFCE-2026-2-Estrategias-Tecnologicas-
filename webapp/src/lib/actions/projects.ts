@@ -7,7 +7,7 @@ import type { ProjectStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { blockedForJunior } from "@/lib/session";
 import type { UndoAction } from "@/lib/undo";
-import { PRIORITY_TAGS, WIP_ATENCION_INMEDIATA } from "@/lib/utils";
+import { fromBogotaInput, PRIORITY_TAGS, WIP_ATENCION_INMEDIATA } from "@/lib/utils";
 
 const PRIORITY_VALUES = PRIORITY_TAGS as readonly string[];
 
@@ -46,6 +46,18 @@ export async function createProject(formData: FormData) {
     ? await prisma.semester.findUnique({ where: { id: rawSemesterId }, select: { id: true } })
     : await prisma.semester.findFirst({ where: { isCurrent: true }, select: { id: true } });
 
+  // Horario (opcional) y proyecto principal (opcional): un proyecto creado como
+  // actividad de un evento, ej. una actividad de la Semana UIFCE.
+  const startAt = fromBogotaInput(String(formData.get("startAt") ?? ""));
+  const endAt = fromBogotaInput(String(formData.get("endAt") ?? ""));
+  const location = String(formData.get("location") ?? "").trim() || null;
+  const rawMainProjectId = String(formData.get("mainProjectId") ?? "").trim();
+  const main = rawMainProjectId
+    ? await prisma.project.findUnique({ where: { id: rawMainProjectId }, select: { id: true, mainProjectId: true } })
+    : null;
+  // El principal no puede ser a su vez una actividad de otro (un solo nivel).
+  const mainProjectId = main && !main.mainProjectId ? main.id : null;
+
   const base = slugify(title) || "proyecto";
   let id = base;
   for (let n = 2; await prisma.project.findUnique({ where: { id }, select: { id: true } }); n++) {
@@ -70,10 +82,16 @@ export async function createProject(formData: FormData) {
       isManual: true,
       sourceOrder,
       semesterId: semester?.id ?? null,
+      startAt,
+      endAt,
+      location,
+      mainProjectId,
     },
   });
 
   revalidatePath("/");
+  if (mainProjectId) revalidatePath(`/proyectos/${mainProjectId}`);
+  if (startAt) revalidatePath("/horario");
   redirect(`/proyectos/${id}`);
 }
 
@@ -262,4 +280,96 @@ export async function updateProjectDriveLink(projectId: string, driveFolderUrl: 
     data: { driveFolderUrl: trimmed.length > 0 ? trimmed : null },
   });
   revalidatePath(`/proyectos/${projectId}`);
+}
+
+/** Cambia solo el nombre del proyecto — un clic sobre el título, sin abrir el
+ *  resto de «Editar contenido». Igual que el resto de escrituras, cualquier
+ *  sesión que no sea el perfil Junior puede usarlo (perfil completo o la
+ *  credencial propia del director, ambas nivel "full"). */
+export async function renameProject(projectId: string, rawTitle: string): Promise<UndoAction | void> {
+  if (await blockedForJunior()) return;
+  const title = rawTitle.trim();
+  if (!title) return;
+
+  const prev = await prisma.project.findUnique({
+    where: { id: projectId },
+    select: { title: true, editedInApp: true },
+  });
+  if (!prev || prev.title === title) return;
+
+  await prisma.project.update({ where: { id: projectId }, data: { title, editedInApp: true } });
+  revalidatePath("/");
+  revalidatePath(`/proyectos/${projectId}`);
+  revalidatePath("/horario");
+
+  return {
+    kind: "project.title",
+    id: projectId,
+    before: { title: prev.title, editedInApp: prev.editedInApp },
+  };
+}
+
+/** Fija o quita la fecha/hora/lugar de un proyecto-evento. Alimenta /horario;
+ *  vacío/null en cualquiera de los tres campos lo quita. */
+export async function updateProjectSchedule(
+  projectId: string,
+  data: { startAt: string; endAt: string; location: string },
+): Promise<UndoAction | void> {
+  if (await blockedForJunior()) return;
+  const prev = await prisma.project.findUnique({
+    where: { id: projectId },
+    select: { startAt: true, endAt: true, location: true },
+  });
+  if (!prev) return;
+
+  const startAt = fromBogotaInput(data.startAt);
+  const endAt = fromBogotaInput(data.endAt);
+  const location = data.location.trim() || null;
+
+  await prisma.project.update({ where: { id: projectId }, data: { startAt, endAt, location } });
+  revalidatePath("/");
+  revalidatePath(`/proyectos/${projectId}`);
+  revalidatePath("/horario");
+
+  return {
+    kind: "project.schedule",
+    id: projectId,
+    before: {
+      startAt: prev.startAt?.toISOString() ?? null,
+      endAt: prev.endAt?.toISOString() ?? null,
+      location: prev.location,
+    },
+  };
+}
+
+/** Vincula (o desvincula) este proyecto a un "proyecto principal" del que es
+ *  una actividad/parte — ej. cada actividad de la Semana UIFCE cuelga del
+ *  proyecto "Semana UIFCE". Un solo nivel: el principal no puede a su vez ser
+ *  actividad de otro, y un proyecto no puede ser su propio principal. */
+export async function updateProjectMainProject(
+  projectId: string,
+  rawMainId: string,
+): Promise<UndoAction | void> {
+  if (await blockedForJunior()) return;
+  const prev = await prisma.project.findUnique({
+    where: { id: projectId },
+    select: { mainProjectId: true },
+  });
+  if (!prev) return;
+
+  const id = rawMainId.trim();
+  let mainProjectId: string | null = null;
+  if (id && id !== projectId) {
+    const main = await prisma.project.findUnique({ where: { id }, select: { id: true, mainProjectId: true } });
+    if (main && !main.mainProjectId) mainProjectId = main.id;
+  }
+  if (prev.mainProjectId === mainProjectId) return;
+
+  await prisma.project.update({ where: { id: projectId }, data: { mainProjectId } });
+  revalidatePath("/");
+  revalidatePath(`/proyectos/${projectId}`);
+  if (mainProjectId) revalidatePath(`/proyectos/${mainProjectId}`);
+  if (prev.mainProjectId) revalidatePath(`/proyectos/${prev.mainProjectId}`);
+
+  return { kind: "project.mainProject", id: projectId, before: prev.mainProjectId };
 }

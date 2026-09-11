@@ -34,6 +34,61 @@ export function formatDateTime(date: Date | string) {
   }).format(d);
 }
 
+/** Convierte el valor de un <input type="datetime-local"> ("2026-09-15T09:00",
+ *  sin zona) a un Date real, asumiendo que esa hora es de Colombia (UTC-5
+ *  fijo, sin horario de verano). Vacío -> null. */
+export function fromBogotaInput(local: string): Date | null {
+  const v = local.trim();
+  if (!v) return null;
+  const d = new Date(`${v}:00-05:00`);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+/** Inverso: da la cadena que espera <input type="datetime-local"> mostrando la
+ *  hora de Colombia (no la del navegador de quien edita). */
+export function toBogotaInputValue(date: Date | string | null): string {
+  if (!date) return "";
+  const d = typeof date === "string" ? new Date(date) : date;
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: APP_TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(d);
+  const get = (t: string) => parts.find((p) => p.type === t)?.value ?? "";
+  return `${get("year")}-${get("month")}-${get("day")}T${get("hour")}:${get("minute")}`;
+}
+
+/** "Martes 15 de septiembre", en hora de Colombia. Para agrupar /horario por día. */
+export function formatDayHeader(date: Date | string) {
+  const d = typeof date === "string" ? new Date(date) : date;
+  const s = new Intl.DateTimeFormat("es-CO", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    timeZone: APP_TIME_ZONE,
+  }).format(d);
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+/** "9:00 – 11:00 a. m." (o solo la hora de inicio si no hay fin), en hora de
+ *  Colombia. */
+export function formatTimeRange(start: Date | string, end?: Date | string | null) {
+  const fmt = (d: Date | string) =>
+    new Intl.DateTimeFormat("es-CO", { hour: "numeric", minute: "2-digit", timeZone: APP_TIME_ZONE }).format(
+      typeof d === "string" ? new Date(d) : d,
+    );
+  return end ? `${fmt(start)} – ${fmt(end)}` : fmt(start);
+}
+
+/** Clave "YYYY-MM-DD" en hora de Colombia, para comparar/agrupar por día. */
+export function bogotaDateKey(date: Date | string) {
+  return toBogotaInputValue(date).slice(0, 10);
+}
+
 export const PROJECT_STATUS_LABEL: Record<string, string> = {
   POR_INICIAR: "Por iniciar",
   EN_CURSO: "En curso",
