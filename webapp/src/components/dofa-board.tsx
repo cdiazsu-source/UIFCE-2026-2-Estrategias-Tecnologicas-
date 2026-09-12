@@ -104,11 +104,11 @@ function Quadrant({
       <CardContent className="flex flex-col gap-3 pt-5">
         <button type="button" onClick={onClick} className="flex items-center gap-2 text-left">
           <span
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-base"
-            style={{ backgroundColor: `${color}1f` }}
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold"
+            style={{ backgroundColor: `${color}1f`, color }}
             aria-hidden
           >
-            {quadrant.emoji}
+            {quadrant.letter}
           </span>
           <span className="flex-1">
             <span className="block text-sm font-semibold" style={{ color }}>

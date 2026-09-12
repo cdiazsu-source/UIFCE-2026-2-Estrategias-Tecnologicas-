@@ -28,6 +28,10 @@ export const DOFA_META = {
   elaboradoPor: "César Díaz S. (equipo de Estrategias Tecnológicas, UIFCE)",
   ultimaActualizacion: "Septiembre de 2026",
   director: "profesor Henry Martínez Sarmiento",
+  /** Qué es una matriz DOFA y para qué la construyó ET (reemplaza la ficha de
+   *  autoría/fecha en el encabezado de la página). */
+  contextualizacion:
+    "Una matriz DOFA analiza las capacidades internas del área —qué funciona bien (Fortalezas) y qué falla (Debilidades)— junto con su entorno externo —qué se puede aprovechar (Oportunidades) y qué la pone en riesgo (Amenazas)—, para decidir en qué apoyarse y qué resolver primero. Estrategias Tecnológicas (ET) construyó esta matriz para planear el semestre 2026-2 con evidencia real de los semestres anteriores, en vez de partir solo de percepción.",
   /** Solo las fuentes de datos usadas para construir el diagnóstico. */
   fuentes: [
     "3 informes de gestión del área: 2025-I, 2025-II, 2026-I",
@@ -288,17 +292,19 @@ export const AMENAZAS: DofaItem[] = [
 
 export type DofaQuadrantKey = "F" | "D" | "O" | "A";
 
+/** Sin emojis (le quitan seriedad al reporte): cada cuadrante se identifica
+ *  por su inicial, en el orden del propio acrónimo D-O-F-A. */
 export const DOFA_QUADRANTS: {
   key: DofaQuadrantKey;
   label: string;
-  emoji: string;
+  letter: string;
   color: string;
   items: DofaItem[];
 }[] = [
-  { key: "F", label: "Fortalezas", emoji: "💪", color: "#3f6b2c", items: FORTALEZAS },
-  { key: "D", label: "Debilidades", emoji: "⚠️", color: "#b23a2a", items: DEBILIDADES },
-  { key: "O", label: "Oportunidades", emoji: "🚀", color: "#2f5f8a", items: OPORTUNIDADES },
-  { key: "A", label: "Amenazas", emoji: "🛑", color: "#c49a00", items: AMENAZAS },
+  { key: "D", label: "Debilidades", letter: "D", color: "#b23a2a", items: DEBILIDADES },
+  { key: "O", label: "Oportunidades", letter: "O", color: "#2f5f8a", items: OPORTUNIDADES },
+  { key: "F", label: "Fortalezas", letter: "F", color: "#3f6b2c", items: FORTALEZAS },
+  { key: "A", label: "Amenazas", letter: "A", color: "#c49a00", items: AMENAZAS },
 ];
 
 export const CRUCE_ESTRATEGICO: { code: "FO" | "DO" | "FA" | "DA"; title: string; points: string[] }[] = [
