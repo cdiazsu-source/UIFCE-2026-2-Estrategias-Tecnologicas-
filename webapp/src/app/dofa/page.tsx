@@ -20,9 +20,17 @@ export default function DofaPage() {
         </p>
       </div>
 
-      <p className="rounded-md border border-border bg-card p-4 text-sm leading-relaxed text-muted-foreground">
-        {DOFA_META.objetivo}
-      </p>
+      <div className="rounded-md border border-border bg-card p-4">
+        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Fuentes del diagnóstico</p>
+        <ul className="mt-2 flex flex-col gap-1.5 text-sm leading-snug text-muted-foreground">
+          {DOFA_META.fuentes.map((fuente, i) => (
+            <li key={i} className="flex gap-1.5">
+              <span>•</span>
+              <span>{fuente}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
 
       <DofaBoard />
     </div>

@@ -161,7 +161,14 @@ export function DofaBoard() {
                       {c.code} · {c.title}
                     </span>
                   </div>
-                  <p className="text-sm leading-relaxed">{c.text}</p>
+                  <ul className="flex flex-col gap-1.5 text-sm leading-snug">
+                    {c.points.map((point, i) => (
+                      <li key={i} className="flex gap-1.5">
+                        <span className="text-muted-foreground">•</span>
+                        <span>{point}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </CardContent>
               </Card>
             );
@@ -191,7 +198,16 @@ export function DofaBoard() {
           {PARAMETROS_OPERATIVOS.map((p) => (
             <div key={p.label}>
               <dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{p.label}</dt>
-              <dd className="text-sm leading-relaxed">{p.text}</dd>
+              <dd>
+                <ul className="mt-1 flex flex-col gap-1 text-sm leading-snug">
+                  {p.points.map((point, i) => (
+                    <li key={i} className="flex gap-1.5">
+                      <span className="text-muted-foreground">•</span>
+                      <span>{point}</span>
+                    </li>
+                  ))}
+                </ul>
+              </dd>
             </div>
           ))}
         </dl>
