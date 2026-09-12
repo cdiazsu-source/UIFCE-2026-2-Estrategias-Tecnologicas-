@@ -132,7 +132,12 @@ function Quadrant({
             {quadrant.items.map((item, i) => (
               <li key={i} className="border-l-2 pl-2.5 text-sm leading-snug" style={{ borderColor: `${color}55` }}>
                 <div className="flex items-start justify-between gap-2">
-                  <span className="font-medium">{item.thesis}</span>
+                  <span>
+                    <span className="font-semibold uppercase tracking-wide" style={{ color }}>
+                      {item.topic}:
+                    </span>{" "}
+                    <span className="font-medium">{item.thesis}</span>
+                  </span>
                   <PeriodBadge period={item.period} />
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground">{item.text}</p>

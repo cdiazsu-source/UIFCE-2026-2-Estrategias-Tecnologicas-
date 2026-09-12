@@ -54,7 +54,7 @@ export function HerramientasTabs({ tools }: { tools: Tool[] }) {
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2">
             <h2 className="text-sm font-semibold">Disponibilidad por equipo</h2>
-            <Badge variant="outline">Boceto</Badge>
+            <Badge variant="outline">Disposición real · software de ejemplo</Badge>
           </div>
           <LabRoomPreview />
         </div>
