@@ -205,6 +205,19 @@ export type UndoAction =
       };
     }
   | {
+      kind: "studycomment.delete";
+      data: {
+        id: string;
+        studyProjectId: string;
+        body: string;
+        author: string;
+        authorRole: string | null;
+        authorId: string | null;
+        parentId: string | null;
+        createdAt: string;
+      };
+    }
+  | {
       kind: "teamcomment.delete";
       data: {
         id: string;
@@ -244,6 +257,7 @@ export function undoLabel(kind: UndoAction["kind"]): string {
     "linkedinsnapshot.delete": "Medición de LinkedIn eliminada",
     "template.update": "Plantilla editada",
     "template.delete": "Plantilla eliminada",
+    "studycomment.delete": "Actualización de PE eliminada",
     "teamcomment.delete": "Comentario eliminado",
     "teamcomment.reviewed": "Comentario actualizado",
   };

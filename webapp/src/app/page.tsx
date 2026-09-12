@@ -9,9 +9,16 @@ import { TeamRoster, type RosterMember } from "@/components/team-roster";
 import { StudyProjects, type JuniorWithStudy } from "@/components/study-projects";
 import { UpdatesFeed, type FeedItem } from "@/components/updates-feed";
 import { TeamComments, type TeamCommentData } from "@/components/team-comments";
+import {
+  StudyComments,
+  type StudyCommentAuthor,
+  type StudyCommentData,
+  type StudyCommentTarget,
+} from "@/components/study-comments";
 import { InfoHint } from "@/components/info-hint";
 import { NewProjectButton } from "@/components/new-project-button";
-import { formatDateTime, JUNIOR_ROLES } from "@/lib/utils";
+import { CategoryDistribution } from "@/components/category-distribution";
+import { formatDateTime, JUNIOR_ROLES, STUDY_COMMENT_ROLES } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -50,8 +57,20 @@ async function getHomeData(semesterId: string | null, includeOrphans: boolean) {
         ? { OR: [{ semesterId }, { semesterId: null }] }
         : { semesterId };
 
-  const [stats, projects, notes, completed, people, roster, teamComments, director, areaProfile, studyJuniors] =
-    await Promise.all([
+  const [
+    stats,
+    projects,
+    notes,
+    completed,
+    people,
+    roster,
+    teamComments,
+    director,
+    areaProfile,
+    studyJuniors,
+    studyComments,
+    studyCommentAuthorRows,
+  ] = await Promise.all([
       prisma.situationStat.findMany({ orderBy: { order: "asc" } }),
       prisma.project.findMany({
         where: projectWhere,
@@ -128,6 +147,25 @@ async function getHomeData(semesterId: string | null, includeOrphans: boolean) {
           },
         },
       }),
+      prisma.studyProjectComment.findMany({
+        where: { studyProject: projectWhere },
+        orderBy: { createdAt: "desc" },
+        take: 150,
+        select: {
+          id: true,
+          studyProjectId: true,
+          body: true,
+          author: true,
+          authorRole: true,
+          parentId: true,
+          createdAt: true,
+        },
+      }),
+      prisma.user.findMany({
+        where: { active: true, role: { in: [...STUDY_COMMENT_ROLES] } },
+        orderBy: { name: "asc" },
+        select: { id: true, name: true, role: true },
+      }),
     ]);
 
   const peopleById = new Map(people.map((u) => [u.id, u]));
@@ -143,6 +181,19 @@ async function getHomeData(semesterId: string | null, includeOrphans: boolean) {
   const studyJuniorOptions = studyJuniors
     .filter((j) => j.active)
     .map((j) => ({ id: j.id, name: j.name }));
+
+  // "Añade una actualización/comentario respecto a tu PE": a qué proyecto de
+  // estudio puede referirse (todos los de los Junior visibles en este semestre)
+  // y quién puede publicar/responder (Junior, Coordinación, Máster).
+  const studyCommentTargets: StudyCommentTarget[] = studyJuniors.flatMap((j) =>
+    j.studyProjects.map((sp) => ({ id: sp.id, title: sp.title, ownerName: j.name })),
+  );
+  const studyCommentAuthors: StudyCommentAuthor[] = studyCommentAuthorRows.map((u) => ({
+    id: u.id,
+    name: u.name,
+    role: u.role,
+  }));
+  const studyCommentsData: StudyCommentData[] = studyComments;
 
   // Por proyecto: la siguiente subtarea pendiente (la que "sigue") y si ya está todo hecho.
   const nextPending = new Map<string, string>();
@@ -272,6 +323,9 @@ async function getHomeData(semesterId: string | null, includeOrphans: boolean) {
     profile,
     studyProjectsData,
     studyJuniorOptions,
+    studyCommentsData,
+    studyCommentAuthors,
+    studyCommentTargets,
   };
 }
 
@@ -292,6 +346,9 @@ export default async function HomePage({
     profile,
     studyProjectsData,
     studyJuniorOptions,
+    studyCommentsData,
+    studyCommentAuthors,
+    studyCommentTargets,
   } = await getHomeData(selected?.id ?? null, isSelectedCurrent);
 
   // ?focus=<id>: enfoca la grilla en los pendientes de atención de esa persona.
@@ -338,6 +395,7 @@ export default async function HomePage({
               Proyectos {selected ? `${selected.label} ` : ""}({projectCards.length})
               <InfoHint text="Una tarjeta por iniciativa del semestre seleccionado (pestañas de arriba). Por defecto se ordenan por urgencia (primero «❗ Atención Inmediata», luego «📅 Próximo Ciclo», luego «⏸️ Backlog»; los completados al final); el desplegable «Orden» permite volver al orden de planeación. Cómo se usa: busca por texto o filtra por categoría; el progreso cuenta subtareas hechas y la franja de color a la izquierda es la persona asignada — titila si el proyecto está en «❗ Atención Inmediata». Con perfil completo, «Nuevo proyecto» lo crea en el semestre visible. Ejemplo: elige «Eventos» para ver solo esos proyectos." />
             </h2>
+            <CategoryDistribution projects={projectCards} />
             <NewProjectButton semesterId={selected?.id} semesterLabel={selected?.label} />
           </div>
           {projectCards.length === 0 ? (
@@ -364,6 +422,8 @@ export default async function HomePage({
               semesterLabel={selected?.label}
             />
           </div>
+
+          <StudyComments comments={studyCommentsData} authors={studyCommentAuthors} targets={studyCommentTargets} />
         </div>
 
         <div className="flex flex-col gap-6">

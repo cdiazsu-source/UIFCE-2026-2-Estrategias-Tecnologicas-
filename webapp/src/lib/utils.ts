@@ -143,3 +143,9 @@ export const CHECKPOINT_STATUS_LABEL: Record<string, string> = {
 
 /** Roles que corresponden a un monitor Junior (tienen proyectos de estudio). */
 export const JUNIOR_ROLES = ["JUNIOR_ARTES", "JUNIOR_AUXILIAR"] as const;
+
+/** Quién puede dejar o responder una actualización de proyecto de estudio (PE):
+ *  los dos Junior, Coordinación y Máster. Un módulo "use server" solo puede
+ *  exportar funciones async, así que esta lista vive aquí (la usan la acción
+ *  en lib/actions/study-comments.ts y la consulta de la página principal). */
+export const STUDY_COMMENT_ROLES = ["MASTER", "JUNIOR_ARTES", "JUNIOR_AUXILIAR", "COORDINADOR"] as const;

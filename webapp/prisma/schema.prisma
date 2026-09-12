@@ -296,6 +296,7 @@ model User {
   linkedInSnapshots    LinkedInSnapshot[]
   consentSignatures    ConsentSignatory[]
   teamComments         TeamComment[]
+  studyProjectComments StudyProjectComment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -557,12 +558,43 @@ model StudyProject {
   semester    Semester? @relation(fields: [semesterId], references: [id], onDelete: SetNull)
 
   checkpoints StudyCheckpoint[]
+  comments    StudyProjectComment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([ownerId])
   @@index([semesterId])
+}
+
+/// Actualización, pregunta o dificultad que el dueño de un proyecto de estudio
+/// (o coordinación/máster, con una sugerencia) deja sobre ESE proyecto en
+/// particular. Como el login es compartido (sin cuenta por persona), quién
+/// "puede comentar" se controla igual que en TeamComment: el desplegable
+/// "¿Quién eres?" solo ofrece Users con rol Junior/Coordinación/Máster (ver
+/// lib/actions/study-comments.ts), y la acción valida el rol otra vez server-side.
+/// Las respuestas (parentId) son la vía para que coordinación/máster sugieran
+/// algo sobre la actualización de un Junior; un solo nivel de anidado, igual
+/// que TeamComment.
+model StudyProjectComment {
+  id             String   @id @default(cuid())
+  studyProjectId String
+  studyProject   StudyProject @relation(fields: [studyProjectId], references: [id], onDelete: Cascade)
+  body           String   @db.Text
+  /// Snapshot del nombre y cargo de quien lo dejó.
+  author         String
+  authorRole     String?
+  authorId       String?
+  authorUser     User?    @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  parentId       String?
+  parent         StudyProjectComment?  @relation("StudyProjectCommentReplies", fields: [parentId], references: [id], onDelete: SetNull)
+  replies        StudyProjectComment[] @relation("StudyProjectCommentReplies")
+  createdAt      DateTime @default(now())
+
+  @@index([studyProjectId])
+  @@index([authorId])
+  @@index([parentId])
+  @@index([createdAt])
 }
 
 /// Uno de los 4 puntos de corte de un proyecto de estudio. Se crean los 4 al

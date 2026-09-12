@@ -272,6 +272,30 @@ export async function applyUndo(action: UndoAction) {
       revalidatePath("/plantillas");
       break;
     }
+    case "studycomment.delete": {
+      const d = action.data;
+      // Solo se re-vincula al padre si sigue existiendo (el banner de deshacer
+      // es efímero, así que en la práctica siempre está).
+      const parentId =
+        d.parentId &&
+        (await prisma.studyProjectComment.findUnique({ where: { id: d.parentId }, select: { id: true } }))
+          ? d.parentId
+          : null;
+      await prisma.studyProjectComment.create({
+        data: {
+          id: d.id,
+          studyProjectId: d.studyProjectId,
+          body: d.body,
+          author: d.author,
+          authorRole: d.authorRole,
+          authorId: d.authorId,
+          parentId,
+          createdAt: new Date(d.createdAt),
+        },
+      });
+      revalidatePath("/");
+      break;
+    }
     case "teamcomment.delete": {
       const d = action.data;
       // Solo se re-vincula al padre si sigue existiendo (el banner de deshacer
