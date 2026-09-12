@@ -309,7 +309,7 @@ model User {
   /// Enlace al perfil de LinkedIn personal de la persona.
   linkedinUrl String?
   /// Clave de identidad de su credencial de acceso propia, si tiene una
-  /// (ver src/lib/auth.ts). Hoy solo el director.
+  /// (ver NAMED_CREDENTIALS en src/lib/auth.ts): hoy el director, Lina y Santi.
   credentialKey String? @unique
   /// Última vez que esa persona entró al aplicativo con su credencial propia.
   lastSeenAt    DateTime?

@@ -1,14 +1,15 @@
 /**
- * Autenticación mínima: acceso compartido con dos perfiles + una credencial
- * nominal para el director. Protege TODO el sitio (middleware.ts): sin cookie
- * válida → /login.
+ * Autenticación mínima: acceso compartido con dos perfiles + credenciales
+ * nominales para personas puntuales. Protege TODO el sitio (middleware.ts):
+ * sin cookie válida → /login.
  *
  *  - Perfil "full"   (usuario UIFCE / contraseña ET2026): edita todo.
  *  - Perfil "junior" (usuario UIFCE / contraseña TEAM):   ve todo, solo agrega
  *    notas de bitácora. El resto es de solo lectura.
- *  - Director        (usuario/contraseña propios de Henry Sarmiento): acceso
- *    total, pero identificado — su cookie lleva `who` y el layout registra su
- *    última visita en User.lastSeenAt (por credentialKey).
+ *  - Credenciales nominales (ver NAMED_CREDENTIALS): acceso total ("full"),
+ *    pero identificado — su cookie lleva `who` y el layout registra su
+ *    última visita en User.lastSeenAt (por credentialKey). Hoy: el director
+ *    y, como colaboradores de Coordinación, Lina y Santi.
  *
  * El nivel y la identidad viajan firmados en la cookie. Diseñado para pasar más
  * adelante a enlace mágico por correo + cuentas por persona sin tocar los
@@ -36,13 +37,20 @@ export const SITE_USER = process.env.SITE_USER || "UIFCE";
 const PASS_FULL = process.env.SITE_PASSWORD || "ET2026";
 const PASS_JUNIOR = process.env.SITE_PASSWORD_JUNIOR || "TEAM";
 
-/** Credencial nominal del director de la unidad. Configurable por entorno en
- *  Vercel (SITE_USER_DIRECTOR / SITE_PASSWORD_DIRECTOR). El usuario distingue
- *  mayúsculas. */
-const DIRECTOR_USER = process.env.SITE_USER_DIRECTOR || "HENRY";
-const DIRECTOR_PASS = process.env.SITE_PASSWORD_DIRECTOR || "UIFCEUNAL310.";
-/** Clave de identidad del director; debe coincidir con User.credentialKey. */
+/** Clave de identidad del director; debe coincidir con User.credentialKey.
+ *  Se mantiene aparte (no solo como entrada de NAMED_CREDENTIALS) porque
+ *  session.ts la usa para excluir al director de la "Vista Junior". */
 export const DIRECTOR_WHO = "henry-sarmiento";
+
+/** Credenciales nominales: cada una da acceso "full" pero identificado — el
+ *  usuario distingue mayúsculas. Todas configurables por entorno en Vercel
+ *  (SITE_USER_<X> / SITE_PASSWORD_<X>) sin tocar el código. `who` debe
+ *  coincidir con el User.credentialKey de la persona (ver prisma/seed.ts). */
+const NAMED_CREDENTIALS: { user: string; pass: string; who: string }[] = [
+  { user: process.env.SITE_USER_DIRECTOR || "HENRY", pass: process.env.SITE_PASSWORD_DIRECTOR || "UIFCEUNAL310.", who: DIRECTOR_WHO },
+  { user: process.env.SITE_USER_LINA || "LINA", pass: process.env.SITE_PASSWORD_LINA || "ET", who: "lina-sanabria" },
+  { user: process.env.SITE_USER_SANTI || "SANTI", pass: process.env.SITE_PASSWORD_SANTI || "ET", who: "santiago-parra" },
+];
 
 const SECRET = process.env.AUTH_SECRET || "et-en-marcha-dev-secret-cambiar-en-vercel";
 
@@ -71,8 +79,8 @@ async function hmac(data: string): Promise<string> {
 export function checkCredentials(username: string, password: string): CredentialCheck | null {
   const user = username.trim();
 
-  if (user === DIRECTOR_USER && password === DIRECTOR_PASS) {
-    return { level: "full", who: DIRECTOR_WHO };
+  for (const cred of NAMED_CREDENTIALS) {
+    if (user === cred.user && password === cred.pass) return { level: "full", who: cred.who };
   }
   if (user === SITE_USER) {
     if (password === PASS_FULL) return { level: "full", who: null };

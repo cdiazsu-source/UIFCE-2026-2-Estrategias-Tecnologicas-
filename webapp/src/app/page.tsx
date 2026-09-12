@@ -65,7 +65,7 @@ async function getHomeData(semesterId: string | null, includeOrphans: boolean) {
     people,
     roster,
     teamComments,
-    director,
+    namedAccess,
     areaProfile,
     studyJuniors,
     studyComments,
@@ -131,8 +131,9 @@ async function getHomeData(semesterId: string | null, includeOrphans: boolean) {
           createdAt: true,
         },
       }),
-      prisma.user.findFirst({
+      prisma.user.findMany({
         where: { credentialKey: { not: null } },
+        orderBy: { name: "asc" },
         select: { name: true, lastSeenAt: true },
       }),
       prisma.areaProfile.findUnique({ where: { id: "area" } }),
@@ -328,7 +329,7 @@ async function getHomeData(semesterId: string | null, includeOrphans: boolean) {
     rosterMembers,
     comments,
     commentAuthors,
-    director,
+    namedAccess,
     profile,
     studyProjectsData,
     studyJuniorOptions,
@@ -351,7 +352,7 @@ export default async function HomePage({
     rosterMembers,
     comments,
     commentAuthors,
-    director,
+    namedAccess,
     profile,
     studyProjectsData,
     studyJuniorOptions,
@@ -369,12 +370,16 @@ export default async function HomePage({
     <div className="flex flex-col gap-8">
       <AreaOverview profile={profile} />
 
-      {director && (
-        <p className="-mt-4 text-xs text-muted-foreground">
-          Último acceso del director ({director.name}):{" "}
-          <span className="font-medium text-foreground">
-            {director.lastSeenAt ? formatDateTime(director.lastSeenAt) : "sin registro todavía"}
-          </span>
+      {namedAccess.length > 0 && (
+        <p className="-mt-4 flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted-foreground">
+          {namedAccess.map((u) => (
+            <span key={u.name}>
+              Último acceso de {u.name}:{" "}
+              <span className="font-medium text-foreground">
+                {u.lastSeenAt ? formatDateTime(u.lastSeenAt) : "sin registro todavía"}
+              </span>
+            </span>
+          ))}
         </p>
       )}
 

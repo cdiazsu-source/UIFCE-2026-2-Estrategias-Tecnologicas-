@@ -268,8 +268,24 @@ const SEED_USERS: {
   { name: "María Fernanda Celis Mora", email: "mafe@example.com", role: "JUNIOR_ARTES", area: "ET", color: "#DB2777" },
   { name: "Jean Carlos Baquero Garcia", email: "jean@example.com", role: "JUNIOR_AUXILIAR", area: "ET", color: "#15803D" },
   { name: "Estrategias Tecnológicas (ET)", email: "et@example.com", role: "EQUIPO", area: "ET", color: "#4A7729" },
-  { name: "Lina Fernanda Sanabria Muñoz", email: "lina.sanabria@example.com", role: "COORDINADOR", area: null, color: "#7C3AED" },
-  { name: "David Santiago Parra Herrera", email: "santiago.parra@example.com", role: "COORDINADOR", area: null, color: "#EA580C" },
+  {
+    name: "Lina Fernanda Sanabria Muñoz",
+    email: "lina.sanabria@example.com",
+    role: "COORDINADOR",
+    area: null,
+    color: "#7C3AED",
+    // Casa con NAMED_CREDENTIALS en src/lib/auth.ts: habilita el registro de última visita.
+    credentialKey: "lina-sanabria",
+  },
+  {
+    name: "David Santiago Parra Herrera",
+    email: "santiago.parra@example.com",
+    role: "COORDINADOR",
+    area: null,
+    color: "#EA580C",
+    // Casa con NAMED_CREDENTIALS en src/lib/auth.ts: habilita el registro de última visita.
+    credentialKey: "santiago-parra",
+  },
   { name: "Daniel Moreno", email: "daniel.moreno@example.com", role: "COORDINADOR", area: null, color: "#C026D3" },
   {
     name: "Henry Martinez Sarmiento",
@@ -277,7 +293,7 @@ const SEED_USERS: {
     role: "DIRECTOR",
     area: null,
     color: "#4F46E5",
-    // Casa con DIRECTOR_WHO en src/lib/auth.ts: habilita el registro de última visita.
+    // Casa con NAMED_CREDENTIALS en src/lib/auth.ts: habilita el registro de última visita.
     credentialKey: "henry-sarmiento",
   },
   // Másters y líderes de otras áreas de la UIFCE (contrapartes interárea). NO
