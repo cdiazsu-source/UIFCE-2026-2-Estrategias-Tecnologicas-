@@ -5,10 +5,12 @@ import { Check, Monitor, User } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
-/** Disposición real de Sala 1: dos columnas de puestos.
- *  - Columna A: 3 filas de 4, 6 y 7 equipos (17 en total).
- *  - Columna B: 4 filas de 5, 6, 6 y 6 equipos (23 en total); la fila 4 se
- *    dibuja levemente curvada porque "rodea" el puesto del profesor.
+/** Disposición real de Sala 1: no es simétrica.
+ *  - Columna A: 3 filas de 4, 6 y 7 equipos (17 en total). La fila 1 (equipos
+ *    1-4) rodea el puesto del profesor, que va junto al tablero.
+ *  - Columna B: 4 filas de 5, 6, 6 y 6 equipos (23 en total), en línea recta
+ *    — el primer puesto de cada fila (18, 23, 29, 35) queda alineado.
+ *  - Entre A y B hay un pasillo central bien definido.
  *  Total: 40 equipos. El software instalado por equipo sigue siendo de
  *  ejemplo (no es el inventario real todavía) — lo real ya cargado es la
  *  disposición física de la sala. */
@@ -85,18 +87,22 @@ function Seat({ n, active, dimmed, color }: { n: number; active: boolean; dimmed
   );
 }
 
-/** Fila recta: todos los puestos alineados. */
+/** Fila recta. `align="start"` alinea el primer puesto de todas las filas al
+ *  mismo borde izquierdo (columna B, filas de distinto largo); `"center"`
+ *  (por defecto) centra cada fila. */
 function StraightRow({
   seats,
   active,
   color,
+  align = "center",
 }: {
   seats: number[];
   active: Software | null;
   color?: string;
+  align?: "center" | "start";
 }) {
   return (
-    <div className="flex justify-center gap-2">
+    <div className={cn("flex gap-2", align === "center" ? "justify-center" : "justify-start")}>
       {seats.map((n) => (
         <Seat key={n} n={n} color={color} active={!!active && active.seats.includes(n)} dimmed={!!active && !active.seats.includes(n)} />
       ))}
@@ -104,9 +110,9 @@ function StraightRow({
   );
 }
 
-/** Última fila de la columna B: se curva alrededor del puesto del profesor,
- *  que queda al centro. Puro efecto visual (translateY simétrico) — el motivo
- *  real es que el puesto del profesor invade el espacio de esa fila. */
+/** Fila que rodea el puesto del profesor (junto al tablero): puro efecto
+ *  visual (translateY simétrico) — el motivo real es que el puesto del
+ *  profesor invade el espacio de esa fila. */
 function CurvedRowAroundTeacherDesk({
   seats,
   active,
@@ -116,7 +122,7 @@ function CurvedRowAroundTeacherDesk({
   active: Software | null;
   color?: string;
 }) {
-  const mid = Math.floor(seats.length / 2);
+  const mid = Math.ceil(seats.length / 2);
   const left = seats.slice(0, mid);
   const right = seats.slice(mid);
 
@@ -144,27 +150,44 @@ function CurvedRowAroundTeacherDesk({
   );
 }
 
+/** Pasillo central, bien definido, entre columna A y columna B. */
+function Pasillo() {
+  return (
+    <div className="relative flex w-10 shrink-0 items-stretch justify-center self-stretch" aria-hidden>
+      <div className="h-full border-l border-dashed border-muted-foreground/50" />
+      <span
+        className="absolute inset-y-0 my-auto h-fit whitespace-nowrap text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60"
+        style={{ writingMode: "vertical-rl" }}
+      >
+        Pasillo
+      </span>
+    </div>
+  );
+}
+
 function SeatColumn({
   title,
   rows,
   active,
-  curveLastRow = false,
+  curveFirstRow = false,
+  align = "center",
 }: {
   title: string;
   rows: number[][];
   active: Software | null;
-  curveLastRow?: boolean;
+  curveFirstRow?: boolean;
+  align?: "center" | "start";
 }) {
   return (
-    <div className="flex flex-col items-center gap-3">
+    <div className={cn("flex flex-col gap-3", align === "center" ? "items-center" : "items-start")}>
       <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{title}</span>
       <div className="flex flex-col gap-3">
         {rows.map((row, i) => {
-          const isLast = i === rows.length - 1;
-          return isLast && curveLastRow ? (
+          const isFirst = i === 0;
+          return isFirst && curveFirstRow ? (
             <CurvedRowAroundTeacherDesk key={i} seats={row} active={active} color={active?.color} />
           ) : (
-            <StraightRow key={i} seats={row} active={active} color={active?.color} />
+            <StraightRow key={i} seats={row} active={active} color={active?.color} align={align} />
           );
         })}
       </div>
@@ -222,24 +245,25 @@ export function LabRoomPreview() {
 
       <div className="flex flex-col items-center gap-6 rounded-lg border border-dashed border-input bg-muted/20 p-4">
         <div className="w-full max-w-md rounded-md border border-border bg-muted/60 py-1.5 text-center text-xs font-medium text-muted-foreground">
-          Tablero
+          Tablero <span className="font-normal text-muted-foreground/70">· el profesor va junto aquí</span>
         </div>
 
-        <div className="flex flex-wrap items-start justify-center gap-8">
-          <SeatColumn title={`Columna A · ${COL_A_ROWS.reduce((a, b) => a + b, 0)} equipos`} rows={colA} active={active} />
-          <div className="hidden w-px self-stretch bg-border sm:block" aria-hidden />
+        <div className="flex flex-wrap items-start justify-center gap-2">
+          <SeatColumn title={`Columna A · ${COL_A_ROWS.reduce((a, b) => a + b, 0)} equipos`} rows={colA} active={active} curveFirstRow />
+          <Pasillo />
           <SeatColumn
             title={`Columna B · ${COL_B_ROWS.reduce((a, b) => a + b, 0)} equipos`}
             rows={colB}
             active={active}
-            curveLastRow
+            align="start"
           />
         </div>
       </div>
 
       <p className="text-xs text-muted-foreground">
-        Disposición real de la sala (40 equipos: columna A con 3 filas, columna B con 4 — la última rodea el puesto
-        del profesor). El software instalado por equipo todavía es de ejemplo, no el inventario real.
+        Disposición real de la sala (40 equipos, no simétrica): en la columna A, los equipos 1-4 rodean el puesto del
+        profesor junto al tablero; la columna B es una grilla recta (18, 23, 29 y 35 alineados), separada de la A por
+        un pasillo central. El software instalado por equipo todavía es de ejemplo, no el inventario real.
       </p>
     </div>
   );

@@ -12,7 +12,7 @@ export default async function HerramientasPage() {
       <div>
         <h1 className="flex items-center gap-1.5 text-xl font-bold">
           Herramientas y licencias
-          <InfoHint text="Qué software tiene el área y las salas de cómputo, y en dónde. «UIFCE» son las licencias del área (edita quien tiene perfil completo, como antes). «Sala 1/2/3» son las salas de la unidad: Sala 1 ya tiene su disposición física real (columna A: 3 filas de 4/6/7 equipos; columna B: 4 filas de 5/6/6/6, la última rodeando el puesto del profesor) — elige un programa y se iluminan los equipos donde está instalado, aunque esa parte (qué software hay en cada equipo) todavía es de ejemplo." />
+          <InfoHint text="Qué software tiene el área y las salas de cómputo, y en dónde. «UIFCE» son las licencias del área (edita quien tiene perfil completo, como antes). «Sala 1/2/3» son las salas de la unidad: Sala 1 ya tiene su disposición física real, no simétrica — columna A: 3 filas de 4/6/7 equipos, la primera (1-4) rodeando el puesto del profesor junto al tablero; columna B: 4 filas de 5/6/6/6 en línea recta, separada de la A por un pasillo — elige un programa y se iluminan los equipos donde está instalado, aunque esa parte (qué software hay en cada equipo) todavía es de ejemplo." />
         </h1>
         <p className="text-sm text-muted-foreground">
           Licencias del área y disponibilidad de software por sala de cómputo.
