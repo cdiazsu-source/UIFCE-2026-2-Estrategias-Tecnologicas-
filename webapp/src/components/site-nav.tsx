@@ -14,6 +14,7 @@ const LINKS = [
   { href: "/redes", label: "Redes sociales" },
   { href: "/plantillas", label: "Plantillas" },
   { href: "/linea-grafica", label: "Línea gráfica" },
+  { href: "/dofa", label: "DOFA" },
   { href: "/herramientas", label: "Herramientas y licencias" },
   { href: "/contactos", label: "Contactos" },
   { href: "/equipo", label: "Equipo" },
