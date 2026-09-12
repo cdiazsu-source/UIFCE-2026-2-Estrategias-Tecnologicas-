@@ -236,9 +236,19 @@ model LabSeat {
   id        String   @id @default(cuid())
   /// "sala1" | "sala2" | "sala3".
   room      String
-  /// Número del puesto dentro de la sala (1..N).
+  /// Número del puesto dentro de la sala (1..N); 0 = el tablero/proyector.
   number    Int
   name      String?
+  /// Claves de software con licencia confirmada en este equipo (ver SOFTWARE
+  /// en lab-room-preview.tsx), ej. ["excel", "r"].
+  software  String[] @default([])
+  /// Qué tiene puesto de fondo/protector de pantalla ahora mismo: cada equipo
+  /// (y el tablero, que es un proyector) es una vitrina publicitaria de la
+  /// unidad — QR a Linktree, redes, aplicativos, página web.
+  wallpaper String?
+  /// true = esta fila no es un puesto físico sino el tablero/proyector de la
+  /// sala (número 0), que también se puede alimentar desde cualquier equipo.
+  isProjector Boolean @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

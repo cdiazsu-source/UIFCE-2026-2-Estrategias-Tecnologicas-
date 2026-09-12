@@ -4,7 +4,7 @@ import { useState } from "react";
 import type { Tool } from "@prisma/client";
 
 import { ToolsTable } from "@/components/tools-table";
-import { LabRoomPreview } from "@/components/lab-room-preview";
+import { LabRoomPreview, type SeatData } from "@/components/lab-room-preview";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
@@ -25,7 +25,7 @@ function RoomPlaceholder({ room }: { room: string }) {
   );
 }
 
-export function HerramientasTabs({ tools, sala1Names }: { tools: Tool[]; sala1Names: Record<number, string> }) {
+export function HerramientasTabs({ tools, sala1Seats }: { tools: Tool[]; sala1Seats: Record<number, SeatData> }) {
   const [tab, setTab] = useState<TabKey>("uifce");
 
   return (
@@ -56,7 +56,7 @@ export function HerramientasTabs({ tools, sala1Names }: { tools: Tool[]; sala1Na
             <h2 className="text-sm font-semibold">Disponibilidad por equipo</h2>
             <Badge variant="outline">Disposición real · software de ejemplo</Badge>
           </div>
-          <LabRoomPreview room="sala1" seatNames={sala1Names} />
+          <LabRoomPreview room="sala1" seatData={sala1Seats} />
         </div>
       )}
 

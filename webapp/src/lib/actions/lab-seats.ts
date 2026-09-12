@@ -5,17 +5,26 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { blockedForJunior } from "@/lib/session";
 
-/** Nombra (o quita el nombre de) un equipo puntual de una sala de cómputo,
- *  para la disposición interactiva de Herramientas y licencias. Vacío borra
- *  el nombre (la UI vuelve a mostrar solo el número). */
-export async function updateLabSeatName(room: string, seatNumber: number, rawName: string): Promise<void> {
+/** Crea, actualiza o borra la ficha de un equipo (o del tablero/proyector,
+ *  número 0) de una sala de cómputo: nombre, licencias de software
+ *  confirmadas y qué tiene de fondo de pantalla / contenido proyectado —
+ *  cada pantalla es una vitrina publicitaria de la unidad. Campos vacíos
+ *  borran el dato (la UI vuelve a mostrar solo el número). */
+export async function updateLabSeat(
+  room: string,
+  seatNumber: number,
+  patch: { name?: string; software?: string[]; wallpaper?: string; isProjector?: boolean },
+): Promise<void> {
   if (await blockedForJunior()) return;
-  const name = rawName.trim();
+
+  const name = patch.name?.trim() || null;
+  const wallpaper = patch.wallpaper?.trim() || null;
+  const software = patch.software ?? [];
 
   await prisma.labSeat.upsert({
     where: { room_number: { room, number: seatNumber } },
-    update: { name: name || null },
-    create: { room, number: seatNumber, name: name || null },
+    update: { name, software, wallpaper },
+    create: { room, number: seatNumber, name, software, wallpaper, isProjector: !!patch.isProjector },
   });
 
   revalidatePath("/herramientas");
