@@ -162,7 +162,16 @@ async function getHomeData(semesterId: string | null, includeOrphans: boolean) {
         },
       }),
       prisma.user.findMany({
-        where: { active: true, role: { in: [...STUDY_COMMENT_ROLES] } },
+        // "Los juniors [...] y el master": el máster y los Junior son los de ET
+        // (mismo criterio que ROSTER_ROLES/"Integrantes"); Coordinación no está
+        // atada a un área, así que entra sin filtrar por area.
+        where: {
+          active: true,
+          OR: [
+            { area: "ET", role: { in: [...STUDY_COMMENT_ROLES].filter((r) => r !== "COORDINADOR") } },
+            { role: "COORDINADOR" },
+          ],
+        },
         orderBy: { name: "asc" },
         select: { id: true, name: true, role: true },
       }),
