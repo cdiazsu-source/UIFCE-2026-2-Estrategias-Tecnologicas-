@@ -25,7 +25,7 @@ function RoomPlaceholder({ room }: { room: string }) {
   );
 }
 
-export function HerramientasTabs({ tools }: { tools: Tool[] }) {
+export function HerramientasTabs({ tools, sala1Names }: { tools: Tool[]; sala1Names: Record<number, string> }) {
   const [tab, setTab] = useState<TabKey>("uifce");
 
   return (
@@ -56,7 +56,7 @@ export function HerramientasTabs({ tools }: { tools: Tool[] }) {
             <h2 className="text-sm font-semibold">Disponibilidad por equipo</h2>
             <Badge variant="outline">Disposición real · software de ejemplo</Badge>
           </div>
-          <LabRoomPreview />
+          <LabRoomPreview room="sala1" seatNames={sala1Names} />
         </div>
       )}
 

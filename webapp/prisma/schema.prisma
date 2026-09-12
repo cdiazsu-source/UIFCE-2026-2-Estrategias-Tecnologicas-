@@ -228,6 +228,24 @@ model SituationStat {
   updatedAt DateTime @updatedAt
 }
 
+/// Nombre/etiqueta de un equipo puntual de una sala de cómputo (ej. "UIFCE-09"),
+/// en la disposición interactiva de Herramientas y licencias. Solo se crea la
+/// fila cuando alguien le pone nombre a ese puesto; si no tiene fila, la UI
+/// muestra solo su número.
+model LabSeat {
+  id        String   @id @default(cuid())
+  /// "sala1" | "sala2" | "sala3".
+  room      String
+  /// Número del puesto dentro de la sala (1..N).
+  number    Int
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([room, number])
+  @@index([room])
+}
+
 /// Fila de la tabla de Herramientas y licencias.
 model Tool {
   id             String     @id @default(cuid())
