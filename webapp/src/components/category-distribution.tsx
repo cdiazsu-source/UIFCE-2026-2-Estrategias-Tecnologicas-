@@ -6,7 +6,7 @@ import { ArrowLeft, ChevronRight, PieChart } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { categoryColor } from "@/lib/category-color";
-import { macroForCategory } from "@/lib/category-groups";
+import { macroDescription, macroForCategory, subgroupDescription, subgroupForCategory } from "@/lib/category-groups";
 
 export type CategoryProject = { id: string; title: string; category: string };
 
@@ -135,7 +135,7 @@ export function CategoryDistribution({ projects }: { projects: CategoryProject[]
   const [view, setView] = useState<View>({ level: "macro" });
 
   const withMacro = useMemo(
-    () => projects.map((p) => ({ ...p, macro: macroForCategory(p.category) })),
+    () => projects.map((p) => ({ ...p, macro: macroForCategory(p.category), subgroup: subgroupForCategory(p.category) })),
     [projects],
   );
 
@@ -155,14 +155,14 @@ export function CategoryDistribution({ projects }: { projects: CategoryProject[]
   const subSlices = useMemo(() => {
     if (view.level === "macro") return [];
     const counts = new Map<string, number>();
-    for (const p of projectsInMacro) counts.set(p.category, (counts.get(p.category) ?? 0) + 1);
+    for (const p of projectsInMacro) counts.set(p.subgroup, (counts.get(p.subgroup) ?? 0) + 1);
     return buildSlices(counts, projectsInMacro.length || 1);
   }, [projectsInMacro, view]);
 
   const projectsInView = useMemo(() => {
     if (view.level !== "projects") return [];
     return withMacro
-      .filter((p) => p.macro === view.macro && p.category === view.sub)
+      .filter((p) => p.macro === view.macro && p.subgroup === view.sub)
       .sort((a, b) => a.title.localeCompare(b.title, "es"));
   }, [withMacro, view]);
 
@@ -175,11 +175,11 @@ export function CategoryDistribution({ projects }: { projects: CategoryProject[]
 
   function selectMacro(macro: string) {
     const inMacro = withMacro.filter((p) => p.macro === macro);
-    const distinctCategories = new Set(inMacro.map((p) => p.category));
+    const distinctSubgroups = new Set(inMacro.map((p) => p.subgroup));
     // Si la macro-categoría solo tiene una subcategoría real, saltar directo a
     // la lista de proyectos (mostrar una rueda de "100% una rebanada" no aporta).
-    if (distinctCategories.size <= 1) {
-      setView({ level: "projects", macro, sub: inMacro[0]?.category ?? macro, cameFromMacro: true });
+    if (distinctSubgroups.size <= 1) {
+      setView({ level: "projects", macro, sub: inMacro[0]?.subgroup ?? macro, cameFromMacro: true });
     } else {
       setView({ level: "sub", macro });
     }
@@ -198,6 +198,12 @@ export function CategoryDistribution({ projects }: { projects: CategoryProject[]
   }
 
   const backLabel = view.level === "sub" ? "Todas las categorías" : view.level === "projects" ? view.macro : "";
+
+  // Descripción corporativa de la categoría en la que se acaba de entrar: la
+  // de la macro-categoría al ver sus subcategorías, la de la subcategoría al
+  // ver sus proyectos.
+  const description =
+    view.level === "sub" ? macroDescription(view.macro) : view.level === "projects" ? subgroupDescription(view.sub) : undefined;
 
   return (
     // display: contents -> este wrapper desaparece del layout; el botón y el
@@ -226,6 +232,10 @@ export function CategoryDistribution({ projects }: { projects: CategoryProject[]
                 <ArrowLeft className="h-3.5 w-3.5" aria-hidden />
                 {backLabel}
               </button>
+            )}
+
+            {description && (
+              <p className="border-l-2 border-primary/40 pl-3 text-sm text-muted-foreground">{description}</p>
             )}
 
             {view.level === "projects" ? (
