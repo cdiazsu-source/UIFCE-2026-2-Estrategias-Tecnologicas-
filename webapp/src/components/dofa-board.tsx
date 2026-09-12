@@ -6,12 +6,59 @@ import { ChevronDown } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import {
+  COMPARATIVO_SEMESTRAL,
   CRUCE_ESTRATEGICO,
   DOFA_QUADRANTS,
   PARAMETROS_OPERATIVOS,
   PROXIMOS_PASOS,
+  type DofaPeriod,
   type DofaQuadrantKey,
 } from "@/lib/dofa-data";
+
+/** Chip de semestre por hallazgo: resalta 2026-I (el semestre inmediatamente
+ *  anterior, el foco del reporte) y lo estructural/vigente; atenúa 2025-I y
+ *  2025-II, que quedan como antecedente. */
+function PeriodBadge({ period }: { period: DofaPeriod }) {
+  const emphasize = period === "2026-I" || period === "Estructural";
+  return (
+    <span
+      className={cn(
+        "inline-block shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide",
+        emphasize ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground",
+      )}
+    >
+      {period}
+    </span>
+  );
+}
+
+/** Contraste explícito con 2026-I (y, donde aplica, 2025-II) — el eje que
+ *  pidió el diagnóstico, para que no quede enterrado entre los hallazgos. */
+function ComparativoSemestral() {
+  return (
+    <Card>
+      <CardContent className="flex flex-col gap-3 pt-5">
+        <div>
+          <h2 className="text-base font-semibold">Comparativo con el semestre inmediatamente anterior</h2>
+          <p className="text-sm text-muted-foreground">Qué cambió frente a 2025-I/2025-II, con datos de 2026-I.</p>
+        </div>
+        <div className="grid gap-3 md:grid-cols-2">
+          {COMPARATIVO_SEMESTRAL.map((c) => (
+            <div key={c.indicador} className="rounded-md border border-border p-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{c.indicador}</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                <span className="font-medium text-foreground">Antes —</span> {c.antes}
+              </p>
+              <p className="text-sm">
+                <span className="font-medium text-primary">Ahora —</span> {c.ahora}
+              </p>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 /** Barra horizontal a mano (sin librería de charts, igual que el resto de la
  *  app): proporción de hallazgos por cuadrante. Cada segmento es clickable y
@@ -84,7 +131,10 @@ function Quadrant({
           <ul className="flex flex-col gap-2.5">
             {quadrant.items.map((item, i) => (
               <li key={i} className="border-l-2 pl-2.5 text-sm leading-snug" style={{ borderColor: `${color}55` }}>
-                <span>{item.text}</span>
+                <div className="flex items-start justify-between gap-2">
+                  <span>{item.text}</span>
+                  <PeriodBadge period={item.period} />
+                </div>
                 {item.source && <span className="mt-0.5 block text-xs text-muted-foreground">{item.source}</span>}
               </li>
             ))}
@@ -119,7 +169,15 @@ export function DofaBoard() {
 
   return (
     <div className="flex flex-col gap-8">
+      <ComparativoSemestral />
+
       <ProportionBar onSelect={goToQuadrant} />
+
+      <p className="text-xs text-muted-foreground">
+        En cada cuadrante, los hallazgos de <span className="font-medium text-primary">2026-I</span> y{" "}
+        <span className="font-medium text-primary">Estructural</span> (vigentes hoy) van primero; 2025-I y 2025-II
+        quedan al final como antecedente.
+      </p>
 
       <div className="grid gap-4 md:grid-cols-2">
         {DOFA_QUADRANTS.map((q) => (

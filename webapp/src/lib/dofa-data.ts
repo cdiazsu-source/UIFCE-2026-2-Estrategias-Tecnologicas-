@@ -4,10 +4,22 @@
  *  una lista editable en el día a día como la línea gráfica o el checklist —
  *  por eso vive como datos estáticos y no como modelo de Prisma. Formato de
  *  bullets concisos (dato + cifra), pensado para lectura en presentación
- *  corporativa, no en prosa. Ver la versión completa en el .docx entregado
- *  (`Diagnostico_DOFA_ET_UIFCE.docx`). */
+ *  corporativa, no en prosa.
+ *
+ *  Cada hallazgo trae un `period`: el semestre de la fuente que lo sustenta.
+ *  El reporte prioriza 2026-I (el semestre inmediatamente anterior a
+ *  2026-2S) y lo estructural/vigente; lo de 2025-I y 2025-II queda como
+ *  antecedente al final de cada cuadrante — visible para tener memoria del
+ *  área, pero no al frente como si fuera el diagnóstico actual. Un hallazgo
+ *  de un semestre anterior que ya no aplica (una persona que ya no está, algo
+ *  que un dato más reciente contradice) se retira o se marca como superado en
+ *  vez de dejarlo como si describiera hoy.
+ *
+ *  Ver la versión completa en el .docx entregado (`Diagnostico_DOFA_ET_UIFCE.docx`). */
 
-export type DofaItem = { text: string; source?: string };
+export type DofaPeriod = "2026-I" | "Estructural" | "2025-II" | "2025-I";
+
+export type DofaItem = { text: string; source?: string; period: DofaPeriod };
 
 export const DOFA_META = {
   elaboradoPor: "César Díaz S. (equipo de Estrategias Tecnológicas, UIFCE)",
@@ -23,115 +35,184 @@ export const DOFA_META = {
   ],
 };
 
+/** Contraste explícito con el semestre inmediatamente anterior (2026-I) y,
+ *  donde aplica, con 2025-II — el eje que pidió el diagnóstico. */
+export const COMPARATIVO_SEMESTRAL: { indicador: string; antes: string; ahora: string }[] = [
+  {
+    indicador: "MicroTalleres ejecutados",
+    antes: "2025-I: 1 ejecutado (baja disponibilidad de monitores)",
+    ahora: "2026-I: 10 ejecutados, 267 inscritos/admitidos",
+  },
+  {
+    indicador: "Instagram",
+    antes: "2025-I/2025-II: sin formato de contenido corto propio",
+    ahora: "2026-I: 11 hacks informáticos (23.029 vistas) + 25 reels (83.649 vistas)",
+  },
+  {
+    indicador: "LinkedIn",
+    antes: "Canal poco activo",
+    ahora: "2026-I: reactivado — 7 publicaciones, 1.491 impresiones, 42 reacciones",
+  },
+  {
+    indicador: "Hackatón",
+    antes: "2025-II: cancelada por baja inscripción",
+    ahora: "2026-2S: retomada («Hackatón Bizagi UIFCE», proyecto en curso)",
+  },
+];
+
 export const FORTALEZAS: DofaItem[] = [
   {
     text: "MicroTalleres ejecutados: 4,72/5 dominio técnico · 4,66/5 aplicabilidad · 4,54/5 expectativas (68 respuestas)",
     source: "Datos Power BI 2026-I, hoja Percepción",
+    period: "2026-I",
   },
   {
-    text: "Demanda > capacidad: «Macros en Excel» 80 inscritos / 40 cupos (200%); 2026-I: 267 inscritos en 10 MicroTalleres",
+    text: "Demanda > capacidad: «Macros en Excel» 80 inscritos / 40 cupos (200%, 2025-I); 2026-I: 267 inscritos en 10 MicroTalleres",
     source: "BBDD Dashboard Final 2025-I; Informe 2026-I",
+    period: "2026-I",
   },
   {
     text: "Manual de MicroTalleres y MicroEventos (2026): aforo mínimo 15, reglas por modalidad, evaluación y grabación obligatorias, roles monitor/Unidad definidos",
     source: "Manual de MicroTalleres y MicroEventos, 2026; Informe 2026-I",
-  },
-  {
-    text: "Correos oficiales de cupo: sin asistencia no hay grabación ni material; envío a cargo del monitor Máster",
-    source: "Formatos de correos de confirmación de cupo, 2026; Informe 2025-II",
-  },
-  {
-    text: "Difusión con apoyo de Comunicaciones de la Facultad (correo masivo), además de Instagram",
-    source: "Manual Microtaller — versión Word, 2026",
+    period: "2026-I",
   },
   {
     text: "Instagram: 11 hacks (23.029 vistas, 526 likes), 25 reels (83.649 vistas, 2.323 interacciones); LinkedIn: 7 publicaciones, 1.491 impresiones, 42 reacciones",
     source: "Informe 2026-I",
+    period: "2026-I",
+  },
+  { text: "Director con perfil afín: administrador de empresas, magíster UNAL, exdirector de virtualización, consultor empresarial", period: "Estructural" },
+  { text: "Informes semestrales sistemáticos: dificultades, propuestas y proyectos a continuar", period: "Estructural" },
+  {
+    text: "Difusión con apoyo de Comunicaciones de la Facultad (correo masivo), además de Instagram",
+    source: "Manual Microtaller — versión Word, 2026",
+    period: "Estructural",
   },
   {
     text: "Instagram y LinkedIn oficializados institucionalmente (Oficina de Medios Digitales UNAL)",
     source: "Informe 2025-II",
+    period: "2025-II",
   },
   {
-    text: "80 inscritos en 2025-I: Economía 27 · Contaduría 25 · Administración 13",
-    source: "BBDD Dashboard Final 2025-I",
+    text: "Correos oficiales de cupo: sin asistencia no hay grabación ni material; envío a cargo del monitor Máster",
+    source: "Formatos de correos de confirmación de cupo, 2026; Informe 2025-II",
+    period: "2025-II",
   },
-  { text: "Director con perfil afín: administrador de empresas, magíster UNAL, exdirector de virtualización, consultor empresarial" },
-  { text: "Informes semestrales sistemáticos: dificultades, propuestas y proyectos a continuar" },
+  {
+    text: "80 inscritos en 2025-I: Economía 27 · Contaduría 25 · Administración 13 (antecedente del público natural en la FCE)",
+    source: "BBDD Dashboard Final 2025-I",
+    period: "2025-I",
+  },
 ];
 
 export const DEBILIDADES: DofaItem[] = [
   {
-    text: "Diseño: una sola persona, sin dominio técnico garantizado (2025-I: monitor de Arquitectura)",
-    source: "Informes 2025-I, 2025-II",
-  },
-  {
-    text: "Sin licencias oficiales (Adobe/Canva personales); equipo UIFCE-08 insuficiente",
-    source: "Informes 2025-I, 2025-II",
-  },
-  {
     text: "2026-I: 267 inscritos/admitidos vs. ~139 asistentes (~52%), agravado por paro académico",
     source: "Informe 2026-I; Datos Power BI 2026-I",
+    period: "2026-I",
   },
-  {
-    text: "Espacios: 3 salas del Ed. 310 copadas; solo Sala 6 disponible (Ed. 238, 16 equipos)",
-    source: "Informe 2025-I",
-  },
-  { text: "Solo 1 MicroTaller ejecutado en 2025-I por baja disponibilidad de monitores", source: "Informe 2025-I" },
-  { text: "Drive de la Unidad desorganizado, persistente entre semestres", source: "Informes 2025-I, 2025-II" },
-  {
-    text: "Gobernanza: LinkedIn con cuenta personal; YouTube tardó semestres en resolverse",
-    source: "Informes 2025-I, 2025-II",
-  },
-  { text: "Brandbook desactualizado (2021)", source: "Informes 2025-I, 2025-II" },
   {
     text: "Extensión Solidaria: 271/275 colegios sin respuesta (98,5%); sin aval de Vicedecanatura en 2026-I",
     source: "Informe 2025-I; BBDD Dashboard Final 2025-I; Informe 2026-I",
-  },
-  { text: "Hackatón cancelada en 2025-II por baja inscripción", source: "Informe 2025-II" },
-  { text: "Operación dependiente de estudiantes auxiliares, sin planta fija" },
-  {
-    text: "Aforo virtual sin conciliar: PDF sin máximo vs. Word 35-100 (Meet)",
-    source: "Manual PDF vs. Manual Word, 2026",
+    period: "2026-I",
   },
   {
     text: "Manual descarta la modalidad híbrida que el informe 2026-I recomienda priorizar",
     source: "Manual de MicroTalleres y MicroEventos, 2026; Informe 2026-I",
+    period: "2026-I",
+  },
+  { text: "Operación dependiente de estudiantes auxiliares, sin planta fija", period: "Estructural" },
+  {
+    text: "Aforo virtual sin conciliar: PDF sin máximo vs. Word 35-100 (Meet)",
+    source: "Manual PDF vs. Manual Word, 2026",
+    period: "Estructural",
+  },
+  {
+    text: "Sin licencias oficiales (Adobe/Canva personales); equipo UIFCE-08 insuficiente — sin confirmación de que se haya resuelto en 2026-I",
+    source: "Informes 2025-I, 2025-II",
+    period: "2025-II",
+  },
+  {
+    text: "Drive de la Unidad desorganizado, persistente entre semestres",
+    source: "Informes 2025-I, 2025-II",
+    period: "2025-II",
+  },
+  {
+    text: "Gobernanza: LinkedIn con cuenta personal; YouTube tardó semestres en resolver propiedad institucional",
+    source: "Informes 2025-I, 2025-II",
+    period: "2025-II",
+  },
+  { text: "Brandbook desactualizado (2021), sin actualización reportada desde entonces", source: "Informes 2025-I, 2025-II", period: "2025-II" },
+  {
+    text: "Hackatón cancelada en 2025-II por baja inscripción — retomada en 2026-2S («Hackatón Bizagi UIFCE», en curso)",
+    source: "Informe 2025-II",
+    period: "2025-II",
+  },
+  {
+    text: "Espacios: 3 salas del Ed. 310 copadas; solo Sala 6 disponible (Ed. 238, 16 equipos) — sin dato más reciente que confirme cambio",
+    source: "Informe 2025-I",
+    period: "2025-I",
+  },
+  {
+    text: "Solo 1 MicroTaller ejecutado en 2025-I por baja disponibilidad de monitores — superado en 2026-I (10 ejecutados)",
+    source: "Informe 2025-I",
+    period: "2025-I",
   },
 ];
 
 export const OPORTUNIDADES: DofaItem[] = [
-  { text: "Semana de Investigación FCE → futura Semana UIFCE (2026-2)", source: "Informes 2025-II, 2026-I" },
+  { text: "Semana de Investigación FCE → futura Semana UIFCE (2026-2)", source: "Informes 2025-II, 2026-I", period: "2026-I" },
   {
     text: "Alianza con Comunicaciones e Imagen Institucional: micrositio, Blog UIFCE, carteleras (2026-I)",
     source: "Informe 2026-I",
+    period: "2026-I",
   },
   {
     text: "Convocatorias de extensión y proyectos estudiantiles para destrabar Extensión Solidaria",
     source: "Informes 2025-I, 2025-II, 2026-I",
+    period: "2026-I",
   },
-  { text: "Red de contactos empresariales del Director (Hackatón, financiamiento externo)" },
   {
     text: "Demanda no satisfecha: SAP, Odoo, Quickbooks, Salesforce, Power BI/Tableau, Power Automate, Blockchain, IA",
     source: "Informes 2025-II, 2026-I; Datos Power BI 2026-I",
+    period: "2026-I",
   },
   {
     text: "Modalidad virtual ya reglamentada (aforo, preinscripción, grabación): escalable sin más salas",
     source: "Informe 2026-I; Manual de MicroTalleres y MicroEventos, 2026",
+    period: "2026-I",
   },
+  { text: "Red de contactos empresariales del Director (Hackatón, financiamiento externo)", period: "Estructural" },
 ];
 
 export const AMENAZAS: DofaItem[] = [
-  { text: "Depende de avales externos (Vicedecanatura/Decanatura) para Extensión Solidaria", source: "Informe 2025-I" },
-  { text: "Factores institucionales imprevisibles (paro académico 2026-I)", source: "Informe 2026-I" },
-  { text: "Competencia interna por espacios físicos con Escuelas y profesores", source: "Informe 2025-I" },
-  { text: "Alcance orgánico limitado, sin presupuesto de pauta", source: "Informe 2025-I" },
-  { text: "Alianzas externas poco confiables (Fundación VGB suspendida en 2025)", source: "Informe 2025-I" },
-  { text: "98,5% sin respuesta en el público objetivo de Extensión Solidaria", source: "BBDD Dashboard Final 2025-I" },
-  { text: "Rotación estructural de monitores (Junior, Ad honorem, Máster)" },
+  { text: "Factores institucionales imprevisibles (paro académico 2026-I)", source: "Informe 2026-I", period: "2026-I" },
+  { text: "Rotación estructural de monitores (Junior, Ad honorem, Máster)", period: "Estructural" },
   {
     text: "Dinámicas lúdicas sujetas a recomendaciones de Bienestar Universitario",
     source: "Manual Microtaller — versión Word, 2026",
+    period: "Estructural",
+  },
+  {
+    text: "Depende de avales externos (Vicedecanatura/Decanatura) para Extensión Solidaria — aún sin resolver en 2026-I",
+    source: "Informe 2025-I",
+    period: "2025-I",
+  },
+  {
+    text: "Competencia interna por espacios físicos con Escuelas y profesores",
+    source: "Informe 2025-I",
+    period: "2025-I",
+  },
+  { text: "Alcance orgánico limitado, sin presupuesto de pauta", source: "Informe 2025-I", period: "2025-I" },
+  {
+    text: "Alianzas externas poco confiables (ejemplo histórico: Fundación VGB suspendida en 2025)",
+    source: "Informe 2025-I",
+    period: "2025-I",
+  },
+  {
+    text: "98,5% sin respuesta en el público objetivo de Extensión Solidaria (línea base, aún sin avance reportado)",
+    source: "BBDD Dashboard Final 2025-I",
+    period: "2025-I",
   },
 ];
 
