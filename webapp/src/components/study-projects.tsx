@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { CalendarClock, FolderOpen, Pencil, Plus, Trash2 } from "lucide-react";
+import { CalendarClock, Download, FolderOpen, Pencil, Plus, Trash2 } from "lucide-react";
 import type { CheckpointStatus, StudyCheckpoint, StudyProject } from "@prisma/client";
 
 import {
@@ -22,6 +22,7 @@ import { PersonAvatar } from "@/components/person-avatar";
 import { useCanEdit } from "@/components/access-context";
 import { CHECKPOINT_STATUS_LABEL, formatDate, USER_ROLE_LABEL } from "@/lib/utils";
 import { personColor } from "@/lib/person-color";
+import { downloadCsv } from "@/lib/csv";
 
 const STATUS_OPTIONS: CheckpointStatus[] = ["PENDIENTE", "EN_CURSO", "CUMPLIDO", "ATRASADO"];
 
@@ -325,16 +326,45 @@ export function StudyProjects({
   const canEdit = useCanEdit();
   const [showForm, setShowForm] = useState(false);
 
+  function handleExport() {
+    const rows: string[][] = [
+      ["Junior", "Rol", "Proyecto de estudio", "Corte", "Nombre del corte", "Fecha límite", "Estado", "Notas"],
+    ];
+    for (const junior of juniors) {
+      for (const project of junior.studyProjects) {
+        const checkpoints = [...project.checkpoints].sort((a, b) => a.number - b.number);
+        for (const c of checkpoints) {
+          rows.push([
+            junior.name,
+            USER_ROLE_LABEL[junior.role] ?? junior.role,
+            project.title,
+            String(c.number),
+            c.label,
+            c.dueDate ? formatDate(c.dueDate) : "",
+            CHECKPOINT_STATUS_LABEL[c.status],
+            c.notes ?? "",
+          ]);
+        }
+      }
+    }
+    const suffix = semesterLabel ? semesterLabel.replace(/\s+/g, "-") : "actual";
+    downloadCsv(`proyectos-de-estudio-cortes-${suffix}.csv`, rows);
+  }
+
   return (
     <div className="flex flex-col gap-8">
-      {canEdit && (
-        <div className="flex justify-end">
+      <div className="flex flex-wrap justify-end gap-2">
+        <Button size="sm" variant="outline" onClick={handleExport}>
+          <Download className="h-3.5 w-3.5" />
+          Exportar
+        </Button>
+        {canEdit && (
           <Button size="sm" variant="outline" onClick={() => setShowForm((s) => !s)}>
             <Plus className="h-3.5 w-3.5" />
             Agregar proyecto de estudio
           </Button>
-        </div>
-      )}
+        )}
+      </div>
 
       {canEdit && showForm && (
         <form
