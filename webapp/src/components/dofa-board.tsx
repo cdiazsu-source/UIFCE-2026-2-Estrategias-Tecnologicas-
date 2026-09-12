@@ -136,6 +136,10 @@ function Quadrant({
                   <PeriodBadge period={item.period} />
                 </div>
                 {item.source && <span className="mt-0.5 block text-xs text-muted-foreground">{item.source}</span>}
+                <p className="mt-1 flex items-start gap-1.5 text-xs italic text-foreground/80">
+                  <span aria-hidden>💡</span>
+                  <span>{item.thesis}</span>
+                </p>
               </li>
             ))}
           </ul>
