@@ -6,8 +6,10 @@ import { Check, Monitor, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /** Disposición real de Sala 1: no es simétrica.
- *  - Columna A: 3 filas de 4, 6 y 7 equipos (17 en total). La fila 1 (equipos
- *    1-4) rodea el puesto del profesor, que va junto al tablero.
+ *  - Columna A: 3 filas de 4, 6 y 7 equipos (17 en total). Los equipos 1-4 no
+ *    son una fila: van en circunferencia alrededor de la mesa del profesor
+ *    (una mesa independiente, cuadrada, que no es un puesto), pegada al
+ *    pasillo y junto al tablero.
  *  - Columna B: 4 filas de 5, 6, 6 y 6 equipos (23 en total), en línea recta
  *    — el primer puesto de cada fila (18, 23, 29, 35) queda alineado.
  *  - Entre A y B hay un pasillo central bien definido.
@@ -110,42 +112,41 @@ function StraightRow({
   );
 }
 
-/** Fila que rodea el puesto del profesor (junto al tablero): puro efecto
- *  visual (translateY simétrico) — el motivo real es que el puesto del
- *  profesor invade el espacio de esa fila. */
-function CurvedRowAroundTeacherDesk({
+/** Los equipos 1-4 en circunferencia alrededor de la mesa del profesor. La
+ *  mesa es independiente (no es un puesto de la fila): una mesa cuadrada al
+ *  centro, con un equipo en cada punto cardinal alrededor. */
+function TeacherDeskCluster({
   seats,
   active,
   color,
 }: {
-  seats: number[];
+  /** Exactamente 4, en orden: [arriba, derecha, abajo, izquierda]. */
+  seats: [number, number, number, number];
   active: Software | null;
   color?: string;
 }) {
-  const mid = Math.ceil(seats.length / 2);
-  const left = seats.slice(0, mid);
-  const right = seats.slice(mid);
-
-  function offsetFor(distanceFromDesk: number) {
-    return Math.min(distanceFromDesk * 4, 10);
-  }
-
+  const [top, right, bottom, left] = seats;
+  const seatProps = (n: number) => ({
+    n,
+    color,
+    active: !!active && active.seats.includes(n),
+    dimmed: !!active && !active.seats.includes(n),
+  });
   return (
-    <div className="flex items-end justify-center gap-2">
-      {left.map((n, i) => (
-        <div key={n} style={{ transform: `translateY(-${offsetFor(left.length - i)}px)` }}>
-          <Seat n={n} color={color} active={!!active && active.seats.includes(n)} dimmed={!!active && !active.seats.includes(n)} />
-        </div>
-      ))}
-      <div className="flex h-11 w-9 shrink-0 flex-col items-center justify-center gap-0.5 rounded-lg border border-dashed border-muted-foreground/40 text-[9px] text-muted-foreground">
+    <div className="grid grid-cols-3 grid-rows-3 place-items-center gap-1.5">
+      <div />
+      <Seat {...seatProps(top)} />
+      <div />
+      <Seat {...seatProps(left)} />
+      <div className="flex h-11 w-11 shrink-0 flex-col items-center justify-center gap-0.5 rounded-md border-2 border-foreground/25 bg-muted text-center text-[9px] font-semibold leading-tight text-muted-foreground">
         <User className="h-3.5 w-3.5" />
-        <span className="leading-none">Prof.</span>
+        <span className="leading-none">Mesa</span>
+        <span className="leading-none">prof.</span>
       </div>
-      {right.map((n, i) => (
-        <div key={n} style={{ transform: `translateY(-${offsetFor(i + 1)}px)` }}>
-          <Seat n={n} color={color} active={!!active && active.seats.includes(n)} dimmed={!!active && !active.seats.includes(n)} />
-        </div>
-      ))}
+      <Seat {...seatProps(right)} />
+      <div />
+      <Seat {...seatProps(bottom)} />
+      <div />
     </div>
   );
 }
@@ -185,7 +186,11 @@ function SeatColumn({
         {rows.map((row, i) => {
           const isFirst = i === 0;
           return isFirst && curveFirstRow ? (
-            <CurvedRowAroundTeacherDesk key={i} seats={row} active={active} color={active?.color} />
+            // Junto al pasillo: pegada al borde derecho de la columna A, que
+            // es justo el borde que da al pasillo central.
+            <div key={i} className="self-end">
+              <TeacherDeskCluster seats={row as [number, number, number, number]} active={active} color={active?.color} />
+            </div>
           ) : (
             <StraightRow key={i} seats={row} active={active} color={active?.color} align={align} />
           );
@@ -245,7 +250,7 @@ export function LabRoomPreview() {
 
       <div className="flex flex-col items-center gap-6 rounded-lg border border-dashed border-input bg-muted/20 p-4">
         <div className="w-full max-w-md rounded-md border border-border bg-muted/60 py-1.5 text-center text-xs font-medium text-muted-foreground">
-          Tablero <span className="font-normal text-muted-foreground/70">· el profesor va junto aquí</span>
+          Tablero
         </div>
 
         <div className="flex flex-wrap items-start justify-center gap-2">
@@ -261,9 +266,10 @@ export function LabRoomPreview() {
       </div>
 
       <p className="text-xs text-muted-foreground">
-        Disposición real de la sala (40 equipos, no simétrica): en la columna A, los equipos 1-4 rodean el puesto del
-        profesor junto al tablero; la columna B es una grilla recta (18, 23, 29 y 35 alineados), separada de la A por
-        un pasillo central. El software instalado por equipo todavía es de ejemplo, no el inventario real.
+        Disposición real de la sala (40 equipos, no simétrica): en la columna A, los equipos 1-4 van en circunferencia
+        alrededor de la mesa independiente del profesor (junto al pasillo y al lado del tablero, no es un puesto de la
+        fila); la columna B es una grilla recta (18, 23, 29 y 35 alineados), separada de la A por el pasillo central.
+        El software instalado por equipo todavía es de ejemplo, no el inventario real.
       </p>
     </div>
   );
