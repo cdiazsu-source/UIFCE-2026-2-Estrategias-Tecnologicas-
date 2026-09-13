@@ -214,10 +214,11 @@ export function CategoryDistribution({ projects }: { projects: CategoryProject[]
         type="button"
         onClick={toggleOpen}
         aria-expanded={open}
-        className="press inline-flex items-center gap-1.5 rounded-md border border-input px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+        aria-label="Por categoría"
+        title="Por categoría"
+        className="press inline-flex h-8 w-8 items-center justify-center rounded-md border border-input text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
       >
         <PieChart className="h-4 w-4" aria-hidden />
-        Por categoría
       </button>
 
       {open && (
