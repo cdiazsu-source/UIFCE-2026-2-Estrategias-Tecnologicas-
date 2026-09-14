@@ -398,7 +398,7 @@ export default async function HomePage({
         <div className="flex flex-col gap-4">
           <SemesterTabs semesters={tabs} selectedId={selected?.id ?? ""} />
 
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="flex flex-col gap-4">
             <SemesterObjectives
               semester={selected ? { id: selected.id, label: selected.label, objectives: selected.objectives } : null}
             />
