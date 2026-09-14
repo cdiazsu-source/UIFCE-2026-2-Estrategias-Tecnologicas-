@@ -94,6 +94,9 @@ model Semester {
   label      String   @unique
   /// Objetivos del área para ese semestre (uno por elemento).
   objectives String[] @default([])
+  /// Frentes de Difusión y visibilidad (Estrategias Tecnológicas) vigentes
+  /// ese semestre — la card "ET" del Panel principal, uno por elemento.
+  etStrategies String[] @default([])
   /// true = semestre vigente (el que se muestra por defecto). Solo uno.
   isCurrent  Boolean  @default(false)
   order      Int      @default(0)

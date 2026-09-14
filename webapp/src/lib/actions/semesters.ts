@@ -54,6 +54,19 @@ export async function updateSemesterObjectives(id: string, objectivesText: strin
   revalidatePath("/");
 }
 
+/** Reemplaza la lista de frentes de Difusión y visibilidad (card "ET" del
+ *  Panel principal), uno por línea. */
+export async function updateSemesterEtStrategies(id: string, textValue: string) {
+  if (await blockedForJunior()) return;
+  const etStrategies = textValue
+    .split("\n")
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0)
+    .slice(0, 20);
+  await prisma.semester.update({ where: { id }, data: { etStrategies } });
+  revalidatePath("/");
+}
+
 /** Borra un semestre solo si no tiene proyectos y no es el vigente. */
 export async function deleteSemester(id: string) {
   if (await blockedForJunior()) return;

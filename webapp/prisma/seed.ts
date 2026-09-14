@@ -70,6 +70,19 @@ const OBJETIVOS_2026_2 = [
   "Garantizar el acompañamiento a las demás áreas de la UIFCE con niveles de servicio (SLA) definidos y un canal único de solicitudes.",
 ];
 
+// Frentes de Difusión y visibilidad vigentes este semestre — card "ET" del
+// Panel principal (semester-objectives.tsx / et-strategies-card.tsx).
+const ET_STRATEGIES_2026_2 = [
+  "Instagram (@ui_fce): contenido corto — hacks informáticos y reels",
+  "LinkedIn institucional: posicionamiento prioritario del semestre",
+  "TikTok: canal nuevo, mismo formato de contenido corto",
+  "YouTube: cierre de la oficialización institucional",
+  "Micrositio y Blog UIFCE como cara digital permanente de la Unidad",
+  "MicroTalleres y MicroEventos: Semana UIFCE y Hackatón Bizagi",
+  "Difusión física: fachadas, carteleras y stands intervenidos",
+  "Alianza con Comunicaciones e Imagen Institucional: correo masivo y validación de piezas",
+];
+
 // --- Ficha del área (singleton) ----------------------------------------
 const AREA_DESCRIPTION = [
   "Estrategias Tecnológicas (ET) es el área de comunicación digital y difusión de la Unidad de Informática de la Facultad de Ciencias Económicas (UIFCE) de la Universidad Nacional de Colombia. Gestiona los canales y redes oficiales de la Unidad, produce las piezas gráficas y audiovisuales, mantiene el micrositio y organiza los microtalleres y microeventos, siempre dentro de los lineamientos de identidad visual de la Universidad y con el acompañamiento de Imagen Institucional / Unimedios.",
@@ -100,10 +113,19 @@ async function ensureCurrentSemester(): Promise<string> {
     if (existing.objectives.length === 0) {
       await prisma.semester.update({ where: { id: existing.id }, data: { objectives: OBJETIVOS_2026_2 } });
     }
+    if (existing.etStrategies.length === 0) {
+      await prisma.semester.update({ where: { id: existing.id }, data: { etStrategies: ET_STRATEGIES_2026_2 } });
+    }
     return existing.id;
   }
   const created = await prisma.semester.create({
-    data: { label: CURRENT_SEMESTER_LABEL, objectives: OBJETIVOS_2026_2, isCurrent: true, order: 0 },
+    data: {
+      label: CURRENT_SEMESTER_LABEL,
+      objectives: OBJETIVOS_2026_2,
+      etStrategies: ET_STRATEGIES_2026_2,
+      isCurrent: true,
+      order: 0,
+    },
   });
   console.log(`Semestre creado: ${CURRENT_SEMESTER_LABEL}`);
   return created.id;

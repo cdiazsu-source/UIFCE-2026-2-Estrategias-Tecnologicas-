@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import type { DifusionSpaceStatus } from "@prisma/client";
 import { ImagePlus, Pencil, Plus, Trash2, X } from "lucide-react";
 
@@ -107,9 +107,9 @@ function AddImageTile({ spaceId }: { spaceId: string }) {
       }}
       onClick={() => inputRef.current?.click()}
       title="Elegir imagen, pegar (Ctrl+V) o arrastrar"
-      className="flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-md border border-dashed border-input p-1 text-center text-[11px] text-muted-foreground hover:border-primary/40 hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="flex aspect-[4/3] cursor-pointer flex-col items-center justify-center gap-1.5 rounded-md border border-dashed border-input p-2 text-center text-xs text-muted-foreground hover:border-primary/40 hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
-      <ImagePlus className="h-4 w-4" aria-hidden />
+      <ImagePlus className="h-6 w-6" aria-hidden />
       {busy ? "Procesando…" : err ?? "Agregar foto"}
       <input
         ref={inputRef}
@@ -122,17 +122,17 @@ function AddImageTile({ spaceId }: { spaceId: string }) {
   );
 }
 
-function GalleryImageTile({ image }: { image: DifusionSpaceImageData }) {
+function GalleryImageTile({ image, onOpen }: { image: DifusionSpaceImageData; onOpen: (src: string) => void }) {
   const canEdit = useCanEdit();
   const undo = useUndo();
   const [isPending, startTransition] = useTransition();
 
   return (
-    <div className="group relative aspect-square overflow-hidden rounded-md border border-border">
-      <a href={image.dataUrl} target="_blank" rel="noreferrer" className="block h-full w-full">
+    <div className="group relative aspect-[4/3] overflow-hidden rounded-md border border-border">
+      <button type="button" onClick={() => onOpen(image.dataUrl)} className="block h-full w-full" aria-label="Ampliar foto">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={image.dataUrl} alt="Foto del espacio" className="h-full w-full object-cover" loading="lazy" />
-      </a>
+      </button>
       {canEdit && (
         <button
           type="button"
@@ -145,11 +145,57 @@ function GalleryImageTile({ image }: { image: DifusionSpaceImageData }) {
             });
           }}
           aria-label="Eliminar foto"
-          className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white opacity-0 transition-opacity hover:bg-destructive group-hover:opacity-100 disabled:opacity-40"
+          className="absolute right-1.5 top-1.5 rounded-full bg-black/60 p-1.5 text-white opacity-0 transition-opacity hover:bg-destructive group-hover:opacity-100 disabled:opacity-40"
         >
-          <X className="h-3 w-3" />
+          <X className="h-4 w-4" />
         </button>
       )}
+    </div>
+  );
+}
+
+/** Visor a pantalla completa de una foto de la galería. Se cierra con Escape,
+ *  clic en el fondo, o la X — mismo patrón que los overlays de DOFA/Análisis
+ *  estratégico. */
+function ImageLightbox({ src, onClose }: { src: string | null; onClose: () => void }) {
+  useEffect(() => {
+    if (!src) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose();
+    }
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [src, onClose]);
+
+  if (!src) return null;
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Foto ampliada"
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
+    >
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label="Cerrar"
+        className="absolute right-4 top-4 rounded-full bg-black/60 p-2 text-white hover:bg-white/20"
+      >
+        <X className="h-5 w-5" />
+      </button>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={src}
+        alt="Foto del espacio ampliada"
+        onClick={(e) => e.stopPropagation()}
+        className="max-h-[90vh] max-w-[90vw] rounded-md object-contain"
+      />
     </div>
   );
 }
@@ -174,7 +220,7 @@ function Fields({ s }: { s?: DifusionSpaceData }) {
   );
 }
 
-function SpaceCard({ space }: { space: DifusionSpaceData }) {
+function SpaceCard({ space, onOpenImage }: { space: DifusionSpaceData; onOpenImage: (src: string) => void }) {
   const canEdit = useCanEdit();
   const undo = useUndo();
   const [editing, setEditing] = useState(false);
@@ -244,9 +290,9 @@ function SpaceCard({ space }: { space: DifusionSpaceData }) {
       </CardHeader>
       <CardContent className="flex flex-col gap-3 text-sm">
         {space.description && <p className="whitespace-pre-line text-muted-foreground">{space.description}</p>}
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {space.images.map((img) => (
-            <GalleryImageTile key={img.id} image={img} />
+            <GalleryImageTile key={img.id} image={img} onOpen={onOpenImage} />
           ))}
           {canEdit && <AddImageTile spaceId={space.id} />}
         </div>
@@ -261,6 +307,7 @@ function SpaceCard({ space }: { space: DifusionSpaceData }) {
 export function DifusionSpacesPanel({ spaces }: { spaces: DifusionSpaceData[] }) {
   const canEdit = useCanEdit();
   const [adding, setAdding] = useState(false);
+  const [lightbox, setLightbox] = useState<string | null>(null);
 
   return (
     <div className="flex flex-col gap-4">
@@ -302,12 +349,14 @@ export function DifusionSpacesPanel({ spaces }: { spaces: DifusionSpaceData[] })
           Todavía no hay espacios registrados.
         </p>
       ) : (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="flex flex-col gap-4">
           {spaces.map((s) => (
-            <SpaceCard key={s.id} space={s} />
+            <SpaceCard key={s.id} space={s} onOpenImage={setLightbox} />
           ))}
         </div>
       )}
+
+      <ImageLightbox src={lightbox} onClose={() => setLightbox(null)} />
     </div>
   );
 }

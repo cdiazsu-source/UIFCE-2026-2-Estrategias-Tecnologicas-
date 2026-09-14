@@ -402,7 +402,9 @@ export default async function HomePage({
             <SemesterObjectives
               semester={selected ? { id: selected.id, label: selected.label, objectives: selected.objectives } : null}
             />
-            <EtStrategiesCard />
+            <EtStrategiesCard
+              semester={selected ? { id: selected.id, label: selected.label, etStrategies: selected.etStrategies } : null}
+            />
           </div>
 
           <TeamRoster people={rosterMembers} />
