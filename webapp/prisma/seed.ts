@@ -1018,6 +1018,28 @@ async function reconcileInstagramNewAccount() {
   console.log("Instagram reconciliada a la cuenta nueva @ui_fce.");
 }
 
+/** El Linktree institucional (https://linktr.ee/UIFCE) se agrega aparte de
+ *  seedSocialChannels porque esa función solo siembra cuando la tabla está
+ *  vacía (count > 0 => return); esto se agrega aunque ya existan canales. */
+async function seedLinktreeChannel() {
+  const existing = await prisma.socialChannel.findUnique({ where: { platform: "LINKTREE" } });
+  if (existing) return;
+
+  const last = await prisma.socialChannel.findFirst({ orderBy: { order: "desc" }, select: { order: true } });
+  await prisma.socialChannel.create({
+    data: {
+      platform: "LINKTREE",
+      handle: "UIFCE",
+      url: "https://linktr.ee/UIFCE",
+      status: "ACTIVA",
+      officialStatus: "SIN_OFICIALIZAR",
+      notes: "Página de enlaces (bio link) que reúne los canales oficiales de la Unidad.",
+      order: (last?.order ?? -1) + 1,
+    },
+  });
+  console.log("Canal Linktree creado.");
+}
+
 // --- Plantillas -----------------------------------------------------------
 async function seedTemplates() {
   const count = await prisma.template.count();
@@ -1232,6 +1254,7 @@ async function main() {
   await seedCursosLibresChecklist();
   await seedSocialChannels();
   await reconcileInstagramNewAccount();
+  await seedLinktreeChannel();
   await seedTemplates();
   await seedAreaProfile();
   await seedLinkedInTrackees();

@@ -7,6 +7,7 @@ import {
   AtSign,
   ExternalLink,
   Instagram,
+  Link2,
   Linkedin,
   Pencil,
   Plus,
@@ -74,9 +75,10 @@ const PLATFORM_LABEL: Record<SocialPlatform, string> = {
   TIKTOK: "TikTok",
   YOUTUBE: "YouTube",
   FACEBOOK: "Facebook",
+  LINKTREE: "Linktree",
 };
 
-const PLATFORM_ORDER: SocialPlatform[] = ["INSTAGRAM", "LINKEDIN", "X", "TIKTOK", "YOUTUBE", "FACEBOOK"];
+const PLATFORM_ORDER: SocialPlatform[] = ["INSTAGRAM", "LINKEDIN", "X", "TIKTOK", "YOUTUBE", "FACEBOOK", "LINKTREE"];
 
 function PlatformIcon({ platform }: { platform: SocialPlatform }) {
   const cls = "h-4 w-4";
@@ -84,6 +86,7 @@ function PlatformIcon({ platform }: { platform: SocialPlatform }) {
   if (platform === "LINKEDIN") return <Linkedin className={cls} />;
   if (platform === "YOUTUBE") return <Youtube className={cls} />;
   if (platform === "TIKTOK") return <Radio className={cls} />;
+  if (platform === "LINKTREE") return <Link2 className={cls} />;
   return <AtSign className={cls} />;
 }
 

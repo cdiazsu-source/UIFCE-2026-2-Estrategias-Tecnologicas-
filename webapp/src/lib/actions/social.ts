@@ -7,7 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { blockedForJunior } from "@/lib/session";
 import type { UndoAction } from "@/lib/undo";
 
-const PLATFORMS = ["INSTAGRAM", "LINKEDIN", "X", "TIKTOK", "YOUTUBE", "FACEBOOK"] as const;
+const PLATFORMS = ["INSTAGRAM", "LINKEDIN", "X", "TIKTOK", "YOUTUBE", "FACEBOOK", "LINKTREE"] as const;
 const STATUSES = ["ACTIVA", "EN_RIESGO", "EN_TRAMITE", "INACTIVA", "PERDIDA"] as const;
 const OFFICIAL_STATUSES = ["OFICIALIZADA", "EN_TRAMITE", "SIN_OFICIALIZAR"] as const;
 

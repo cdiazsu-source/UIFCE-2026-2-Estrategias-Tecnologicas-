@@ -11,6 +11,7 @@ const PLATFORM_RANK: Record<string, number> = {
   TIKTOK: 3,
   YOUTUBE: 4,
   FACEBOOK: 5,
+  LINKTREE: 6,
 };
 
 export default async function RedesPage() {

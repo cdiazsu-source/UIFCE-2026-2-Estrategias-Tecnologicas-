@@ -51,6 +51,7 @@ enum SocialPlatform {
   TIKTOK
   YOUTUBE
   FACEBOOK
+  LINKTREE
 }
 
 /// Estado operativo de una cuenta en el panel de Redes sociales.
