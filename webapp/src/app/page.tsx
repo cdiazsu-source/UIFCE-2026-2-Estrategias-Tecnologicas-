@@ -18,6 +18,7 @@ import {
 import { InfoHint } from "@/components/info-hint";
 import { NewProjectButton } from "@/components/new-project-button";
 import { CategoryDistribution } from "@/components/category-distribution";
+import { DofaOverlay } from "@/components/dofa-overlay";
 import { StrategicAnalysisOverlay } from "@/components/strategic-analysis-overlay";
 import { formatDateTime, JUNIOR_ROLES, STUDY_COMMENT_ROLES } from "@/lib/utils";
 
@@ -411,6 +412,7 @@ export default async function HomePage({
               <InfoHint text="Una tarjeta por iniciativa del semestre seleccionado (pestañas de arriba). Por defecto se ordenan por urgencia (primero «❗ Atención Inmediata», luego «📅 Próximo Ciclo», luego «⏸️ Backlog»; los completados al final); el desplegable «Orden» permite volver al orden de planeación. Cómo se usa: busca por texto o filtra por categoría; el progreso cuenta subtareas hechas y la franja de color a la izquierda es la persona asignada — titila si el proyecto está en «❗ Atención Inmediata». Con perfil completo, «Nuevo proyecto» lo crea en el semestre visible. Ejemplo: elige «Eventos» para ver solo esos proyectos." />
             </h2>
             <CategoryDistribution projects={projectCards} />
+            <DofaOverlay />
             <StrategicAnalysisOverlay />
             <NewProjectButton semesterId={selected?.id} semesterLabel={selected?.label} />
           </div>

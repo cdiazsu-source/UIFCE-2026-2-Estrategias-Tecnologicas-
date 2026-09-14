@@ -5,6 +5,10 @@
  *  quedan juntas, con el mismo criterio de claridad ejecutiva que el resto
  *  del panel.
  *
+ *  Contenido en bullets cortos a propósito (una idea por línea, sin prosa de
+ *  transición): esto se muestra en una capa a pantalla completa pensada para
+ *  exponer, no para leer de corrido.
+ *
  *  Es contenido fijo, igual que dofa-data.ts: análisis hecho una vez sobre el
  *  DOFA de septiembre de 2026 y el portafolio de ese momento, no algo que se
  *  recalcule solo con lo que haya en la base de datos hoy. Si el portafolio
@@ -19,53 +23,53 @@ export const COVERAGE_LABEL: Record<CoverageStatus, string> = {
   gap: "Sin proyecto — iniciativa propuesta",
 };
 
+/** Un hallazgo condensado del DOFA, ya atribuido a su cuadrante — para que la
+ *  tarjeta pinte un punto de color por bullet en vez de repetir "F ·" / "D ·"
+ *  como texto. */
+export type QuadrantFinding = { quadrant: DofaQuadrantKey; text: string };
+
 export type StrategicTheme = {
   id: string;
   title: string;
-  quadrants: DofaQuadrantKey[];
-  /** Síntesis de qué dice el DOFA sobre este tema, citando el cuadrante. */
-  dofaSummary: string;
+  /** Un hallazgo por cuadrante involucrado, ya condensado a una línea. */
+  findings: QuadrantFinding[];
   /** Proyectos vigentes del portafolio que ya atienden el tema (título tal
    *  como aparece en `planeacion_del_area.csv`). Vacío si es un vacío puro. */
   projects: string[];
   status: CoverageStatus;
-  /** El ángulo de Estrategia Tecnológica: cómo la tecnología resuelve (o
-   *  resolvería) el problema concreto, no solo la gestión administrativa. */
-  techStrategy: string;
+  /** La palanca tecnológica concreta, en 1-2 bullets — no la gestión
+   *  administrativa alrededor. */
+  action: string[];
 };
 
-export const STRATEGIC_SUMMARY =
-  "Cada tema agrupa los hallazgos del DOFA (Fortalezas, Oportunidades, Debilidades, Amenazas) que hablan de lo mismo, " +
-  "señala qué proyecto del portafolio 2026-2 ya lo atiende y, cuando ninguno lo cubre, propone una iniciativa nueva " +
-  "con enfoque de Estrategia Tecnológica: la tecnología como la palanca que resuelve el problema de fondo, no solo " +
-  "el registro de que existe.";
+export const STRATEGIC_INTRO: string[] = [
+  "Qué dice el DOFA, hallazgo por cuadrante (F · D · O · A)",
+  "Qué proyecto del portafolio 2026-2 ya lo atiende",
+  "Dónde no hay proyecto, la iniciativa nueva que lo resolvería — con enfoque tecnológico",
+];
 
 export const STRATEGIC_THEMES: StrategicTheme[] = [
   {
     id: "microtalleres",
     title: "MicroTalleres y MicroEventos",
-    quadrants: ["F", "D", "O", "A"],
-    dofaSummary:
-      "F: calidad ya probada (4,72/5 dominio técnico) y demanda que duplica la capacidad (267 inscritos en 2026-I). " +
-      "D: solo ~52% de quienes se inscriben asiste; el Manual descarta la modalidad híbrida pese a que el propio " +
-      "informe 2026-I recomienda priorizarla, y el aforo virtual queda inconsistente entre sus dos versiones. " +
-      "O: la modalidad virtual ya está reglamentada, lista para escalar sin más salas. " +
-      "A: los MicroEventos lúdicos dependen de aval de Bienestar Universitario.",
+    findings: [
+      { quadrant: "F", text: "Calidad probada (4,72/5) y demanda que duplica cupos: 267 inscritos en 2026-I" },
+      { quadrant: "D", text: "~52% de asistencia real; el Manual descarta la híbrida y desalinea el aforo virtual" },
+      { quadrant: "O", text: "Modalidad virtual ya reglamentada — lista para escalar sin más salas" },
+      { quadrant: "A", text: "MicroEventos lúdicos sujetos a aval de Bienestar Universitario" },
+    ],
     projects: ["Microtalleres UIFCE", "Cierre de Términos y Condiciones de Estrategias Tecnológicas"],
     status: "partial",
-    techStrategy:
-      "El Manual y los próximos T&C ya formalizan roles, penalizaciones y grabación obligatoria. El paso tecnológico " +
-      "que falta es un único formulario de preinscripción que capture la modalidad elegida y calcule un solo número " +
-      "de aforo virtual — no dos documentos que pueden desalinearse.",
+    action: ["Un solo formulario de preinscripción que fije modalidad y aforo — no dos manuales que se contradicen"],
   },
   {
     id: "redes",
     title: "Redes sociales y contenido digital",
-    quadrants: ["F", "D", "A"],
-    dofaSummary:
-      "F: salto medible en 2026-I (11 hacks con 23.029 vistas, LinkedIn reactivado con 1.491 impresiones). " +
-      "D: canales institucionales que aún dependen de gestiones o cuentas personales (LinkedIn, el histórico de " +
-      "YouTube). A: sin presupuesto de pauta, el alcance depende por completo de la calidad y frecuencia del contenido.",
+    findings: [
+      { quadrant: "F", text: "23.029 vistas en Instagram + LinkedIn reactivado (2026-I)" },
+      { quadrant: "D", text: "Canales aún atados a cuentas o gestiones personales (LinkedIn, histórico de YouTube)" },
+      { quadrant: "A", text: "Sin presupuesto de pauta: el alcance depende solo del contenido" },
+    ],
     projects: [
       "Recuperación o recreación de la cuenta de Instagram @uifce_un",
       "Posicionamiento prioritario de LinkedIn UIFCE",
@@ -74,49 +78,40 @@ export const STRATEGIC_THEMES: StrategicTheme[] = [
       "Repositorio de Hacks Informáticos",
     ],
     status: "covered",
-    techStrategy:
-      "La oficialización institucional ante la Oficina de Medios Digitales UNAL es la vacuna tecnológica contra el " +
-      "riesgo de gobernanza — ya aplicada a Instagram y LinkedIn; falta extenderla a TikTok. El formato corto " +
-      "(hacks/reels) sustituye la pauta paga que el área no tiene.",
+    action: ["Oficializar cada cuenta ante Medios Digitales UNAL; el formato corto sustituye la pauta que falta"],
   },
   {
     id: "extension-solidaria",
     title: "Extensión Solidaria",
-    quadrants: ["D", "O", "A"],
-    dofaSummary:
-      "D/A: 271 de 275 colegios contactados sin respuesta (98,5%) y sin aval de Vicedecanatura en 2026-I. " +
-      "O: existen convocatorias de extensión y proyectos estudiantiles que no dependen de ese aval.",
+    findings: [
+      { quadrant: "D", text: "271/275 colegios sin respuesta (98,5%), sin aval de Vicedecanatura" },
+      { quadrant: "O", text: "Convocatorias de extensión y proyectos estudiantiles no dependen de ese aval" },
+      { quadrant: "A", text: "Depende de avales externos que no llegan" },
+    ],
     projects: ["Extensión Solidaria"],
     status: "covered",
-    techStrategy:
-      "El proyecto ya existe y tiene una ruta de financiamiento alterna. El rol de la tecnología aquí es la " +
-      "evidencia: el propio tablero de ET en Marcha puede convertir ese 98,5% de no-respuesta en el argumento " +
-      "cuantitativo que le falta al área para escalar la gestión ante Decanatura.",
+    action: ["Usar el 98,5% de no-respuesta como evidencia cuantitativa ante Decanatura"],
   },
   {
     id: "liderazgo-alianzas",
     title: "Liderazgo y alianzas empresariales",
-    quadrants: ["F", "O", "A"],
-    dofaSummary:
-      "F: el Director tiene un perfil y una red empresarial afines al área. O: esa red hoy se usa sobre todo para " +
-      "la Hackatón, no para más. A: las alianzas externas sin trayectoria pueden fallar — antecedente: la Fundación " +
-      "VGB, suspendida en 2025.",
+    findings: [
+      { quadrant: "F", text: "Director con perfil y red empresarial afines al área" },
+      { quadrant: "O", text: "Esa red hoy solo se usa para la Hackatón" },
+      { quadrant: "A", text: "Alianzas externas sin trayectoria pueden fallar (antecedente: Fundación VGB, 2025)" },
+    ],
     projects: ["Red de Aliados Académicos UIFCE"],
     status: "partial",
-    techStrategy:
-      "El proyecto que capitaliza esta fortaleza sigue en Backlog. Priorizarlo es la forma de convertir una relación " +
-      "personal del Director en un activo institucional del área, con criterios explícitos de verificación que " +
-      "eviten repetir el caso de la Fundación VGB.",
+    action: ["Priorizar la Red de Aliados Académicos (hoy en Backlog) con criterios de verificación explícitos"],
   },
   {
     id: "memoria-continuidad",
     title: "Memoria institucional y continuidad del equipo",
-    quadrants: ["F", "D", "A"],
-    dofaSummary:
-      "F: los informes semestrales sistemáticos ya dejan trazabilidad. D: el Drive de la Unidad sigue desorganizado " +
-      "y la operación depende de estudiantes auxiliares sin planta fija. A: la rotación estructural (Junior, Ad " +
-      "honorem, Máster) y factores imprevisibles — el paro académico de 2026-I — pueden borrar en un semestre buena " +
-      "parte del avance logrado.",
+    findings: [
+      { quadrant: "F", text: "Informes semestrales sistemáticos ya dejan trazabilidad" },
+      { quadrant: "D", text: "Drive desorganizado; operación depende de auxiliares sin planta fija" },
+      { quadrant: "A", text: "Rotación estructural + riesgos externos (paro académico 2026-I) borran avance" },
+    ],
     projects: [
       "Repositorio documental permanente de Estrategias Tecnológicas",
       "Propuesta de reorganización del Drive UIFCE ante Gestión del Conocimiento (GC)",
@@ -124,79 +119,64 @@ export const STRATEGIC_THEMES: StrategicTheme[] = [
       "Memoria institucional audiovisual del equipo y del semestre 2026-2S",
     ],
     status: "partial",
-    techStrategy:
-      "Documentar el qué ya está en marcha; falta documentar el cómo. Un checklist de empalme por rol dentro de la " +
-      "misma app, apoyado en las grabaciones que el Manual ya exige, permite que un monitor nuevo se autoforme sin " +
-      "depender de que quien se va alcance a explicarle todo antes de irse.",
+    action: ["Checklist de empalme por rol + video-tutoriales cortos (ya se graban por obligación)"],
   },
   {
     id: "comunicaciones",
     title: "Alianza con Comunicaciones e Imagen Institucional",
-    quadrants: ["F", "O"],
-    dofaSummary:
-      "F: la difusión de MicroTalleres ya se apoya en el correo masivo de Comunicaciones de la Facultad. " +
-      "O: la alianza se amplió en 2026-I a micrositio, Blog UIFCE y carteleras.",
+    findings: [
+      { quadrant: "F", text: "Difusión de MicroTalleres ya usa el correo masivo de Comunicaciones" },
+      { quadrant: "O", text: "Alianza ampliada en 2026-I: micrositio, Blog UIFCE y carteleras" },
+    ],
     projects: ["Carteleras UIFCE (física y digital)", "Micrositio UIFCE", "Blog UIFCE"],
     status: "covered",
-    techStrategy:
-      "Validar cada pieza con Comunicaciones antes de publicarla — como ya ocurrió con el ajuste de color pedido en " +
-      "2026-I — es un paso de revisión, no una herramienta nueva, y evita retrocesos más costosos después de publicado.",
+    action: ["Validar cada pieza con Comunicaciones antes de publicar, no después"],
   },
   {
     id: "identidad-licencias",
     title: "Identidad visual y licencias de software",
-    quadrants: ["D"],
-    dofaSummary:
-      "D: el Brandbook no se actualiza desde 2021. El área tampoco tiene licencias oficiales de diseño (Adobe/Canva " +
-      "son personales) y el equipo UIFCE-08 es insuficiente, sin confirmación de que se haya resuelto en 2026-I.",
+    findings: [
+      { quadrant: "D", text: "Brandbook sin actualizar desde 2021" },
+      { quadrant: "D", text: "Sin licencias oficiales de diseño (Adobe/Canva personales); equipo UIFCE-08 insuficiente" },
+    ],
     projects: [],
     status: "gap",
-    techStrategy: "Ningún proyecto vigente del portafolio lo cubre — ver las dos iniciativas propuestas más abajo.",
+    action: ["Ningún proyecto vigente lo cubre — ver las iniciativas nuevas"],
   },
   {
     id: "hackaton-semana",
     title: "Semana UIFCE y Hackatón Bizagi",
-    quadrants: ["D", "O"],
-    dofaSummary:
-      "D: la Hackatón se canceló en 2025-II por baja inscripción. O: la Semana UIFCE (heredera de la Semana de " +
-      "Investigación FCE) es la plataforma para relanzarla en 2026-2 junto con un microtaller y una conferencia.",
+    findings: [
+      { quadrant: "D", text: "Hackatón cancelada en 2025-II por baja inscripción" },
+      { quadrant: "O", text: "Semana UIFCE es la plataforma para relanzarla en 2026-2" },
+    ],
     projects: [
       "Semana UIFCE — primera edición",
       "Hackatón Bizagi UIFCE: Optimización y Simulación de Procesos Empresariales",
     ],
     status: "covered",
-    techStrategy:
-      "El proyecto ya existe y está en curso — pero la razón de fondo de la cancelación de 2025-II (baja inscripción) " +
-      "sigue sin una respuesta explícita para 2026-2, justo cuando además colapsaron los canales masivos del área. " +
-      "Es el tema pendiente de la conversación específica sobre cómo reestructurar la convocatoria de la Hackatón.",
+    action: ["La causa de fondo de 2025-II (baja inscripción) sigue sin respuesta explícita — tema pendiente"],
   },
   {
     id: "espacios",
     title: "Espacios físicos",
-    quadrants: ["D", "A"],
-    dofaSummary:
-      "D: de las salas del Ed. 310, solo la Sala 6 (Ed. 238, 16 equipos) aparecía disponible, sin dato más reciente " +
-      "que confirme un cambio. A: el área compite en desventaja por salones frente a Escuelas con más peso institucional.",
+    findings: [
+      { quadrant: "D", text: "Solo la Sala 6 disponible (16 equipos), sin dato más reciente" },
+      { quadrant: "A", text: "El área compite en desventaja por salones frente a Escuelas" },
+    ],
     projects: [],
     status: "partial",
-    techStrategy:
-      "No se propone un proyecto de infraestructura nueva — la estrategia tecnológica es reducir la dependencia del " +
-      "espacio físico: la modalidad virtual ya reglamentada (MicroTalleres) absorbe la demanda que la Sala 6 no " +
-      "alcanza a cubrir, y el tracker de Herramientas y licencias de Sala 1 ya deja registrado qué PC puede además " +
-      "usarse para proyectar, sin pedir un salón nuevo.",
+    action: ["Absorber la demanda con la modalidad virtual (tema MicroTalleres) + el tracker de Sala 1 ya construido"],
   },
   {
     id: "tecnologia-aplicada",
     title: "Tecnología aplicada (demanda empresarial)",
-    quadrants: ["O"],
-    dofaSummary:
-      "O: demanda no satisfecha en SAP, Odoo, Quickbooks, Salesforce, Power BI/Tableau, Power Automate, Blockchain e IA.",
+    findings: [
+      { quadrant: "O", text: "Demanda no satisfecha: SAP, Odoo, Salesforce, Power BI, Power Automate, Blockchain, IA" },
+    ],
     projects: ["Repositorio de material con IA y automatización de producción de video"],
     status: "partial",
-    techStrategy:
-      "La Hackatón Bizagi es, en sí misma, la primera respuesta directa a esta oportunidad: Bizagi es una herramienta " +
-      "de BPM, exactamente el tipo de software empresarial que el diagnóstico señala como brecha. El catálogo de " +
-      "próximos MicroTalleres es el vehículo natural para cubrir el resto de la lista.",
+    action: ["La Hackatón Bizagi ya responde (Bizagi = BPM); el resto alimenta el catálogo de próximos MicroTalleres"],
   },
 ];
 
@@ -204,51 +184,41 @@ export type ProposedInitiative = {
   id: string;
   title: string;
   fromThemeId: string;
-  description: string;
-  techAngle: string;
+  /** Qué hacer, en 1 bullet. */
+  what: string;
+  /** Por qué es una palanca tecnológica, en 1 bullet. */
+  why: string;
 };
 
 /** Iniciativas nuevas: solo para los temas que el portafolio actual no cubre
- *  (status "gap" arriba). No se inventan proyectos donde ya hay uno vigente. */
+ *  (status "gap"/"partial" arriba). No se inventan proyectos donde ya hay uno vigente. */
 export const PROPOSED_INITIATIVES: ProposedInitiative[] = [
   {
     id: "modalidad-hibrida",
     title: "Piloto de modalidad híbrida para MicroTalleres",
     fromThemeId: "microtalleres",
-    description:
-      "Definir y probar en un MicroTaller la transmisión simultánea presencial + virtual, resolviendo en el mismo " +
-      "paso la inconsistencia de aforo entre las dos versiones del Manual.",
-    techAngle:
-      "Un único formulario de preinscripción, dentro de ET en Marcha, que registre la modalidad elegida y aplique " +
-      "un solo número de aforo virtual — no dos documentos que pueden contradecirse.",
+    what: "Probar transmisión simultánea presencial + virtual en un MicroTaller",
+    why: "Un formulario único fija modalidad y aforo — resuelve la inconsistencia del Manual",
   },
   {
     id: "empalme-continuidad",
     title: "Programa de empalme y continuidad de talento",
     fromThemeId: "memoria-continuidad",
-    description:
-      "Convertir el Manual de Funciones en un checklist de empalme operativo por rol, más una biblioteca corta de " +
-      "video-tutoriales grabados con el mismo equipo que ya graba los MicroTalleres.",
-    techAngle:
-      "Un monitor nuevo se autoforma con lo que el área ya produce por obligación (grabaciones), en vez de depender " +
-      "de una transición verbal con quien se va.",
+    what: "Checklist de empalme por rol + biblioteca corta de video-tutoriales",
+    why: "Un monitor nuevo se autoforma sin depender de una transición verbal con quien se va",
   },
   {
     id: "brandbook-2026",
     title: "Actualización del Brandbook UIFCE 2026",
     fromThemeId: "identidad-licencias",
-    description:
-      "Reemplazar el brandbook de 2021 usando la página «Línea gráfica» de ET en Marcha como el documento vivo — " +
-      "colores, tipografías y plantillas versionados en el mismo lugar donde ya se consultan.",
-    techAngle: "Una guía de marca que vive en la app no vuelve a desactualizarse en silencio: cambia con un commit, no con un PDF que nadie reemplaza.",
+    what: "Reemplazar el brandbook de 2021 con la página «Línea gráfica» como documento vivo",
+    why: "Una guía que vive en la app no se desactualiza en silencio: cambia con un commit, no con un PDF olvidado",
   },
   {
     id: "gestion-licencias",
     title: "Gestión institucional de licencias de software",
     fromThemeId: "identidad-licencias",
-    description:
-      "Usar el tracker de software por PC de Herramientas y licencias (Sala 1) como reporte de brecha — qué equipo " +
-      "tiene qué — para sustentar ante la Unidad la compra de licencias oficiales de diseño.",
-    techAngle: "La evidencia para pedir presupuesto ya existe en la app; falta solo convertir el inventario visual en un reporte de faltantes.",
+    what: "Convertir el tracker de software de Sala 1 (Herramientas y licencias) en un reporte de brecha",
+    why: "La evidencia para pedir presupuesto ya existe en la app — falta solo presentarla como faltante",
   },
 ];
