@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { Prisma } from "@prisma/client";
-import type { SocialChannelStatus, SocialOfficialStatus, SocialPlatform } from "@prisma/client";
+import type { DifusionSpaceStatus, SocialChannelStatus, SocialOfficialStatus, SocialPlatform } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
 import { blockedForJunior } from "@/lib/session";
@@ -153,7 +153,7 @@ export async function applyUndo(action: UndoAction) {
           responsibleId: b.responsibleId,
         },
       });
-      revalidatePath("/redes");
+      revalidatePath("/difusion/digital");
       break;
     }
     case "social.delete": {
@@ -177,7 +177,7 @@ export async function applyUndo(action: UndoAction) {
           order: d.order,
         },
       });
-      revalidatePath("/redes");
+      revalidatePath("/difusion/digital");
       break;
     }
     case "socialinteraction.update": {
@@ -194,7 +194,7 @@ export async function applyUndo(action: UndoAction) {
           url: b.url,
         },
       });
-      revalidatePath("/redes");
+      revalidatePath("/difusion/digital");
       break;
     }
     case "socialinteraction.delete": {
@@ -212,7 +212,7 @@ export async function applyUndo(action: UndoAction) {
           url: d.url,
         },
       });
-      revalidatePath("/redes");
+      revalidatePath("/difusion/digital");
       break;
     }
     case "socialmetric.update": {
@@ -220,7 +220,7 @@ export async function applyUndo(action: UndoAction) {
       const data: Prisma.SocialMetricUncheckedUpdateInput = { at: new Date(b.at), note: b.note };
       for (const [k, v] of Object.entries(b.values)) (data as Record<string, unknown>)[k] = v;
       await prisma.socialMetric.update({ where: { id: action.id }, data });
-      revalidatePath("/redes");
+      revalidatePath("/difusion/digital");
       break;
     }
     case "socialmetric.delete": {
@@ -236,7 +236,7 @@ export async function applyUndo(action: UndoAction) {
       };
       for (const [k, v] of Object.entries(d.values)) (data as Record<string, unknown>)[k] = v;
       await prisma.socialMetric.create({ data });
-      revalidatePath("/redes");
+      revalidatePath("/difusion/digital");
       break;
     }
     case "linkedinsnapshot.update": {
@@ -270,6 +270,36 @@ export async function applyUndo(action: UndoAction) {
     case "template.delete": {
       await prisma.template.create({ data: action.data });
       revalidatePath("/plantillas");
+      break;
+    }
+    case "difusionspace.update": {
+      await prisma.difusionSpace.update({ where: { id: action.id }, data: action.before });
+      revalidatePath("/difusion/fisica");
+      break;
+    }
+    case "difusionspace.delete": {
+      const d = action.data;
+      await prisma.difusionSpace.create({
+        data: {
+          id: d.id,
+          title: d.title,
+          status: d.status as DifusionSpaceStatus,
+          description: d.description,
+          order: d.order,
+          images: {
+            create: d.images.map((img) => ({ id: img.id, dataUrl: img.dataUrl, order: img.order })),
+          },
+        },
+      });
+      revalidatePath("/difusion/fisica");
+      break;
+    }
+    case "difusionspaceimage.delete": {
+      const d = action.data;
+      await prisma.difusionSpaceImage.create({
+        data: { id: d.id, spaceId: d.spaceId, dataUrl: d.dataUrl, order: d.order },
+      });
+      revalidatePath("/difusion/fisica");
       break;
     }
     case "studycomment.delete": {

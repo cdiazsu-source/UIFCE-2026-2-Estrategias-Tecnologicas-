@@ -95,6 +95,13 @@ export const PROJECT_STATUS_LABEL: Record<string, string> = {
   COMPLETADO: "Completado",
 };
 
+/** Estado de la intervención de un espacio de Difusión física. */
+export const DIFUSION_SPACE_STATUS_LABEL: Record<string, string> = {
+  POR_INTERVENIR: "Por intervenir",
+  EN_INTERVENCION: "En intervención",
+  INTERVENIDO: "Intervenido",
+};
+
 /** Etiquetas de urgencia del proyecto: fase temporal, independiente del estado.
  *  Se guarda el código (`priorityTag`); el emoji y el color mate van en el
  *  render (ver components/priority-tag.tsx). Doble codificación: emoji + color. */

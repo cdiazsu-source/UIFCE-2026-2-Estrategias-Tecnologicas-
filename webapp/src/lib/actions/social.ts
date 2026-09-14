@@ -38,7 +38,7 @@ export async function addSocialChannel(formData: FormData) {
   await prisma.socialChannel.create({
     data: { platform: platform as SocialPlatform, order: (top?.order ?? -1) + 1 },
   });
-  revalidatePath("/redes");
+  revalidatePath("/difusion/digital");
 }
 
 export async function updateSocialChannel(id: string, formData: FormData): Promise<UndoAction | void> {
@@ -76,7 +76,7 @@ export async function updateSocialChannel(id: string, formData: FormData): Promi
     },
   });
 
-  revalidatePath("/redes");
+  revalidatePath("/difusion/digital");
   revalidatePath("/");
 
   return {
@@ -104,7 +104,7 @@ export async function deleteSocialChannel(id: string): Promise<UndoAction | void
   if (!prev) return;
 
   await prisma.socialChannel.delete({ where: { id } });
-  revalidatePath("/redes");
+  revalidatePath("/difusion/digital");
 
   return {
     kind: "social.delete",
@@ -156,7 +156,7 @@ export async function addSocialInteraction(channelId: string, formData: FormData
       url: str(formData, "url"),
     },
   });
-  revalidatePath("/redes");
+  revalidatePath("/difusion/digital");
 }
 
 export async function updateSocialInteraction(id: string, formData: FormData): Promise<UndoAction | void> {
@@ -178,7 +178,7 @@ export async function updateSocialInteraction(id: string, formData: FormData): P
       url: str(formData, "url"),
     },
   });
-  revalidatePath("/redes");
+  revalidatePath("/difusion/digital");
 
   return {
     kind: "socialinteraction.update",
@@ -201,7 +201,7 @@ export async function deleteSocialInteraction(id: string): Promise<UndoAction | 
   if (!prev) return;
 
   await prisma.socialInteraction.delete({ where: { id } });
-  revalidatePath("/redes");
+  revalidatePath("/difusion/digital");
 
   return {
     kind: "socialinteraction.delete",

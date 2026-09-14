@@ -548,7 +548,7 @@ function TrackeeCard({
 }
 
 /** Tarjeta de la página institucional de LinkedIn: resumen de solo lectura de
- *  la última medición registrada en Redes sociales. Ocupa el ancho de dos
+ *  la última medición registrada en Difusión digital. Ocupa el ancho de dos
  *  tarjetas y va primera. */
 function OrgCard({ org }: { org: NonNullable<OrgSummary> }) {
   return (
@@ -579,10 +579,10 @@ function OrgCard({ org }: { org: NonNullable<OrgSummary> }) {
           </div>
         </div>
         <Link
-          href="/redes"
+          href="/difusion/digital"
           className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-input px-2.5 py-1.5 text-xs font-medium text-primary hover:bg-accent"
         >
-          Editar en Redes sociales
+          Editar en Difusión digital
           <ArrowRight className="h-3.5 w-3.5" />
         </Link>
       </CardHeader>
@@ -604,7 +604,7 @@ function OrgCard({ org }: { org: NonNullable<OrgSummary> }) {
             ))}
           {org.followers == null && org.metrics.every((m) => m.value == null) && (
             <span className="text-sm text-muted-foreground">
-              Aún no hay métricas de la página. Se registran en la tarjeta de LinkedIn de Redes sociales.
+              Aún no hay métricas de la página. Se registran en la tarjeta de LinkedIn de Difusión digital.
             </span>
           )}
         </div>

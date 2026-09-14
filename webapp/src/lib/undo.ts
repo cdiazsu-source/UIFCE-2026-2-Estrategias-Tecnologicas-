@@ -205,6 +205,26 @@ export type UndoAction =
       };
     }
   | {
+      kind: "difusionspace.update";
+      id: string;
+      before: { title: string; description: string | null };
+    }
+  | {
+      kind: "difusionspace.delete";
+      data: {
+        id: string;
+        title: string;
+        status: string;
+        description: string | null;
+        order: number;
+        images: { id: string; dataUrl: string; order: number }[];
+      };
+    }
+  | {
+      kind: "difusionspaceimage.delete";
+      data: { id: string; spaceId: string; dataUrl: string; order: number };
+    }
+  | {
       kind: "studycomment.delete";
       data: {
         id: string;
@@ -257,6 +277,9 @@ export function undoLabel(kind: UndoAction["kind"]): string {
     "linkedinsnapshot.delete": "Medición de LinkedIn eliminada",
     "template.update": "Plantilla editada",
     "template.delete": "Plantilla eliminada",
+    "difusionspace.update": "Espacio editado",
+    "difusionspace.delete": "Espacio eliminado",
+    "difusionspaceimage.delete": "Imagen eliminada",
     "studycomment.delete": "Actualización de PE eliminada",
     "teamcomment.delete": "Comentario eliminado",
     "teamcomment.reviewed": "Comentario actualizado",

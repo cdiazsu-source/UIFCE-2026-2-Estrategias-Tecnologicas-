@@ -69,6 +69,13 @@ enum SocialOfficialStatus {
   SIN_OFICIALIZAR
 }
 
+/// Estado de la intervención de un espacio físico en el módulo "Difusión física".
+enum DifusionSpaceStatus {
+  POR_INTERVENIR
+  EN_INTERVENCION
+  INTERVENIDO
+}
+
 /// Ficha institucional del área (singleton, id fijo "area"): descripción
 /// corporativa y objetivos generales/permanentes. Los objetivos por semestre
 /// viven en Semester.objectives.
@@ -660,4 +667,35 @@ model BrandGuideline {
   updatedAt DateTime @updatedAt
 
   @@index([section])
+}
+
+/// Un espacio físico a intervenir con piezas de difusión (fachada, stand,
+/// oficinas, pasillos…), del módulo "Difusión física" dentro de "Difusión y
+/// visibilidad" (/difusion/fisica). Se crea dinámicamente desde la UI: no hay
+/// un catálogo fijo de espacios, cada uno con su propia galería de imágenes.
+model DifusionSpace {
+  id          String              @id @default(cuid())
+  title       String
+  status      DifusionSpaceStatus @default(POR_INTERVENIR)
+  description String?             @db.Text
+  order       Int                 @default(0)
+  images      DifusionSpaceImage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/// Una imagen de la galería de un DifusionSpace. `dataUrl` sigue el mismo
+/// patrón que Template.screenshot: normalmente una data URL ya reducida
+/// (~640px) que pega, arrastra o elige quien edita.
+model DifusionSpaceImage {
+  id      String        @id @default(cuid())
+  spaceId String
+  space   DifusionSpace @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  dataUrl String        @db.Text
+  order   Int           @default(0)
+
+  createdAt DateTime @default(now())
+
+  @@index([spaceId])
 }

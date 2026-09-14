@@ -96,7 +96,7 @@ export async function addSocialMetric(channelId: string, formData: FormData) {
 
   await prisma.socialMetric.create({ data });
 
-  revalidatePath("/redes");
+  revalidatePath("/difusion/digital");
 }
 
 /** Editar una medición. Perfil completo y junior. */
@@ -117,7 +117,7 @@ export async function updateSocialMetric(id: string, formData: FormData): Promis
 
   await prisma.socialMetric.update({ where: { id }, data });
 
-  revalidatePath("/redes");
+  revalidatePath("/difusion/digital");
 
   return {
     kind: "socialmetric.update",
@@ -134,7 +134,7 @@ export async function deleteSocialMetric(id: string): Promise<UndoAction | void>
   if (!prev) return;
 
   await prisma.socialMetric.delete({ where: { id } });
-  revalidatePath("/redes");
+  revalidatePath("/difusion/digital");
 
   return {
     kind: "socialmetric.delete",
