@@ -5,6 +5,7 @@ import { Pencil, Plus, Tag, Trash2, X } from "lucide-react";
 import type { Project } from "@prisma/client";
 
 import { deleteManualProject, updateProjectContent, updateProjectTags } from "@/lib/actions/projects";
+import { ALL_PROJECT_CATEGORIES } from "@/lib/category-groups";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -128,12 +129,18 @@ export function ProjectControls({ project }: { project: Project }) {
           }}
           className="flex w-full flex-col gap-2 rounded-md border border-dashed border-input bg-card p-4"
         >
+          <datalist id="project-categories">
+            {ALL_PROJECT_CATEGORIES.map((c) => (
+              <option key={c} value={c} />
+            ))}
+          </datalist>
           <div className="flex flex-wrap gap-2">
             <Input name="title" defaultValue={project.title} placeholder="Título" className="min-w-[16rem] flex-1" />
             <Input
               name="category"
               defaultValue={project.category}
               placeholder="Categoría"
+              list="project-categories"
               className="min-w-[14rem] flex-1"
             />
           </div>

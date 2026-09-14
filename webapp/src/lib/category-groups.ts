@@ -109,6 +109,14 @@ export const CATEGORY_GROUPS: CategoryGroupDef[] = [
   },
 ];
 
+/** Categorías principales conocidas, para el datalist de sugerencias al crear
+ *  o editar un proyecto (ver new-project-button.tsx y project-controls.tsx).
+ *  El campo sigue siendo texto libre — esto solo evita que cada quien
+ *  reescriba a mano una categoría que ya existe. */
+export const ALL_PROJECT_CATEGORIES: string[] = CATEGORY_GROUPS.flatMap((g) =>
+  g.subgroups.flatMap((sg) => sg.categories),
+);
+
 export function macroForCategory(category: string): string {
   for (const g of CATEGORY_GROUPS) {
     if (g.subgroups.some((sg) => sg.categories.includes(category))) return g.label;

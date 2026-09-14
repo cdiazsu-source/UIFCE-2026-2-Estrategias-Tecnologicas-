@@ -90,14 +90,14 @@ function ContactRow({ contact, projectOptions }: { contact: ContactWithProject; 
       <TableCell>
         {canEdit && (
           <div className="flex justify-end gap-1">
-            <button type="button" onClick={() => setEditing(true)} className="rounded p-1 text-muted-foreground hover:bg-accent" aria-label="Editar contacto">
+            <button type="button" onClick={() => setEditing(true)} className="rounded p-1 text-muted-foreground hover:bg-accent" aria-label="Editar aliado">
               <Pencil className="h-3.5 w-3.5" />
             </button>
             <button
               type="button"
               onClick={() => startTransition(() => deleteContact(contact.id))}
               className="rounded p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-              aria-label="Eliminar contacto"
+              aria-label="Eliminar aliado"
             >
               <Trash2 className="h-3.5 w-3.5" />
             </button>
@@ -124,7 +124,7 @@ export function ContactsTable({
         <div className="flex justify-end">
           <Button size="sm" variant="outline" onClick={() => setShowForm((s) => !s)}>
             <Plus className="h-3.5 w-3.5" />
-            Agregar contacto
+            Agregar aliado
           </Button>
         </div>
       )}
@@ -163,7 +163,7 @@ export function ContactsTable({
           <TableRow>
             <TableHead>Nombre</TableHead>
             <TableHead>Rol / institución</TableHead>
-            <TableHead>Contacto</TableHead>
+            <TableHead>Aliado</TableHead>
             <TableHead>Proyecto vinculado</TableHead>
             <TableHead>Notas</TableHead>
             <TableHead />

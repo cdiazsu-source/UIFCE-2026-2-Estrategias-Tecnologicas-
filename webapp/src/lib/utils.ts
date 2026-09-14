@@ -62,7 +62,7 @@ export function toBogotaInputValue(date: Date | string | null): string {
   return `${get("year")}-${get("month")}-${get("day")}T${get("hour")}:${get("minute")}`;
 }
 
-/** "Martes 15 de septiembre", en hora de Colombia. Para agrupar /horario por día. */
+/** "Martes 15 de septiembre", en hora de Colombia. Para agrupar /calendario por día. */
 export function formatDayHeader(date: Date | string) {
   const d = typeof date === "string" ? new Date(date) : date;
   const s = new Intl.DateTimeFormat("es-CO", {

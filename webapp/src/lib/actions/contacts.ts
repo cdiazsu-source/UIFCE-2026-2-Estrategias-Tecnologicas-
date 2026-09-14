@@ -29,7 +29,7 @@ export async function addContact(formData: FormData) {
     },
   });
 
-  revalidatePath("/contactos");
+  revalidatePath("/aliados");
 }
 
 export async function updateContact(id: string, formData: FormData) {
@@ -55,11 +55,11 @@ export async function updateContact(id: string, formData: FormData) {
     },
   });
 
-  revalidatePath("/contactos");
+  revalidatePath("/aliados");
 }
 
 export async function deleteContact(id: string) {
   if (await blockedForJunior()) return;
   await prisma.contact.delete({ where: { id } });
-  revalidatePath("/contactos");
+  revalidatePath("/aliados");
 }

@@ -19,7 +19,7 @@ function isGroup(entry: NavEntry): entry is NavGroup {
 
 const LINKS: NavEntry[] = [
   { href: "/", label: "Panel principal" },
-  { href: "/horario", label: "Horario" },
+  { href: "/calendario", label: "Calendario" },
   {
     label: "Difusión y visibilidad",
     children: [
@@ -30,7 +30,7 @@ const LINKS: NavEntry[] = [
   { href: "/plantillas", label: "Plantillas" },
   { href: "/linea-grafica", label: "Línea gráfica" },
   { href: "/herramientas", label: "Herramientas y licencias" },
-  { href: "/contactos", label: "Contactos" },
+  { href: "/aliados", label: "Aliados" },
   { href: "/equipo", label: "Equipo" },
 ];
 

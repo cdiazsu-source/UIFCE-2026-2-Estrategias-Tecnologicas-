@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Plus } from "lucide-react";
 
 import { createProject } from "@/lib/actions/projects";
+import { ALL_PROJECT_CATEGORIES } from "@/lib/category-groups";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
@@ -36,9 +37,20 @@ export function NewProjectButton({ semesterId, semesterLabel }: { semesterId?: s
           Se crea en el semestre <span className="font-medium text-foreground">{semesterLabel}</span>.
         </p>
       )}
+      <datalist id="project-categories">
+        {ALL_PROJECT_CATEGORIES.map((c) => (
+          <option key={c} value={c} />
+        ))}
+      </datalist>
       <div className="flex flex-wrap gap-2">
         <Input name="title" placeholder="Título del proyecto" required className="min-w-[16rem] flex-1" />
-        <Input name="category" placeholder="Categoría (ej. Producción de contenido)" required className="min-w-[14rem] flex-1" />
+        <Input
+          name="category"
+          placeholder="Categoría (ej. Producción de contenido)"
+          list="project-categories"
+          required
+          className="min-w-[14rem] flex-1"
+        />
         <Select name="priorityTag" defaultValue="" className="w-52">
           <option value="">Sin etiqueta de urgencia</option>
           <option value="ATENCION_INMEDIATA">❗ Atención Inmediata</option>

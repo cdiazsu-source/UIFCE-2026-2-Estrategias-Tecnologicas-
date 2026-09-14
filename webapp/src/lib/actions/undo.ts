@@ -112,7 +112,7 @@ export async function applyUndo(action: UndoAction) {
     case "project.title": {
       await prisma.project.update({ where: { id: action.id }, data: action.before });
       revalidatePath(`/proyectos/${action.id}`);
-      revalidatePath("/horario");
+      revalidatePath("/calendario");
       break;
     }
     case "project.schedule": {
@@ -126,7 +126,7 @@ export async function applyUndo(action: UndoAction) {
         },
       });
       revalidatePath(`/proyectos/${action.id}`);
-      revalidatePath("/horario");
+      revalidatePath("/calendario");
       break;
     }
     case "project.mainProject": {
@@ -300,6 +300,36 @@ export async function applyUndo(action: UndoAction) {
         data: { id: d.id, spaceId: d.spaceId, dataUrl: d.dataUrl, order: d.order },
       });
       revalidatePath("/difusion/fisica");
+      break;
+    }
+    case "calendarevent.update": {
+      const b = action.before;
+      await prisma.calendarEvent.update({
+        where: { id: action.id },
+        data: {
+          title: b.title,
+          description: b.description,
+          startAt: new Date(b.startAt),
+          endAt: b.endAt ? new Date(b.endAt) : null,
+          location: b.location,
+        },
+      });
+      revalidatePath("/calendario");
+      break;
+    }
+    case "calendarevent.delete": {
+      const d = action.data;
+      await prisma.calendarEvent.create({
+        data: {
+          id: d.id,
+          title: d.title,
+          description: d.description,
+          startAt: new Date(d.startAt),
+          endAt: d.endAt ? new Date(d.endAt) : null,
+          location: d.location,
+        },
+      });
+      revalidatePath("/calendario");
       break;
     }
     case "studycomment.delete": {

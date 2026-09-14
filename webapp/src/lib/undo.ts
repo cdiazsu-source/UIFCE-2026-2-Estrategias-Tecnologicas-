@@ -225,6 +225,28 @@ export type UndoAction =
       data: { id: string; spaceId: string; dataUrl: string; order: number };
     }
   | {
+      kind: "calendarevent.update";
+      id: string;
+      before: {
+        title: string;
+        description: string | null;
+        startAt: string;
+        endAt: string | null;
+        location: string | null;
+      };
+    }
+  | {
+      kind: "calendarevent.delete";
+      data: {
+        id: string;
+        title: string;
+        description: string | null;
+        startAt: string;
+        endAt: string | null;
+        location: string | null;
+      };
+    }
+  | {
       kind: "studycomment.delete";
       data: {
         id: string;
@@ -280,6 +302,8 @@ export function undoLabel(kind: UndoAction["kind"]): string {
     "difusionspace.update": "Espacio editado",
     "difusionspace.delete": "Espacio eliminado",
     "difusionspaceimage.delete": "Imagen eliminada",
+    "calendarevent.update": "Evento editado",
+    "calendarevent.delete": "Evento eliminado",
     "studycomment.delete": "Actualización de PE eliminada",
     "teamcomment.delete": "Comentario eliminado",
     "teamcomment.reviewed": "Comentario actualizado",

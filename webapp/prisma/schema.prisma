@@ -139,7 +139,7 @@ model Project {
   assigneeId      String?
   assignee        User?         @relation(fields: [assigneeId], references: [id], onDelete: SetNull)
   /// Fecha/hora de inicio y fin, solo para proyectos que son (o incluyen) un
-  /// evento con horario concreto. Alimenta /horario; la mayoría de proyectos
+  /// evento con horario concreto. Alimenta /calendario; la mayoría de proyectos
   /// se quedan en null (sin horario fijo).
   startAt         DateTime?
   endAt           DateTime?
@@ -698,4 +698,23 @@ model DifusionSpaceImage {
   createdAt DateTime @default(now())
 
   @@index([spaceId])
+}
+
+/// Evento del Calendario (/calendario) sin proyecto asociado: reunión,
+/// entrega, trámite… Los eventos que sí son (o incluyen) un proyecto siguen
+/// viviendo en Project.startAt/endAt/location; este modelo es solo para lo
+/// que no pertenece al portafolio. El Calendario los combina con los
+/// proyectos con horario y las subtareas con fecha límite (ChecklistItem.dueDate).
+model CalendarEvent {
+  id          String    @id @default(cuid())
+  title       String
+  description String?   @db.Text
+  startAt     DateTime
+  endAt       DateTime?
+  location    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([startAt])
 }

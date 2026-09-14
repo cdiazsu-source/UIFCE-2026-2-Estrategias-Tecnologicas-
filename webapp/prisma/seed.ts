@@ -165,6 +165,78 @@ async function seedProjectsFromCsv() {
   console.log(`Proyectos sincronizados desde CSV: ${rows.length}`);
 }
 
+// --- ET en Marcha (la plataforma misma, como proyecto propio del portafolio) -
+// No viene del CSV: es la aplicación que el equipo usa a diario, tratada como
+// una iniciativa más del semestre, de alta prioridad. `isManual: true` para
+// que el resync del CSV nunca la toque.
+const ET_EN_MARCHA_ID = "et-en-marcha";
+
+const ET_EN_MARCHA_ITEMS: { text: string; done: boolean }[] = [
+  { text: "Diseñar la arquitectura (Next.js 14 + Prisma + Postgres/Neon) y desplegar en Vercel", done: true },
+  { text: "Migrar la planeación del semestre (CSV) a base de datos con un seed idempotente y aditivo", done: true },
+  { text: "Construir el seguimiento de proyectos: checklist, bitácora, responsables y urgencia", done: true },
+  {
+    text: "Construir los paneles de Difusión digital, Plantillas, Línea gráfica, Herramientas y licencias, Aliados y Equipo",
+    done: true,
+  },
+  { text: "Publicar el Diagnóstico DOFA interactivo y el análisis estratégico cruzado con el portafolio", done: true },
+  { text: "Habilitar acceso por perfil (completo, junior, director) con Vista Junior", done: true },
+  { text: "Construir Difusión física (catálogo de espacios) y el módulo Calendario", done: false },
+  { text: "Documentar la guía de administración y traspaso técnico para quien continúe el área", done: false },
+  { text: "Transferir propiedad y datos desarrollo para subir al servidor de la unidad", done: false },
+];
+
+async function seedEtEnMarchaProject() {
+  const semesterId = await ensureCurrentSemester();
+  const existing = await prisma.project.findUnique({ where: { id: ET_EN_MARCHA_ID }, select: { id: true } });
+
+  if (!existing) {
+    const top = await prisma.project.findFirst({ orderBy: { sourceOrder: "desc" }, select: { sourceOrder: true } });
+    const sourceOrder = Math.max((top?.sourceOrder ?? 0) + 1, 1000);
+    await prisma.project.create({
+      data: {
+        id: ET_EN_MARCHA_ID,
+        category: "Innovación y eficiencia operativa",
+        priorityTag: "ATENCION_INMEDIATA",
+        title: "ET en Marcha — plataforma de seguimiento del área",
+        description:
+          "Diseñar, construir y mantener «ET en Marcha» —la plataforma propia de seguimiento del área—: modelo de " +
+          "datos, autenticación por perfil, paneles operativos (proyectos, difusión digital y física, plantillas, " +
+          "línea gráfica, herramientas, aliados, equipo, calendario), el Diagnóstico DOFA interactivo y su análisis " +
+          "estratégico, y el traspaso técnico final a la infraestructura de la Unidad.",
+        expectedOutcome:
+          "Una aplicación en producción, con datos reales del semestre 2026-2, que el equipo usa a diario para " +
+          "seguimiento operativo — y que al cierre del semestre queda entregada (código, base de datos y " +
+          "credenciales) al servidor propio de la UIFCE, no en una cuenta personal.",
+        rationale:
+          "El área necesitaba pasar de hojas de cálculo y documentos sueltos a una herramienta única, editable por " +
+          "el equipo, que preserve memoria institucional entre semestres —uno de los objetivos generales del área— " +
+          "sin depender de que una sola persona recuerde dónde quedó cada cosa. Es, en sí misma, la aplicación " +
+          "práctica del eje «Innovación y eficiencia operativa» del semestre.",
+        isManual: true,
+        sourceOrder,
+        semesterId,
+      },
+    });
+    console.log("Proyecto ET en Marcha creado.");
+  }
+
+  const existingItems = await prisma.checklistItem.findMany({
+    where: { projectId: ET_EN_MARCHA_ID },
+    select: { text: true },
+  });
+  const have = new Set(existingItems.map((e) => e.text));
+
+  let order = existingItems.length;
+  let created = 0;
+  for (const { text, done } of ET_EN_MARCHA_ITEMS) {
+    if (have.has(text)) continue;
+    await prisma.checklistItem.create({ data: { projectId: ET_EN_MARCHA_ID, text, done, order: order++ } });
+    created++;
+  }
+  console.log(`Checklist ET en Marcha: ${created} ítems creados.`);
+}
+
 async function seedSituationStats() {
   const count = await prisma.situationStat.count();
   if (count > 0) return;
@@ -1126,6 +1198,7 @@ async function seedConsentSignatories() {
 
 async function main() {
   await seedProjectsFromCsv();
+  await seedEtEnMarchaProject();
   await seedSituationStats();
   await seedTools();
   await seedContacts();

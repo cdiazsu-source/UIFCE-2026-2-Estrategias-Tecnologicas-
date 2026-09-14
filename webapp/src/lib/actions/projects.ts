@@ -91,7 +91,7 @@ export async function createProject(formData: FormData) {
 
   revalidatePath("/");
   if (mainProjectId) revalidatePath(`/proyectos/${mainProjectId}`);
-  if (startAt) revalidatePath("/horario");
+  if (startAt) revalidatePath("/calendario");
   redirect(`/proyectos/${id}`);
 }
 
@@ -300,7 +300,7 @@ export async function renameProject(projectId: string, rawTitle: string): Promis
   await prisma.project.update({ where: { id: projectId }, data: { title, editedInApp: true } });
   revalidatePath("/");
   revalidatePath(`/proyectos/${projectId}`);
-  revalidatePath("/horario");
+  revalidatePath("/calendario");
 
   return {
     kind: "project.title",
@@ -309,7 +309,7 @@ export async function renameProject(projectId: string, rawTitle: string): Promis
   };
 }
 
-/** Fija o quita la fecha/hora/lugar de un proyecto-evento. Alimenta /horario;
+/** Fija o quita la fecha/hora/lugar de un proyecto-evento. Alimenta /calendario;
  *  vacío/null en cualquiera de los tres campos lo quita. */
 export async function updateProjectSchedule(
   projectId: string,
@@ -329,7 +329,7 @@ export async function updateProjectSchedule(
   await prisma.project.update({ where: { id: projectId }, data: { startAt, endAt, location } });
   revalidatePath("/");
   revalidatePath(`/proyectos/${projectId}`);
-  revalidatePath("/horario");
+  revalidatePath("/calendario");
 
   return {
     kind: "project.schedule",
