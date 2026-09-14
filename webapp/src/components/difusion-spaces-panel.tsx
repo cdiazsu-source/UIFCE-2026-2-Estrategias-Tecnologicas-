@@ -244,7 +244,7 @@ function SpaceCard({ space }: { space: DifusionSpaceData }) {
       </CardHeader>
       <CardContent className="flex flex-col gap-3 text-sm">
         {space.description && <p className="whitespace-pre-line text-muted-foreground">{space.description}</p>}
-        <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           {space.images.map((img) => (
             <GalleryImageTile key={img.id} image={img} />
           ))}
@@ -302,7 +302,7 @@ export function DifusionSpacesPanel({ spaces }: { spaces: DifusionSpaceData[] })
           Todavía no hay espacios registrados.
         </p>
       ) : (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {spaces.map((s) => (
             <SpaceCard key={s.id} space={s} />
           ))}

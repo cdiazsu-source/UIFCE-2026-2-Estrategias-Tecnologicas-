@@ -69,6 +69,20 @@ export const CATEGORY_GROUPS: CategoryGroupDef[] = [
           "Apoyo puntual de ET al área de Virtualización, incluida la estandarización de piezas e interacciones para los cursos virtuales.",
         categories: ["Acompañamiento a Virtualización"],
       },
+      {
+        label: "Acompañamiento a Apoyos Académicos",
+        description: "Apoyo puntual de ET al área de Apoyos Académicos (AA), según el protocolo interárea.",
+        categories: [
+          "Acompañamiento a Apoyos Académicos",
+          "Acompañamiento a Apoyos académicos",
+          "Acompañamiento a Apoyos Académicos.",
+        ],
+      },
+      {
+        label: "Acompañamiento a Desarrollo",
+        description: "Apoyo puntual de ET al área de Desarrollo (DS), según el protocolo interárea.",
+        categories: ["Acompañamiento a Desarrollo"],
+      },
     ],
   },
   {

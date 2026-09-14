@@ -5,6 +5,7 @@ import { type ProjectCardData, type CardAssignee } from "@/components/project-ca
 import { ProjectsGrid } from "@/components/projects-grid";
 import { SemesterTabs, type SemesterTab } from "@/components/semester-tabs";
 import { SemesterObjectives } from "@/components/semester-objectives";
+import { EtStrategiesCard } from "@/components/et-strategies-card";
 import { TeamRoster, type RosterMember } from "@/components/team-roster";
 import { StudyProjects, type JuniorWithStudy } from "@/components/study-projects";
 import { UpdatesFeed, type FeedItem } from "@/components/updates-feed";
@@ -397,9 +398,12 @@ export default async function HomePage({
         <div className="flex flex-col gap-4">
           <SemesterTabs semesters={tabs} selectedId={selected?.id ?? ""} />
 
-          <SemesterObjectives
-            semester={selected ? { id: selected.id, label: selected.label, objectives: selected.objectives } : null}
-          />
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <SemesterObjectives
+              semester={selected ? { id: selected.id, label: selected.label, objectives: selected.objectives } : null}
+            />
+            <EtStrategiesCard />
+          </div>
 
           <TeamRoster people={rosterMembers} />
 

@@ -43,7 +43,6 @@ export const DOFA_META = {
     "Bases de los tableros de Power BI: BBDD Dashboard Final 2025-I, Datos Power BI 2026-I",
     "Manual de MicroTalleres y MicroEventos, 2026 (versión PDF «Monitor Máster» y versión Word «Manual Microtaller»)",
     "Formatos de correos de confirmación de cupo a microtalleres o microeventos, 2026",
-    "Los .pbix no se procesaron directamente (binarios propietarios) — su información está en los .xlsx citados",
   ],
 };
 
