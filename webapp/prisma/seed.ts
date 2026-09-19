@@ -259,6 +259,207 @@ async function seedEtEnMarchaProject() {
   console.log(`Checklist ET en Marcha: ${created} ítems creados.`);
 }
 
+// --- Numerales de la planeación base (hoja "Planeación" del Excel) -----------
+// Antes del portafolio final del semestre hubo una planeación inicial en la
+// que cada iniciativa tenía un numeral fijo (columna "#" de esa hoja, ver
+// planeacion/planeacion.csv). Ese numeral no vive en el esquema: se guarda
+// como una etiqueta "Base #N" (el campo `tags` ya es libre y editable) para
+// que la tarjeta del proyecto la muestre con un borde algo más grueso, sin
+// necesitar una migración. Solo cubre los proyectos que ya estaban numerados
+// en esa hoja; lo que se agregó después no tiene numeral y no se toca aquí.
+const PROJECT_BASE_NUMERALS: Record<string, number> = {
+  "redes-instagram": 1,
+  "redes-linkedin": 2,
+  "redes-tiktok": 3,
+  "redes-youtube": 4,
+  "normativa-terminos-condiciones": 5,
+  "produccion-piezas-audiovisual": 6,
+  "produccion-hacks-informaticos": 7,
+  "eventos-microtalleres": 8,
+  "continuidad-blog": 9,
+  "continuidad-micrositio": 10,
+  "produccion-senaletica-salas": 11,
+  "cursoslibres-linea-grafica": 12,
+  "estrategicos-extension-solidaria": 13,
+  "produccion-carteleras": 14,
+  "eventos-semana-uifce": 15,
+  "estrategicos-boletin-digital": 16,
+  "estrategicos-red-aliados-academicos": 17,
+  "innovacion-repositorio-ia": 18,
+  "documentacion-repositorio-permanente": 19,
+  "documentacion-propuesta-drive-gc": 20,
+  "acompanamiento-interarea": 21,
+  "documentacion-memorias-2026-2": 22,
+  "cursoslibres-piezas-primer-lanzamiento": 23,
+  "produccion-uifcito-reutilizable": 24,
+  "micrositio-equipo-de-trabajo": 25,
+  "micrositio-ex-monitores": 26,
+};
+
+const BASE_NUMERAL_TAG = /^Base #\d+$/;
+
+async function seedBaseNumeralTags() {
+  let updated = 0;
+  for (const [id, numeral] of Object.entries(PROJECT_BASE_NUMERALS)) {
+    const project = await prisma.project.findUnique({ where: { id }, select: { tags: true } });
+    if (!project) continue;
+    const tag = `Base #${numeral}`;
+    if (project.tags.includes(tag)) continue;
+    const tags = [...project.tags.filter((t) => !BASE_NUMERAL_TAG.test(t)), tag];
+    await prisma.project.update({ where: { id }, data: { tags } });
+    updated++;
+  }
+  console.log(`Numerales de planeación base etiquetados: ${updated}.`);
+}
+
+// --- Avance corte 1 (planeación inicial) -------------------------------------
+// La hoja de planeación inicial traía una columna "Avance corte 1" con el
+// estado de cada iniciativa al primer corte del semestre, nunca volcada a la
+// bitácora ni al checklist de la app. Esto la siembra una sola vez por
+// proyecto: agrega solo los ítems de checklist que falten (nunca sobrescribe)
+// y crea la nota de bitácora si su texto exacto todavía no existe. Solo cubre
+// los proyectos para los que ese corte trae información real; donde decía
+// "OK" o algo puntual sin una subtarea concreta, se deja solo la nota.
+type AvanceCorte1 = { note: string; checklist?: { text: string; done?: boolean }[] };
+
+const AVANCE_CORTE_1: Record<string, AvanceCorte1> = {
+  "redes-instagram": {
+    note:
+      "Corte 1 — Avance: se está gestionando con la Unidad un nuevo correo institucional para las redes de la " +
+      "UIFCE, paso previo para avanzar en la recuperación o la oficialización de la cuenta.\n" +
+      "Bloqueo: mientras no esté listo el correo, no se puede continuar el trámite.",
+    checklist: [{ text: "Solicitar nuevo correo institucional para las redes de la UIFCE" }],
+  },
+  "redes-linkedin": {
+    note:
+      "Corte 1 — Avance: ya inició la difusión bajo el enfoque prioritario del semestre.\n" +
+      "Próximo: colocar la foto de portada institucional de la UIFCE en la cuenta.",
+    checklist: [{ text: "Colocar foto de portada institucional de la UIFCE en LinkedIn" }],
+  },
+  "redes-tiktok": {
+    note: "Corte 1 — Bloqueo: la creación de la cuenta sigue en espera de que llegue el correo institucional de redes.",
+  },
+  "redes-youtube": {
+    note: "Corte 1 — Avance: sin novedades desde el cierre de 2026-1; el trámite de oficialización sigue pendiente de retomar.",
+  },
+  "normativa-terminos-condiciones": {
+    note:
+      "Corte 1 — Avance: prioridad del corte es ajustar el contexto, las expectativas y los entregables del " +
+      "documento de TyC, y mostrar avance de cara al segundo pago del semestre.",
+  },
+  "produccion-piezas-audiovisual": {
+    note: "Corte 1 — Avance: producción semanal de piezas y material audiovisual en curso, sin bloqueos reportados en este corte.",
+  },
+  "produccion-hacks-informaticos": {
+    note: "Corte 1 — Avance: prioridad del corte es consolidar avances de cara al segundo pago del semestre.",
+  },
+  "eventos-microtalleres": {
+    note: "Corte 1 — Próximo: consolidar el cronograma general de eventos de ET para 2026-2.",
+    checklist: [{ text: "Consolidar el cronograma general de eventos ET 2026-2" }],
+  },
+  "continuidad-blog": {
+    note:
+      "Corte 1 — Avance: el despliegue del blog es prioridad de este corte; antes de avanzar falta revisar la " +
+      "documentación existente.",
+  },
+  "continuidad-micrositio": {
+    note: "Corte 1 — Avance: el micrositio es prioridad de este corte.",
+  },
+  "produccion-senaletica-salas": {
+    note:
+      "Corte 1 — Próximo: incluir en la pieza los espacios de sala abierta al público y los de soporte técnico, " +
+      "y difundir la pieza actualizada para que la comunidad conozca la información.",
+    checklist: [
+      { text: "Incluir en la pieza los espacios de sala abierta al público" },
+      { text: "Incluir en la pieza los espacios de soporte técnico" },
+      { text: "Difundir la pieza actualizada entre la comunidad" },
+    ],
+  },
+  "cursoslibres-linea-grafica": {
+    note: "Corte 1 — Avance: sin novedades este corte; el despliegue de la línea gráfica de Cursos Libres sigue vigente y sin bloqueos.",
+  },
+  "produccion-carteleras": {
+    note: "Corte 1 — Avance: sin novedades este corte; las carteleras física y digital siguen vigentes.",
+  },
+  "eventos-semana-uifce": {
+    note: "Corte 1 — Próximo: preparar la difusión de un recap de lo realizado en la Semana UIFCE, una vez concluya el evento.",
+    checklist: [{ text: "Preparar recap de difusión de la Semana UIFCE" }],
+  },
+  "estrategicos-boletin-digital": {
+    note: "Corte 1 — Próximo: publicar la primera edición del boletín.",
+  },
+  "estrategicos-red-aliados-academicos": {
+    note:
+      "Corte 1 — Avance: este corte se enfoca en definir el proyecto de forma concreta, documentarlo y " +
+      "coordinar con Apoyos Académicos (AA) el networking necesario para activarlo.",
+    checklist: [
+      { text: "Definir y documentar formalmente el alcance del proyecto" },
+      { text: "Coordinar con Apoyos Académicos (AA) el networking para activar la red" },
+    ],
+  },
+  "innovacion-repositorio-ia": {
+    note:
+      "Corte 1 — Avance: se está evaluando Notebook (LM) para el proyecto.\n" +
+      "Próximo: documentar formalmente el proyecto, definir un formato/prompt estándar de calidad para los " +
+      "videos, y proponer entregables concretos con alternativas si la herramienta no aplica (ej. matriz DOFA).",
+    checklist: [
+      { text: "Documentar formalmente el proyecto y el formato/prompt estándar de calidad para videos" },
+      { text: "Proponer entregables concretos y alternativas si Notebook no aplica (ej. matriz DOFA)" },
+    ],
+  },
+  "documentacion-repositorio-permanente": {
+    note: "Corte 1 — Próximo: coordinar con Gestión del Conocimiento (GC) los lineamientos de calidad, eficacia y mejora aplicables a ambos repositorios.",
+    checklist: [{ text: "Establecer con GC lineamientos de calidad y mejora para ambos repositorios" }],
+  },
+  "acompanamiento-interarea": {
+    note:
+      "Corte 1 — Avance: ET en Marcha ya opera como la herramienta que formaliza la estrategia de " +
+      "acompañamiento interárea.\n" +
+      "Próximo: implementarla en la cultura de coordinación y comunicar al equipo la nueva estrategia y su " +
+      "dinámica — el qué, el por qué, el para qué y el para quién.",
+    checklist: [{ text: "Comunicar al equipo la nueva estrategia de acompañamiento interárea (qué, por qué, para qué, para quién)" }],
+  },
+};
+
+async function seedAvanceCorte1() {
+  const author = await prisma.user.findUnique({ where: { email: "cdiazsu@unal.edu.co" } });
+  let notesCreated = 0;
+  let itemsCreated = 0;
+
+  for (const [id, avance] of Object.entries(AVANCE_CORTE_1)) {
+    const project = await prisma.project.findUnique({ where: { id }, select: { id: true } });
+    if (!project) continue;
+
+    if (avance.checklist?.length) {
+      const existing = await prisma.checklistItem.findMany({ where: { projectId: id }, select: { text: true } });
+      const have = new Set(existing.map((e) => e.text));
+      let order = existing.length;
+      for (const item of avance.checklist) {
+        if (have.has(item.text)) continue;
+        await prisma.checklistItem.create({
+          data: { projectId: id, text: item.text, done: item.done ?? false, order: order++ },
+        });
+        itemsCreated++;
+      }
+    }
+
+    const existingNote = await prisma.projectNote.findFirst({ where: { projectId: id, body: avance.note } });
+    if (!existingNote) {
+      await prisma.projectNote.create({
+        data: {
+          projectId: id,
+          body: avance.note,
+          author: author?.name ?? "Cesar Steven Diaz Suarez",
+          authorRole: "Máster",
+          authorId: author?.id ?? null,
+        },
+      });
+      notesCreated++;
+    }
+  }
+  console.log(`Avance corte 1: ${notesCreated} notas de bitácora y ${itemsCreated} ítems de checklist creados.`);
+}
+
 async function seedSituationStats() {
   const count = await prisma.situationStat.count();
   if (count > 0) return;
@@ -1248,6 +1449,8 @@ async function main() {
   await seedContacts();
   await seedUsers();
   await dedupeSeededPeople();
+  await seedBaseNumeralTags();
+  await seedAvanceCorte1();
   await seedStudyProjects();
   await seedEtJuniorStudyProjects();
   await seedBrandGuidelines();

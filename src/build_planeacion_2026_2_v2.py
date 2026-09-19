@@ -320,6 +320,26 @@ IDEAS = [
         entregables="* Texto de encabezado de la sección publicado.\n* Base de ex monitores: foto, nombre, rol y enlace de LinkedIn de cada uno.\n* Consentimientos de imagen de los ex monitores gestionados.\n* Contenido entregado a Desarrollo.\n* Fotos enlazadas a LinkedIn y enlaces verificados en el micrositio.",
         priority=False,
     ),
+    dict(
+        id="produccion-videos-presentacion-docente",
+        cat="Producción de contenido — Backlog",
+        idea="Biblioteca de videos de presentación del equipo docente y guion estándar",
+        hacer="Definir un guion y un estándar visual únicos para los videos de presentación de cada integrante del equipo (duración, estructura, preguntas guía, línea gráfica), grabar el video de cada persona bajo ese estándar y centralizarlos en un solo repositorio, enlazado con el resto de piezas de memoria institucional del área.",
+        espera="Una biblioteca completa de videos de presentación del equipo, con un mismo estándar visual y de guion, integrada a los materiales del área y lista para usarse en micrositio, redes y empalme, antes del cierre del semestre.",
+        fundamento="Retomado de la planeación inicial de ET 2026-2, que identificó la falta de contenido humanizado del equipo como una oportunidad para acercarlo a los estudiantes e incrementar el valor percibido del área. La organización de carpetas de esa misma idea original ya quedó cubierta por el repositorio documental permanente y la propuesta de reorganización del Drive ante GC; la biblioteca de videos de presentación en sí seguía sin un proyecto propio.",
+        entregables="* Guion estándar y lineamientos visuales para el video de presentación de cada integrante.\n* Video de presentación grabado de cada persona del equipo, bajo el estándar definido.\n* Biblioteca centralizada de videos, enlazada al repositorio documental permanente.",
+        priority=False,
+    ),
+    dict(
+        id="estrategicos-divulgacion-primeros-semestres",
+        cat="Proyectos estratégicos — Backlog",
+        idea="Divulgación organizada de la UIFCE a estudiantes de primeros semestres",
+        hacer="Establecer un enlace formal con las áreas de la Facultad y los grupos estudiantiles de acompañamiento (GEA) para coordinar un espacio periódico de presentación de la Unidad y sus servicios a los estudiantes que ingresan cada semestre, dentro de las actividades de bienvenida o inducción ya existentes.",
+        espera="Contar, a más tardar en 2027-1, con un espacio formal y recurrente en el que la UIFCE presente sus servicios a los estudiantes de primeros semestres, coordinado con las áreas y los grupos GEA correspondientes.",
+        fundamento="Retomado de la planeación inicial de ET 2026-2, que identificó la ausencia de una presentación organizada de la Unidad a los estudiantes nuevos como una oportunidad de divulgación no resuelta. No hay todavía un antecedente ejecutado; este proyecto documenta la necesidad y formula la propuesta de enlace.",
+        entregables="* Documento de propuesta con el enlace institucional necesario (áreas de la Facultad y grupos GEA).\n* Espacio de presentación de la Unidad acordado y calendarizado.\n* Primera edición del espacio ejecutada, con reporte de asistencia.",
+        priority=False,
+    ),
 ]
 
 # ---------- Sheet 1: Planeación ----------

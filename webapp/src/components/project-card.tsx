@@ -39,6 +39,12 @@ export type ProjectCardData = {
   sortIndex: number;
 };
 
+// Etiqueta interna "Base #N": numeral del proyecto en la hoja de planeación
+// inicial (ver PROJECT_BASE_NUMERALS en prisma/seed.ts). Se guarda como un tag
+// más para no requerir una migración, pero se muestra aparte (no como badge
+// libre) y le da a la tarjeta un borde algo más grueso.
+const BASE_NUMERAL_TAG = /^Base #(\d+)$/;
+
 export function ProjectCard({ project }: { project: ProjectCardData }) {
   const progress = project.checklistTotal > 0 ? (project.checklistDone / project.checklistTotal) * 100 : 0;
 
@@ -51,9 +57,17 @@ export function ProjectCard({ project }: { project: ProjectCardData }) {
   const accent = accentPerson ? personColor(accentPerson) : null;
   const urgent = assigned && project.priorityTag === "ATENCION_INMEDIATA";
 
+  const baseNumeralMatch = project.tags.map((t) => t.match(BASE_NUMERAL_TAG)).find((m): m is RegExpMatchArray => !!m);
+  const baseNumeral = baseNumeralMatch?.[1] ?? null;
+  const visibleTags = project.tags.filter((t) => !BASE_NUMERAL_TAG.test(t));
+
   return (
     <Link href={`/proyectos/${project.id}`} className="block h-full">
-      <Card className="group relative h-full cursor-pointer transition-[transform,box-shadow,border-color] duration-200 ease-out-strong [@media(hover:hover)]:hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-card-hover active:translate-y-0 active:scale-[0.99] active:shadow-card">
+      <Card
+        className={`group relative h-full cursor-pointer transition-[transform,box-shadow,border-color] duration-200 ease-out-strong [@media(hover:hover)]:hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-card-hover active:translate-y-0 active:scale-[0.99] active:shadow-card ${
+          baseNumeral ? "border-[1.5px] border-foreground/25" : ""
+        }`}
+      >
         {assigned && (
           <span
             aria-hidden
@@ -66,13 +80,21 @@ export function ProjectCard({ project }: { project: ProjectCardData }) {
             <Badge variant="outline">{project.category}</Badge>
             <PriorityTag tag={project.priorityTag} className={urgent ? "animate-et-blink" : ""} />
             {project.isManual && <Badge variant="secondary">Propio</Badge>}
-            {project.tags.slice(0, 3).map((t) => (
+            {visibleTags.slice(0, 3).map((t) => (
               <Badge key={t} variant="secondary">
                 {t}
               </Badge>
             ))}
-            {project.tags.length > 3 && (
-              <span className="text-[10px] text-muted-foreground">+{project.tags.length - 3}</span>
+            {visibleTags.length > 3 && (
+              <span className="text-[10px] text-muted-foreground">+{visibleTags.length - 3}</span>
+            )}
+            {baseNumeral && (
+              <span
+                title="Numeral en la planeación inicial de ET 2026-2"
+                className="ml-auto shrink-0 rounded-full border border-foreground/30 px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground"
+              >
+                Base #{baseNumeral}
+              </span>
             )}
           </div>
           <CardTitle className="mt-1 transition-colors group-hover:text-primary">{project.title}</CardTitle>
