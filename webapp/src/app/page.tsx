@@ -394,7 +394,7 @@ export default async function HomePage({
         <SituationStrip stats={stats} />
       </section>
 
-      <section className="grid grid-cols-1 gap-8 lg:grid-cols-[2fr_1fr]">
+      <section className="flex flex-col gap-8">
         <div className="flex flex-col gap-4">
           <SemesterTabs semesters={tabs} selectedId={selected?.id ?? ""} />
 
