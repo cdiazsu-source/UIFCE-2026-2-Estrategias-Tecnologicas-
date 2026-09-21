@@ -9,9 +9,12 @@ import { blockedForJunior, canRecordMetrics } from "@/lib/session";
 import type { UndoAction } from "@/lib/undo";
 
 const NUM_FIELDS = [
+  "impressions",
+  "followers",
+  "profileViews",
+  "searchAppearances",
   "profileScore",
   "connections",
-  "followers",
   "ssi",
   "postsLast30",
   "engagementLast30",

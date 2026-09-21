@@ -538,9 +538,16 @@ model LinkedInSnapshot {
   trackee   LinkedInTrackee @relation(fields: [trackeeId], references: [id], onDelete: Cascade)
   month     String
 
+  /// Las 4 que muestra la tarjeta "Supervisa el rendimiento" del apartado de
+  /// Analíticas de la app de LinkedIn — las que se piden mirando el celular de
+  /// la persona, por eso van primero en el formulario de captura.
+  impressions       Int?
+  followers         Int?
+  profileViews      Int?
+  searchAppearances Int?
+
   profileScore     Int?
   connections      Int?
-  followers        Int?
   ssi              Int?
   postsLast30      Int?
   engagementLast30 Int?

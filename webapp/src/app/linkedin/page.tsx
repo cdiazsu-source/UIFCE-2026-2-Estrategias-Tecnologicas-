@@ -8,9 +8,12 @@ import { LinkedInTracker, type OrgSummary, type TrackeeData } from "@/components
 export const dynamic = "force-dynamic";
 
 const VALUE_KEYS = [
+  "impressions",
+  "followers",
+  "profileViews",
+  "searchAppearances",
   "profileScore",
   "connections",
-  "followers",
   "ssi",
   "postsLast30",
   "engagementLast30",
@@ -99,7 +102,7 @@ export default async function LinkedInPage() {
       <div>
         <h1 className="flex items-center gap-1.5 text-xl font-bold">
           Seguimiento del equipo en LinkedIn
-          <InfoHint text="Seguimiento mensual del LinkedIn del equipo, para la marca empleadora. Primero, la página de la Unidad (resumen de solo lectura; se edita en Difusión digital). Luego una ficha por persona —Dirección, Coordinación, Liderazgo, Máster y el resto— con profile score (0–100), conexiones, seguidores, SSI, publicaciones, interacciones, recomendaciones y certificados. Cómo se usa: elige el mes, filtra por área si buscas a alguien, y «Registrar medición» en cada ficha (lo hace el junior coordinador; el perfil junior crea y edita, borrar es del perfil completo). El enlace de LinkedIn de cada persona lo puede agregar cualquiera con sesión. Todo se ingresa a mano. Ejemplo: «Cesar Diaz · sep 2026 · profile score 70 · 520 conexiones · SSI 48»." />
+          <InfoHint text="Seguimiento mensual del LinkedIn del equipo, para la marca empleadora. Primero, la página de la Unidad (resumen de solo lectura; se edita en Difusión digital). Luego una ficha por persona —Dirección, Coordinación, Liderazgo, Máster y el resto— con 4 métricas rápidas (impresiones, seguidores, visualizaciones del perfil y apariciones en búsquedas — las mismas 4 tarjetas que muestra la app de LinkedIn en «Analíticas») y, si hay tiempo, métricas opcionales: profile score (0–100), conexiones, SSI, publicaciones, interacciones, recomendaciones y certificados. Cómo se usa: acércate a cada persona, pídele que abra Analíticas en su app de LinkedIn, elige el mes y «Registrar medición» en su ficha —las 4 tarjetas rápidas son lo único que hace falta, el resto es opcional y queda plegado— (lo hace el junior coordinador; el perfil junior crea y edita, borrar es del perfil completo). El enlace de LinkedIn de cada persona lo puede agregar cualquiera con sesión. Todo se ingresa a mano. Ejemplo: «Cesar Diaz · sep 2026 · 6 impresiones · 53 seguidores · 37 visualizaciones de perfil»." />
         </h1>
         <p className="text-sm text-muted-foreground">
           {data.length} personas en seguimiento · {withData} con mediciones. Principio del semestre: calidad sobre

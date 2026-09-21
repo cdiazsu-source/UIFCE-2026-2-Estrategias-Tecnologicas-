@@ -47,16 +47,27 @@ export type TrackeeData = {
 
 type FieldDef = { key: string; label: string; max?: number };
 
-const NUM_FIELDS: FieldDef[] = [
+/** Las 4 tarjetas de "Supervisa el rendimiento" en Analíticas de la app de
+ *  LinkedIn — lo único que hace falta mirar en el celular de la persona para
+ *  una captura rápida. Van primero y destacadas en el formulario. */
+const QUICK_FIELDS: FieldDef[] = [
+  { key: "impressions", label: "Impresiones (7 días)" },
+  { key: "followers", label: "Total de seguidores" },
+  { key: "profileViews", label: "Visualizaciones del perfil (90 días)" },
+  { key: "searchAppearances", label: "Apariciones en búsquedas (7 días)" },
+];
+/** Métricas opcionales, plegadas: se llenan si hay tiempo de seguir mirando
+ *  el perfil, no son necesarias para una captura ágil. */
+const MORE_FIELDS: FieldDef[] = [
   { key: "profileScore", label: "Profile score (0–100)", max: 100 },
   { key: "connections", label: "Conexiones" },
-  { key: "followers", label: "Seguidores" },
   { key: "ssi", label: "SSI (Sales Navigator)" },
   { key: "postsLast30", label: "Publicaciones (últimos 30 d)" },
   { key: "engagementLast30", label: "Interacciones (últimos 30 d)" },
   { key: "recommendations", label: "Recomendaciones" },
   { key: "certsPublished", label: "Certificados publicados" },
 ];
+const NUM_FIELDS: FieldDef[] = [...QUICK_FIELDS, ...MORE_FIELDS];
 const BOOL_FIELDS: FieldDef[] = [
   { key: "uifceExperience", label: "Tiene a la UIFCE como experiencia" },
   { key: "creatorMode", label: "Modo creador activo" },
@@ -127,6 +138,8 @@ function Spark({ points }: { points: number[] }) {
 }
 
 function SnapshotFields({ snapshot }: { snapshot?: SnapshotData }) {
+  const hasMoreValues = MORE_FIELDS.some((f) => snapshot?.values[f.key] != null);
+
   return (
     <>
       <Input
@@ -137,38 +150,108 @@ function SnapshotFields({ snapshot }: { snapshot?: SnapshotData }) {
         className="w-44"
         aria-label="Mes de la medición"
       />
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-        {NUM_FIELDS.map((f) => (
-          <label key={f.key} className="flex flex-col gap-0.5 text-xs text-muted-foreground">
-            {f.label}
-            <Input
-              name={f.key}
-              type="number"
-              min={0}
-              max={f.max}
-              inputMode="numeric"
-              defaultValue={(snapshot?.values[f.key] as number | undefined) ?? ""}
-              placeholder="0"
-              className="h-8"
-            />
-          </label>
-        ))}
+
+      <div className="rounded-lg border border-primary/25 bg-primary/5 p-2.5">
+        <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-primary">
+          Lo que se ve en «Analíticas» de LinkedIn
+        </p>
+        <div className="grid grid-cols-2 gap-2">
+          {QUICK_FIELDS.map((f) => (
+            <label key={f.key} className="flex flex-col gap-0.5 rounded-md bg-background p-2 text-xs text-muted-foreground shadow-sm">
+              {f.label}
+              <Input
+                name={f.key}
+                type="number"
+                min={0}
+                inputMode="numeric"
+                defaultValue={(snapshot?.values[f.key] as number | undefined) ?? ""}
+                placeholder="0"
+                className="h-10 border-0 bg-transparent p-0 text-lg font-bold text-foreground placeholder:font-normal placeholder:text-muted-foreground/50 focus-visible:ring-0"
+              />
+            </label>
+          ))}
+        </div>
       </div>
-      <div className="flex flex-wrap gap-4">
-        {BOOL_FIELDS.map((b) => (
-          <label key={b.key} className="flex items-center gap-1.5 text-xs">
-            <input
-              type="checkbox"
-              name={b.key}
-              defaultChecked={snapshot?.values[b.key] === true}
-              className="h-3.5 w-3.5 rounded border-input accent-[hsl(var(--primary))]"
-            />
-            {b.label}
-          </label>
-        ))}
-      </div>
+
+      <details className="group" open={hasMoreValues}>
+        <summary className="cursor-pointer select-none text-xs text-muted-foreground hover:text-foreground">
+          Más métricas (opcional)
+        </summary>
+        <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+          {MORE_FIELDS.map((f) => (
+            <label key={f.key} className="flex flex-col gap-0.5 text-xs text-muted-foreground">
+              {f.label}
+              <Input
+                name={f.key}
+                type="number"
+                min={0}
+                max={f.max}
+                inputMode="numeric"
+                defaultValue={(snapshot?.values[f.key] as number | undefined) ?? ""}
+                placeholder="0"
+                className="h-8"
+              />
+            </label>
+          ))}
+        </div>
+        <div className="mt-3 flex flex-wrap gap-4">
+          {BOOL_FIELDS.map((b) => (
+            <label key={b.key} className="flex items-center gap-1.5 text-xs">
+              <input
+                type="checkbox"
+                name={b.key}
+                defaultChecked={snapshot?.values[b.key] === true}
+                className="h-3.5 w-3.5 rounded border-input accent-[hsl(var(--primary))]"
+              />
+              {b.label}
+            </label>
+          ))}
+        </div>
+      </details>
+
       <Textarea name="note" defaultValue={snapshot?.note ?? ""} placeholder="Nota (opcional)" className="min-h-[42px]" />
     </>
+  );
+}
+
+/** Variación vs. la medición anterior registrada, al estilo de las flechitas
+ *  "▲ 8 % vs. últimos 7 días" que muestra la propia app de LinkedIn. */
+function Delta({ current, previous }: { current: number | null | undefined; previous: number | null | undefined }) {
+  if (typeof current !== "number" || typeof previous !== "number") return null;
+  const diff = current - previous;
+  if (diff === 0) return <span className="text-muted-foreground">sin cambio</span>;
+  if (previous === 0) {
+    return <span className="text-success">▲ nuevo</span>;
+  }
+  const pct = Math.round((Math.abs(diff) / previous) * 100);
+  return (
+    <span className={diff > 0 ? "text-success" : "text-destructive"}>
+      {diff > 0 ? "▲" : "▼"} {pct}%
+    </span>
+  );
+}
+
+/** Tarjeta grande al estilo "Supervisa el rendimiento" de LinkedIn: número
+ *  destacado + variación vs. la medición anterior. */
+function QuickStatCard({
+  label,
+  value,
+  previous,
+}: {
+  label: string;
+  value: number | boolean | null | undefined;
+  previous: number | boolean | null | undefined;
+}) {
+  const v = typeof value === "number" ? value : null;
+  const p = typeof previous === "number" ? previous : null;
+  return (
+    <div className="rounded-md border border-border bg-muted/30 p-2">
+      <p className="text-[10px] leading-tight text-muted-foreground">{label}</p>
+      <p className="text-lg font-bold leading-tight">{v != null ? num(v) : "—"}</p>
+      <p className="text-[10px] leading-tight">
+        <Delta current={v} previous={p} />
+      </p>
+    </div>
   );
 }
 
@@ -347,8 +430,11 @@ function TrackeeCard({
 
   const asc = [...trackee.snapshots].sort((a, b) => a.month.localeCompare(b.month));
   const desc = [...asc].reverse();
-  const forMonth = asc.find((s) => s.month === month) ?? null;
+  const forMonthIdx = asc.findIndex((s) => s.month === month);
+  const forMonth = forMonthIdx >= 0 ? asc[forMonthIdx] : null;
+  const prevSnapshot = forMonthIdx > 0 ? asc[forMonthIdx - 1] : null;
   const trend = asc.map((s) => s.values.profileScore).filter((v): v is number => typeof v === "number");
+  const hasQuickData = forMonth ? QUICK_FIELDS.some((f) => forMonth.values[f.key] != null) : false;
 
   if (editingCard) {
     return (
@@ -452,10 +538,23 @@ function TrackeeCard({
       </CardHeader>
 
       <CardContent className="flex flex-col gap-2">
+        {forMonth && hasQuickData && (
+          <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4">
+            {QUICK_FIELDS.map((f) => (
+              <QuickStatCard
+                key={f.key}
+                label={f.label}
+                value={forMonth.values[f.key]}
+                previous={prevSnapshot?.values[f.key]}
+              />
+            ))}
+          </div>
+        )}
+
         {forMonth ? (
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
             {typeof forMonth.values.profileScore === "number" && <ScoreBar score={forMonth.values.profileScore} />}
-            {NUM_FIELDS.filter((f) => f.key !== "profileScore" && forMonth.values[f.key] != null).map((f) => (
+            {MORE_FIELDS.filter((f) => f.key !== "profileScore" && forMonth.values[f.key] != null).map((f) => (
               <span key={f.key} className="text-xs">
                 <span className="text-muted-foreground">{f.label.split(" (")[0]}:</span>{" "}
                 <span className="font-medium">{num(forMonth.values[f.key])}</span>
