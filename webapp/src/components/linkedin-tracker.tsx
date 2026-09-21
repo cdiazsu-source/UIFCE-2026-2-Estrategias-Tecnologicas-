@@ -19,6 +19,7 @@ import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { PersonAvatar } from "@/components/person-avatar";
+import { InfoHint } from "@/components/info-hint";
 import { useCanEdit, useCanRecordMetrics } from "@/components/access-context";
 import { useUndo } from "@/components/undo-banner";
 import { formatDate } from "@/lib/utils";
@@ -45,32 +46,85 @@ export type TrackeeData = {
   snapshots: SnapshotData[];
 };
 
-type FieldDef = { key: string; label: string; max?: number };
+type FieldDef = { key: string; label: string; max?: number; hint: string };
 
 /** Las 4 tarjetas de "Supervisa el rendimiento" en Analíticas de la app de
  *  LinkedIn — lo único que hace falta mirar en el celular de la persona para
  *  una captura rápida. Van primero y destacadas en el formulario. */
 const QUICK_FIELDS: FieldDef[] = [
-  { key: "impressions", label: "Impresiones (7 días)" },
-  { key: "followers", label: "Total de seguidores" },
-  { key: "profileViews", label: "Visualizaciones del perfil (90 días)" },
-  { key: "searchAppearances", label: "Apariciones en búsquedas (7 días)" },
+  {
+    key: "impressions",
+    label: "Impresiones (7 días)",
+    hint: "Qué mide: cuántas veces se mostraron tus publicaciones en la pantalla de otras personas en los últimos 7 días (no son clics, solo que aparecieron en su feed). Dónde se ve: en la app, toca tu foto de perfil → «Analíticas» → tarjeta «Supervisa el rendimiento» → «Impresiones de la publicación en 7 días».",
+  },
+  {
+    key: "followers",
+    label: "Total de seguidores",
+    hint: "Qué mide: el total acumulado de personas que siguen tu perfil y ven lo que publicas — incluye gente que no es tu conexión directa (a diferencia de «Conexiones»). Dónde se ve: foto de perfil → «Analíticas» → «Supervisa el rendimiento» → «Total de seguidores».",
+  },
+  {
+    key: "profileViews",
+    label: "Visualizaciones del perfil (90 días)",
+    hint: "Qué mide: cuántas veces entraron a ver tu perfil completo (no solo una publicación) en los últimos 90 días. Dónde se ve: foto de perfil → «Analíticas» → «Supervisa el rendimiento» → «Visualizaciones de tu perfil en 90 días».",
+  },
+  {
+    key: "searchAppearances",
+    label: "Apariciones en búsquedas (7 días)",
+    hint: "Qué mide: cuántas veces tu perfil salió como resultado cuando alguien buscó en LinkedIn, en los últimos 7 días. Dónde se ve: foto de perfil → «Analíticas» → «Supervisa el rendimiento» → «Apariciones en búsquedas».",
+  },
 ];
 /** Métricas opcionales, plegadas: se llenan si hay tiempo de seguir mirando
  *  el perfil, no son necesarias para una captura ágil. */
 const MORE_FIELDS: FieldDef[] = [
-  { key: "profileScore", label: "Profile score (0–100)", max: 100 },
-  { key: "connections", label: "Conexiones" },
-  { key: "ssi", label: "SSI (Sales Navigator)" },
-  { key: "postsLast30", label: "Publicaciones (últimos 30 d)" },
-  { key: "engagementLast30", label: "Interacciones (últimos 30 d)" },
-  { key: "recommendations", label: "Recomendaciones" },
-  { key: "certsPublished", label: "Certificados publicados" },
+  {
+    key: "profileScore",
+    label: "Profile score (0–100)",
+    max: 100,
+    hint: "Qué es: no es un número que LinkedIn muestre — es una nota manual de 0 a 100 que le pones al perfil a tu propio criterio (foto, banner, titular, extracto, experiencia, habilidades…), mirándolo de arriba a abajo. Sirve para comparar mes a mes qué tan trabajado está.",
+  },
+  {
+    key: "connections",
+    label: "Conexiones",
+    hint: "Qué mide: personas con las que tienes conexión directa (aceptaron tu invitación o tú la de ellas) — distinto de «seguidores», que puede incluir gente sin conexión directa. Dónde se ve: en tu propio perfil, justo debajo de tu nombre («500+ contactos» o el número exacto si son menos).",
+  },
+  {
+    key: "ssi",
+    label: "SSI (Sales Navigator)",
+    hint: "Qué es: el Social Selling Index, un puntaje de 0 a 100 que mide qué tan bien usas LinkedIn para construir marca y relaciones (no viene en la pestaña «Analíticas» del celular). Dónde se ve: entrando desde el navegador a linkedin.com/sales/ssi con la cuenta de la persona.",
+  },
+  {
+    key: "postsLast30",
+    label: "Publicaciones (últimos 30 d)",
+    hint: "Qué mide: cuántas publicaciones propias hizo la persona en el último mes (conteo manual, LinkedIn no da este número directo). Dónde se ve: en su perfil → «Actividad» → pestaña «Publicaciones», contando las que tienen fecha dentro de los últimos 30 días.",
+  },
+  {
+    key: "engagementLast30",
+    label: "Interacciones (últimos 30 d)",
+    hint: "Qué mide: la suma de reacciones + comentarios + veces compartido que recibieron sus publicaciones del último mes. Dónde se ve: foto de perfil → «Analíticas» → «Análisis de contenido» → sección «Interacción» de cada publicación (o el acumulado del período).",
+  },
+  {
+    key: "recommendations",
+    label: "Recomendaciones",
+    hint: "Qué mide: cuántas recomendaciones escritas por otras personas tiene visibles en su perfil (no autoevaluaciones ni aptitudes avaladas, son textos que alguien más escribió sobre ella). Dónde se ve: bajando en su propio perfil hasta la sección «Recomendaciones».",
+  },
+  {
+    key: "certsPublished",
+    label: "Certificados publicados",
+    hint: "Qué mide: cuántos cursos o certificaciones tiene agregados en su perfil. Dónde se ve: bajando en su propio perfil hasta la sección «Licencias y certificaciones».",
+  },
 ];
 const NUM_FIELDS: FieldDef[] = [...QUICK_FIELDS, ...MORE_FIELDS];
 const BOOL_FIELDS: FieldDef[] = [
-  { key: "uifceExperience", label: "Tiene a la UIFCE como experiencia" },
-  { key: "creatorMode", label: "Modo creador activo" },
+  {
+    key: "uifceExperience",
+    label: "Tiene a la UIFCE como experiencia",
+    hint: "Qué mide: si la persona agregó su paso por la UIFCE como experiencia laboral en su perfil — clave para que el paso por la Unidad quede como marca empleadora visible. Dónde se ve: en su perfil, sección «Experiencia»: ¿aparece la UIFCE listada ahí?",
+  },
+  {
+    key: "creatorMode",
+    label: "Modo creador activo",
+    hint: "Qué es: un interruptor del perfil que, cuando está activo, agrega hashtags/temas destacados debajo del titular y cambia el botón principal de «Conectar» a «Seguir». Dónde se ve: entrando a su propio perfil — si ve esos temas destacados y el botón «Seguir», está activo.",
+  },
 ];
 
 const LEVEL_LABEL: Record<string, string> = {
@@ -158,7 +212,10 @@ function SnapshotFields({ snapshot }: { snapshot?: SnapshotData }) {
         <div className="grid grid-cols-2 gap-2">
           {QUICK_FIELDS.map((f) => (
             <label key={f.key} className="flex flex-col gap-0.5 rounded-md bg-background p-2 text-xs text-muted-foreground shadow-sm">
-              {f.label}
+              <span className="inline-flex items-center gap-1">
+                {f.label}
+                <InfoHint text={f.hint} />
+              </span>
               <Input
                 name={f.key}
                 type="number"
@@ -180,7 +237,10 @@ function SnapshotFields({ snapshot }: { snapshot?: SnapshotData }) {
         <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
           {MORE_FIELDS.map((f) => (
             <label key={f.key} className="flex flex-col gap-0.5 text-xs text-muted-foreground">
-              {f.label}
+              <span className="inline-flex items-center gap-1">
+                {f.label}
+                <InfoHint text={f.hint} />
+              </span>
               <Input
                 name={f.key}
                 type="number"
@@ -204,6 +264,7 @@ function SnapshotFields({ snapshot }: { snapshot?: SnapshotData }) {
                 className="h-3.5 w-3.5 rounded border-input accent-[hsl(var(--primary))]"
               />
               {b.label}
+              <InfoHint text={b.hint} />
             </label>
           ))}
         </div>
@@ -235,10 +296,12 @@ function Delta({ current, previous }: { current: number | null | undefined; prev
  *  destacado + variación vs. la medición anterior. */
 function QuickStatCard({
   label,
+  hint,
   value,
   previous,
 }: {
   label: string;
+  hint: string;
   value: number | boolean | null | undefined;
   previous: number | boolean | null | undefined;
 }) {
@@ -246,7 +309,10 @@ function QuickStatCard({
   const p = typeof previous === "number" ? previous : null;
   return (
     <div className="rounded-md border border-border bg-muted/30 p-2">
-      <p className="text-[10px] leading-tight text-muted-foreground">{label}</p>
+      <p className="inline-flex items-center gap-1 text-[10px] leading-tight text-muted-foreground">
+        {label}
+        <InfoHint text={hint} />
+      </p>
       <p className="text-lg font-bold leading-tight">{v != null ? num(v) : "—"}</p>
       <p className="text-[10px] leading-tight">
         <Delta current={v} previous={p} />
@@ -544,6 +610,7 @@ function TrackeeCard({
               <QuickStatCard
                 key={f.key}
                 label={f.label}
+                hint={f.hint}
                 value={forMonth.values[f.key]}
                 previous={prevSnapshot?.values[f.key]}
               />
