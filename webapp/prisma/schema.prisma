@@ -138,10 +138,16 @@ model Project {
   /// El resync desde el CSV deja de sobrescribir esos campos para no perder
   /// la edición; el CSV sigue mandando el orden (sourceOrder).
   editedInApp     Boolean       @default(false)
-  /// Persona responsable del proyecto (asignación a nivel de proyecto, aparte de
-  /// los responsables de cada subtarea). Da el color del proyecto en el panel.
+  /// Persona responsable del proyecto: quien está a cargo dentro de ET (asignación
+  /// a nivel de proyecto, aparte de los responsables de cada subtarea). Da el
+  /// color del proyecto en el panel.
   assigneeId      String?
-  assignee        User?         @relation(fields: [assigneeId], references: [id], onDelete: SetNull)
+  assignee        User?         @relation("ProjectAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  /// Persona solicitante del proyecto: quien, fuera del área de ET, pidió el
+  /// servicio o la iniciativa (otra área, coordinación, dirección). No aplica a
+  /// las iniciativas propias de ET, que no tienen solicitante externo.
+  requesterId     String?
+  requester       User?         @relation("ProjectRequester", fields: [requesterId], references: [id], onDelete: SetNull)
   /// Fecha/hora de inicio y fin, solo para proyectos que son (o incluyen) un
   /// evento con horario concreto. Alimenta /calendario; la mayoría de proyectos
   /// se quedan en null (sin horario fijo).
@@ -166,6 +172,7 @@ model Project {
 
   @@index([semesterId])
   @@index([assigneeId])
+  @@index([requesterId])
   @@index([mainProjectId])
   @@index([startAt])
 }
@@ -327,7 +334,8 @@ model User {
 
   studyProjects        StudyProject[]
   projectNotes         ProjectNote[]
-  assignedProjects     Project[]
+  assignedProjects     Project[] @relation("ProjectAssignee")
+  requestedProjects    Project[] @relation("ProjectRequester")
   assignedChecklistItems ChecklistItem[]
   socialChannels       SocialChannel[]
   socialMetrics        SocialMetric[]

@@ -109,6 +109,11 @@ export async function applyUndo(action: UndoAction) {
       revalidatePath(`/proyectos/${action.id}`);
       break;
     }
+    case "project.requester": {
+      await prisma.project.update({ where: { id: action.id }, data: { requesterId: action.before } });
+      revalidatePath(`/proyectos/${action.id}`);
+      break;
+    }
     case "project.title": {
       await prisma.project.update({ where: { id: action.id }, data: action.before });
       revalidatePath(`/proyectos/${action.id}`);

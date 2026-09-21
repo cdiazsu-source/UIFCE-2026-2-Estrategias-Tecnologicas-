@@ -10,6 +10,7 @@ import { DriveLinkEditor } from "@/components/drive-link-editor";
 import { ProjectStatusSelect } from "@/components/project-status-select";
 import { ProjectPrioritySelect } from "@/components/project-priority-select";
 import { ProjectAssigneeSelect } from "@/components/project-assignee-select";
+import { ProjectRequesterSelect } from "@/components/project-requester-select";
 import { PriorityTag } from "@/components/priority-tag";
 import { ProjectControls } from "@/components/project-controls";
 import { ProjectTitleEditor } from "@/components/project-title-editor";
@@ -37,6 +38,7 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
       where: { id: params.id },
       include: {
         assignee: { select: { id: true, name: true, color: true } },
+        requester: { select: { id: true, name: true, color: true } },
         mainProject: { select: { id: true, title: true } },
         relatedProjects: {
           select: { id: true, title: true, status: true, startAt: true, endAt: true, location: true },
@@ -113,7 +115,7 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
           <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
             Estado:
-            <InfoHint text="Cabecera editable del proyecto. El estado (Por iniciar / En curso / Completado) es la fase; la urgencia (❗ Atención Inmediata / 📅 Próximo Ciclo / ⏸️ Backlog) marca la prioridad temporal; el responsable es la persona a cargo del proyecto y su color identifica el proyecto en el panel. Cómo se usa: los roles distintos de Junior (perfil completo) cambian estado, urgencia y responsable, pegan el enlace de Drive, gestionan etiquetas y, con «Editar contenido», ajustan título, categoría y textos; el nombre se edita con un clic directo sobre el título. Límite: nadie puede tener más de 3 proyectos activos en «❗ Atención Inmediata». Ejemplo: «En curso · 📅 Próximo Ciclo · María Fernanda Celis»." />
+            <InfoHint text="Cabecera editable del proyecto. El estado (Por iniciar / En curso / Completado) es la fase; la urgencia (❗ Atención Inmediata / 📅 Próximo Ciclo / ⏸️ Backlog) marca la prioridad temporal; el responsable es la persona de ET a cargo del proyecto y su color identifica el proyecto en el panel; el solicitante es la persona fuera de ET (otra área, coordinación, dirección) que pidió el servicio o la iniciativa, si aplica. Cómo se usa: los roles distintos de Junior (perfil completo) cambian estado, urgencia, responsable y solicitante, pegan el enlace de Drive, gestionan etiquetas y, con «Editar contenido», ajustan título, categoría y textos; el nombre se edita con un clic directo sobre el título. Límite: nadie puede tener más de 3 proyectos activos en «❗ Atención Inmediata». Ejemplo: «En curso · 📅 Próximo Ciclo · Responsable: María Fernanda Celis · Solicitante: Angela Fierro (AA)»." />
           </span>
           <ProjectStatusSelect projectId={project.id} status={project.status} />
           <span className="text-sm text-muted-foreground">Urgencia:</span>
@@ -124,6 +126,8 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
           />
           <span className="text-sm text-muted-foreground">Responsable:</span>
           <ProjectAssigneeSelect projectId={project.id} assignee={project.assignee} people={authors} />
+          <span className="text-sm text-muted-foreground">Solicitante:</span>
+          <ProjectRequesterSelect projectId={project.id} requester={project.requester} people={authors} />
         </div>
         <ProjectEventControls project={project} candidateMains={candidateMains} mainProject={project.mainProject} />
         <ProjectControls project={project} />

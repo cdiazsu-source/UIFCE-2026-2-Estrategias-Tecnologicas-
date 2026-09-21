@@ -187,6 +187,35 @@ export async function updateProjectAssignee(
   return { kind: "project.assignee", id: projectId, before: prev.assigneeId };
 }
 
+/** Fija (o quita) quién solicitó el proyecto: la persona fuera de ET que pidió
+ *  el servicio o la iniciativa (otra área, coordinación, dirección). Bloqueado
+ *  para el perfil junior, igual que el resto de la cabecera del proyecto. */
+export async function updateProjectRequester(
+  projectId: string,
+  rawUserId: string,
+): Promise<UndoAction | void> {
+  if (await blockedForJunior()) return;
+
+  const prev = await prisma.project.findUnique({
+    where: { id: projectId },
+    select: { requesterId: true },
+  });
+  if (!prev) return;
+
+  const id = rawUserId.trim();
+  const user = id
+    ? await prisma.user.findFirst({ where: { id, active: true }, select: { id: true } })
+    : null;
+  const requesterId = user?.id ?? null;
+  if (prev.requesterId === requesterId) return;
+
+  await prisma.project.update({ where: { id: projectId }, data: { requesterId } });
+  revalidatePath("/");
+  revalidatePath(`/proyectos/${projectId}`);
+
+  return { kind: "project.requester", id: projectId, before: prev.requesterId };
+}
+
 /** Edita los campos de contenido de cualquier proyecto. Si el proyecto viene
  *  del CSV, lo marca como editado en la app para que el resync deje de
  *  sobrescribir esos campos (ver Project.editedInApp). */
