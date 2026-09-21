@@ -1,12 +1,23 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Info } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
+/** Ancho del globo (coincide con w-64) y aire mínimo respecto al borde de
+ *  pantalla, en px. Se usan para que el globo no se salga del viewport
+ *  cuando el ícono está pegado a un borde (columnas derechas en grillas
+ *  angostas de celular). */
+const TOOLTIP_WIDTH = 256;
+const VIEWPORT_MARGIN = 16;
+
 export function InfoHint({ text, className }: { text: string; className?: string }) {
   const [open, setOpen] = useState(false);
+  // Corrimiento en px respecto al centrado por defecto, para no salirse de
+  // pantalla cuando el ícono está cerca de un borde. 0 = centrado normal.
+  const [shift, setShift] = useState(0);
+  const [maxWidth, setMaxWidth] = useState(TOOLTIP_WIDTH);
   const ref = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
@@ -25,6 +36,23 @@ export function InfoHint({ text, className }: { text: string; className?: string
     };
   }, [open]);
 
+  useLayoutEffect(() => {
+    if (!open || !ref.current) return;
+    // clientWidth (no la barra de scroll) es lo que de verdad limita el
+    // layout — más fiable que innerWidth en algunos webviews/emuladores.
+    const viewportWidth = document.documentElement.clientWidth;
+    const width = Math.min(TOOLTIP_WIDTH, viewportWidth - VIEWPORT_MARGIN * 2);
+    setMaxWidth(width);
+    const rect = ref.current.getBoundingClientRect();
+    const center = rect.left + rect.width / 2;
+    const halfWidth = width / 2;
+    const idealLeft = center - halfWidth;
+    const idealRight = center + halfWidth;
+    if (idealLeft < VIEWPORT_MARGIN) setShift(VIEWPORT_MARGIN - idealLeft);
+    else if (idealRight > viewportWidth - VIEWPORT_MARGIN) setShift(viewportWidth - VIEWPORT_MARGIN - idealRight);
+    else setShift(0);
+  }, [open]);
+
   return (
     <span ref={ref} className={cn("relative inline-flex", className)}>
       <button
@@ -39,7 +67,8 @@ export function InfoHint({ text, className }: { text: string; className?: string
       {open && (
         <span
           role="tooltip"
-          className="absolute left-1/2 top-full z-20 mt-2 w-64 max-w-[calc(100vw-2rem)] -translate-x-1/2 rounded-lg border border-border bg-card p-3 text-xs font-normal normal-case leading-relaxed tracking-normal text-card-foreground shadow-lg"
+          style={{ transform: `translateX(calc(-50% + ${shift}px))`, maxWidth }}
+          className="absolute left-1/2 top-full z-20 mt-2 w-64 rounded-lg border border-border bg-card p-3 text-xs font-normal normal-case leading-relaxed tracking-normal text-card-foreground shadow-lg"
         >
           {text}
         </span>
