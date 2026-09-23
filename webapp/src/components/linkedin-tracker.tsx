@@ -20,6 +20,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { PersonAvatar } from "@/components/person-avatar";
 import { InfoHint } from "@/components/info-hint";
+import { LinkedInProfileTemplate } from "@/components/linkedin-profile-template";
 import { useCanEdit, useCanRecordMetrics } from "@/components/access-context";
 import { useUndo } from "@/components/undo-banner";
 import { formatDate } from "@/lib/utils";
@@ -44,6 +45,8 @@ export type TrackeeData = {
   photoUrl: string | null;
   color: string | null;
   snapshots: SnapshotData[];
+  /** Respuestas ya guardadas de la plantilla de perfil, por clave de pregunta. */
+  profileAnswers: Record<string, string>;
 };
 
 type FieldDef = { key: string; label: string; max?: number; hint: string };
@@ -655,6 +658,7 @@ function TrackeeCard({
               Registrar medición
             </Button>
           )}
+          <LinkedInProfileTemplate trackeeId={trackee.id} trackeeName={trackee.name} answers={trackee.profileAnswers} />
           {trackee.snapshots.length > 0 && (
             <button
               type="button"

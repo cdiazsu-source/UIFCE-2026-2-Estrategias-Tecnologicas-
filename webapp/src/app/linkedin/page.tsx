@@ -28,6 +28,7 @@ export default async function LinkedInPage() {
       include: {
         user: { select: { photoUrl: true, color: true, area: true } },
         snapshots: { orderBy: { month: "asc" } },
+        profileAnswers: { select: { questionKey: true, answer: true } },
       },
     }),
     prisma.user.findMany({
@@ -72,6 +73,7 @@ export default async function LinkedInPage() {
     isET: t.area === "ET" || t.user?.area === "ET",
     photoUrl: t.user?.photoUrl ?? null,
     color: t.user?.color ?? null,
+    profileAnswers: Object.fromEntries(t.profileAnswers.map((a) => [a.questionKey, a.answer])),
     snapshots: t.snapshots.map((s) => {
       const values: Record<string, number | boolean | null> = {};
       for (const k of VALUE_KEYS) values[k] = s[k];
@@ -102,7 +104,7 @@ export default async function LinkedInPage() {
       <div>
         <h1 className="flex items-center gap-1.5 text-xl font-bold">
           Seguimiento del equipo en LinkedIn
-          <InfoHint text="Seguimiento mensual del LinkedIn del equipo, para la marca empleadora. Primero, la página de la Unidad (resumen de solo lectura; se edita en Difusión digital). Luego una ficha por persona —Dirección, Coordinación, Liderazgo, Máster y el resto— con 4 métricas rápidas (impresiones, seguidores, visualizaciones del perfil y apariciones en búsquedas — las mismas 4 tarjetas que muestra la app de LinkedIn en «Analíticas») y, si hay tiempo, métricas opcionales: profile score (0–100), conexiones, SSI, publicaciones, interacciones, recomendaciones y certificados. Cómo se usa: acércate a cada persona, pídele que abra Analíticas en su app de LinkedIn, elige el mes y «Registrar medición» en su ficha —las 4 tarjetas rápidas son lo único que hace falta, el resto es opcional y queda plegado— (lo hace el junior coordinador; el perfil junior crea y edita, borrar es del perfil completo). El enlace de LinkedIn de cada persona lo puede agregar cualquiera con sesión. Todo se ingresa a mano. Ejemplo: «Cesar Diaz · sep 2026 · 6 impresiones · 53 seguidores · 37 visualizaciones de perfil»." />
+          <InfoHint text="Seguimiento mensual del LinkedIn del equipo, para la marca empleadora. Primero, la página de la Unidad (resumen de solo lectura; se edita en Difusión digital). Luego una ficha por persona —Dirección, Coordinación, Liderazgo, Máster y el resto— con 4 métricas rápidas (impresiones, seguidores, visualizaciones del perfil y apariciones en búsquedas — las mismas 4 tarjetas que muestra la app de LinkedIn en «Analíticas») y, si hay tiempo, métricas opcionales: profile score (0–100), conexiones, SSI, publicaciones, interacciones, recomendaciones y certificados. Cada ficha tiene además «Plantilla de perfil»: 8 preguntas cortas, una por pantalla, que sirven de insumo inicial para armar el titular, el extracto, la experiencia y las habilidades de esa persona en LinkedIn — se responde de a una, se guarda sola sin botón de enviar y se puede dejar a la mitad y retomar cuando sea. Cómo se usa: acércate a cada persona, pídele que abra Analíticas en su app de LinkedIn, elige el mes y «Registrar medición» en su ficha —las 4 tarjetas rápidas son lo único que hace falta, el resto es opcional y queda plegado— (lo hace el junior coordinador; el perfil junior crea y edita, borrar es del perfil completo). El enlace de LinkedIn de cada persona lo puede agregar cualquiera con sesión. Todo se ingresa a mano. Ejemplo: «Cesar Diaz · sep 2026 · 6 impresiones · 53 seguidores · 37 visualizaciones de perfil»." />
         </h1>
         <p className="text-sm text-muted-foreground">
           {data.length} personas en seguimiento · {withData} con mediciones. Principio del semestre: calidad sobre

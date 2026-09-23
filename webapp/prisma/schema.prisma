@@ -522,12 +522,34 @@ model LinkedInTrackee {
   order       Int     @default(0)
   active      Boolean @default(true)
 
-  snapshots LinkedInSnapshot[]
+  snapshots      LinkedInSnapshot[]
+  profileAnswers LinkedInProfileAnswer[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([userId])
+}
+
+/// Respuesta de una persona a una pregunta de la plantilla de perfil de
+/// LinkedIn (el insumo inicial para armar titular, extracto, experiencia y
+/// habilidades — ver src/lib/linkedin-profile-questions.ts). Una fila por
+/// trackee y pregunta; se guarda pregunta por pregunta, no como un formulario
+/// que se manda de una vez, así nunca se pierde lo ya escrito.
+model LinkedInProfileAnswer {
+  id          String          @id @default(cuid())
+  trackeeId   String
+  trackee     LinkedInTrackee @relation(fields: [trackeeId], references: [id], onDelete: Cascade)
+  /// Clave de la pregunta (ver PROFILE_QUESTIONS), no el texto — así se puede
+  /// reordenar o retocar la redacción de la pregunta sin perder respuestas.
+  questionKey String
+  answer      String          @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([trackeeId, questionKey])
+  @@index([trackeeId])
 }
 
 /// Medición mensual de LinkedIn de una persona (`LinkedInTrackee`). Una fila por
