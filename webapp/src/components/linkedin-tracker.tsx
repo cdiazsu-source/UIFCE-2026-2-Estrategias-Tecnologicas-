@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import Link from "next/link";
-import { ArrowRight, Check, ChevronDown, ExternalLink, Linkedin, Pencil, Plus, Trash2 } from "lucide-react";
+import { ArrowRight, Check, ChevronDown, ExternalLink, Linkedin, Pencil, PenSquare, Plus, Trash2 } from "lucide-react";
 
 import {
   addLinkedInSnapshot,
@@ -50,6 +50,12 @@ export type TrackeeData = {
 };
 
 type FieldDef = { key: string; label: string; max?: number; hint: string };
+
+/** Herramienta externa (Claude Artifact) con titulares, "Acerca de" y bullets
+ *  de experiencia ya redactados por área y rol de la UIFCE, listos para
+ *  copiar y pulir. Vive fuera del repo porque es contenido editorial que se
+ *  revisa en conversación, no código de la app. */
+const PROFILE_WRITER_URL = "https://claude.ai/artifact/D27NuM9YCX5qb97WbV855W";
 
 /** Las 4 tarjetas de "Supervisa el rendimiento" en Analíticas de la app de
  *  LinkedIn — lo único que hace falta mirar en el celular de la persona para
@@ -103,7 +109,7 @@ const MORE_FIELDS: FieldDef[] = [
   {
     key: "engagementLast30",
     label: "Interacciones (últimos 30 d)",
-    hint: "Qué mide: la suma de reacciones + comentarios + veces compartido que recibieron sus publicaciones del último mes. Dónde se ve: foto de perfil → «Analíticas» → «Análisis de contenido» → sección «Interacción» de cada publicación (o el acumulado del período).",
+    hint: "Qué mide: cuánta gente reaccionó a sus publicaciones del último mes — la suma de reacciones (me gusta, celebra, etc.) + comentarios + veces que las compartieron. LinkedIn no muestra este total ya sumado: hay que calcularlo a mano. Cómo sacarlo: foto de perfil → «Analíticas» → «Análisis de contenido». Ahí aparece cada publicación de los últimos 30 días con su número de reacciones, comentarios y veces compartida por separado; suma esos tres números de cada publicación del período y pon aquí el total.",
   },
   {
     key: "recommendations",
@@ -659,6 +665,16 @@ function TrackeeCard({
             </Button>
           )}
           <LinkedInProfileTemplate trackeeId={trackee.id} trackeeName={trackee.name} answers={trackee.profileAnswers} />
+          <a
+            href={PROFILE_WRITER_URL}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1.5 rounded-md border border-dashed border-primary/40 px-2 py-1 text-xs font-medium text-primary hover:bg-primary/5"
+          >
+            <PenSquare className="h-3.5 w-3.5" />
+            Redactor de perfil
+            <ExternalLink className="h-3 w-3" />
+          </a>
           {trackee.snapshots.length > 0 && (
             <button
               type="button"
