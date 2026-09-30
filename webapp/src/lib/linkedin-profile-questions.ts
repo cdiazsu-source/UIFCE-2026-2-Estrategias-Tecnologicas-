@@ -66,6 +66,18 @@ export const PROFILE_QUESTIONS: ProfileQuestion[] = [
     hint: "Así quien te ayude a organizarlo sabe por dónde empezar contigo, sin que tengas que explicarlo cada vez.",
     placeholder: "Foto, redactar, banner, no sé por dónde empezar…",
   },
+  {
+    key: "dreamCompanies",
+    prompt: "¿En qué empresas o tipo de organizaciones te gustaría trabajar más adelante?",
+    hint: "Nombra 2 o 3 — sirve para seguir esas páginas en LinkedIn y para decidir qué palabras clave conviene destacar en tu perfil.",
+    placeholder: "Ej: Bancolombia, una ONG, una startup de tecnología…",
+  },
+  {
+    key: "microtallerTopic",
+    prompt: "Si dictaras un microtaller para la UIFCE, ¿de qué tema o rama te gustaría que fuera?",
+    hint: "Es la semilla de una propuesta de microtaller a tu nombre — no tiene que estar desarrollada todavía, solo el tema que te interesaría mostrar.",
+    placeholder: "Ej: edición de video, Excel avanzado, diseño en Canva…",
+  },
 ];
 
 export const PROFILE_QUESTION_KEYS = new Set(PROFILE_QUESTIONS.map((q) => q.key));

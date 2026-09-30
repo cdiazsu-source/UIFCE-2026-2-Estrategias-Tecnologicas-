@@ -307,6 +307,41 @@ model Contact {
   @@index([projectId])
 }
 
+/// Empresa de interés laboral para el equipo (ej. "Mastercard"), agrupador de
+/// los perfiles de LinkedIn que se le siguen (ver CompanyLead). Editable en
+/// /aliados, subsección "Empresas de interés".
+model TargetCompany {
+  id    String  @id @default(cuid())
+  name  String  @unique
+  notes String? @db.Text
+  order Int     @default(0)
+  leads CompanyLead[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/// Persona vinculada a una empresa de interés (ejecutivo, reclutador,
+/// referido…) cuyo perfil de LinkedIn se sigue para detectar oportunidades
+/// laborales del equipo. `lastCheckedAt` se actualiza con el botón "Marcar
+/// revisado hoy": cuándo fue la última vez que alguien miró ese perfil.
+model CompanyLead {
+  id            String        @id @default(cuid())
+  companyId     String
+  company       TargetCompany @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  name          String
+  /// Cargo o rol frente a la empresa: "Ejecutivo", "Reclutador", "Referido"… texto libre.
+  role          String
+  linkedinUrl   String?
+  notes         String?       @db.Text
+  lastCheckedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([companyId])
+}
+
 /// Persona del equipo de ET o de su entorno cercano (coordinación, dirección).
 /// Directorio editable desde /equipo. `email` es la identidad; por ahora no
 /// habilita inicio de sesión — es sólo dato de contacto y atribución.
