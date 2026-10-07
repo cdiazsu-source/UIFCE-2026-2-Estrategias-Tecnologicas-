@@ -350,6 +350,36 @@ IDEAS = [
         entregables="* Letrero de puerta instalado en cada sala de informática.\n* Pieza 16:9 programada en las pantallas informativas institucionales.\n* Póster A4/tabloide colocado en la Biblioteca Central y las salas de estudio.\n* Tablero de seguimiento con los tres indicadores (ocupación, escaneos de QR y encuesta de percepción).",
         priority=False,
     ),
+    dict(
+        id="innovacion-experiencia-nfc-uifce",
+        cat="Innovación y eficiencia operativa — Próximo ciclo",
+        idea="Experiencia NFC de identificación sonora y audiovisual de la UIFCE",
+        hacer="Diseñar una experiencia con chips NFC que permita a las personas interactuar con contenidos audiovisuales de la UIFCE mediante el escaneo. Producir una primera serie de videos breves orientados a presentar la Unidad y facilitar su interacción con el público. Definir una propuesta de identificación sonora breve y distintiva para su uso en contenidos audiovisuales de la UIFCE. Solicitar el acompañamiento de Desarrollo para la programación e integración técnica de los chips NFC.",
+        espera="Contar con un prototipo funcional de experiencia NFC, una primera serie de videos [por confirmar] y una propuesta de identificación sonora aprobada para uso institucional.",
+        fundamento="La propuesta surge como una iniciativa nueva para fortalecer la identificación y posicionamiento de la UIFCE mediante una experiencia interactiva que articule recursos físicos, audiovisuales y digitales. El proyecto requiere articulación con Desarrollo para la programación de los chips NFC, de acuerdo con el protocolo de acompañamiento interárea.",
+        entregables="* Definir el recorrido de interacción del chip NFC en un documento de experiencia.\n* Solicitar a Desarrollo la validación técnica del prototipo NFC.\n* Definir el concepto de los videos en un documento de producción.\n* Producir la primera serie de videos [por confirmar].\n* Diseñar la propuesta de identificación sonora de la UIFCE.\n* Validar las piezas audiovisuales y sonoras según los lineamientos institucionales.\n* Integrar los contenidos al prototipo NFC.\n* Publicar el prototipo y registrar su enlace de acceso.",
+        priority=False,
+    ),
+    dict(
+        id="innovacion-seguimiento-gastos-et",
+        cat="Innovación y eficiencia operativa — Próximo ciclo",
+        idea="Sistema de seguimiento de gastos de ET",
+        hacer="Diseñar una planilla para registrar y consultar los gastos de ET asociados a impresiones, publicidad y adquisición de equipo. Definir los campos mínimos de seguimiento y una estructura que permita identificar el concepto, valor y estado de cada gasto. Entregar la herramienta para su uso interno en la gestión de ET.",
+        espera="Contar con una planilla funcional para registrar y consultar los gastos de ET en las categorías definidas, con una estructura validada por el máster.",
+        fundamento="Esta propuesta surge como una necesidad nueva de organización y seguimiento de los gastos asociados a las actividades de ET. No se cuenta con un antecedente específico suministrado para justificar una estructura previa, por lo que el proyecto busca establecer una herramienta inicial de control operativo.",
+        entregables="* Definir los campos de registro requeridos en la planilla.\n* Diseñar la estructura de la planilla de seguimiento.\n* Incorporar las categorías de impresiones, publicidad y equipo.\n* Validar la estructura con el máster.\n* Entregar la planilla funcional para uso de ET.\n* Registrar el enlace o ubicación definitiva de la herramienta.",
+        priority=False,
+    ),
+    dict(
+        id="produccion-point-of-purchase-uifce",
+        cat="Producción de contenido — Próximo ciclo",
+        idea="Sistema de Point of Purchase de la UIFCE",
+        hacer="Definir el concepto visual y los elementos de Point of Purchase de la marca UIFCE para uso en espacios físicos de la oficina. Diseñar las piezas visuales priorizadas de acuerdo con los lineamientos de identidad visual institucional. Validar las piezas con el máster antes de su producción o instalación.",
+        espera="Contar con una propuesta visual de Point of Purchase aprobada y con las piezas finales listas para su implementación en la oficina.",
+        fundamento="La necesidad surge como una iniciativa nueva para fortalecer la presencia visual de la UIFCE en sus espacios físicos. El proyecto se plantea como una primera entrega acotada, priorizando calidad y coherencia con la identidad visual institucional.",
+        entregables="* Definir los elementos de Point of Purchase prioritarios en un listado aprobado.\n* Revisar los lineamientos de identidad visual aplicables en un documento de referencia.\n* Elaborar la propuesta visual de los elementos priorizados en archivos editables.\n* Revisar la propuesta con el máster en una aprobación registrada.\n* Ajustar las piezas según la aprobación registrada.\n* Entregar las piezas finales en sus formatos de producción.",
+        priority=False,
+    ),
 ]
 
 # ---------- Sheet 1: Planeación ----------
