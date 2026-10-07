@@ -18,6 +18,7 @@ import {
 } from "@/components/study-comments";
 import { InfoHint } from "@/components/info-hint";
 import { NewProjectButton } from "@/components/new-project-button";
+import { ProjectSeedPromptButton } from "@/components/project-seed-prompt-button";
 import { CategoryDistribution } from "@/components/category-distribution";
 import { DofaOverlay } from "@/components/dofa-overlay";
 import { StrategicAnalysisOverlay } from "@/components/strategic-analysis-overlay";
@@ -420,6 +421,7 @@ export default async function HomePage({
             <CategoryDistribution projects={projectCards} />
             <DofaOverlay />
             <StrategicAnalysisOverlay />
+            <ProjectSeedPromptButton />
             <NewProjectButton semesterId={selected?.id} semesterLabel={selected?.label} />
           </div>
           {projectCards.length === 0 ? (

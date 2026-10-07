@@ -18,6 +18,9 @@ const WIP_MESSAGE = "Límite de WIP alcanzado: Resuelve o reclasifica una tarea 
  *  con el índice del CSV (0..N-1) que reescribe el seed en cada resync. */
 const MANUAL_SOURCE_ORDER_BASE = 1000;
 
+/** Tope de subtareas que se siembran al crear un proyecto desde el formulario. */
+const MAX_INITIAL_CHECKLIST = 40;
+
 function slugify(text: string): string {
   return text
     .normalize("NFD")
@@ -39,6 +42,12 @@ export async function createProject(formData: FormData) {
   const description = String(formData.get("description") ?? "").trim();
   const expectedOutcome = String(formData.get("expectedOutcome") ?? "").trim();
   const rationale = String(formData.get("rationale") ?? "").trim();
+  // Checklist inicial: una subtarea por línea; se quitan viñetas y numeración.
+  const checklist = String(formData.get("checklist") ?? "")
+    .split(/\r?\n/)
+    .map((line) => line.replace(/^\s*(?:[-*•]|\d+\s*[.)]|\[[ xX]?\])\s*/, "").trim())
+    .filter(Boolean)
+    .slice(0, MAX_INITIAL_CHECKLIST);
 
   // Semestre: el que se eligió, si no el vigente.
   const rawSemesterId = String(formData.get("semesterId") ?? "").trim();
@@ -86,6 +95,7 @@ export async function createProject(formData: FormData) {
       endAt,
       location,
       mainProjectId,
+      checklistItems: { create: checklist.map((text, order) => ({ text, order })) },
     },
   });
 

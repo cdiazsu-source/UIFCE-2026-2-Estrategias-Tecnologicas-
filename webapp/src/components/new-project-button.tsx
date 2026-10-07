@@ -61,6 +61,11 @@ export function NewProjectButton({ semesterId, semesterLabel }: { semesterId?: s
       <Textarea name="description" placeholder="Qué se debe hacer (opcional)" className="min-h-[60px]" />
       <Textarea name="expectedOutcome" placeholder="Qué se espera (opcional)" className="min-h-[60px]" />
       <Textarea name="rationale" placeholder="Fundamento (opcional)" className="min-h-[60px]" />
+      <Textarea
+        name="checklist"
+        placeholder={"Checklist (opcional): una subtarea por línea, en el orden en que se ejecutan.\nSe aceptan numeradas (1. …) o con guion (- …)."}
+        className="min-h-[96px]"
+      />
       <div className="flex gap-2">
         <Button type="submit" size="sm">
           Crear proyecto
