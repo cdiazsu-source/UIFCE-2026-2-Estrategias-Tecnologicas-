@@ -1,10 +1,11 @@
 import fs from "node:fs";
 import path from "node:path";
 import { parse } from "csv-parse/sync";
-import { PrismaClient } from "@prisma/client";
 import { personColor } from "../src/lib/person-color";
-
-const prisma = new PrismaClient();
+// Mismo cliente que la app: habla con Neon por WebSocket (:443). Un
+// `new PrismaClient()` sin adaptador va directo al :5432, que en algunas redes
+// falla de forma intermitente ("Timed out fetching a new connection").
+import { prisma } from "../src/lib/prisma";
 
 // Fuente de verdad editada por personas: no se reemplaza, solo se lee.
 // Ver CLAUDE.md numeral 6 y prisma/schema.prisma para el porqué de este diseño.

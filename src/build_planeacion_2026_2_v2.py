@@ -340,6 +340,16 @@ IDEAS = [
         entregables="* Documento de propuesta con el enlace institucional necesario (áreas de la Facultad y grupos GEA).\n* Espacio de presentación de la Unidad acordado y calendarizado.\n* Primera edición del espacio ejecutada, con reporte de asistencia.",
         priority=False,
     ),
+    dict(
+        id="produccion-sala-abierta",
+        cat="Producción de contenido — Próximo ciclo",
+        idea="Campaña de difusión \"Sala Abierta\" (salas de informática en horario libre)",
+        hacer="Diseñar y producir tres piezas que den a conocer las franjas de uso libre de las salas de informática (lunes 7:00-9:00 y 14:00-16:00, jueves 7:00-9:00 y viernes 9:00-11:00): (1) un letrero permanente para la puerta de cada sala, en vinilo o metacrilato, que indique de un vistazo si la sala está abierta o reservada para clase; (2) una pieza digital 16:9 para las pantallas informativas de pasillos, hall y zonas comunes; (3) un póster A4/tabloide para las carteleras y mesas de la Biblioteca Central y las salas de estudio. Las tres llevan un código QR al sitio informativo y un tono de invitación, no restrictivo. Confirmar con Coordinación las franjas vigentes antes de imprimir.",
+        espera="Que el estudiante sepa sin preguntar si una sala está disponible (meta: reducir en 80 % las consultas al personal sobre disponibilidad) y que la ocupación en las franjas libres supere el 75 % promedio semanal. Seguimiento con más de 500 escaneos de QR al mes y más del 80 % de respuestas afirmativas en la encuesta de percepción sobre cómo se enteraron del servicio.",
+        fundamento="El diagnóstico 2025-2 → 2026-1 recomienda gestionar con Coordinación franjas horarias de sala para mitigar la restricción estructural de espacio físico, y la reunión final de 2026-1 pidió evitar el lenguaje restrictivo en la señalética de salas (ver produccion-senaletica-salas). No hay antecedente de una campaña específica de uso libre: surge como necesidad nueva, porque el documento de estrategia \"Sala Abierta\" atribuye la subutilización de las salas al desconocimiento de los horarios y a la falta de señalización en los puntos de flujo estudiantil.",
+        entregables="* Letrero de puerta instalado en cada sala de informática.\n* Pieza 16:9 programada en las pantallas informativas institucionales.\n* Póster A4/tabloide colocado en la Biblioteca Central y las salas de estudio.\n* Tablero de seguimiento con los tres indicadores (ocupación, escaneos de QR y encuesta de percepción).",
+        priority=False,
+    ),
 ]
 
 # ---------- Sheet 1: Planeación ----------
