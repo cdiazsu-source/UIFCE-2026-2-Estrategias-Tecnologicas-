@@ -7,6 +7,7 @@ import {
   addConsentSignatory,
   deleteConsentSignatory,
   setConsentDriveAccess,
+  setConsentPhotoReady,
   setConsentSigned,
   updateConsentDriveUrl,
   updateConsentSignatory,
@@ -18,7 +19,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PersonAvatar } from "@/components/person-avatar";
 import { InfoHint } from "@/components/info-hint";
 import { useCanManageConsent } from "@/components/access-context";
-import { CONSENT_DOC_TEXT, consentTextFor } from "@/lib/consent";
+import { CONSENT_DOC_TEXT, CONSENT_PHOTO_REQUIREMENTS, consentTextFor } from "@/lib/consent";
 import { formatDate } from "@/lib/utils";
 
 export type ConsentRow = {
@@ -28,6 +29,8 @@ export type ConsentRow = {
   signedAt: Date | null;
   driveAccess: boolean;
   driveAccessAt: Date | null;
+  photoReady: boolean;
+  photoReadyAt: Date | null;
   driveFolderUrl: string | null;
   active: boolean;
   isET: boolean;
@@ -91,20 +94,24 @@ function ProgressChart({ rows }: { rows: ConsentRow[] }) {
   const total = rows.length;
   const signed = rows.filter((r) => r.signed).length;
   const drive = rows.filter((r) => r.driveAccess).length;
-  const both = rows.filter((r) => r.signed && r.driveAccess).length;
+  const photo = rows.filter((r) => r.photoReady).length;
+  const all = rows.filter((r) => r.signed && r.driveAccess && r.photoReady).length;
 
   return (
     <div className="flex flex-col gap-3 rounded-md border border-border p-3">
       <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
         Avance del proyecto
-        <InfoHint text="Cuántas personas cumplen cada ítem del checklist y cuántas faltan. «Todo listo» son las que ya firmaron y ya tienen acceso a su carpeta. Las barras se actualizan al marcar cada fila abajo." />
+        <InfoHint text="Cuántas personas cumplen cada ítem del checklist y cuántas faltan. «Todo listo» son las que ya firmaron, ya tienen acceso a su carpeta y ya tienen su foto lista. Las barras se actualizan al marcar cada fila abajo." />
       </p>
       <Bar label="Consentimientos firmados" done={signed} total={total} />
       <Bar label="Acceso a carpeta de Drive" done={drive} total={total} />
+      <Bar label="Foto lista en la carpeta" done={photo} total={total} />
       <p className="text-xs text-muted-foreground">
-        Todo listo (firmado y con acceso): <span className="font-medium text-foreground">{both}</span> de {total}
-        {total - both > 0 ? ` · faltan ${total - both}` : ""}.
+        Todo listo (firmado, con acceso y con foto): <span className="font-medium text-foreground">{all}</span> de{" "}
+        {total}
+        {total - all > 0 ? ` · faltan ${total - all}` : ""}.
       </p>
+      <p className="text-xs text-muted-foreground">Foto requerida: {CONSENT_PHOTO_REQUIREMENTS}</p>
     </div>
   );
 }
@@ -115,6 +122,7 @@ function Toggle({
   offLabel,
   at,
   disabled,
+  title,
   onChange,
 }: {
   on: boolean;
@@ -122,6 +130,7 @@ function Toggle({
   offLabel: string;
   at: Date | null;
   disabled: boolean;
+  title?: string;
   onChange: (next: boolean) => void;
 }) {
   return (
@@ -135,7 +144,7 @@ function Toggle({
           ? "border-success/40 bg-success/10 text-success"
           : "border-border text-muted-foreground " + (disabled ? "" : "hover:bg-accent"))
       }
-      title={at ? formatDate(at) : undefined}
+      title={[title, at ? formatDate(at) : null].filter(Boolean).join(" · ") || undefined}
     >
       {on ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
       {on ? onLabel : offLabel}
@@ -277,6 +286,16 @@ function SignatoryRow({ row }: { row: ConsentRow }) {
         onChange={(next) => startTransition(() => setConsentDriveAccess(row.id, next))}
       />
 
+      <Toggle
+        on={row.photoReady}
+        onLabel="Foto lista"
+        offLabel="Sin foto"
+        at={row.photoReadyAt}
+        disabled={!canEdit || isPending}
+        title={CONSENT_PHOTO_REQUIREMENTS}
+        onChange={(next) => startTransition(() => setConsentPhotoReady(row.id, next))}
+      />
+
       <DriveButton row={row} />
 
       <button
@@ -335,7 +354,7 @@ export function ConsentPanel({ signatories }: { signatories: ConsentRow[] }) {
         <CardTitle className="flex items-center gap-1.5">
           <FileSignature className="h-4 w-4" />
           Consentimientos de uso de imagen
-          <InfoHint text="Panel del proyecto: el documento a firmar, el avance (cuántas personas faltan por firmar y por recibir acceso a su carpeta de fotos) y una fila por integrante para marcar «Firmó» y «Acceso a Drive» y guardar el enlace a su carpeta. Con perfil completo se marcan los estados y se edita la lista. Ejemplo: «María Fernanda Celis · Firmó · Acceso a Drive · Abrir carpeta»." />
+          <InfoHint text="Panel del proyecto: el documento a firmar, el avance (cuántas personas faltan por firmar, por recibir acceso a su carpeta y por tener su foto lista) y una fila por integrante para marcar «Firmó», «Acceso a Drive» y «Foto lista» (tipo carné, JPG, máx. 5 MB, dentro de su carpeta) y guardar el enlace a su carpeta. Con perfil completo se marcan los estados y se edita la lista. Ejemplo: «María Fernanda Celis · Firmó · Acceso a Drive · Foto lista · Abrir carpeta»." />
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">

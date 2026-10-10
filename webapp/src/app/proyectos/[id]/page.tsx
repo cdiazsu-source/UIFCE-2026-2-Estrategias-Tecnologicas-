@@ -93,6 +93,8 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
     signedAt: c.signedAt,
     driveAccess: c.driveAccess,
     driveAccessAt: c.driveAccessAt,
+    photoReady: c.photoReady,
+    photoReadyAt: c.photoReadyAt,
     driveFolderUrl: c.driveFolderUrl,
     active: c.active,
     isET: c.user?.area === "ET",

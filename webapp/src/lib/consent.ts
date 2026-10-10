@@ -26,3 +26,7 @@ C.C. XXXX
 export function consentTextFor(name: string): string {
   return CONSENT_DOC_TEXT.replace("Yo, XXX,", `Yo, ${name},`).replace("\n____________________________\nXXXXXX\n", `\n____________________________\n${name}\n`);
 }
+
+/** Requisitos de la foto de cada integrante para el micrositio (ver la nota del
+ *  proyecto): se guarda dentro de su carpeta de Drive. */
+export const CONSENT_PHOTO_REQUIREMENTS = "Foto tipo carné, formato JPG, máximo 5 MB, guardada dentro de su carpeta de Drive.";

@@ -655,6 +655,9 @@ model ConsentSignatory {
   signedAt      DateTime?
   driveAccess   Boolean   @default(false)
   driveAccessAt DateTime?
+  /// true = su foto tipo carné (JPG, máx. 5 MB) ya está lista en su carpeta de Drive.
+  photoReady    Boolean   @default(false)
+  photoReadyAt  DateTime?
   /// Carpeta de Drive con las fotos de esa persona (destino del botón).
   driveFolderUrl String?
   userId        String?

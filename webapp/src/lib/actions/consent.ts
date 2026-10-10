@@ -34,6 +34,15 @@ export async function setConsentDriveAccess(id: string, driveAccess: boolean) {
   revalidate();
 }
 
+export async function setConsentPhotoReady(id: string, photoReady: boolean) {
+  if (!(await canManageConsent())) return;
+  await prisma.consentSignatory.update({
+    where: { id },
+    data: { photoReady, photoReadyAt: photoReady ? new Date() : null },
+  });
+  revalidate();
+}
+
 export async function updateConsentDriveUrl(id: string, driveFolderUrl: string) {
   if (!(await canManageConsent())) return;
   const trimmed = driveFolderUrl.trim();
