@@ -1,19 +1,66 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Check, Copy, FileText, Pencil, Plus, Trash2 } from "lucide-react";
 import type { BrandGuideline } from "@prisma/client";
 
 import { addGuideline, deleteGuideline, updateGuideline } from "@/lib/actions/brand";
+import { buildBrandSummary, SECTION_ORDER, sortSections } from "@/lib/brand-summary";
+import { copyText } from "@/lib/copy-text";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { useCanEdit } from "@/components/access-context";
 
-/** Orden preferido de secciones; cualquier otra sección va después, alfabética. */
-const SECTION_ORDER = ["Lineamientos", "Colores", "Franjas", "Formatos", "Aprobación"];
 const SECTION_SUGGESTIONS = [...SECTION_ORDER, "Tipografía", "Logos y escudo"];
+
+/** Botones «Copiar resumen» / «Copiar todo»: dejan en el portapapeles la línea
+ *  gráfica vigente como texto plano, para pegarla en un chat, un prompt o un
+ *  documento. Se arma con los datos actuales, así que sigue al día con las ediciones. */
+function CopyButtons({ guidelines }: { guidelines: BrandGuideline[] }) {
+  const [done, setDone] = useState<"essential" | "full" | null>(null);
+  const [failed, setFailed] = useState(false);
+
+  async function copy(mode: "essential" | "full") {
+    const ok = await copyText(buildBrandSummary(guidelines, mode));
+    setFailed(!ok);
+    if (!ok) return;
+    setDone(mode);
+    setTimeout(() => setDone((d) => (d === mode ? null : d)), 2500);
+  }
+
+  const disabled = guidelines.length === 0;
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <Button
+        type="button"
+        size="sm"
+        variant="outline"
+        disabled={disabled}
+        onClick={() => copy("essential")}
+        title="Una línea por indicación: título, color y su idea clave"
+      >
+        {done === "essential" ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+        {done === "essential" ? "Resumen copiado" : "Copiar resumen"}
+      </Button>
+      <Button
+        type="button"
+        size="sm"
+        variant="ghost"
+        disabled={disabled}
+        onClick={() => copy("full")}
+        title="Todas las indicaciones con su texto completo"
+      >
+        {done === "full" ? <Check className="h-3.5 w-3.5" /> : <FileText className="h-3.5 w-3.5" />}
+        {done === "full" ? "Todo copiado" : "Copiar todo"}
+      </Button>
+      <span role="status" className="text-xs text-destructive">
+        {failed ? "No se pudo copiar: revisa el permiso del portapapeles del navegador." : ""}
+      </span>
+    </div>
+  );
+}
 
 function GuidelineFields({ guideline }: { guideline?: BrandGuideline }) {
   return (
@@ -138,12 +185,7 @@ export function BrandGuidelines({ guidelines }: { guidelines: BrandGuideline[] }
       list.push(g);
       bySection.set(g.section, list);
     }
-    return [...bySection.entries()].sort(([a], [b]) => {
-      const ia = SECTION_ORDER.indexOf(a);
-      const ib = SECTION_ORDER.indexOf(b);
-      if (ia !== -1 || ib !== -1) return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib);
-      return a.localeCompare(b, "es");
-    });
+    return sortSections([...bySection.entries()]);
   }, [guidelines]);
 
   return (
@@ -154,14 +196,15 @@ export function BrandGuidelines({ guidelines }: { guidelines: BrandGuideline[] }
         ))}
       </datalist>
 
-      {canEdit && (
-        <div className="flex justify-end">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <CopyButtons guidelines={guidelines} />
+        {canEdit && (
           <Button size="sm" variant="outline" onClick={() => setShowForm((s) => !s)}>
             <Plus className="h-3.5 w-3.5" />
             Agregar indicación
           </Button>
-        </div>
-      )}
+        )}
+      </div>
 
       {canEdit && showForm && (
         <form

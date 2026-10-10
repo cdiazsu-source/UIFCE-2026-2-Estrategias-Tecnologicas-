@@ -11,6 +11,7 @@ import { PhotoField } from "@/components/photo-field";
 import { InfoHint } from "@/components/info-hint";
 import { useCanEdit } from "@/components/access-context";
 import { personColor } from "@/lib/person-color";
+import { togglePersonFilter, usePersonFilter } from "@/lib/person-filter";
 import { USER_ROLE_LABEL } from "@/lib/utils";
 
 export type RosterMember = {
@@ -78,38 +79,51 @@ function MemberCard({ member }: { member: RosterMember }) {
     );
   }
 
-  const inner = (
-    <>
-      <PersonAvatar
-        name={member.name}
-        photoUrl={member.photoUrl}
-        size="md"
-        ringColor={personColor(member)}
-      />
-      <div className="min-w-0">
-        <p className="flex items-center gap-1 truncate text-sm font-medium">
-          {member.name}
-          {member.linkedinUrl && <Linkedin className="h-3.5 w-3.5 shrink-0 text-primary" aria-hidden />}
-        </p>
-        <p className="truncate text-xs text-muted-foreground">{roleLabel}</p>
-      </div>
-    </>
-  );
+  const active = usePersonFilter()?.id === member.id;
+
+  // Clic en la persona: filtra el panel a sus proyectos (otro clic, lo quita) y
+  // baja a la sección. El LinkedIn queda en el ícono de la esquina.
+  function filterByPerson() {
+    togglePersonFilter({ id: member.id, name: member.name });
+    if (!active) document.getElementById("proyectos")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 
   return (
     <li className="group relative flex flex-col gap-1.5">
-      {member.linkedinUrl ? (
-        <a
-          href={member.linkedinUrl}
-          target="_blank"
-          rel="noreferrer"
-          className="flex items-center gap-3 rounded-md border border-border p-3 transition-colors hover:border-primary/30 hover:bg-muted/50"
+      <div className="relative">
+        <button
+          type="button"
+          onClick={filterByPerson}
+          aria-pressed={active}
+          title={active ? "Quitar el filtro de proyectos" : `Ver los proyectos de ${member.name}`}
+          className={`flex w-full items-center gap-3 rounded-md border p-3 text-left transition-colors hover:border-primary/30 hover:bg-muted/50 ${
+            active ? "border-primary bg-primary/5" : "border-border"
+          }`}
         >
-          {inner}
-        </a>
-      ) : (
-        <div className="flex items-center gap-3 rounded-md border border-border p-3">{inner}</div>
-      )}
+          <PersonAvatar
+            name={member.name}
+            photoUrl={member.photoUrl}
+            size="md"
+            ringColor={personColor(member)}
+          />
+          <div className="min-w-0 pr-6">
+            <p className="truncate text-sm font-medium">{member.name}</p>
+            <p className="truncate text-xs text-muted-foreground">{roleLabel}</p>
+          </div>
+        </button>
+        {member.linkedinUrl && (
+          <a
+            href={member.linkedinUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="absolute bottom-2 right-2 rounded p-1 text-primary hover:bg-accent"
+            aria-label={`Abrir el LinkedIn de ${member.name}`}
+            title="Abrir LinkedIn"
+          >
+            <Linkedin className="h-3.5 w-3.5" aria-hidden />
+          </a>
+        )}
+      </div>
       {member.urgentCount > 0 && <FocusPill member={member} />}
       {canEdit && (
         <button
@@ -132,7 +146,7 @@ export function TeamRoster({ people }: { people: RosterMember[] }) {
     <div className="flex flex-col gap-2">
       <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
         Integrantes
-        <InfoHint text="El equipo de ET que ejecuta los proyectos (máster y monitores); solo se listan integrantes del área ET. El anillo alrededor de la foto es el color de acento de esa persona: el mismo que identifica sus subtareas y proyectos en el resto del panel. Cómo se usa: clic en una persona abre su LinkedIn; con perfil completo, el lápiz permite subir o cambiar su foto (se comprime en el navegador) y pegar su enlace de LinkedIn. Ejemplo: «Cesar Diaz · Máster · linkedin.com/in/…»." />
+        <InfoHint text="El equipo de ET que ejecuta los proyectos (máster y monitores); solo se listan integrantes del área ET. El anillo alrededor de la foto es el color de acento de esa persona: el mismo que identifica sus subtareas y proyectos en el resto del panel. Cómo se usa: clic en una persona filtra el panel a sus proyectos (otro clic, o «Quitar filtro», lo deshace); el ícono de LinkedIn de la esquina abre su perfil. Con perfil completo, el lápiz permite subir o cambiar su foto (se comprime en el navegador) y pegar su enlace de LinkedIn. Ejemplo: clic en «Jean Baquero» → solo se ven los proyectos donde es responsable o tiene subtareas." />
       </p>
       <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {people.map((m) => (

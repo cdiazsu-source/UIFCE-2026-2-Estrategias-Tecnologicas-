@@ -7,6 +7,8 @@ import { AlertTriangle, Search, X } from "lucide-react";
 import { ProjectCard, type ProjectCardData } from "@/components/project-card";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
+import { setPersonFilter, usePersonFilter } from "@/lib/person-filter";
+import { byUrgency } from "@/lib/project-order";
 import { PRIORITY_TAG_LABEL } from "@/lib/utils";
 
 function norm(s: string) {
@@ -14,22 +16,6 @@ function norm(s: string) {
     .normalize("NFD")
     .replace(/\p{Diacritic}/gu, "")
     .toLowerCase();
-}
-
-/** Menor = más urgente. Sin etiqueta va al final. */
-const PRIORITY_RANK: Record<string, number> = {
-  ATENCION_INMEDIATA: 0,
-  PROXIMO_CICLO: 1,
-  BACKLOG: 2,
-};
-
-function byUrgency(a: ProjectCardData, b: ProjectCardData) {
-  const ca = a.status === "COMPLETADO" ? 1 : 0;
-  const cb = b.status === "COMPLETADO" ? 1 : 0;
-  if (ca !== cb) return ca - cb;
-  const ra = PRIORITY_RANK[a.priorityTag ?? ""] ?? 3;
-  const rb = PRIORITY_RANK[b.priorityTag ?? ""] ?? 3;
-  return ra - rb || a.sortIndex - b.sortIndex;
 }
 
 export function ProjectsGrid({
@@ -46,6 +32,8 @@ export function ProjectsGrid({
   const [q, setQ] = useState("");
   const [category, setCategory] = useState("");
   const [sortMode, setSortMode] = useState<"urgency" | "plan">("urgency");
+  // Filtro rápido por persona, activado desde «Integrantes» (clic en el nombre).
+  const person = usePersonFilter();
 
   // Lista base: todo, o solo los pendientes de atención de la persona enfocada.
   const base = useMemo(() => {
@@ -70,10 +58,14 @@ export function ProjectsGrid({
   );
 
   const nq = norm(q.trim());
-  const filtering = nq.length > 0 || category.length > 0;
+  const filtering = nq.length > 0 || category.length > 0 || person !== null;
 
   const filtered = useMemo(() => {
     return ordered.filter((p) => {
+      // «Asignado a»: responsable del proyecto o alguien con subtareas en él.
+      const matchesPerson =
+        !person || p.assignee?.id === person.id || p.assignees.some((a) => a.id === person.id);
+      if (!matchesPerson) return false;
       const matchesText =
         nq.length === 0 ||
         [p.title, p.category, PRIORITY_TAG_LABEL[p.priorityTag ?? ""] ?? "", p.description, ...p.tags].some((f) =>
@@ -82,7 +74,7 @@ export function ProjectsGrid({
       const matchesCategory = category.length === 0 || p.category === category;
       return matchesText && matchesCategory;
     });
-  }, [ordered, nq, category]);
+  }, [ordered, nq, category, person]);
 
   return (
     <div className="flex flex-col gap-3">
@@ -95,6 +87,23 @@ export function ProjectsGrid({
           <Link href="/#proyectos" className="text-muted-foreground underline hover:text-foreground">
             Ver todos los proyectos
           </Link>
+        </div>
+      )}
+
+      {person && (
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-primary/30 bg-primary/5 px-3 py-2 text-xs">
+          <span className="flex items-center gap-1.5 font-medium text-primary">
+            <Search className="h-3.5 w-3.5" />
+            Proyectos de {person.name} ({filtered.length})
+          </span>
+          <button
+            type="button"
+            onClick={() => setPersonFilter(null)}
+            className="inline-flex items-center gap-1 text-muted-foreground underline hover:text-foreground"
+          >
+            <X className="h-3 w-3" />
+            Quitar filtro
+          </button>
         </div>
       )}
 
@@ -137,6 +146,7 @@ export function ProjectsGrid({
             onClick={() => {
               setQ("");
               setCategory("");
+              setPersonFilter(null);
             }}
             className="inline-flex items-center gap-1 rounded-md border border-input px-2.5 py-1.5 text-xs text-muted-foreground hover:bg-accent"
           >
@@ -156,7 +166,9 @@ export function ProjectsGrid({
         <p className="rounded-md border border-dashed border-input p-6 text-center text-sm text-muted-foreground">
           {focusPersonId
             ? `${focusPersonName ?? "Esta persona"} no tiene proyectos en «❗ Atención Inmediata».`
-            : "Ningún proyecto coincide con la búsqueda."}
+            : person && nq.length === 0 && category.length === 0
+              ? `${person.name} no tiene proyectos asignados en este semestre.`
+              : "Ningún proyecto coincide con la búsqueda."}
         </p>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">

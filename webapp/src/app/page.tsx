@@ -19,6 +19,7 @@ import {
 import { InfoHint } from "@/components/info-hint";
 import { NewProjectButton } from "@/components/new-project-button";
 import { ProjectSeedPromptButton } from "@/components/project-seed-prompt-button";
+import { byUrgency } from "@/lib/project-order";
 import { CategoryDistribution } from "@/components/category-distribution";
 import { DofaOverlay } from "@/components/dofa-overlay";
 import { StrategicAnalysisOverlay } from "@/components/strategic-analysis-overlay";
@@ -229,14 +230,6 @@ async function getHomeData(semesterId: string | null, includeOrphans: boolean) {
     }
   }
 
-  // Rango de urgencia para ordenar: primero «❗ Atención Inmediata», luego
-  // «📅 Próximo Ciclo», luego «⏸️ Backlog», luego sin etiqueta.
-  const PRIORITY_RANK: Record<string, number> = {
-    ATENCION_INMEDIATA: 0,
-    PROXIMO_CICLO: 1,
-    BACKLOG: 2,
-  };
-
   const projectCards: ProjectCardData[] = projects
     .map((p, i) => {
       const directAssignee: CardAssignee | null = p.assignee
@@ -271,16 +264,9 @@ async function getHomeData(semesterId: string | null, includeOrphans: boolean) {
         sortIndex: i,
       };
     })
-    // Orden por defecto: los que requieren atención más urgente primero; los
-    // completados al final; el orden de planeación como desempate.
-    .sort((a, b) => {
-      const ca = a.status === "COMPLETADO" ? 1 : 0;
-      const cb = b.status === "COMPLETADO" ? 1 : 0;
-      if (ca !== cb) return ca - cb;
-      const ra = PRIORITY_RANK[a.priorityTag ?? ""] ?? 3;
-      const rb = PRIORITY_RANK[b.priorityTag ?? ""] ?? 3;
-      return ra - rb || a.sortIndex - b.sortIndex;
-    });
+    // Orden por defecto: «Atención Inmediata», luego «En curso», luego el resto
+    // por urgencia y los completados al final (ver lib/project-order.ts).
+    .sort(byUrgency);
 
   const feedItems: FeedItem[] = [
     ...notes.map(
@@ -416,7 +402,7 @@ export default async function HomePage({
           >
             <h2 className="flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
               Proyectos {selected ? `${selected.label} ` : ""}({projectCards.length})
-              <InfoHint text="Una tarjeta por iniciativa del semestre seleccionado (pestañas de arriba). Por defecto se ordenan por urgencia (primero «❗ Atención Inmediata», luego «📅 Próximo Ciclo», luego «⏸️ Backlog»; los completados al final); el desplegable «Orden» permite volver al orden de planeación. Cómo se usa: busca por texto o filtra por categoría; el progreso cuenta subtareas hechas y la franja de color a la izquierda es la persona asignada — titila si el proyecto está en «❗ Atención Inmediata». Con perfil completo, «Nuevo proyecto» lo crea en el semestre visible. Ejemplo: elige «Eventos» para ver solo esos proyectos." />
+              <InfoHint text="Una tarjeta por iniciativa del semestre seleccionado (pestañas de arriba). Por defecto se ordenan por urgencia (primero «❗ Atención Inmediata», luego los que están «En curso», luego «📅 Próximo Ciclo» y «⏸️ Backlog»; los completados al final); el desplegable «Orden» permite volver al orden de planeación. Cómo se usa: busca por texto, filtra por categoría o haz clic en el nombre de un integrante (arriba) para ver solo sus proyectos; el progreso cuenta subtareas hechas y la franja de color a la izquierda es la persona asignada — titila si el proyecto está en «❗ Atención Inmediata». Con perfil completo, «Nuevo proyecto» lo crea en el semestre visible. Ejemplo: elige «Eventos» para ver solo esos proyectos." />
             </h2>
             <CategoryDistribution projects={projectCards} />
             <DofaOverlay />

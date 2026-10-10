@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { Check, Copy, Sparkles } from "lucide-react";
 
+import { copyText } from "@/lib/copy-text";
 import { buildProjectSeedPrompt } from "@/lib/project-seed-prompt";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -31,26 +32,7 @@ export function ProjectSeedPromptButton() {
   }
 
   async function copy() {
-    let ok = false;
-    try {
-      await navigator.clipboard.writeText(prompt);
-      ok = true;
-    } catch {
-      // Sin permiso de portapapeles (iframe, navegador antiguo): copia por selección.
-      const area = document.createElement("textarea");
-      area.value = prompt;
-      area.setAttribute("readonly", "");
-      area.style.position = "fixed";
-      area.style.opacity = "0";
-      document.body.appendChild(area);
-      area.select();
-      try {
-        ok = document.execCommand("copy");
-      } catch {
-        ok = false;
-      }
-      document.body.removeChild(area);
-    }
+    const ok = await copyText(prompt);
     setFailed(!ok);
     if (ok) {
       setCopied(true);
