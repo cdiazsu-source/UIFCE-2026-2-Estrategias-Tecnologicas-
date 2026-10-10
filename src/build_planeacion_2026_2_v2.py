@@ -400,6 +400,16 @@ IDEAS = [
         entregables="* Validar con el área de Cursos Libres el mensaje clave del video (correo de aprobación).\n* Obtener del área de Cursos Libres la cifra base de certificados emitidos en el aplicativo (dato registrado en el tracker).\n* Redactar la justificación de la propuesta para el equipo de comunicaciones (documento de justificación).\n* Escribir el guion de 25 segundos (documento de guion).\n* Obtener la aprobación del guion por parte del máster (visto bueno registrado).\n* Recibir el contacto del equipo de comunicaciones por Google Chat para darle seguimiento a la pieza, también de manera presencial en el edificio 238.\n* Entregar el guion con su justificación al equipo de comunicaciones (correo de entrega).\n* Revisar el corte final frente a los lineamientos de identidad visual de la Universidad (visto bueno del área de Estrategias Tecnológicas).\n* Comparar los certificados emitidos tras la emisión con la cifra base (informe de cierre).",
         priority=False,
     ),
+    dict(
+        id="interarea-plantillas-powerpoint-aa-cl",
+        cat="Acompañamiento interárea — Backlog",
+        idea="Plantillas de presentación PowerPoint para Apoyos Académicos y Cursos Libres",
+        hacer="El equipo de Estrategias Tecnológicas (ET) desarrollará una plantilla maestra de PowerPoint adaptada para Apoyos Académicos (AA) y Cursos Libres (CL). La producción incorporará los colores oficiales de la UIFCE y la imagen de la mascota UIFCITO bajo los lineamientos de Imagen Institucional de la Universidad Nacional. El paquete incluirá 6 diagramaciones tipo (portada, agenda, contenido general, separador de sección, datos o gráficos y cierre) para ser distribuido a través del repositorio institucional de la Unidad.",
+        espera="Entrega de 1 archivo de plantilla maestra (.potx) que contenga 6 diapositivas tipo aprobadas para el uso de AA y CL. La meta de finalización queda fijada para [por confirmar] tras la validación técnica del máster de ET.",
+        fundamento="No existe un antecedente o solicitud previa registrada para esta iniciativa, por lo cual se radica como una necesidad nueva del área. El proyecto busca estandarizar la línea gráfica corporativa y modernizar las presentaciones de las áreas acompañadas. Esta acción fortalece el posicionamiento visual de la UIFCE bajo el principio rector de calidad sobre cantidad del semestre 2026-2.",
+        entregables="* Validar las necesidades de diagramación de las áreas usuarias en un documento de requerimientos.\n* Definir la paleta gráfica de la UIFCE y el uso de la mascota UIFCITO en una ficha técnica.\n* Maquetar las 6 diapositivas tipo en un archivo borrador de PowerPoint.\n* Remitir la propuesta al máster de ET para su validación de marca.\n* Solicitar la aprobación formal de las jefaturas de las áreas usuarias mediante un correo de visto bueno.\n* Cargar la plantilla final (.potx) en el enlace del repositorio oficial de la UIFCE.\n* Notificar la disponibilidad del recurso para registrar el cierre en el tracker.",
+        priority=False,
+    ),
 ]
 
 # ---------- Sheet 1: Planeación ----------
