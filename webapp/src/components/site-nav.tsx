@@ -38,8 +38,8 @@ const linkClass = (active: boolean) =>
   cn(
     "press rounded-md px-3 py-1.5 text-sm font-medium transition-[color,background-color] duration-150 ease-out-strong",
     active
-      ? "bg-primary text-primary-foreground shadow-card"
-      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+      ? "bg-white/15 text-white shadow-[inset_0_-2px_0_hsl(var(--nav-foreground)/0.9)]"
+      : "text-nav-foreground/70 hover:bg-white/10 hover:text-white"
   );
 
 /** Sub-menú desplegable para un grupo de enlaces relacionados (ej. "Difusión y
@@ -119,9 +119,9 @@ export function SiteNav({
   if (pathname === "/login") return null;
 
   return (
-    <header className="site-nav sticky top-0 z-40 border-b border-border/60 bg-card/95 backdrop-blur-xl backdrop-saturate-150 supports-[backdrop-filter]:bg-card/70">
+    <header className="site-nav sticky top-0 z-40 border-b border-white/10 bg-nav text-nav-foreground shadow-card">
       <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 gap-y-2 px-6 py-3.5">
-        <Link href="/" className="text-lg font-bold tracking-tight text-primary">
+        <Link href="/" className="text-lg font-bold tracking-tight text-white">
           ET en Marcha
         </Link>
         <nav className="flex flex-wrap gap-1">
@@ -142,7 +142,7 @@ export function SiteNav({
             <form action={setJuniorView.bind(null, false)}>
               <button
                 type="submit"
-                className="press inline-flex items-center gap-1.5 rounded-full border border-warning/50 bg-warning/15 px-2.5 py-1 text-xs font-medium text-warning hover:bg-warning/25"
+                className="press inline-flex items-center gap-1.5 rounded-full border border-amber-300/50 bg-amber-300/15 px-2.5 py-1 text-xs font-medium text-amber-200 hover:bg-amber-300/25"
               >
                 <Eye className="h-3.5 w-3.5" />
                 Vista Junior · salir
@@ -152,7 +152,7 @@ export function SiteNav({
             <form action={setJuniorView.bind(null, true)}>
               <button
                 type="submit"
-                className="press inline-flex items-center gap-1.5 rounded-full border border-input px-2.5 py-1 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                className="press inline-flex items-center gap-1.5 rounded-full border border-white/25 px-2.5 py-1 text-xs font-medium text-nav-foreground/80 hover:bg-white/10 hover:text-white"
                 title="Ver la app como la ve un monitor Junior"
               >
                 <Eye className="h-3.5 w-3.5" />
@@ -167,7 +167,7 @@ export function SiteNav({
           <form action={logout}>
             <button
               type="submit"
-              className="press inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-[color,background-color] duration-150 ease-out-strong hover:bg-accent hover:text-accent-foreground"
+              className="press inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-nav-foreground/70 transition-[color,background-color] duration-150 ease-out-strong hover:bg-white/10 hover:text-white"
             >
               <LogOut className="h-3.5 w-3.5" />
               Salir
