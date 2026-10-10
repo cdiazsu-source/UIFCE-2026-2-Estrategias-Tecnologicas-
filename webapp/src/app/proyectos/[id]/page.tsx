@@ -18,8 +18,10 @@ import { ProjectEventControls } from "@/components/project-event-controls";
 import { Checklist } from "@/components/checklist";
 import { NotesLog } from "@/components/notes-log";
 import { ConsentPanel, type ConsentRow } from "@/components/consent-panel";
+import { ExpensesPanel, type ExpenseRow } from "@/components/expenses-panel";
 import { wipBlockedBy } from "@/lib/actions/projects";
 import { CONSENT_PROJECT_ID } from "@/lib/consent";
+import { EXPENSES_PROJECT_ID } from "@/lib/expenses";
 import { formatDayHeader, formatTimeRange, PROJECT_STATUS_LABEL } from "@/lib/utils";
 
 const STATUS_BADGE_VARIANT: Record<string, "secondary" | "warning" | "success"> = {
@@ -32,8 +34,9 @@ export const dynamic = "force-dynamic";
 
 export default async function ProjectDetailPage({ params }: { params: { id: string } }) {
   const isConsent = params.id === CONSENT_PROJECT_ID;
+  const isExpenses = params.id === EXPENSES_PROJECT_ID;
 
-  const [project, authors, consentRows, candidateMains] = await Promise.all([
+  const [project, authors, consentRows, expenseRows, expenseProjects, candidateMains] = await Promise.all([
     prisma.project.findUnique({
       where: { id: params.id },
       include: {
@@ -59,6 +62,18 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
           include: { user: { select: { photoUrl: true, color: true, area: true } } },
         })
       : Promise.resolve([]),
+    isExpenses
+      ? prisma.expense.findMany({
+          orderBy: [{ date: "desc" }, { createdAt: "desc" }],
+          include: {
+            responsible: { select: { id: true, name: true, photoUrl: true, color: true } },
+            project: { select: { id: true, title: true } },
+          },
+        })
+      : Promise.resolve([]),
+    isExpenses
+      ? prisma.project.findMany({ select: { id: true, title: true }, orderBy: { title: "asc" } })
+      : Promise.resolve([]),
     // Proyectos elegibles como "principal": los que no son ya, a su vez, una
     // actividad de otro (un solo nivel de anidado, igual que las respuestas
     // a comentarios).
@@ -83,6 +98,19 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
     isET: c.user?.area === "ET",
     photoUrl: c.user?.photoUrl ?? null,
     color: c.user?.color ?? null,
+  }));
+
+  const expensesData: ExpenseRow[] = expenseRows.map((e) => ({
+    id: e.id,
+    date: e.date.toISOString(),
+    concept: e.concept,
+    category: e.category,
+    amount: e.amount,
+    status: e.status,
+    responsible: e.responsible,
+    project: e.project,
+    supportUrl: e.supportUrl,
+    notes: e.notes,
   }));
 
   // Para el bloqueo de WIP en el selector de urgencia (validación también en frontend).
@@ -182,6 +210,8 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
       )}
 
       {isConsent && <ConsentPanel signatories={consentData} />}
+
+      {isExpenses && <ExpensesPanel expenses={expensesData} people={authors} projects={expenseProjects} />}
 
       <Checklist projectId={project.id} items={project.checklistItems} people={authors} />
 

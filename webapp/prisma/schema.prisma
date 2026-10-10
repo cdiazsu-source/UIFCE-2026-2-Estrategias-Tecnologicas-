@@ -77,6 +77,21 @@ enum DifusionSpaceStatus {
   INTERVENIDO
 }
 
+/// Categoría de un gasto del proyecto "Sistema de seguimiento de gastos de ET".
+enum ExpenseCategory {
+  IMPRESIONES
+  PUBLICIDAD
+  EQUIPO
+}
+
+/// Etapa de un gasto: Cotizado → Aprobado → Pagado (o Cancelado).
+enum ExpenseStatus {
+  COTIZADO
+  APROBADO
+  PAGADO
+  CANCELADO
+}
+
 /// Ficha institucional del área (singleton, id fijo "area"): descripción
 /// corporativa y objetivos generales/permanentes. Los objetivos por semestre
 /// viven en Semester.objectives.
@@ -166,6 +181,7 @@ model Project {
   notes          ProjectNote[]
   contacts       Contact[]
   socialChannels SocialChannel[]
+  expenses       Expense[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -379,6 +395,7 @@ model User {
   consentSignatures    ConsentSignatory[]
   teamComments         TeamComment[]
   studyProjectComments StudyProjectComment[]
+  expenses             Expense[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -793,4 +810,34 @@ model CalendarEvent {
   updatedAt DateTime @updatedAt
 
   @@index([startAt])
+}
+
+/// Un gasto de ET (impresiones, publicidad, equipo), del panel de seguimiento
+/// de gastos dentro del proyecto "innovacion-seguimiento-gastos-et". Valores en
+/// pesos colombianos (COP), enteros.
+model Expense {
+  id            String          @id @default(cuid())
+  /// Fecha en que se hizo o se prevé el gasto.
+  date          DateTime
+  concept       String
+  category      ExpenseCategory
+  /// Valor en COP, sin decimales.
+  amount        Int
+  status        ExpenseStatus   @default(COTIZADO)
+  responsibleId String?
+  responsible   User?           @relation(fields: [responsibleId], references: [id], onDelete: SetNull)
+  /// Proyecto del tracker al que corresponde el gasto, si aplica.
+  projectId     String?
+  project       Project?        @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  /// Enlace a la factura o cotización (Drive).
+  supportUrl    String?
+  notes         String?         @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([date])
+  @@index([category])
+  @@index([responsibleId])
+  @@index([projectId])
 }
