@@ -1,6 +1,13 @@
 /** Orden preferido de secciones de la línea gráfica; cualquier otra sección va
  *  después, alfabética. Lo comparten la página y el texto que se copia. */
-export const SECTION_ORDER = ["Lineamientos", "Colores", "Franjas", "Formatos", "Aprobación"];
+export const SECTION_ORDER = [
+  "Lineamientos",
+  "Colores",
+  "Colores de la Unidad (UIFCE)",
+  "Franjas",
+  "Formatos",
+  "Aprobación",
+];
 
 type GuidelineLike = { section: string; title: string; body: string; colorHex: string | null; order: number };
 
@@ -38,9 +45,9 @@ function sentences(text: string): string[] {
 
 /** Las primeras oraciones completas que caben en el presupuesto (siempre la
  *  primera, recortada en un límite de palabra si ella sola lo excede). Se omite
- *  «Equivalente aproximado: HEX…», que repite el color ya escrito en el título. */
+ *  «Equivalente (aproximado): HEX…», que repite el color ya escrito en el título. */
 function keyIdea(body: string): string {
-  const parts = sentences(body.replace(/\s+/g, " ").trim()).filter((s) => !/^Equivalente aproximado/i.test(s));
+  const parts = sentences(body.replace(/\s+/g, " ").trim()).filter((s) => !/^Equivalente( aproximado)?:/i.test(s));
   const picked: string[] = [];
   let len = 0;
   for (const s of parts) {

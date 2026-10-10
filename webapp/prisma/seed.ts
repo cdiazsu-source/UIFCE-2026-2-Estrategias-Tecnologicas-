@@ -951,7 +951,48 @@ async function seedBrandGuidelines() {
     {
       section: "Colores",
       title: "Nota sobre los equivalentes digitales",
-      body: "Los HEX/RGB de arriba son conversiones de referencia de los Pantone para pantalla; para impresión usar siempre el Pantone o el CMYK del documento oficial de paleta de la UNAL (identidad.unal.edu.co). La app \"ET en Marcha\" usa estos mismos valores: verde #4A7729 como primario y #84BD00 para estados de \"completado\".",
+      body: "Los HEX/RGB de arriba son conversiones de referencia de los Pantone para pantalla; para impresión usar siempre el Pantone o el CMYK del documento oficial de paleta de la UNAL (identidad.unal.edu.co). La app \"ET en Marcha\" ya no usa esta paleta: desde el rediseño usa la gama propia de la Unidad (ver la sección «Colores de la Unidad (UIFCE)»).",
+    },
+    {
+      section: "Colores de la Unidad (UIFCE)",
+      title: "Paleta propia de la Unidad de Informática",
+      body: "Gama de color propia de la UIFCE, aparte de la paleta institucional de la UNAL (que sigue vigente y es la de arriba). Se usa dentro de los mínimos de identidad de la Universidad: no sustituye el escudo, la tipografía ni los colores institucionales. La app \"ET en Marcha\" está diseñada con esta gama.",
+    },
+    {
+      section: "Colores de la Unidad (UIFCE)",
+      title: "Navy oscuro",
+      body: "Barra superior, texto principal y fondos de alto contraste. Equivalente: HEX #031A2F · RGB (3, 26, 47).",
+      colorHex: "#031A2F",
+    },
+    {
+      section: "Colores de la Unidad (UIFCE)",
+      title: "Navy clásico",
+      body: "Color primario de la Unidad: botones, marca y elementos destacados. Equivalente: HEX #073763 · RGB (7, 55, 99).",
+      colorHex: "#073763",
+    },
+    {
+      section: "Colores de la Unidad (UIFCE)",
+      title: "Slate oscuro",
+      body: "Texto de apoyo y énfasis secundario. Equivalente: HEX #1F3864 · RGB (31, 56, 100).",
+      colorHex: "#1F3864",
+    },
+    {
+      section: "Colores de la Unidad (UIFCE)",
+      title: "Azul acero",
+      body: "Base de los tintes: fondos suaves de acento y gráficos secundarios. Equivalente: HEX #2F5496 · RGB (47, 84, 150).",
+      colorHex: "#2F5496",
+    },
+    {
+      section: "Colores de la Unidad (UIFCE)",
+      title: "Cobalto profundo",
+      body: "Foco, enlaces y detalles activos. Equivalente: HEX #08549B · RGB (8, 84, 155).",
+      colorHex: "#08549B",
+    },
+    {
+      section: "Colores de la Unidad (UIFCE)",
+      title: "Blanco hielo",
+      body: "Fondo de página y áreas amplias; hace contrastar las tarjetas blancas. Equivalente: HEX #EDEFF3 · RGB (237, 239, 243).",
+      colorHex: "#EDEFF3",
     },
     {
       section: "Franjas",
