@@ -64,7 +64,7 @@ export function ProjectEventControls({
         {mainProject && (
           <span>
             Parte de:{" "}
-            <Link href={`/proyectos/${mainProject.id}`} className="text-primary hover:underline">
+            <Link href={`/proyectos/${mainProject.id}`} className="text-link hover:underline">
               {mainProject.title}
             </Link>
           </span>

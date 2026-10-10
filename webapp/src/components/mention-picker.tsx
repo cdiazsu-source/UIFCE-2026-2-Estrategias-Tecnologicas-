@@ -34,7 +34,7 @@ export function MentionPicker({
         return (
           <span key={id}>
             <input type="hidden" name={name} value={id} />
-            <span className="inline-flex items-center gap-1 rounded-full border border-border bg-secondary px-2 py-0.5 text-xs">
+            <span className="inline-flex items-center gap-1 rounded-full border border-border bg-accent px-2 py-0.5 text-xs text-accent-foreground">
               <span
                 className="h-1.5 w-1.5 shrink-0 rounded-full"
                 style={{ backgroundColor: personColor(p) }}

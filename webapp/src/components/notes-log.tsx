@@ -210,7 +210,7 @@ export function NotesLog({
         {authors.length === 0 ? (
           <p className="rounded-md border border-dashed border-input p-3 text-sm text-muted-foreground">
             Para dejar notas primero agrega personas en la sección{" "}
-            <a href="/equipo" className="text-primary hover:underline">
+            <a href="/equipo" className="text-link hover:underline">
               Equipo
             </a>
             .

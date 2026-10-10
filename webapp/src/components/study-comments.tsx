@@ -218,7 +218,7 @@ export function StudyComments({
         {authors.length === 0 || targets.length === 0 ? (
           <p className="rounded-md border border-dashed border-input p-3 text-sm text-muted-foreground">
             Hace falta al menos un proyecto de estudio y una persona con rol Junior, Coordinación o Máster en{" "}
-            <a href="/equipo" className="text-primary hover:underline">
+            <a href="/equipo" className="text-link hover:underline">
               Equipo
             </a>
             .

@@ -961,37 +961,37 @@ async function seedBrandGuidelines() {
     {
       section: "Colores de la Unidad (UIFCE)",
       title: "Navy oscuro",
-      body: "Barra superior, texto principal y fondos de alto contraste. Equivalente: HEX #031A2F · RGB (3, 26, 47).",
+      body: "Texto principal y fondos de alto contraste. Equivalente: HEX #031A2F · RGB (3, 26, 47).",
       colorHex: "#031A2F",
     },
     {
       section: "Colores de la Unidad (UIFCE)",
       title: "Navy clásico",
-      body: "Color primario de la Unidad: botones, marca y elementos destacados. Equivalente: HEX #073763 · RGB (7, 55, 99).",
+      body: "Estados «presionado» y «seleccionado»: botón pulsado y tarjeta activa. Equivalente: HEX #073763 · RGB (7, 55, 99).",
       colorHex: "#073763",
     },
     {
       section: "Colores de la Unidad (UIFCE)",
       title: "Slate oscuro",
-      body: "Texto de apoyo y énfasis secundario. Equivalente: HEX #1F3864 · RGB (31, 56, 100).",
+      body: "Barra superior y estructura de la app; también el hover del botón principal. Equivalente: HEX #1F3864 · RGB (31, 56, 100).",
       colorHex: "#1F3864",
     },
     {
       section: "Colores de la Unidad (UIFCE)",
       title: "Azul acero",
-      body: "Base de los tintes: fondos suaves de acento y gráficos secundarios. Equivalente: HEX #2F5496 · RGB (47, 84, 150).",
+      body: "Elementos secundarios: enlaces, etiquetas y botones secundarios; base de los tintes suaves. Equivalente: HEX #2F5496 · RGB (47, 84, 150).",
       colorHex: "#2F5496",
     },
     {
       section: "Colores de la Unidad (UIFCE)",
       title: "Cobalto profundo",
-      body: "Foco, enlaces y detalles activos. Equivalente: HEX #08549B · RGB (8, 84, 155).",
+      body: "Foco de acción: botón principal, progreso activo, pestañas seleccionadas y anillo de foco. Equivalente: HEX #08549B · RGB (8, 84, 155).",
       colorHex: "#08549B",
     },
     {
       section: "Colores de la Unidad (UIFCE)",
       title: "Blanco hielo",
-      body: "Fondo de página y áreas amplias; hace contrastar las tarjetas blancas. Equivalente: HEX #EDEFF3 · RGB (237, 239, 243).",
+      body: "Lienzo: fondo de página y áreas amplias; las tarjetas van en blanco para destacar sobre él. Equivalente: HEX #EDEFF3 · RGB (237, 239, 243).",
       colorHex: "#EDEFF3",
     },
     {

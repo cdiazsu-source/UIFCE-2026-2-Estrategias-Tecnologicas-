@@ -479,7 +479,7 @@ function ChannelCard({
               </Field>
               <Field label="Proyecto vinculado">
                 {channel.project ? (
-                  <Link href={`/proyectos/${channel.project.id}`} className="text-primary hover:underline">
+                  <Link href={`/proyectos/${channel.project.id}`} className="text-link hover:underline">
                     {channel.project.title}
                   </Link>
                 ) : (

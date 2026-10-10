@@ -54,7 +54,7 @@ function TagsEditor({ project }: { project: Project }) {
               type="button"
               onClick={() => commit(tags.filter((x) => x !== t))}
               disabled={isPending}
-              className="rounded-full text-muted-foreground hover:text-destructive disabled:opacity-40"
+              className="rounded-full text-secondary-foreground/80 hover:text-secondary-foreground disabled:opacity-40"
               aria-label={`Quitar etiqueta ${t}`}
             >
               <X className="h-3 w-3" />

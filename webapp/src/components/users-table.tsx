@@ -113,7 +113,7 @@ function UserRow({ user }: { user: User }) {
         </div>
       </TableCell>
       <TableCell className="text-muted-foreground">
-        <a href={`mailto:${user.email}`} className="hover:text-primary hover:underline">
+        <a href={`mailto:${user.email}`} className="hover:text-link hover:underline">
           {user.email}
         </a>
       </TableCell>

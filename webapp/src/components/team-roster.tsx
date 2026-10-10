@@ -97,7 +97,7 @@ function MemberCard({ member }: { member: RosterMember }) {
           aria-pressed={active}
           title={active ? "Quitar el filtro de proyectos" : `Ver los proyectos de ${member.name}`}
           className={`flex w-full items-center gap-3 rounded-md border p-3 text-left transition-colors hover:border-primary/30 hover:bg-muted/50 ${
-            active ? "border-primary bg-primary/5" : "border-border"
+            active ? "border-primary-active bg-primary-active/10 ring-1 ring-primary-active" : "border-border"
           }`}
         >
           <PersonAvatar

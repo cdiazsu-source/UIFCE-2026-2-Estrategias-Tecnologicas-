@@ -77,7 +77,7 @@ function LeadRow({ lead }: { lead: CompanyLeadData }) {
               href={lead.linkedinUrl}
               target="_blank"
               rel="noreferrer"
-              className="hover:text-primary hover:underline"
+              className="hover:text-link hover:underline"
             >
               {lead.name}
             </a>

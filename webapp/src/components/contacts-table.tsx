@@ -79,7 +79,7 @@ function ContactRow({ contact, projectOptions }: { contact: ContactWithProject; 
       </TableCell>
       <TableCell>
         {contact.project ? (
-          <Link href={`/proyectos/${contact.project.id}`} className="text-primary hover:underline">
+          <Link href={`/proyectos/${contact.project.id}`} className="text-link hover:underline">
             {contact.project.title}
           </Link>
         ) : (

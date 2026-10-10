@@ -5,13 +5,16 @@
 @layer base {
   :root {
     /* Paleta de la Unidad de Informática (UIFCE). Los valores se expresan en HSL
-       para consumo vía hsl(var(--token)).
-       - Navy oscuro   #031A2F  barra superior y texto principal
-       - Navy clásico  #073763  color primario (botones, marca)
-       - Slate oscuro  #1F3864  texto de apoyo y énfasis secundario
-       - Azul acero    #2F5496  base de los tintes (secundario, acento)
-       - Cobalto       #08549B  foco y enlaces activos
-       - Blanco hielo  #EDEFF3  fondo de página
+       para consumo vía hsl(var(--token)). Regla 60-30-10: 60 % lienzo, 30 %
+       estructura y texto, 10 % foco de acción.
+       - Blanco hielo  #EDEFF3  lienzo: fondo de página (las tarjetas van en blanco)
+       - Navy oscuro   #031A2F  texto principal
+       - Slate oscuro  #1F3864  barra superior y estructura; hover del botón primario
+       - Cobalto       #08549B  foco de acción: botón primario, progreso, pestañas, foco
+       - Azul acero    #2F5496  secundarios: enlaces, etiquetas, botón secundario
+       - Navy clásico  #073763  estados "presionado" y "seleccionado"
+       Cobalto y azul acero tienen casi la misma claridad (1,03:1), por eso el hover
+       del botón primario oscurece (slate) en vez de pasar a azul acero.
        Los estados (éxito, advertencia, error) conservan matices propios para que
        "completado", "en curso" y "crítico" no se confundan con el azul de marca. */
 
@@ -22,23 +25,28 @@
     --card-foreground: 209 88% 10%;
 
     /* Barra superior */
-    --nav: 209 88% 10%;
+    --nav: 218 53% 26%; /* slate oscuro */
     --nav-foreground: 220 20% 94%;
 
-    --primary: 209 87% 21%; /* navy clásico */
+    --primary: 209 90% 32%; /* cobalto */
     --primary-foreground: 0 0% 100%;
+    --primary-hover: 218 53% 26%; /* slate oscuro */
+    --primary-active: 209 87% 21%; /* navy clásico */
 
-    /* Tintes de azul acero sobre fondo claro */
-    --secondary: 218 40% 90%;
-    --secondary-foreground: 218 53% 26%; /* slate oscuro */
+    /* Secundario: azul acero sólido (etiquetas, botón secundario) */
+    --secondary: 218 52% 39%;
+    --secondary-foreground: 0 0% 100%;
+
+    /* Enlaces */
+    --link: 218 52% 39%; /* azul acero */
 
     --muted: 220 20% 91%;
     --muted-foreground: 218 28% 35%;
 
+    /* Tintes claros para hover de elementos no rellenos y fondos de acento */
     --accent: 218 45% 91%;
     --accent-foreground: 218 53% 26%;
 
-    /* Destructivo / crítico: rojo institucional UNAL (Pantone 187 C) */
     --destructive: 351 74% 37%;
     --destructive-foreground: 0 0% 100%;
 

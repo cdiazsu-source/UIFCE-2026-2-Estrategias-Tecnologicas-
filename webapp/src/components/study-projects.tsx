@@ -407,7 +407,7 @@ export function StudyProjects({
 
       {juniorOptions.length === 0 && (
         <p className="rounded-md border border-dashed border-input p-4 text-sm text-muted-foreground">
-          Todavía no hay monitores Junior en el <a href="/equipo" className="text-primary hover:underline">Equipo</a>.
+          Todavía no hay monitores Junior en el <a href="/equipo" className="text-link hover:underline">Equipo</a>.
           Agrégalos allí (rol Junior — Artes o Junior — ET) para poder registrar sus proyectos de estudio.
         </p>
       )}

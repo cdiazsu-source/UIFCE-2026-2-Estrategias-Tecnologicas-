@@ -570,7 +570,7 @@ function TrackeeCard({
                   href={trackee.linkedinUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="truncate hover:text-primary hover:underline"
+                  className="truncate hover:text-link hover:underline"
                 >
                   {trackee.name}
                 </a>

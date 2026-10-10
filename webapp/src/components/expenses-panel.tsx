@@ -194,7 +194,7 @@ function ExpenseTableRow({
       <td className="min-w-[14rem] px-3 py-2">
         <p className="font-medium">{expense.concept}</p>
         {expense.project && (
-          <Link href={`/proyectos/${expense.project.id}`} className="text-xs text-primary hover:underline">
+          <Link href={`/proyectos/${expense.project.id}`} className="text-xs text-link hover:underline">
             {expense.project.title}
           </Link>
         )}
@@ -246,7 +246,7 @@ function ExpenseTableRow({
             href={expense.supportUrl}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+            className="inline-flex items-center gap-1 text-xs font-medium text-link hover:underline"
           >
             <ExternalLink className="h-3.5 w-3.5" />
             Ver soporte

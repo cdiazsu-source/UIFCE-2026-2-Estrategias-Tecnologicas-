@@ -160,7 +160,7 @@ export function SiteNav({
               </button>
             </form>
           ) : !canEdit ? (
-            <span className="rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground">
+            <span className="rounded-full bg-white/15 px-2.5 py-1 text-xs font-medium text-white">
               Modo lectura
             </span>
           ) : null}

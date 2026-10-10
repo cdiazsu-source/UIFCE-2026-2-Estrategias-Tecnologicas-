@@ -253,7 +253,7 @@ function TemplateCard({ template }: { template: TemplateData }) {
             <a
               href={template.url}
               download
-              className="inline-flex w-fit items-center gap-1 text-primary hover:underline"
+              className="inline-flex w-fit items-center gap-1 text-link hover:underline"
             >
               Descargar imagen
               <Download className="h-3.5 w-3.5" />
@@ -265,7 +265,7 @@ function TemplateCard({ template }: { template: TemplateData }) {
             href={template.url}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex w-fit items-center gap-1 text-primary hover:underline"
+            className="inline-flex w-fit items-center gap-1 text-link hover:underline"
           >
             Abrir plantilla
             <ExternalLink className="h-3.5 w-3.5" />
