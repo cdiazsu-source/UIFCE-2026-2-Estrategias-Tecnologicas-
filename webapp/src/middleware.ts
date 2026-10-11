@@ -14,6 +14,8 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  // Todo salvo: /login, assets de Next, favicon y las fotos públicas de /avatares.
-  matcher: ["/((?!login|_next/static|_next/image|favicon.ico|avatares).*)"],
+  // Todo salvo: /login, assets de Next, iconos de pestaña (icon.png, apple-icon.png,
+  // favicon.ico; el navegador los pide también antes de iniciar sesión) y las fotos
+  // públicas de /avatares.
+  matcher: ["/((?!login|_next/static|_next/image|favicon.ico|icon.png|apple-icon.png|avatares).*)"],
 };
