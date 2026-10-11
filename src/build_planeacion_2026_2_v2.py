@@ -410,6 +410,16 @@ IDEAS = [
         entregables="* Validar las necesidades de diagramación de las áreas usuarias en un documento de requerimientos.\n* Definir la paleta gráfica de la UIFCE y el uso de la mascota UIFCITO en una ficha técnica.\n* Maquetar las 6 diapositivas tipo en un archivo borrador de PowerPoint.\n* Remitir la propuesta al máster de ET para su validación de marca.\n* Solicitar la aprobación formal de las jefaturas de las áreas usuarias mediante un correo de visto bueno.\n* Cargar la plantilla final (.potx) en el enlace del repositorio oficial de la UIFCE.\n* Notificar la disponibilidad del recurso para registrar el cierre en el tracker.",
         priority=False,
     ),
+    dict(
+        id="interarea-infografia-puntualidad",
+        cat="Acompañamiento interárea — Atención inmediata",
+        idea="Infografía sobre actualización de reglas de puntualidad en la UIFCE",
+        hacer="Diseñar una infografía impresa clara y accesible sobre el esquema actualizado de puntualidad, tolerancias, multas y llamados de atención de la UIFCE. La pieza está destinada al personal y monitores de la Unidad para promover el cumplimiento oportuno de los turnos y unificar criterios de convivencia. El desarrollo visual estará a cargo del monitor de artes bajo la supervisión del máster de ET y se instalará en las instalaciones físicas de la UIFCE.",
+        espera="Instalar la infografía impresa en un punto visible de la UIFCE a más tardar el martes 13 de octubre de 2026, coincidiendo con el inicio del nuevo registro de puntualidad. La entrega requiere la validación previa de Coordinación y la aprobación técnica del máster de ET.",
+        fundamento="Este proyecto atiende la solicitud de Coordinación tras identificar dudas operativas y retrasos recurrentes al inicio de los turnos en la UIFCE. Surge ante la unificación de criterios sobre tolerancias y sanciones, así como por el reinicio en cero del registro de llegadas tarde programado para el martes 13 de octubre de 2026. No se registran antecedentes de piezas gráficas previas sobre esta normativa en el tracker de ET.",
+        entregables="* Validar el texto definitivo de las disposiciones de puntualidad con Coordinación mediante confirmación escrita.\n* Definir las especificaciones técnicas del formato impreso en la ficha del proyecto.\n* Diseñar la propuesta gráfica respetando la identidad visual institucional por el monitor de artes.\n* Obtener la aprobación del diseño por parte de Coordinación en archivo digital.\n* Obtener la aprobación del diseño por parte del máster de ET en archivo digital.\n* Imprimir el material visual en el formato físico acordado.\n* Fijar la pieza impresa en el espacio asignado dentro de la UIFCE.\n* Archivar el registro fotográfico de la instalación en el repositorio de ET.",
+        priority=False,
+    ),
 ]
 
 # ---------- Sheet 1: Planeación ----------
