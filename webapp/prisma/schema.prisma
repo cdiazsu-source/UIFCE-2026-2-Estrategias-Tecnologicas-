@@ -244,6 +244,8 @@ model ProjectNote {
   checklistItem   ChecklistItem? @relation(fields: [checklistItemId], references: [id], onDelete: SetNull)
   /// Ids de personas del equipo etiquetadas/mencionadas en la nota. Sin FK.
   mentionIds String[] @default([])
+  /// Enlaces de apoyo: lista de { label, url } (ver lib/note-links.ts).
+  links      Json     @default("[]")
   createdAt  DateTime @default(now())
 
   @@index([projectId])

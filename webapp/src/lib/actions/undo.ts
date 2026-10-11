@@ -34,6 +34,7 @@ export async function applyUndo(action: UndoAction) {
           authorId: d.authorId,
           checklistItemId: d.checklistItemId,
           mentionIds: d.mentionIds,
+          links: d.links ?? [],
           createdAt: new Date(d.createdAt),
         },
       });
@@ -47,6 +48,7 @@ export async function applyUndo(action: UndoAction) {
           body: action.before.body,
           checklistItemId: action.before.checklistItemId,
           mentionIds: action.before.mentionIds,
+          links: action.before.links ?? [],
         },
       });
       revalidatePath(`/proyectos/${action.projectId}`);

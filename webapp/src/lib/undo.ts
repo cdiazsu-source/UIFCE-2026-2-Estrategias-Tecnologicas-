@@ -15,6 +15,7 @@ export type UndoAction =
         authorId: string | null;
         checklistItemId: string | null;
         mentionIds: string[];
+        links: { label: string; url: string }[];
         createdAt: string;
       };
     }
@@ -22,7 +23,12 @@ export type UndoAction =
       kind: "note.update";
       id: string;
       projectId: string;
-      before: { body: string; checklistItemId: string | null; mentionIds: string[] };
+      before: {
+        body: string;
+        checklistItemId: string | null;
+        mentionIds: string[];
+        links: { label: string; url: string }[];
+      };
     }
   | {
       kind: "checklist.delete";

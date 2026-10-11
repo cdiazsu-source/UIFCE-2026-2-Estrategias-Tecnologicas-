@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState, useTransition } from "react";
-import { Check, ListChecks, Pencil, Trash2 } from "lucide-react";
+import { Check, ExternalLink, Link2, ListChecks, Pencil, Plus, Trash2, X } from "lucide-react";
 import type { ChecklistItem, ProjectNote } from "@prisma/client";
 
 import { addProjectNote, deleteProjectNote, updateProjectNote } from "@/lib/actions/notes";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,6 +14,7 @@ import { InfoHint } from "@/components/info-hint";
 import { MentionPicker, MentionTags } from "@/components/mention-picker";
 import { useUndo } from "@/components/undo-banner";
 import { BITACORA_TARGET_EVENT } from "@/lib/events";
+import { linkDisplay, NOTE_LINKS_MAX, parseNoteLinks, type NoteLink } from "@/lib/note-links";
 import { formatDateTime, USER_ROLE_LABEL } from "@/lib/utils";
 
 export type NoteAuthorOption = { id: string; name: string; role: string; color?: string | null };
@@ -67,6 +69,85 @@ function ChecklistItemSelect({
   );
 }
 
+/** Apartado «Enlaces»: filas de nombre (opcional) + URL. Los campos paralelos
+ *  linkLabel / linkUrl los lee el servidor; las filas sin URL válida se descartan. */
+function LinksField({ defaultValue = [] }: { defaultValue?: NoteLink[] }) {
+  const seq = useRef(0);
+  const [rows, setRows] = useState(() => defaultValue.map((l) => ({ key: seq.current++, ...l })));
+
+  return (
+    <div className="flex flex-col gap-2">
+      {rows.length > 0 && (
+        <ul className="flex flex-col gap-2">
+          {rows.map((r) => (
+            <li key={r.key} className="flex flex-wrap items-center gap-2">
+              <Input
+                name="linkLabel"
+                defaultValue={r.label}
+                placeholder="Nombre (ej. Carpeta de Drive)"
+                aria-label="Nombre del enlace"
+                maxLength={80}
+                className="w-full sm:w-56"
+              />
+              <Input
+                name="linkUrl"
+                type="url"
+                defaultValue={r.url}
+                placeholder="https://…"
+                aria-label="Dirección del enlace"
+                className="min-w-[14rem] flex-1"
+              />
+              <button
+                type="button"
+                onClick={() => setRows((rs) => rs.filter((x) => x.key !== r.key))}
+                className="rounded p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                aria-label="Quitar enlace"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+      {rows.length < NOTE_LINKS_MAX && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="self-start"
+          onClick={() => setRows((rs) => [...rs, { key: seq.current++, label: "", url: "" }])}
+        >
+          <Plus className="h-3.5 w-3.5" />
+          {rows.length === 0 ? "Agregar enlace" : "Agregar otro enlace"}
+        </Button>
+      )}
+    </div>
+  );
+}
+
+function NoteLinks({ links }: { links: NoteLink[] }) {
+  if (links.length === 0) return null;
+  return (
+    <ul className="mt-1.5 flex flex-wrap gap-1.5">
+      {links.map((l, i) => (
+        <li key={i} className="max-w-full">
+          <a
+            href={l.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            title={l.url}
+            className="inline-flex max-w-full items-center gap-1.5 rounded-md border border-border bg-card px-2 py-1 text-xs font-medium text-link hover:bg-accent"
+          >
+            <Link2 className="h-3.5 w-3.5 shrink-0" aria-hidden />
+            <span className="min-w-0 truncate">{linkDisplay(l)}</span>
+            <ExternalLink className="h-3 w-3 shrink-0 opacity-60" aria-hidden />
+          </a>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 function LinkedItemTag({ item }: { item: { text: string; done: boolean } }) {
   return (
     <span className="mt-1.5 inline-flex max-w-full items-start gap-1.5 rounded-md border border-primary/30 bg-primary/5 px-2 py-1 text-xs text-primary">
@@ -114,6 +195,7 @@ function NoteRow({
             items={checklistItems}
             defaultValue={note.checklistItemId ?? ""}
           />
+          <LinksField defaultValue={parseNoteLinks(note.links)} />
           <MentionPicker name="mentionIds" people={authors} defaultValue={note.mentionIds} />
           <div className="flex gap-2">
             <Button type="submit" size="sm">
@@ -133,6 +215,7 @@ function NoteRow({
   return (
     <li className="group relative rounded-md bg-muted/40 p-3">
       <p className="whitespace-pre-line break-words text-sm leading-snug">{note.body}</p>
+      <NoteLinks links={parseNoteLinks(note.links)} />
       {note.checklistItem && <LinkedItemTag item={note.checklistItem} />}
       {mentioned.length > 0 && (
         <p className="mt-1 text-xs text-muted-foreground">
@@ -203,7 +286,7 @@ export function NotesLog({
       <CardHeader>
         <CardTitle className="flex items-center gap-1.5">
           Bitácora
-          <InfoHint text="El historial de avance del proyecto, de la nota más reciente a la más antigua. Cómo se usa: escribe la nota, elige quién la deja (lista de Equipo), si aplica la subtarea relacionada, y con «Etiquetar a…» marca a quién involucra; al pasar el cursor sobre una nota aparecen editar y borrar. Alimenta «Últimas actualizaciones» del panel. Ejemplo: «Confirmado que la licencia de Adobe sigue vigente hasta diciembre. @ Maria Fernanda Celis»." />
+          <InfoHint text="El historial de avance del proyecto, de la nota más reciente a la más antigua. Cómo se usa: escribe la nota, elige quién la deja (lista de Equipo), si aplica la subtarea relacionada, y con «Etiquetar a…» marca a quién involucra; «Agregar enlace» guarda carpetas de Drive, documentos o formularios como vínculos con nombre que se abren en otra pestaña (mejor que pegar la URL dentro del texto); al pasar el cursor sobre una nota aparecen editar y borrar. Alimenta «Últimas actualizaciones» del panel. Ejemplo: «Confirmado que la licencia de Adobe sigue vigente hasta diciembre. @ Maria Fernanda Celis», con el enlace «Correo de confirmación»." />
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
@@ -250,6 +333,7 @@ export function NotesLog({
                 onChange={setTargetItemId}
               />
             </div>
+            <LinksField />
             <MentionPicker name="mentionIds" people={authors} />
             <Button type="submit" size="sm" className="self-start">
               Publicar nota

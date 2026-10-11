@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { prisma } from "@/lib/prisma";
 import { resolveMentions } from "@/lib/mentions";
+import { linksFromForm, parseNoteLinks } from "@/lib/note-links";
 import { USER_ROLE_LABEL } from "@/lib/utils";
 import type { UndoAction } from "@/lib/undo";
 
@@ -35,6 +36,7 @@ export async function addProjectNote(projectId: string, formData: FormData) {
 
   const checklistItemId = await resolveChecklistItem(formData.get("checklistItemId"), projectId);
   const mentionIds = await resolveMentions(formData.getAll("mentionIds"));
+  const links = linksFromForm(formData.getAll("linkLabel"), formData.getAll("linkUrl"));
 
   await prisma.projectNote.create({
     data: {
@@ -45,6 +47,7 @@ export async function addProjectNote(projectId: string, formData: FormData) {
       authorId,
       checklistItemId,
       mentionIds,
+      links,
     },
   });
 
@@ -65,16 +68,17 @@ export async function updateProjectNote(
 
   const prev = await prisma.projectNote.findUnique({
     where: { id: noteId },
-    select: { body: true, checklistItemId: true, mentionIds: true },
+    select: { body: true, checklistItemId: true, mentionIds: true, links: true },
   });
   if (!prev) return;
 
   const checklistItemId = await resolveChecklistItem(formData.get("checklistItemId"), projectId);
   const mentionIds = await resolveMentions(formData.getAll("mentionIds"));
+  const links = linksFromForm(formData.getAll("linkLabel"), formData.getAll("linkUrl"));
 
   await prisma.projectNote.update({
     where: { id: noteId },
-    data: { body, checklistItemId, mentionIds },
+    data: { body, checklistItemId, mentionIds, links },
   });
 
   revalidatePath("/");
@@ -84,7 +88,12 @@ export async function updateProjectNote(
     kind: "note.update",
     id: noteId,
     projectId,
-    before: { body: prev.body, checklistItemId: prev.checklistItemId, mentionIds: prev.mentionIds },
+    before: {
+      body: prev.body,
+      checklistItemId: prev.checklistItemId,
+      mentionIds: prev.mentionIds,
+      links: parseNoteLinks(prev.links),
+    },
   };
 }
 
@@ -109,6 +118,7 @@ export async function deleteProjectNote(noteId: string, projectId: string): Prom
       authorId: prev.authorId,
       checklistItemId: prev.checklistItemId,
       mentionIds: prev.mentionIds,
+      links: parseNoteLinks(prev.links),
       createdAt: prev.createdAt.toISOString(),
     },
   };
