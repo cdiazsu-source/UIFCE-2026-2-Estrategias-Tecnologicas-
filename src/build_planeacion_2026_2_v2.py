@@ -420,6 +420,16 @@ IDEAS = [
         entregables="* Validar el texto definitivo de las disposiciones de puntualidad con Coordinación mediante confirmación escrita.\n* Definir las especificaciones técnicas del formato impreso en la ficha del proyecto.\n* Diseñar la propuesta gráfica respetando la identidad visual institucional por el monitor de artes.\n* Obtener la aprobación del diseño por parte de Coordinación en archivo digital.\n* Obtener la aprobación del diseño por parte del máster de ET en archivo digital.\n* Imprimir el material visual en el formato físico acordado.\n* Fijar la pieza impresa en el espacio asignado dentro de la UIFCE.\n* Archivar el registro fotográfico de la instalación en el repositorio de ET.",
         priority=False,
     ),
+    dict(
+        id="virtualizacion-poster-encuesta-automatizacion",
+        cat="Acompañamiento a Virtualización — Atención inmediata",
+        idea="Póster de difusión para la encuesta de automatización de procesos",
+        hacer="Se deben diseñar las piezas gráficas en formatos adaptados para correo institucional y pantallas de la UIFCE. Estas piezas promocionan la encuesta sobre procesos susceptibles de automatización liderada por el área de Virtualización. La difusión está dirigida a la comunidad de la FCE, compuesta por estudiantes, profesores y personal administrativo. La distribución se realizará mediante el canal masivo de correo institucional y la emisión en los televisores de la Unidad.",
+        espera="Se espera la entrega y difusión del póster ajustado a las proporciones requeridas para correo institucional y televisores de la UIFCE. El hito verificable será el envío del correo masivo a la comunidad de la FCE y la transmisión activa del material en las pantallas de la Unidad.",
+        fundamento="El área de Virtualización Académica solicitó apoyo a ET para visibilizar la encuesta sobre automatización de procesos, vinculada al proyecto de estudio del monitor Junior Ángel Gutiérrez. Es necesario contar con material visual adecuado para garantizar la participación de estudiantes, profesores y administrativos de la FCE. Al no existir antecedentes de difusión previa para este instrumento, se presenta como una necesidad nueva y de atención prioritaria.",
+        entregables="* Validar el contenido de la encuesta con el área de Virtualización mediante una ficha de requerimientos.\n* Definir las especificaciones técnicas de los formatos requeridos en un documento de parámetros.\n* Diseñar la propuesta gráfica según los lineamientos de Imagen Institucional en un archivo editable.\n* Obtener la aprobación del diseño por parte del máster de ET mediante una confirmación escrita.\n* Generar la versión de la pieza para televisores de la UIFCE en una carpeta de entregables.\n* Generar la versión de la pieza para correo institucional en una carpeta de entregables.\n* Publicar la pieza gráfica en los televisores de la UIFCE mediante un registro de emisión.\n* Confirmar el despacho del correo institucional mediante una captura de confirmación.",
+        priority=False,
+    ),
 ]
 
 # ---------- Sheet 1: Planeación ----------
