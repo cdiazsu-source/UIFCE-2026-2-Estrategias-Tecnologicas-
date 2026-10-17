@@ -19,6 +19,7 @@ import {
 import { InfoHint } from "@/components/info-hint";
 import { NewProjectButton } from "@/components/new-project-button";
 import { ProjectSeedPromptButton } from "@/components/project-seed-prompt-button";
+import { CollapsibleBlock } from "@/components/collapsible";
 import { byUrgency } from "@/lib/project-order";
 import { CategoryDistribution } from "@/components/category-distribution";
 import { DofaOverlay } from "@/components/dofa-overlay";
@@ -396,20 +397,29 @@ export default async function HomePage({
 
           <TeamRoster people={rosterMembers} />
 
-          <div
+          <CollapsibleBlock
+            scope="home:proyectos"
+            label="los proyectos"
             id="proyectos"
-            className="flex scroll-mt-20 flex-wrap items-center justify-between gap-2 border-t border-border pt-4"
-          >
-            <h2 className="flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+            wrapperClassName="flex flex-col gap-4"
+            headerClassName="flex scroll-mt-20 flex-wrap items-center justify-between gap-2 border-t border-border pt-4"
+            titleClassName="flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wide text-muted-foreground"
+            title={
+              <>
               Proyectos {selected ? `${selected.label} ` : ""}({projectCards.length})
               <InfoHint text="Una tarjeta por iniciativa del semestre seleccionado (pestañas de arriba). Por defecto se ordenan por urgencia (primero «❗ Atención Inmediata», luego los que están «En curso», luego «📅 Próximo Ciclo» y «⏸️ Backlog»; los completados al final); el desplegable «Orden» permite volver al orden de planeación. Cómo se usa: busca por texto, filtra por categoría o haz clic en el nombre de un integrante (arriba) para ver solo sus proyectos; el progreso cuenta subtareas hechas y la franja de color a la izquierda es la persona asignada — titila si el proyecto está en «❗ Atención Inmediata». Con perfil completo, «Nuevo proyecto» lo crea en el semestre visible. Ejemplo: elige «Eventos» para ver solo esos proyectos." />
-            </h2>
+              </>
+            }
+            actions={
+              <>
             <CategoryDistribution projects={projectCards} />
             <DofaOverlay />
             <StrategicAnalysisOverlay />
             <ProjectSeedPromptButton />
             <NewProjectButton semesterId={selected?.id} semesterLabel={selected?.label} />
-          </div>
+              </>
+            }
+          >
           {projectCards.length === 0 ? (
             <p className="rounded-md border border-dashed border-input p-6 text-center text-sm text-muted-foreground">
               {selected ? `El semestre ${selected.label} todavía no tiene proyectos.` : "No hay proyectos."}
@@ -421,19 +431,27 @@ export default async function HomePage({
               focusPersonName={focusPerson?.name}
             />
           )}
+          </CollapsibleBlock>
 
-          <div className="flex flex-col gap-2 border-t border-border pt-4">
-            <h2 className="flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+          <CollapsibleBlock
+            scope="home:estudio"
+            label="los proyectos de estudio"
+            wrapperClassName="flex flex-col gap-2 border-t border-border pt-4"
+            titleClassName="flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wide text-muted-foreground"
+            title={
+              <>
               Proyectos de estudio {selected ? `${selected.label} ` : ""}
               <InfoHint text="Los proyectos de estudio de los monitores Junior del semestre seleccionado, agrupados por Junior, cada uno con su cronograma y sus 4 puntos de corte. Un Junior puede tener varios. Cómo se usa: con perfil completo, «Agregar proyecto de estudio» lo crea en el semestre visible; edita cada punto de corte (fecha y estado) y pega el enlace de la carpeta de Drive de entregables. Los Junior se definen en Equipo." />
-            </h2>
+              </>
+            }
+          >
             <StudyProjects
               juniors={studyProjectsData}
               juniorOptions={studyJuniorOptions}
               semesterId={selected?.id}
               semesterLabel={selected?.label}
             />
-          </div>
+          </CollapsibleBlock>
 
           <StudyComments comments={studyCommentsData} authors={studyCommentAuthors} targets={studyCommentTargets} />
         </div>

@@ -23,6 +23,7 @@ import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { InfoHint } from "@/components/info-hint";
+import { CollapseToggle, useCollapse } from "@/components/collapsible";
 import { PersonAvatar } from "@/components/person-avatar";
 import { useCanEdit } from "@/components/access-context";
 
@@ -298,6 +299,7 @@ export function ExpensesPanel({
   projects: ExpenseProjectOption[];
 }) {
   const canEdit = useCanEdit();
+  const { open, toggle } = useCollapse("project:gastos");
   const [showForm, setShowForm] = useState(false);
   const [category, setCategory] = useState<ExpenseCategoryKey | "">("");
   const [status, setStatus] = useState<ExpenseStatusKey | "">("");
@@ -357,13 +359,14 @@ export function ExpensesPanel({
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className={open ? "" : "py-3"}>
         <CardTitle className="flex items-center gap-1.5">
+          <CollapseToggle open={open} onToggle={toggle} label="el seguimiento de gastos" />
           Seguimiento de gastos
           <InfoHint text="Registro de los gastos de ET en impresiones, publicidad y equipo, en pesos colombianos (COP). Cada gasto pasa por Cotizado → Aprobado → Pagado (o Cancelado). Los totales no cuentan los cancelados. Cómo se usa: «Registrar gasto» (perfil completo) crea la fila; el estado se cambia desde la misma tabla; los filtros y el buscador acotan la vista y «Copiar tabla» deja lo que ves listo para pegar en Excel o Sheets. El perfil junior solo consulta. Ejemplo: «Impresión de 20 pósters A3 · Impresiones · $ 250.000 · Aprobado»." />
         </CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col gap-4">
+      {open && <CardContent className="flex flex-col gap-4">
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           <div className="rounded-md border border-border p-3">
             <p className="text-xs text-muted-foreground">Total (sin cancelados)</p>
@@ -493,7 +496,7 @@ export function ExpensesPanel({
             <span className="font-medium tabular-nums text-foreground">{formatCOP(filteredTotal)}</span>
           </p>
         )}
-      </CardContent>
+      </CardContent>}
     </Card>
   );
 }

@@ -19,8 +19,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PersonAvatar } from "@/components/person-avatar";
+import { CollapseAllControls, CollapseToggle, useCollapse } from "@/components/collapsible";
 import { useCanEdit } from "@/components/access-context";
-import { CHECKPOINT_STATUS_LABEL, formatDate, USER_ROLE_LABEL } from "@/lib/utils";
+import { CHECKPOINT_STATUS_LABEL, cn, formatDate, USER_ROLE_LABEL } from "@/lib/utils";
 import { personColor } from "@/lib/person-color";
 import { downloadCsv } from "@/lib/csv";
 
@@ -222,11 +223,13 @@ function StudyProjectCard({ project }: { project: StudyProjectFull }) {
   const canEdit = useCanEdit();
   const [editing, setEditing] = useState(false);
   const [, startTransition] = useTransition();
+  const { open, setOpen, toggle } = useCollapse(`study:card:${project.id}`);
   const checkpoints = [...project.checkpoints].sort((a, b) => a.number - b.number);
+  const cumplidos = checkpoints.filter((c) => c.status === "CUMPLIDO").length;
 
   return (
     <Card>
-      <CardHeader className="flex-row items-start justify-between space-y-0">
+      <CardHeader className={cn("flex-row items-start justify-between space-y-0", !open && !editing && "py-3")}>
         {editing && canEdit ? (
           <form
             action={async (formData) => {
@@ -254,12 +257,25 @@ function StudyProjectCard({ project }: { project: StudyProjectFull }) {
           </form>
         ) : (
           <>
-            <CardTitle className="text-base leading-snug">{project.title}</CardTitle>
+            <div className="flex min-w-0 items-start gap-1.5">
+              <CollapseToggle open={open} onToggle={toggle} label="este proyecto de estudio" className="mt-px" />
+              <div className="flex min-w-0 flex-col gap-0.5">
+                <CardTitle className="text-base leading-snug">{project.title}</CardTitle>
+                {!open && (
+                  <p className="text-xs text-muted-foreground">
+                    Puntos de corte {cumplidos}/{checkpoints.length}
+                  </p>
+                )}
+              </div>
+            </div>
             {canEdit && (
               <div className="flex shrink-0 gap-1">
                 <button
                   type="button"
-                  onClick={() => setEditing(true)}
+                  onClick={() => {
+                    setOpen(true);
+                    setEditing(true);
+                  }}
                   className="rounded p-1 text-muted-foreground hover:bg-accent"
                   aria-label="Editar proyecto de estudio"
                 >
@@ -278,7 +294,7 @@ function StudyProjectCard({ project }: { project: StudyProjectFull }) {
           </>
         )}
       </CardHeader>
-      {!(editing && canEdit) && (
+      {open && !(editing && canEdit) && (
         <CardContent className="flex flex-col gap-4">
           {project.description && <p className="text-sm text-muted-foreground">{project.description}</p>}
           <div>
@@ -308,6 +324,37 @@ function StudyProjectCard({ project }: { project: StudyProjectFull }) {
         </CardContent>
       )}
     </Card>
+  );
+}
+
+/** Sección de un Junior: su encabezado lleva el ícono de ocultar / expandir y,
+ *  contraída, deja ver cuántos proyectos de estudio tiene. */
+function JuniorSection({ junior }: { junior: JuniorWithStudy }) {
+  const color = personColor(junior);
+  const { open, toggle } = useCollapse(`study:junior:${junior.id}`);
+  return (
+    <section className="flex flex-col gap-3 border-l-2 pl-4" style={{ borderColor: color }}>
+      <div className="flex items-center gap-2.5">
+        <CollapseToggle open={open} onToggle={toggle} label={`los proyectos de ${junior.name}`} />
+        <PersonAvatar name={junior.name} photoUrl={junior.photoUrl ?? null} />
+        <h2 className="text-lg font-semibold">{junior.name}</h2>
+        <Badge variant="outline">{USER_ROLE_LABEL[junior.role]}</Badge>
+        <span className="text-xs text-muted-foreground">
+          {junior.studyProjects.length}{" "}
+          {junior.studyProjects.length === 1 ? "proyecto de estudio" : "proyectos de estudio"}
+        </span>
+      </div>
+      {open &&
+        (junior.studyProjects.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Sin proyecto de estudio todavía.</p>
+        ) : (
+          <div className="flex flex-col gap-4">
+            {junior.studyProjects.map((p) => (
+              <StudyProjectCard key={p.id} project={p} />
+            ))}
+          </div>
+        ))}
+    </section>
   );
 }
 
@@ -353,7 +400,8 @@ export function StudyProjects({
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex flex-wrap justify-end gap-2">
+      <div className="flex flex-wrap items-center justify-end gap-2">
+        {juniors.some((j) => j.studyProjects.length > 0) && <CollapseAllControls scope="study" />}
         <Button size="sm" variant="outline" onClick={handleExport}>
           <Download className="h-3.5 w-3.5" />
           Exportar
@@ -412,35 +460,9 @@ export function StudyProjects({
         </p>
       )}
 
-      {juniors.map((junior) => {
-        const color = personColor(junior);
-        return (
-          <section
-            key={junior.id}
-            className="flex flex-col gap-3 border-l-2 pl-4"
-            style={{ borderColor: color }}
-          >
-            <div className="flex items-center gap-2.5">
-              <PersonAvatar name={junior.name} photoUrl={junior.photoUrl ?? null} />
-              <h2 className="text-lg font-semibold">{junior.name}</h2>
-              <Badge variant="outline">{USER_ROLE_LABEL[junior.role]}</Badge>
-              <span className="text-xs text-muted-foreground">
-                {junior.studyProjects.length}{" "}
-                {junior.studyProjects.length === 1 ? "proyecto de estudio" : "proyectos de estudio"}
-              </span>
-            </div>
-            {junior.studyProjects.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Sin proyecto de estudio todavía.</p>
-            ) : (
-              <div className="flex flex-col gap-4">
-                {junior.studyProjects.map((p) => (
-                  <StudyProjectCard key={p.id} project={p} />
-                ))}
-              </div>
-            )}
-          </section>
-        );
-      })}
+      {juniors.map((junior) => (
+        <JuniorSection key={junior.id} junior={junior} />
+      ))}
     </div>
   );
 }

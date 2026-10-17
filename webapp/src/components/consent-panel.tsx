@@ -18,6 +18,7 @@ import { Select } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PersonAvatar } from "@/components/person-avatar";
 import { InfoHint } from "@/components/info-hint";
+import { CollapseToggle, useCollapse } from "@/components/collapsible";
 import { useCanManageConsent } from "@/components/access-context";
 import { CONSENT_DOC_TEXT, CONSENT_PHOTO_REQUIREMENTS, consentTextFor } from "@/lib/consent";
 import { formatDate } from "@/lib/utils";
@@ -344,20 +345,22 @@ function SignatoryRow({ row }: { row: ConsentRow }) {
 export function ConsentPanel({ signatories }: { signatories: ConsentRow[] }) {
   const canEdit = useCanManageConsent();
   const [adding, setAdding] = useState(false);
+  const { open, toggle } = useCollapse("project:consentimientos");
 
   const active = signatories.filter((s) => s.active);
   const inactive = signatories.filter((s) => !s.active);
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className={open ? "" : "py-3"}>
         <CardTitle className="flex items-center gap-1.5">
+          <CollapseToggle open={open} onToggle={toggle} label="los consentimientos" />
           <FileSignature className="h-4 w-4" />
           Consentimientos de uso de imagen
           <InfoHint text="Panel del proyecto: el documento a firmar, el avance (cuántas personas faltan por firmar, por recibir acceso a su carpeta y por tener su foto lista) y una fila por integrante para marcar «Firmó», «Acceso a Drive» y «Foto lista» (tipo carné, JPG, máx. 5 MB, dentro de su carpeta) y guardar el enlace a su carpeta. Con perfil completo se marcan los estados y se edita la lista. Ejemplo: «María Fernanda Celis · Firmó · Acceso a Drive · Foto lista · Abrir carpeta»." />
         </CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col gap-4">
+      {open && <CardContent className="flex flex-col gap-4">
         <DocBlock />
         <ProgressChart rows={active} />
 
@@ -409,7 +412,7 @@ export function ConsentPanel({ signatories }: { signatories: ConsentRow[] }) {
             )}
           </div>
         )}
-      </CardContent>
+      </CardContent>}
     </Card>
   );
 }

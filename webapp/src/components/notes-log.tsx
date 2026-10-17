@@ -11,6 +11,7 @@ import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { InfoHint } from "@/components/info-hint";
+import { CollapseToggle, useCollapse } from "@/components/collapsible";
 import { MentionPicker, MentionTags } from "@/components/mention-picker";
 import { useUndo } from "@/components/undo-banner";
 import { BITACORA_TARGET_EVENT } from "@/lib/events";
@@ -268,28 +269,34 @@ export function NotesLog({
   const [addKey, setAddKey] = useState(0);
   const formRef = useRef<HTMLFormElement>(null);
   const bodyRef = useRef<HTMLTextAreaElement>(null);
+  const { open, setOpen, toggle } = useCollapse("project:bitacora");
 
   useEffect(() => {
     function onTarget(e: Event) {
       const id = (e as CustomEvent<string>).detail;
       if (typeof id !== "string") return;
       setTargetItemId(id);
-      formRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-      bodyRef.current?.focus();
+      // Si la sección estaba contraída, se abre y se espera a que pinte el formulario.
+      setOpen(true);
+      setTimeout(() => {
+        formRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+        bodyRef.current?.focus();
+      }, 50);
     }
     window.addEventListener(BITACORA_TARGET_EVENT, onTarget);
     return () => window.removeEventListener(BITACORA_TARGET_EVENT, onTarget);
-  }, []);
+  }, [setOpen]);
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className={open ? "" : "py-3"}>
         <CardTitle className="flex items-center gap-1.5">
+          <CollapseToggle open={open} onToggle={toggle} label="la bitácora" />
           Bitácora
           <InfoHint text="El historial de avance del proyecto, de la nota más reciente a la más antigua. Cómo se usa: escribe la nota, elige quién la deja (lista de Equipo), si aplica la subtarea relacionada, y con «Etiquetar a…» marca a quién involucra; «Agregar enlace» guarda carpetas de Drive, documentos o formularios como vínculos con nombre que se abren en otra pestaña (mejor que pegar la URL dentro del texto); al pasar el cursor sobre una nota aparecen editar y borrar. Alimenta «Últimas actualizaciones» del panel. Ejemplo: «Confirmado que la licencia de Adobe sigue vigente hasta diciembre. @ Maria Fernanda Celis», con el enlace «Correo de confirmación»." />
         </CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col gap-4">
+      {open && <CardContent className="flex flex-col gap-4">
         {authors.length === 0 ? (
           <p className="rounded-md border border-dashed border-input p-3 text-sm text-muted-foreground">
             Para dejar notas primero agrega personas en la sección{" "}
@@ -356,7 +363,7 @@ export function NotesLog({
             ))}
           </ul>
         )}
-      </CardContent>
+      </CardContent>}
     </Card>
   );
 }

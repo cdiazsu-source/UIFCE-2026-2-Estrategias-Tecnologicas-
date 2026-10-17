@@ -93,7 +93,7 @@ La fase de la sección 6 ya está construida y en producción: **"ET en Marcha"*
 
 1. **Identidad de git: `Juan Diego Peña <tucorreo@ejemplo.com>`. No cambiarla nunca.** Es un correo de marcador deliberado (repo público). En una máquina nueva, fijarla *local* al repo: `git config user.name "Juan Diego Peña"` y `git config user.email "tucorreo@ejemplo.com"` — eso es preservarla, no cambiarla.
 2. **El agente NO corre `prisma migrate`, `db:deploy`, `db:seed` ni `npx tsx prisma/seed.ts`** — el clasificador de permisos del harness lo bloquea y va contra producción. Las migraciones se escriben **a mano** como `webapp/prisma/migrations/AAAAMMDDHHMMSS_nombre/migration.sql` (+ actualizar `schema.prisma`); **el usuario** corre `db:deploy` + `db:seed`.
-3. El repo de GitHub es **público**: nada de contraseñas ni secretos reales en el código. Las credenciales van como variables de entorno en Vercel (`SITE_PASSWORD`, `SITE_PASSWORD_JUNIOR`, `SITE_USER_DIRECTOR` / `SITE_PASSWORD_DIRECTOR`, `AUTH_SECRET`).
+3. El repo de GitHub es **público**: nada de contraseñas ni secretos reales en el código. Las credenciales van como variables de entorno en Vercel (`SITE_USER_MASTER` / `SITE_PASSWORD`, `SITE_USER_JUNIOR` / `SITE_PASSWORD_JUNIOR`, `SITE_USER_DIRECTOR` / `SITE_PASSWORD_DIRECTOR`, `AUTH_SECRET`).
 4. `webapp/.env` (git-ignored) apunta al **mismo** Neon de producción que usa Vercel. Cualquier script que escriba en BD impacta producción.
 5. Mensajes de commit terminan con `Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>`. Un commit por feature. PowerShell 5.1 no acepta `&&` (comandos separados).
 
@@ -103,7 +103,9 @@ La fase de la sección 6 ya está construida y en producción: **"ET en Marcha"*
 - Desplegar un cambio: (1) si hay migración nueva, el usuario corre `cd webapp && npm run db:deploy && npm run db:seed` contra Neon; (2) `git push` desde la raíz → Vercel redespliega; (3) verificar con Ctrl+Shift+R.
 - Gráficas: SVG inline a mano, sin librería de charts.
 
-**Acceso (`/login`, login compartido):** `UIFCE` / `ET2026` = perfil completo (edita todo); `UIFCE` / `TEAM` = perfil junior (registra KPIs, gestiona checklist y consentimientos; no edita el resto); `HENRY` / `UIFCEUNAL310.` = director. La **"Vista Junior"** (cookie `et_view`) deja al perfil completo ver la app como un junior. Todo overridable por entorno.
+**Acceso (`/login`, login compartido):** `MASTER` / `ET2026` = perfil completo (edita todo; es el máster y es el único que ve **Desarrollador**); `JUNIOR` / `TEAM` = perfil junior (registra KPIs, gestiona checklist y consentimientos; no edita el resto); `HENRY` / `UIFCEUNAL310.` = director. Antes los dos perfiles compartidos usaban el usuario `UIFCE` (variable `SITE_USER`, ya sin uso: si sigue en Vercel se puede borrar). La **"Vista Junior"** (cookie `et_view`) deja al perfil completo ver la app como un junior. Todo overridable por entorno.
+
+**Desarrollador (`/desarrollador`, solo máster):** genera el prompt de contexto estructural + la modificación que se quiere hacer, para pegarlo en Claude Code. El texto vive en `webapp/src/lib/developer-prompt.ts` (estático) y es parte del mantenimiento: si cambian rutas, modelos o convenciones, actualizarlo. **Semilla de checklist** (botón junto a «Agregar subtarea» en cada proyecto): prompt con el contexto del proyecto + «Pegar lista» para agregar de una vez las subtareas que devuelve la IA (`lib/checklist-seed-prompt.ts`, `lib/checklist-lines.ts`, acción `addChecklistItems`). **Ocultar/expandir** de secciones: `components/collapsible.tsx`.
 
 **Backlog conocido (no empezar sin que el usuario lo pida):**
 

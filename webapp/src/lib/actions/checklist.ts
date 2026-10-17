@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { blockedForJunior, canEdit, canManageChecklist } from "@/lib/session";
 import { resolveMentions } from "@/lib/mentions";
+import { parseChecklistLines } from "@/lib/checklist-lines";
 import type { UndoAction } from "@/lib/undo";
 
 /** Roles del directorio que cuentan como "monitor Junior". El perfil junior
@@ -63,6 +64,43 @@ export async function addChecklistItem(projectId: string, formData: FormData) {
 
   revalidatePath("/");
   revalidatePath(`/proyectos/${projectId}`);
+}
+
+/** Agrega varias subtareas de una vez desde un texto pegado (ver «Pegar lista»
+ *  en la tarjeta Checklist): una por línea, al final de la checklist actual.
+ *  Se omiten las que ya existen con el mismo texto. Sin responsable ni fecha: eso
+ *  se asigna después, subtarea por subtarea. */
+export async function addChecklistItems(
+  projectId: string,
+  raw: string,
+): Promise<{ added: number; skipped: number }> {
+  if (!(await canManageChecklist())) return { added: 0, skipped: 0 };
+  const lines = parseChecklistLines(raw);
+  if (lines.length === 0) return { added: 0, skipped: 0 };
+
+  const existing = await prisma.checklistItem.findMany({
+    where: { projectId },
+    orderBy: { order: "asc" },
+    select: { text: true, order: true },
+  });
+  const key = (t: string) => t.trim().toLowerCase();
+  const seen = new Set(existing.map((e) => key(e.text)));
+  const fresh: string[] = [];
+  for (const text of lines) {
+    if (seen.has(key(text))) continue;
+    seen.add(key(text));
+    fresh.push(text);
+  }
+  if (fresh.length === 0) return { added: 0, skipped: lines.length };
+
+  const base = (existing[existing.length - 1]?.order ?? -1) + 1;
+  await prisma.checklistItem.createMany({
+    data: fresh.map((text, i) => ({ projectId, text, order: base + i })),
+  });
+
+  revalidatePath("/");
+  revalidatePath(`/proyectos/${projectId}`);
+  return { added: fresh.length, skipped: lines.length - fresh.length };
 }
 
 export async function toggleChecklistItem(

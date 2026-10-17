@@ -4,6 +4,15 @@ import { WIP_ATENCION_INMEDIATA } from "@/lib/utils";
 /** Categorías canónicas (una por subgrupo) para que el modelo no invente otras. */
 const CATEGORIES = CATEGORY_GROUPS.flatMap((g) => g.subgroups.map((sg) => sg.categories[0]));
 
+/** Contexto fijo del área ET. Lo comparten los prompts «semilla» (proyecto y checklist). */
+export const ET_AREA_CONTEXT = `## Contexto del área
+- ET es una de las siete áreas de la UIFCE (AA Apoyos Académicos, GC Gestión del Conocimiento, ET Estrategias Tecnológicas, DS Desarrollo, Virtualización, CL Cursos Libres y Coordinación). ET se encarga de redes sociales, difusión, piezas gráficas y audiovisuales, micrositio, microtalleres y eventos de la Unidad.
+- La lidera una persona llamada «máster» y trabaja con monitores (por ejemplo, el monitor de artes). Los recursos son limitados, por eso cada proyecto debe ser acotado y terminable.
+- Principio rector del semestre 2026-2: «calidad sobre cantidad», para posicionar a la Unidad. Si la idea es grande, propón una primera entrega pequeña y de calidad.
+- Terminología fija: UIFCE (en mayúsculas), Hackatón (con tilde), ET, máster, monitores. Canales institucionales: Instagram @ui_fce, LinkedIn (prioritario), TikTok, YouTube.
+- Las piezas siguen los lineamientos de identidad visual de la Universidad (Unimedios / Imagen Institucional). El tono es institucional y de invitación: evita el lenguaje restrictivo («prohibido», «no se permite»).
+- Cuando el proyecto se cruza con otra área, nómbrala; las solicitudes entre áreas pasan por el protocolo de acompañamiento interárea.`;
+
 export const IDEA_PLACEHOLDER = "<<Escribe aquí tu idea en bruto: qué es, por qué surge, qué quieren lograr, quién la haría, fechas.>>";
 
 /** Prompt «semilla»: se pega en un asistente de IA junto con una idea en bruto y
@@ -12,13 +21,7 @@ export function buildProjectSeedPrompt(idea: string): string {
   const raw = idea.trim() || IDEA_PLACEHOLDER;
   return `Eres el asistente de planeación del área de Estrategias Tecnológicas (ET) de la Unidad de Informática de la Facultad de Ciencias Económicas (UIFCE), Universidad Nacional de Colombia. Tu trabajo es convertir una idea en bruto en un proyecto bien formulado para el tracker interno «ET en Marcha».
 
-## Contexto del área
-- ET es una de las siete áreas de la UIFCE (AA Apoyos Académicos, GC Gestión del Conocimiento, ET Estrategias Tecnológicas, DS Desarrollo, Virtualización, CL Cursos Libres y Coordinación). ET se encarga de redes sociales, difusión, piezas gráficas y audiovisuales, micrositio, microtalleres y eventos de la Unidad.
-- La lidera una persona llamada «máster» y trabaja con monitores (por ejemplo, el monitor de artes). Los recursos son limitados, por eso cada proyecto debe ser acotado y terminable.
-- Principio rector del semestre 2026-2: «calidad sobre cantidad», para posicionar a la Unidad. Si la idea es grande, propón una primera entrega pequeña y de calidad.
-- Terminología fija: UIFCE (en mayúsculas), Hackatón (con tilde), ET, máster, monitores. Canales institucionales: Instagram @ui_fce, LinkedIn (prioritario), TikTok, YouTube.
-- Las piezas siguen los lineamientos de identidad visual de la Universidad (Unimedios / Imagen Institucional). El tono es institucional y de invitación: evita el lenguaje restrictivo («prohibido», «no se permite»).
-- Cuando el proyecto se cruza con otra área, nómbrala; las solicitudes entre áreas pasan por el protocolo de acompañamiento interárea.
+${ET_AREA_CONTEXT}
 
 ## Qué necesita un proyecto para verse bien en el tracker
 Cada proyecto se muestra como una tarjeta con estos campos. Redáctalos con este criterio:

@@ -8,6 +8,7 @@ import {
   MessageSquarePlus,
   Pencil,
   Plus,
+  Sparkles,
   Trash2,
 } from "lucide-react";
 import type { ChecklistItem } from "@prisma/client";
@@ -25,6 +26,9 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { InfoHint } from "@/components/info-hint";
+import { CollapseToggle, useCollapse } from "@/components/collapsible";
+import { ChecklistSeedPanel } from "@/components/checklist-seed-panel";
+import type { ChecklistSeedContext } from "@/lib/checklist-seed-prompt";
 import { MentionPicker, MentionTags } from "@/components/mention-picker";
 import { cn, formatDate } from "@/lib/utils";
 import { personColor } from "@/lib/person-color";
@@ -267,14 +271,20 @@ export function Checklist({
   projectId,
   items,
   people,
+  seedContext,
 }: {
   projectId: string;
   items: ChecklistItem[];
   people: PersonOption[];
+  /** Datos del proyecto para el prompt de «Semilla de checklist» (sin la checklist,
+   *  que se arma aquí con el estado actual). Sin esto no se muestra el botón. */
+  seedContext?: Omit<ChecklistSeedContext, "checklist">;
 }) {
   const canEdit = useCanEdit();
   const canManage = useCanManageChecklist();
+  const { open, setOpen, toggle } = useCollapse("project:checklist");
   const [showForm, setShowForm] = useState(false);
+  const [showSeed, setShowSeed] = useState(false);
   const [addKey, setAddKey] = useState(0);
   const [, startReorder] = useTransition();
 
@@ -297,6 +307,20 @@ export function Checklist({
   }, [order, byId, sorted]);
 
   const done = displayed.filter((i) => i.done).length;
+
+  // Prompt de la semilla: el contexto del proyecto + la checklist tal como está ahora.
+  const fullSeedContext = useMemo<ChecklistSeedContext | null>(() => {
+    if (!seedContext) return null;
+    return {
+      ...seedContext,
+      checklist: displayed.map((i) => ({
+        text: i.text,
+        done: i.done,
+        assignee: (i.assigneeId ? people.find((p) => p.id === i.assigneeId)?.name : null) ?? i.assignee ?? null,
+        due: i.dueDate ? formatDate(i.dueDate) : null,
+      })),
+    };
+  }, [seedContext, displayed, people]);
 
   function handleDropOn(targetId: string | null) {
     const dragId = draggingId;
@@ -321,8 +345,9 @@ export function Checklist({
 
   return (
     <Card>
-      <CardHeader className="flex-row items-center justify-between space-y-0">
+      <CardHeader className={cn("flex-row items-center justify-between space-y-0", !open && "py-3")}>
         <CardTitle className="flex items-center gap-1.5">
+          <CollapseToggle open={open} onToggle={toggle} label="la checklist" />
           Checklist{" "}
           <span className="font-normal text-muted-foreground">
             ({done}/{displayed.length})
@@ -330,13 +355,38 @@ export function Checklist({
           <InfoHint text="Las subtareas de este proyecto. Cómo se usa: la casilla marca hecho; para reordenar, arrástralas por el asa (⠿) o usa las flechas ▲▼; el lápiz edita (texto, responsable del Equipo, vencimiento y personas etiquetadas) y el globo abre la bitácora ligada a esa subtarea. «Agregar subtarea» suma una nueva. El perfil junior puede crear, editar y marcar subtareas, pero solo puede poner de responsable a un monitor Junior; borrar es solo del perfil completo. Ejemplo: «Calendario editorial 2026-2 · Maria Fernanda Celis · vence 20 sep · @ Cesar Diaz»." />
         </CardTitle>
         {canManage && (
-          <Button size="sm" variant="outline" onClick={() => setShowForm((s) => !s)}>
-            <Plus className="h-3.5 w-3.5" />
-            Agregar subtarea
-          </Button>
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            {fullSeedContext && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  setOpen(true);
+                  setShowSeed((s) => !s);
+                }}
+              >
+                <Sparkles className="h-3.5 w-3.5" />
+                Semilla de checklist
+              </Button>
+            )}
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                setOpen(true);
+                setShowForm((s) => !s);
+              }}
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Agregar subtarea
+            </Button>
+          </div>
         )}
       </CardHeader>
-      <CardContent className="flex flex-col gap-3">
+      {open && <CardContent className="flex flex-col gap-3">
+        {canManage && showSeed && fullSeedContext && (
+          <ChecklistSeedPanel projectId={projectId} context={fullSeedContext} onClose={() => setShowSeed(false)} />
+        )}
         {canManage && showForm && (
           <form
             key={addKey}
@@ -394,7 +444,7 @@ export function Checklist({
             ))}
           </ul>
         )}
-      </CardContent>
+      </CardContent>}
     </Card>
   );
 }

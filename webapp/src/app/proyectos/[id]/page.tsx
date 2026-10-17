@@ -4,7 +4,7 @@ import { ArrowLeft } from "lucide-react";
 
 import { prisma } from "@/lib/prisma";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CollapseAllControls, CollapsibleCard } from "@/components/collapsible";
 import { InfoHint } from "@/components/info-hint";
 import { DriveLinkEditor } from "@/components/drive-link-editor";
 import { ProjectStatusSelect } from "@/components/project-status-select";
@@ -22,7 +22,13 @@ import { ExpensesPanel, type ExpenseRow } from "@/components/expenses-panel";
 import { wipBlockedBy } from "@/lib/actions/projects";
 import { CONSENT_PROJECT_ID } from "@/lib/consent";
 import { EXPENSES_PROJECT_ID } from "@/lib/expenses";
-import { formatDayHeader, formatTimeRange, PROJECT_STATUS_LABEL } from "@/lib/utils";
+import {
+  formatDateTime,
+  formatDayHeader,
+  formatTimeRange,
+  PRIORITY_TAG_LABEL,
+  PROJECT_STATUS_LABEL,
+} from "@/lib/utils";
 
 const STATUS_BADGE_VARIANT: Record<string, "secondary" | "warning" | "success"> = {
   POR_INICIAR: "secondary",
@@ -119,6 +125,35 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
   const wipBlocked =
     project.priorityTag === "ATENCION_INMEDIATA" ? false : Boolean(await wipBlockedBy(project.id));
 
+  // Contexto del proyecto para el prompt de «Semilla de checklist» (el checklist
+  // actual lo agrega el componente, con su estado en vivo).
+  const seedContext = {
+    title: project.title,
+    category: project.category,
+    statusLabel: PROJECT_STATUS_LABEL[project.status],
+    priorityLabel: project.priorityTag ? (PRIORITY_TAG_LABEL[project.priorityTag] ?? null) : null,
+    assignee: project.assignee?.name ?? null,
+    requester: project.requester?.name ?? null,
+    tags: project.tags,
+    description: project.description,
+    expectedOutcome: project.expectedOutcome,
+    rationale: project.rationale,
+    schedule: project.startAt
+      ? [`${formatDayHeader(project.startAt)} · ${formatTimeRange(project.startAt, project.endAt)}`, project.location]
+          .filter(Boolean)
+          .join(" · ")
+      : project.location,
+    mainProjectTitle: project.mainProject?.title ?? null,
+    notes: [...project.notes]
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      .slice(0, 5)
+      .map((n) => ({
+        author: n.author,
+        date: formatDateTime(n.createdAt),
+        body: n.body.length > 400 ? `${n.body.slice(0, 400)}…` : n.body,
+      })),
+  };
+
   return (
     <div className="flex flex-col gap-6">
       <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
@@ -163,32 +198,32 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
         <ProjectControls project={project} />
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Qué se debe hacer</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-4 text-sm leading-relaxed">
-          <p>{project.description}</p>
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Qué se espera</p>
-            <p className="mt-1">{project.expectedOutcome}</p>
-          </div>
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Fundamento</p>
-            <p className="mt-1 text-muted-foreground">{project.rationale}</p>
-          </div>
-        </CardContent>
-      </Card>
+      <CollapseAllControls scope="project" className="-mb-3 justify-end" />
+
+      <CollapsibleCard scope="project:descripcion" label="«Qué se debe hacer»" title="Qué se debe hacer">
+        <p>{project.description}</p>
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Qué se espera</p>
+          <p className="mt-1">{project.expectedOutcome}</p>
+        </div>
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Fundamento</p>
+          <p className="mt-1 text-muted-foreground">{project.rationale}</p>
+        </div>
+      </CollapsibleCard>
 
       {project.relatedProjects.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-1.5">
+        <CollapsibleCard
+          scope="project:actividades"
+          label="las actividades"
+          title={
+            <>
               Actividades de este proyecto
               <InfoHint text="Proyectos que cuelgan de este como su «proyecto principal» — por ejemplo, cada actividad de la Semana UIFCE. Se vinculan desde el horario de cada actividad. En orden cronológico." />
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-2">
+            </>
+          }
+        >
+          <div className="flex flex-col gap-2">
             {project.relatedProjects.map((r) => (
               <Link
                 key={r.id}
@@ -207,15 +242,15 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
                 </span>
               </Link>
             ))}
-          </CardContent>
-        </Card>
+          </div>
+        </CollapsibleCard>
       )}
 
       {isConsent && <ConsentPanel signatories={consentData} />}
 
       {isExpenses && <ExpensesPanel expenses={expensesData} people={authors} projects={expenseProjects} />}
 
-      <Checklist projectId={project.id} items={project.checklistItems} people={authors} />
+      <Checklist projectId={project.id} items={project.checklistItems} people={authors} seedContext={seedContext} />
 
       <NotesLog
         projectId={project.id}
