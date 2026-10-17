@@ -415,7 +415,7 @@ export function Checklist({
   }
 
   return (
-    <Card>
+    <Card id="p-checklist" className="scroll-mt-20">
       <CardHeader className={cn("flex-row items-center justify-between space-y-0", !open && "py-3")}>
         <CardTitle className="flex items-center gap-1.5">
           <CollapseToggle open={open} onToggle={toggle} label="la checklist" />

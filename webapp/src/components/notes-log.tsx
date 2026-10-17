@@ -305,7 +305,7 @@ export function NotesLog({
   }, [setOpen]);
 
   return (
-    <Card>
+    <Card id="p-bitacora" className="scroll-mt-20">
       <CardHeader className={open ? "" : "py-3"}>
         <CardTitle className="flex items-center gap-1.5">
           <CollapseToggle open={open} onToggle={toggle} label="la bitácora" />

@@ -351,7 +351,7 @@ export function ConsentPanel({ signatories }: { signatories: ConsentRow[] }) {
   const inactive = signatories.filter((s) => !s.active);
 
   return (
-    <Card>
+    <Card id="p-consentimientos" className="scroll-mt-20">
       <CardHeader className={open ? "" : "py-3"}>
         <CardTitle className="flex items-center gap-1.5">
           <CollapseToggle open={open} onToggle={toggle} label="los consentimientos" />

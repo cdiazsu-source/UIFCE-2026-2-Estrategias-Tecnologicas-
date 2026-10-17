@@ -374,7 +374,7 @@ export default async function HomePage({
         </p>
       )}
 
-      <section className="flex flex-col gap-3">
+      <section id="situacion" className="flex scroll-mt-20 flex-col gap-3">
         <h1 className="flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
           Situación actual
           <InfoHint text="Foto fija de cómo llega el área al semestre: canales en riesgo o activos, el principio rector y las alertas críticas abiertas. No se calcula solo. Cómo se usa: con perfil completo, pasa el cursor por una tarjeta y usa el lápiz para editar etiqueta y valor. Ejemplo: «Canal en riesgo → Instagram (cuenta nueva en consolidación)»." />
@@ -386,7 +386,7 @@ export default async function HomePage({
         <div className="flex flex-col gap-4">
           <SemesterTabs semesters={tabs} selectedId={selected?.id ?? ""} />
 
-          <div className="flex flex-col gap-4">
+          <div id="semestre" className="flex scroll-mt-20 flex-col gap-4">
             <SemesterObjectives
               semester={selected ? { id: selected.id, label: selected.label, objectives: selected.objectives } : null}
             />
@@ -395,7 +395,9 @@ export default async function HomePage({
             />
           </div>
 
-          <TeamRoster people={rosterMembers} />
+          <div id="integrantes" className="scroll-mt-20">
+            <TeamRoster people={rosterMembers} />
+          </div>
 
           <CollapsibleBlock
             scope="home:proyectos"
@@ -436,6 +438,8 @@ export default async function HomePage({
           <CollapsibleBlock
             scope="home:estudio"
             label="los proyectos de estudio"
+            id="estudio"
+            headerClassName="scroll-mt-20"
             wrapperClassName="flex flex-col gap-2 border-t border-border pt-4"
             titleClassName="flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wide text-muted-foreground"
             title={
@@ -453,11 +457,13 @@ export default async function HomePage({
             />
           </CollapsibleBlock>
 
-          <StudyComments comments={studyCommentsData} authors={studyCommentAuthors} targets={studyCommentTargets} />
+          <div id="comentarios-estudio" className="scroll-mt-20">
+            <StudyComments comments={studyCommentsData} authors={studyCommentAuthors} targets={studyCommentTargets} />
+          </div>
         </div>
 
         <div className="flex flex-col gap-6">
-          <div className="flex flex-col gap-3">
+          <div id="actividad" className="flex scroll-mt-20 flex-col gap-3">
             <h2 className="flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
               Actividad
               <InfoHint text="Lo más reciente de todos los proyectos, en orden cronológico: notas de bitácora y subtareas marcadas como hechas. Bajo una subtarea completada, titilando, aparece la que sigue. El texto largo se recorta; clic en una entrada abre el proyecto. Se alimenta de lo que el equipo escribe en la bitácora de cada proyecto." />

@@ -17,6 +17,11 @@ type CollapseDetail = { scope: string; open: boolean };
 /** Estado abierto/cerrado de una sección, con respuesta a «Contraer todo» /
  *  «Expandir todo». Por defecto arranca abierta; no se persiste (es solo para
  *  moverse mejor por una página larga). */
+/** Abre (expande) la sección con ese scope exacto, p. ej. desde el menú rápido. */
+export function expandScope(scope: string) {
+  window.dispatchEvent(new CustomEvent<CollapseDetail>(COLLAPSE_EVENT, { detail: { scope, open: true } }));
+}
+
 export function useCollapse(scope: string, defaultOpen = true) {
   const [open, setOpen] = useState(defaultOpen);
 
@@ -86,6 +91,7 @@ export function CollapseAllControls({ scope, className }: { scope: string; class
 /** Tarjeta con encabezado y contenido que se oculta con el ícono. Para secciones
  *  que se renderizan en el servidor (los hijos pueden ser server components). */
 export function CollapsibleCard({
+  id,
   scope,
   label,
   title,
@@ -93,6 +99,8 @@ export function CollapsibleCard({
   defaultOpen = true,
   className,
 }: {
+  /** id del elemento, para saltar a la tarjeta desde el menú rápido. */
+  id?: string;
   scope: string;
   /** Nombre corto para el tooltip («Ocultar …»). */
   label: string;
@@ -103,7 +111,7 @@ export function CollapsibleCard({
 }) {
   const { open, toggle } = useCollapse(scope, defaultOpen);
   return (
-    <Card className={className}>
+    <Card id={id} className={cn("scroll-mt-20", className)}>
       <CardHeader className={cn("flex-row items-center gap-1.5 space-y-0", open ? "" : "py-3")}>
         <CollapseToggle open={open} onToggle={toggle} label={label} />
         <CardTitle className="flex items-center gap-1.5">{title}</CardTitle>

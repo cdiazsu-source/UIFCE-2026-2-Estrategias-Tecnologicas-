@@ -4,6 +4,7 @@ import { Eye } from "lucide-react";
 import { SiteNav } from "@/components/site-nav";
 import { AccessProvider } from "@/components/access-context";
 import { UndoProvider } from "@/components/undo-banner";
+import { QuickNav } from "@/components/quick-nav";
 import { getSession } from "@/lib/session";
 import { setJuniorView } from "@/lib/actions/view";
 import { touchLastSeen } from "@/lib/presence";
@@ -53,6 +54,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               canUseJuniorView={canUseJuniorView}
               canUseDeveloper={canUseDeveloper}
             />
+            <QuickNav />
             {asJunior && (
               <div className="border-b border-warning/40 bg-warning/10">
                 <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-6 py-2 text-xs">
