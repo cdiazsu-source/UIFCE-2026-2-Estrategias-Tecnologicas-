@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronDown, Eye, LogOut } from "lucide-react";
+import { ChevronDown, Code2, Eye, LogOut } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { logout } from "@/lib/actions/auth";
@@ -109,10 +109,12 @@ export function SiteNav({
   canEdit = true,
   viewingAsJunior = false,
   canUseJuniorView = false,
+  canUseDeveloper = false,
 }: {
   canEdit?: boolean;
   viewingAsJunior?: boolean;
   canUseJuniorView?: boolean;
+  canUseDeveloper?: boolean;
 }) {
   const pathname = usePathname();
 
@@ -138,6 +140,21 @@ export function SiteNav({
           })}
         </nav>
         <div className="ml-auto flex items-center gap-2">
+          {canUseDeveloper && (
+            <Link
+              href="/desarrollador"
+              className={cn(
+                "press inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium",
+                pathname.startsWith("/desarrollador")
+                  ? "border-white/60 bg-white/15 text-white"
+                  : "border-white/25 text-nav-foreground/80 hover:bg-white/10 hover:text-white"
+              )}
+              title="Contexto del proyecto y prompt para Claude Code u otra IA"
+            >
+              <Code2 className="h-3.5 w-3.5" />
+              Desarrollador
+            </Link>
+          )}
           {viewingAsJunior ? (
             <form action={setJuniorView.bind(null, false)}>
               <button

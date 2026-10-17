@@ -14,6 +14,9 @@ export type Session =
       viewingAsJunior: boolean;
       /** true = esta sesión puede activar la Vista Junior (máster: full y no director). */
       canUseJuniorView: boolean;
+      /** true = es la credencial compartida del máster (usuario MASTER): full y sin
+       *  identidad nominal. Es quien ve el apartado "Desarrollador". */
+      isMaster: boolean;
     }
   | { authed: false };
 
@@ -27,7 +30,16 @@ export async function getSession(): Promise<Session> {
   const viewingAsJunior = canUseJuniorView && jar.get(VIEW_COOKIE)?.value === "junior";
   const level: AccessLevel = viewingAsJunior ? "junior" : v.level;
 
-  return { authed: true, level, who: v.who, realLevel: v.level, viewingAsJunior, canUseJuniorView };
+  const isMaster = v.level === "full" && v.who === null;
+
+  return { authed: true, level, who: v.who, realLevel: v.level, viewingAsJunior, canUseJuniorView, isMaster };
+}
+
+/** ¿Puede entrar al apartado "Desarrollador"? Solo el máster (usuario MASTER) y
+ *  con la Vista Junior apagada. Se valida en el servidor, no solo en el menú. */
+export async function canUseDeveloper(): Promise<boolean> {
+  const s = await getSession();
+  return s.authed && s.isMaster && !s.viewingAsJunior;
 }
 
 /** ¿La sesión puede editar? Solo el perfil "full" (y con la Vista Junior apagada).

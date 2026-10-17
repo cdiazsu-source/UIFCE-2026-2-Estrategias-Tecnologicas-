@@ -3,8 +3,9 @@
  * nominales para personas puntuales. Protege TODO el sitio (middleware.ts):
  * sin cookie válida → /login.
  *
- *  - Perfil "full"   (usuario UIFCE / contraseña ET2026): edita todo.
- *  - Perfil "junior" (usuario UIFCE / contraseña TEAM):   ve todo, solo agrega
+ *  - Perfil "full"   (usuario MASTER / contraseña ET2026): edita todo. Es el
+ *    "máster": además ve el apartado "Desarrollador" (/desarrollador).
+ *  - Perfil "junior" (usuario JUNIOR / contraseña TEAM):   ve todo, solo agrega
  *    notas de bitácora. El resto es de solo lectura.
  *  - Credenciales nominales (ver NAMED_CREDENTIALS): acceso total ("full"),
  *    pero identificado — su cookie lleva `who` y el layout registra su
@@ -33,7 +34,11 @@ export type AccessLevel = "full" | "junior";
  *  User.credentialKey. Las credenciales compartidas devuelven who = null. */
 export type CredentialCheck = { level: AccessLevel; who: string | null };
 
-export const SITE_USER = process.env.SITE_USER || "UIFCE";
+/** Usuarios compartidos. Cada perfil tiene su propio nombre de usuario (antes
+ *  ambos usaban "UIFCE" con SITE_USER). Variables nuevas a propósito: un
+ *  SITE_USER viejo en Vercel ya no fija el nombre. */
+export const SITE_USER_MASTER = process.env.SITE_USER_MASTER || "MASTER";
+export const SITE_USER_JUNIOR = process.env.SITE_USER_JUNIOR || "JUNIOR";
 const PASS_FULL = process.env.SITE_PASSWORD || "ET2026";
 const PASS_JUNIOR = process.env.SITE_PASSWORD_JUNIOR || "TEAM";
 
@@ -82,10 +87,8 @@ export function checkCredentials(username: string, password: string): Credential
   for (const cred of NAMED_CREDENTIALS) {
     if (user === cred.user && password === cred.pass) return { level: "full", who: cred.who };
   }
-  if (user === SITE_USER) {
-    if (password === PASS_FULL) return { level: "full", who: null };
-    if (password === PASS_JUNIOR) return { level: "junior", who: null };
-  }
+  if (user === SITE_USER_MASTER && password === PASS_FULL) return { level: "full", who: null };
+  if (user === SITE_USER_JUNIOR && password === PASS_JUNIOR) return { level: "junior", who: null };
   return null;
 }
 

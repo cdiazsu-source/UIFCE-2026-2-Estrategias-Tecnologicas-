@@ -33,6 +33,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   // consentimientos. La Vista Junior no cambia esto (es lo que un junior puede).
   const asJunior = session.authed ? session.viewingAsJunior : false;
   const canUseJuniorView = session.authed ? session.canUseJuniorView : false;
+  // "Desarrollador": solo el máster (usuario MASTER) y con la Vista Junior apagada.
+  const canUseDeveloper = session.authed ? session.isMaster && !session.viewingAsJunior : false;
   if (session.authed) await touchLastSeen(session.who);
 
   return (
@@ -45,7 +47,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           canManageConsent={session.authed}
         >
           <UndoProvider>
-            <SiteNav canEdit={editable} viewingAsJunior={asJunior} canUseJuniorView={canUseJuniorView} />
+            <SiteNav
+              canEdit={editable}
+              viewingAsJunior={asJunior}
+              canUseJuniorView={canUseJuniorView}
+              canUseDeveloper={canUseDeveloper}
+            />
             {asJunior && (
               <div className="border-b border-warning/40 bg-warning/10">
                 <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-6 py-2 text-xs">
