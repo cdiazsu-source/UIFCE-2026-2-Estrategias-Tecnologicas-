@@ -265,14 +265,14 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
       <CollapseAllControls scope="project" className="-mb-3 justify-end" />
 
       <CollapsibleCard scope="project:descripcion" label="«Qué se debe hacer»" title="Qué se debe hacer">
-        <p>{project.description}</p>
+        <p className="whitespace-pre-line">{project.description}</p>
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Qué se espera</p>
-          <p className="mt-1">{project.expectedOutcome}</p>
+          <p className="mt-1 whitespace-pre-line">{project.expectedOutcome}</p>
         </div>
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Fundamento</p>
-          <p className="mt-1 text-muted-foreground">{project.rationale}</p>
+          <p className="mt-1 whitespace-pre-line text-muted-foreground">{project.rationale}</p>
         </div>
       </CollapsibleCard>
 
