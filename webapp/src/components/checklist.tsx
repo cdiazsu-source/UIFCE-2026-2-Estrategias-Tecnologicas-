@@ -5,6 +5,7 @@ import {
   ChevronDown,
   ChevronUp,
   GripVertical,
+  MessageSquare,
   MessageSquarePlus,
   Pencil,
   Plus,
@@ -30,11 +31,20 @@ import { CollapseToggle, useCollapse } from "@/components/collapsible";
 import { ChecklistSeedPanel } from "@/components/checklist-seed-panel";
 import type { ChecklistSeedContext } from "@/lib/checklist-seed-prompt";
 import { MentionPicker, MentionTags } from "@/components/mention-picker";
-import { cn, formatDate } from "@/lib/utils";
+import { cn, formatDate, formatDateTime } from "@/lib/utils";
 import { personColor } from "@/lib/person-color";
-import { BITACORA_TARGET_EVENT } from "@/lib/events";
+import { BITACORA_FOCUS_NOTE_EVENT, BITACORA_TARGET_EVENT } from "@/lib/events";
 import { useCanEdit, useCanManageChecklist } from "@/components/access-context";
 import { useUndo } from "@/components/undo-banner";
+
+/** Entrada de bitácora reducida: lo necesario para listarla bajo su subtarea. */
+export type ChecklistNoteLite = {
+  id: string;
+  checklistItemId: string | null;
+  author: string;
+  body: string;
+  createdAt: Date;
+};
 
 export type PersonOption = { id: string; name: string; role?: string | null; color?: string | null };
 
@@ -81,10 +91,54 @@ function AssigneeTag({ item, people }: { item: ChecklistItem; people: PersonOpti
   );
 }
 
+/** Chip sutil «N entradas» bajo una subtarea; al pulsarlo despliega una tarjeta con
+ *  las notas de bitácora ligadas a ella y cada una lleva a su lugar en la bitácora. */
+function RelatedNotes({ notes }: { notes: ChecklistNoteLite[] }) {
+  const [open, setOpen] = useState(false);
+  if (notes.length === 0) return null;
+  return (
+    <div className="mt-1">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        title="Entradas de la bitácora relacionadas con esta subtarea"
+        className={cn(
+          "inline-flex items-center gap-1 rounded-full border border-border px-1.5 py-0.5 text-[11px] text-muted-foreground transition-colors hover:bg-accent hover:text-foreground",
+          open && "bg-accent text-foreground",
+        )}
+      >
+        <MessageSquare className="h-3 w-3" aria-hidden />
+        {notes.length} {notes.length === 1 ? "entrada" : "entradas"}
+      </button>
+      {open && (
+        <ul className="mt-1.5 flex flex-col gap-0.5 rounded-md border border-border bg-muted/30 p-1">
+          {notes.map((n) => (
+            <li key={n.id}>
+              <button
+                type="button"
+                onClick={() => window.dispatchEvent(new CustomEvent(BITACORA_FOCUS_NOTE_EVENT, { detail: n.id }))}
+                title="Ver esta nota en la bitácora"
+                className="flex w-full flex-col rounded px-2 py-1 text-left transition-colors hover:bg-accent"
+              >
+                <span className="text-[11px] text-muted-foreground">
+                  {formatDateTime(n.createdAt)} · {n.author}
+                </span>
+                <span className="line-clamp-2 whitespace-pre-line break-words text-xs">{n.body}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 function ChecklistRow({
   item,
   projectId,
   people,
+  notes,
   isFirst,
   isLast,
   dragEnabled,
@@ -98,6 +152,7 @@ function ChecklistRow({
   item: ChecklistItem;
   projectId: string;
   people: PersonOption[];
+  notes: ChecklistNoteLite[];
   isFirst: boolean;
   isLast: boolean;
   dragEnabled: boolean;
@@ -209,6 +264,7 @@ function ChecklistRow({
             <MentionTags people={people.filter((p) => item.mentionIds.includes(p.id))} />
           </p>
         )}
+        <RelatedNotes notes={notes} />
       </div>
       <div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
         <button
@@ -271,11 +327,14 @@ export function Checklist({
   projectId,
   items,
   people,
+  notes = [],
   seedContext,
 }: {
   projectId: string;
   items: ChecklistItem[];
   people: PersonOption[];
+  /** Notas de la bitácora del proyecto; las ligadas a una subtarea se listan bajo ella. */
+  notes?: ChecklistNoteLite[];
   /** Datos del proyecto para el prompt de «Semilla de checklist» (sin la checklist,
    *  que se arma aquí con el estado actual). Sin esto no se muestra el botón. */
   seedContext?: Omit<ChecklistSeedContext, "checklist">;
@@ -307,6 +366,18 @@ export function Checklist({
   }, [order, byId, sorted]);
 
   const done = displayed.filter((i) => i.done).length;
+
+  // Notas de bitácora por subtarea, de la más reciente a la más antigua.
+  const notesByItem = useMemo(() => {
+    const map = new Map<string, ChecklistNoteLite[]>();
+    for (const n of [...notes].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())) {
+      if (!n.checklistItemId) continue;
+      const list = map.get(n.checklistItemId);
+      if (list) list.push(n);
+      else map.set(n.checklistItemId, [n]);
+    }
+    return map;
+  }, [notes]);
 
   // Prompt de la semilla: el contexto del proyecto + la checklist tal como está ahora.
   const fullSeedContext = useMemo<ChecklistSeedContext | null>(() => {
@@ -428,6 +499,7 @@ export function Checklist({
                 item={item}
                 projectId={projectId}
                 people={people}
+                notes={notesByItem.get(item.id) ?? []}
                 isFirst={i === 0}
                 isLast={i === displayed.length - 1}
                 dragEnabled={canManage}

@@ -14,7 +14,7 @@ import { InfoHint } from "@/components/info-hint";
 import { CollapseToggle, useCollapse } from "@/components/collapsible";
 import { MentionPicker, MentionTags } from "@/components/mention-picker";
 import { useUndo } from "@/components/undo-banner";
-import { BITACORA_TARGET_EVENT } from "@/lib/events";
+import { BITACORA_FOCUS_NOTE_EVENT, BITACORA_TARGET_EVENT } from "@/lib/events";
 import { linkDisplay, NOTE_LINKS_MAX, parseNoteLinks, type NoteLink } from "@/lib/note-links";
 import { formatDateTime, USER_ROLE_LABEL } from "@/lib/utils";
 
@@ -181,7 +181,7 @@ function NoteRow({
 
   if (editing) {
     return (
-      <li className="rounded-md bg-muted/40 p-3">
+      <li id={`nota-${note.id}`} className="rounded-md bg-muted/40 p-3">
         <form
           action={async (formData) => {
             const u = await updateProjectNote(note.id, projectId, formData);
@@ -214,7 +214,7 @@ function NoteRow({
   const mentioned = authors.filter((a) => note.mentionIds.includes(a.id));
 
   return (
-    <li className="group relative rounded-md bg-muted/40 p-3">
+    <li id={`nota-${note.id}`} className="group relative rounded-md bg-muted/40 p-3 transition-shadow">
       <p className="whitespace-pre-line break-words text-sm leading-snug">{note.body}</p>
       <NoteLinks links={parseNoteLinks(note.links)} />
       {note.checklistItem && <LinkedItemTag item={note.checklistItem} />}
@@ -283,8 +283,25 @@ export function NotesLog({
         bodyRef.current?.focus();
       }, 50);
     }
+    // Desde la tarjeta de entradas de una subtarea: abre la bitácora, va a la nota y la resalta.
+    function onFocusNote(e: Event) {
+      const id = (e as CustomEvent<string>).detail;
+      if (typeof id !== "string") return;
+      setOpen(true);
+      setTimeout(() => {
+        const el = document.getElementById(`nota-${id}`);
+        if (!el) return;
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        el.classList.add("ring-2", "ring-primary/60");
+        setTimeout(() => el.classList.remove("ring-2", "ring-primary/60"), 1800);
+      }, 60);
+    }
     window.addEventListener(BITACORA_TARGET_EVENT, onTarget);
-    return () => window.removeEventListener(BITACORA_TARGET_EVENT, onTarget);
+    window.addEventListener(BITACORA_FOCUS_NOTE_EVENT, onFocusNote);
+    return () => {
+      window.removeEventListener(BITACORA_TARGET_EVENT, onTarget);
+      window.removeEventListener(BITACORA_FOCUS_NOTE_EVENT, onFocusNote);
+    };
   }, [setOpen]);
 
   return (
