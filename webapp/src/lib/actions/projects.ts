@@ -6,6 +6,7 @@ import type { ProjectStatus } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
 import { blockedForJunior } from "@/lib/session";
+import { isRequesterValue } from "@/lib/requester";
 import type { UndoAction } from "@/lib/undo";
 import { fromBogotaInput, PRIORITY_TAGS, WIP_ATENCION_INMEDIATA } from "@/lib/utils";
 
@@ -197,33 +198,32 @@ export async function updateProjectAssignee(
   return { kind: "project.assignee", id: projectId, before: prev.assigneeId };
 }
 
-/** Fija (o quita) quién solicitó el proyecto: la persona fuera de ET que pidió
- *  el servicio o la iniciativa (otra área, coordinación, dirección). Bloqueado
- *  para el perfil junior, igual que el resto de la cabecera del proyecto. */
+/** Fija (o quita) el solicitante del proyecto: el ÁREA o instancia, fuera de ET, que
+ *  pidió el servicio o la iniciativa (AA, GC, DS, VA, CL, Coordinación, Dirección; ver
+ *  src/lib/requester.ts). Vacío = sin solicitante. Bloqueado para el perfil junior,
+ *  igual que el resto de la cabecera del proyecto. */
 export async function updateProjectRequester(
   projectId: string,
-  rawUserId: string,
+  rawArea: string,
 ): Promise<UndoAction | void> {
   if (await blockedForJunior()) return;
 
   const prev = await prisma.project.findUnique({
     where: { id: projectId },
-    select: { requesterId: true },
+    select: { requesterArea: true },
   });
   if (!prev) return;
 
-  const id = rawUserId.trim();
-  const user = id
-    ? await prisma.user.findFirst({ where: { id, active: true }, select: { id: true } })
-    : null;
-  const requesterId = user?.id ?? null;
-  if (prev.requesterId === requesterId) return;
+  const value = rawArea.trim();
+  if (value && !isRequesterValue(value)) return;
+  const requesterArea = value || null;
+  if (prev.requesterArea === requesterArea) return;
 
-  await prisma.project.update({ where: { id: projectId }, data: { requesterId } });
+  await prisma.project.update({ where: { id: projectId }, data: { requesterArea } });
   revalidatePath("/");
   revalidatePath(`/proyectos/${projectId}`);
 
-  return { kind: "project.requester", id: projectId, before: prev.requesterId };
+  return { kind: "project.requester", id: projectId, before: prev.requesterArea };
 }
 
 /** Edita los campos de contenido de cualquier proyecto. Si el proyecto viene

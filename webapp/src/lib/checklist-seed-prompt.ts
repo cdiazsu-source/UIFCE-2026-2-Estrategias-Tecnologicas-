@@ -57,7 +57,7 @@ ${ET_AREA_CONTEXT}
 - Título: ${ctx.title}
 - Categoría: ${ctx.category}
 - Estado: ${ctx.statusLabel} · Urgencia: ${dash(ctx.priorityLabel)}
-- Responsable: ${dash(ctx.assignee)} · Solicitante: ${dash(ctx.requester)}
+- Responsable: ${dash(ctx.assignee)} · Área solicitante: ${dash(ctx.requester)}
 - Etiquetas: ${ctx.tags.length ? ctx.tags.join(", ") : "—"}
 - Horario y lugar: ${dash(ctx.schedule)}
 - Es una actividad del proyecto: ${dash(ctx.mainProjectTitle)}

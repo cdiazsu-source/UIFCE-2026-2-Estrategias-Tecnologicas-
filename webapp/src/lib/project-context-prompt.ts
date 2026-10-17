@@ -102,7 +102,7 @@ ${list(ctx.etStrategies)}
 - Título: ${ctx.title}
 - Categoría: ${ctx.category}
 - Estado: ${ctx.statusLabel} · Urgencia: ${dash(ctx.priorityLabel)}
-- Responsable (dentro de ET): ${dash(ctx.assignee)} · Solicitante (fuera de ET): ${dash(ctx.requester)}
+- Responsable (dentro de ET): ${dash(ctx.assignee)} · Área solicitante (fuera de ET): ${dash(ctx.requester)}
 - Etiquetas: ${ctx.tags.length ? ctx.tags.join(", ") : "—"}
 - Horario y lugar: ${dash(ctx.schedule)}
 - Es una actividad del proyecto: ${dash(ctx.mainProjectTitle)}

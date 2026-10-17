@@ -112,7 +112,7 @@ export async function applyUndo(action: UndoAction) {
       break;
     }
     case "project.requester": {
-      await prisma.project.update({ where: { id: action.id }, data: { requesterId: action.before } });
+      await prisma.project.update({ where: { id: action.id }, data: { requesterArea: action.before } });
       revalidatePath(`/proyectos/${action.id}`);
       break;
     }
