@@ -15,6 +15,9 @@ import { PriorityTag } from "@/components/priority-tag";
 import { ProjectControls } from "@/components/project-controls";
 import { ProjectTitleEditor } from "@/components/project-title-editor";
 import { ProjectEventControls } from "@/components/project-event-controls";
+import { ProjectContextButton } from "@/components/project-context-button";
+import type { ProjectContext } from "@/lib/project-context-prompt";
+import { parseNoteLinks } from "@/lib/note-links";
 import { Checklist } from "@/components/checklist";
 import { NotesLog } from "@/components/notes-log";
 import { ConsentPanel, type ConsentRow } from "@/components/consent-panel";
@@ -23,6 +26,7 @@ import { wipBlockedBy } from "@/lib/actions/projects";
 import { CONSENT_PROJECT_ID } from "@/lib/consent";
 import { EXPENSES_PROJECT_ID } from "@/lib/expenses";
 import {
+  formatDate,
   formatDateTime,
   formatDayHeader,
   formatTimeRange,
@@ -92,6 +96,17 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
 
   if (!project) notFound();
 
+  // Contexto de la Unidad para el botón «Contexto para IA».
+  const [areaProfile, semester] = await Promise.all([
+    prisma.areaProfile.findUnique({ where: { id: "area" }, select: { description: true } }),
+    project.semesterId
+      ? prisma.semester.findUnique({
+          where: { id: project.semesterId },
+          select: { label: true, objectives: true, etStrategies: true },
+        })
+      : Promise.resolve(null),
+  ]);
+
   const consentData: ConsentRow[] = consentRows.map((c) => ({
     id: c.id,
     name: c.name,
@@ -154,6 +169,54 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
       })),
   };
 
+  // Contexto completo (Unidad + proyecto + checklist + bitácora) para pegar en cualquier IA.
+  const scheduleOf = (startAt: Date | null, endAt: Date | null, location: string | null) =>
+    startAt
+      ? [`${formatDayHeader(startAt)} · ${formatTimeRange(startAt, endAt)}`, location].filter(Boolean).join(" · ")
+      : location;
+  const NOTES_IN_CONTEXT = 20;
+  const sortedNotes = [...project.notes].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  const aiContext: ProjectContext = {
+    title: project.title,
+    category: project.category,
+    statusLabel: PROJECT_STATUS_LABEL[project.status],
+    priorityLabel: project.priorityTag ? (PRIORITY_TAG_LABEL[project.priorityTag] ?? null) : null,
+    assignee: project.assignee?.name ?? null,
+    requester: project.requester?.name ?? null,
+    tags: project.tags,
+    description: project.description,
+    expectedOutcome: project.expectedOutcome,
+    rationale: project.rationale,
+    schedule: scheduleOf(project.startAt, project.endAt, project.location),
+    mainProjectTitle: project.mainProject?.title ?? null,
+    driveFolderUrl: project.driveFolderUrl,
+    semesterLabel: semester?.label ?? null,
+    semesterObjectives: semester?.objectives ?? [],
+    etStrategies: semester?.etStrategies ?? [],
+    areaDescription: areaProfile?.description ?? null,
+    activities: project.relatedProjects.map((r) => ({
+      title: r.title,
+      statusLabel: PROJECT_STATUS_LABEL[r.status],
+      schedule: scheduleOf(r.startAt, r.endAt, r.location),
+    })),
+    checklist: [...project.checklistItems]
+      .sort((a, b) => a.order - b.order)
+      .map((i) => ({
+        text: i.text,
+        done: i.done,
+        assignee: (i.assigneeId ? authors.find((p) => p.id === i.assigneeId)?.name : null) ?? i.assignee ?? null,
+        due: i.dueDate ? formatDate(i.dueDate) : null,
+      })),
+    notes: sortedNotes.slice(0, NOTES_IN_CONTEXT).map((n) => ({
+      author: n.author,
+      date: formatDateTime(n.createdAt),
+      body: n.body.length > 600 ? `${n.body.slice(0, 600)}…` : n.body,
+      item: n.checklistItem?.text ?? null,
+      links: parseNoteLinks(n.links),
+    })),
+    notesTotal: sortedNotes.length,
+  };
+
   return (
     <div className="flex flex-col gap-6">
       <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
@@ -196,6 +259,7 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
         </div>
         <ProjectEventControls project={project} candidateMains={candidateMains} mainProject={project.mainProject} />
         <ProjectControls project={project} />
+        <ProjectContextButton context={aiContext} />
       </div>
 
       <CollapseAllControls scope="project" className="-mb-3 justify-end" />
@@ -250,7 +314,16 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
 
       {isExpenses && <ExpensesPanel expenses={expensesData} people={authors} projects={expenseProjects} />}
 
-      <Checklist projectId={project.id} items={project.checklistItems} people={authors} seedContext={seedContext} />
+      <Checklist projectId={project.id} items={project.checklistItems} people={authors}
+        notes={project.notes.map((n) => ({
+          id: n.id,
+          checklistItemId: n.checklistItemId,
+          author: n.author,
+          body: n.body,
+          createdAt: n.createdAt,
+        }))}
+        seedContext={seedContext}
+      />
 
       <NotesLog
         projectId={project.id}
