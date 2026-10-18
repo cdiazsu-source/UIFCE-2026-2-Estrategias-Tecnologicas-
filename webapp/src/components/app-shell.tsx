@@ -8,7 +8,8 @@ import { ChevronDown, Code2, Eye, LogOut, Menu, X } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { logout } from "@/lib/actions/auth";
-import { setJuniorView } from "@/lib/actions/view";
+import { setJuniorView, viewAsJunior } from "@/lib/actions/view";
+import { JUNIOR_PROFILES } from "@/lib/auth";
 import { groupBySection, isItemActive, SIDEBAR_ITEMS, type SidebarItem } from "@/lib/sidebar-nav";
 
 type ShellProps = {
@@ -16,6 +17,8 @@ type ShellProps = {
   badges?: Record<string, number>;
   canEdit?: boolean;
   viewingAsJunior?: boolean;
+  /** Perfil Junior que se está viendo («junior-artes» / «junior-et»), si hay uno concreto. */
+  viewingAsKey?: string | null;
   canUseJuniorView?: boolean;
   canUseDeveloper?: boolean;
   children: React.ReactNode;
@@ -152,12 +155,70 @@ function ScrollableNav({ children }: { children: React.ReactNode }) {
   );
 }
 
+/** Selector de la Vista Junior: el máster elige QUÉ Junior quiere ver (Junior Artes o Junior ET) y
+ *  la app se muestra tal como la ve ese monitor (su saludo, sus proyectos primero y solo su
+ *  proyecto de estudio). Es un desplegable en línea, con las opciones a 44 px. */
+function JuniorViewPicker({
+  buttonClass,
+  label,
+  current,
+}: {
+  buttonClass: string;
+  label: string;
+  current: string | null;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <li>
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        title="Elegir qué Junior ver: Junior Artes o Junior ET"
+        className={buttonClass}
+      >
+        <Eye className="h-5 w-5 shrink-0" aria-hidden />
+        <span className="flex-1">{label}</span>
+        <ChevronDown className={cn("h-4 w-4 shrink-0 transition-transform duration-150", open && "rotate-180")} aria-hidden />
+      </button>
+      {open && (
+        <ul className="ml-8 mt-0.5 flex flex-col gap-0.5">
+          {Object.entries(JUNIOR_PROFILES).map(([key, name]) => {
+            const on = current === key;
+            return (
+              <li key={key}>
+                <form action={viewAsJunior.bind(null, key)}>
+                  <button
+                    type="submit"
+                    aria-current={on ? "true" : undefined}
+                    className={cn(
+                      "flex min-h-11 w-full items-center gap-2.5 rounded-l-xl py-2 pl-3 pr-4 text-left text-sm outline-none transition-colors duration-150 hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-accent",
+                      on ? "bg-white/15 font-semibold text-white" : "font-medium text-nav-foreground"
+                    )}
+                  >
+                    <span
+                      className={cn("h-2 w-2 shrink-0 rounded-full border", on ? "border-brand-accent bg-brand-accent" : "border-white/60")}
+                      aria-hidden
+                    />
+                    {name}
+                  </button>
+                </form>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </li>
+  );
+}
+
 /** Contenido del menú (lo comparten la barra fija de escritorio y el cajón móvil). */
 function SidebarContent({
   pathname,
   badges,
   canEdit,
   viewingAsJunior,
+  viewingAsKey,
   canUseJuniorView,
   canUseDeveloper,
   onNavigate,
@@ -215,23 +276,24 @@ function SidebarContent({
             />
           )}
           {viewingAsJunior ? (
-            <li>
-              <form action={setJuniorView.bind(null, false)}>
-                <button type="submit" className={cn(footerButton, "text-brand-accent")}>
-                  <Eye className="h-5 w-5 shrink-0" aria-hidden />
-                  Vista Junior · salir
-                </button>
-              </form>
-            </li>
+            <>
+              <li>
+                <form action={setJuniorView.bind(null, false)}>
+                  <button type="submit" className={cn(footerButton, "text-brand-accent")}>
+                    <Eye className="h-5 w-5 shrink-0" aria-hidden />
+                    <span className="flex flex-col leading-tight">
+                      Vista Junior · salir
+                      {viewingAsKey && JUNIOR_PROFILES[viewingAsKey] && (
+                        <span className="text-xs font-normal text-nav-foreground/80">Como {JUNIOR_PROFILES[viewingAsKey]}</span>
+                      )}
+                    </span>
+                  </button>
+                </form>
+              </li>
+              <JuniorViewPicker buttonClass={footerButton} label="Cambiar de Junior" current={viewingAsKey ?? null} />
+            </>
           ) : canUseJuniorView ? (
-            <li>
-              <form action={setJuniorView.bind(null, true)}>
-                <button type="submit" className={footerButton} title="Ver la app como la ve un monitor Junior">
-                  <Eye className="h-5 w-5 shrink-0" aria-hidden />
-                  Vista Junior
-                </button>
-              </form>
-            </li>
+            <JuniorViewPicker buttonClass={footerButton} label="Vista Junior" current={null} />
           ) : !canEdit ? (
             <li className="flex min-h-11 items-center gap-3 py-2 pl-3 pr-4 text-sm text-nav-foreground/70">
               <Eye className="h-5 w-5 shrink-0" aria-hidden />

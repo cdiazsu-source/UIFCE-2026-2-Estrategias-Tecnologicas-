@@ -1,16 +1,20 @@
 /**
- * Autenticación mínima: acceso compartido con dos perfiles + credenciales
+ * Autenticación mínima: una credencial compartida del máster + credenciales
  * nominales para personas puntuales. Protege TODO el sitio (middleware.ts):
  * sin cookie válida → /login.
  *
  *  - Perfil "full"   (usuario MASTER / contraseña ET2026): edita todo. Es el
  *    "máster": además ve el apartado "Desarrollador" (/desarrollador).
- *  - Perfil "junior" (usuario JUNIOR / contraseña TEAM):   ve todo, solo agrega
- *    notas de bitácora. El resto es de solo lectura.
- *  - Credenciales nominales (ver NAMED_CREDENTIALS): acceso total ("full"),
- *    pero identificado — su cookie lleva `who` y el layout registra su
- *    última visita en User.lastSeenAt (por credentialKey). Hoy: el director
- *    y, como colaboradores de Coordinación, Lina y Santi.
+ *  - Credenciales nominales (ver NAMED_CREDENTIALS): identificadas — su cookie
+ *    lleva `who` y el layout registra su última visita en User.lastSeenAt (por
+ *    credentialKey), que el máster consulta. Dos clases:
+ *      · acceso total ("full"): el director y, como colaboradores de
+ *        Coordinación, Lina y Santi;
+ *      · perfil "junior": uno por monitor (Junior Artes y Junior ET). Ve el
+ *        panel con sus proyectos asignados en primer plano y SOLO su proyecto de
+ *        estudio; solo agrega notas, gestiona checklist y consentimientos y
+ *        registra KPIs; el resto es de solo lectura.
+ *    (Ya no existe el usuario compartido JUNIOR / TEAM.)
  *
  * El nivel y la identidad viajan firmados en la cookie. Diseñado para pasar más
  * adelante a enlace mágico por correo + cuentas por persona sin tocar los
@@ -22,9 +26,10 @@
 export const SESSION_COOKIE = "et_session";
 export const SESSION_MAX_AGE = 60 * 60 * 24 * 30; // 30 días
 
-/** Cookie de "Vista Junior": si vale "junior" y la sesión real es completa y no
- *  es la del director, la app se comporta como si fuera perfil junior (para que
- *  el máster pueda revisar qué ven y qué pueden hacer los monitores). */
+/** Cookie de "Vista Junior": si vale "junior" (o "junior:<clave>" para verla como
+ *  un monitor concreto) y la sesión real es completa y no es la del director, la
+ *  app se comporta como si fuera perfil junior (para que el máster pueda revisar
+ *  qué ven y qué pueden hacer los monitores). */
 export const VIEW_COOKIE = "et_view";
 
 export type AccessLevel = "full" | "junior";
@@ -34,27 +39,51 @@ export type AccessLevel = "full" | "junior";
  *  User.credentialKey. Las credenciales compartidas devuelven who = null. */
 export type CredentialCheck = { level: AccessLevel; who: string | null };
 
-/** Usuarios compartidos. Cada perfil tiene su propio nombre de usuario (antes
- *  ambos usaban "UIFCE" con SITE_USER). Variables nuevas a propósito: un
- *  SITE_USER viejo en Vercel ya no fija el nombre. */
+/** Usuario compartido del máster (antes ambos perfiles usaban "UIFCE" con
+ *  SITE_USER). Variable nueva a propósito: un SITE_USER viejo en Vercel ya no fija
+ *  el nombre. */
 export const SITE_USER_MASTER = process.env.SITE_USER_MASTER || "MASTER";
-export const SITE_USER_JUNIOR = process.env.SITE_USER_JUNIOR || "JUNIOR";
 const PASS_FULL = process.env.SITE_PASSWORD || "ET2026";
-const PASS_JUNIOR = process.env.SITE_PASSWORD_JUNIOR || "TEAM";
+
+/** Claves de identidad de los dos perfiles Junior; deben coincidir con
+ *  User.credentialKey de cada monitor (lo fija scripts/apply-junior-profiles.mjs). */
+export const JUNIOR_ARTES_WHO = "junior-artes";
+export const JUNIOR_ET_WHO = "junior-et";
+/** Rótulo de cada perfil Junior (para el menú, los avisos y «ver como»). */
+export const JUNIOR_PROFILES: Record<string, string> = {
+  [JUNIOR_ARTES_WHO]: "Junior Artes",
+  [JUNIOR_ET_WHO]: "Junior ET",
+};
+export function isJuniorWho(who: string | null | undefined): who is string {
+  return !!who && Object.prototype.hasOwnProperty.call(JUNIOR_PROFILES, who);
+}
 
 /** Clave de identidad del director; debe coincidir con User.credentialKey.
  *  Se mantiene aparte (no solo como entrada de NAMED_CREDENTIALS) porque
  *  session.ts la usa para excluir al director de la "Vista Junior". */
 export const DIRECTOR_WHO = "henry-sarmiento";
 
-/** Credenciales nominales: cada una da acceso "full" pero identificado — el
- *  usuario distingue mayúsculas. Todas configurables por entorno en Vercel
- *  (SITE_USER_<X> / SITE_PASSWORD_<X>) sin tocar el código. `who` debe
- *  coincidir con el User.credentialKey de la persona (ver prisma/seed.ts). */
-const NAMED_CREDENTIALS: { user: string; pass: string; who: string }[] = [
+/** Credenciales nominales: cada una es identificada (el usuario distingue
+ *  mayúsculas). Dan acceso "full" salvo que indiquen `level: "junior"`. Todas
+ *  configurables por entorno en Vercel (SITE_USER_<X> / SITE_PASSWORD_<X>) sin
+ *  tocar el código. `who` debe coincidir con el User.credentialKey de la persona. */
+const NAMED_CREDENTIALS: { user: string; pass: string; who: string; level?: AccessLevel }[] = [
   { user: process.env.SITE_USER_DIRECTOR || "HENRY", pass: process.env.SITE_PASSWORD_DIRECTOR || "UIFCEUNAL310.", who: DIRECTOR_WHO },
   { user: process.env.SITE_USER_LINA || "LINA", pass: process.env.SITE_PASSWORD_LINA || "ET", who: "lina-sanabria" },
   { user: process.env.SITE_USER_SANTI || "SANTI", pass: process.env.SITE_PASSWORD_SANTI || "ET", who: "santiago-parra" },
+  // Monitores Junior: un perfil por persona (cambiar las contraseñas por defecto en Vercel).
+  {
+    user: process.env.SITE_USER_JUNIOR_ARTES || "ARTES",
+    pass: process.env.SITE_PASSWORD_JUNIOR_ARTES || "artes123",
+    who: JUNIOR_ARTES_WHO,
+    level: "junior",
+  },
+  {
+    user: process.env.SITE_USER_JUNIOR_ET || "JUNIORET",
+    pass: process.env.SITE_PASSWORD_JUNIOR_ET || "junioret123",
+    who: JUNIOR_ET_WHO,
+    level: "junior",
+  },
 ];
 
 const SECRET = process.env.AUTH_SECRET || "et-en-marcha-dev-secret-cambiar-en-vercel";
@@ -85,10 +114,9 @@ export function checkCredentials(username: string, password: string): Credential
   const user = username.trim();
 
   for (const cred of NAMED_CREDENTIALS) {
-    if (user === cred.user && password === cred.pass) return { level: "full", who: cred.who };
+    if (user === cred.user && password === cred.pass) return { level: cred.level ?? "full", who: cred.who };
   }
   if (user === SITE_USER_MASTER && password === PASS_FULL) return { level: "full", who: null };
-  if (user === SITE_USER_JUNIOR && password === PASS_JUNIOR) return { level: "junior", who: null };
   return null;
 }
 

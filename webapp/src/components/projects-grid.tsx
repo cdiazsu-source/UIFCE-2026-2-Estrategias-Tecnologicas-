@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { AlertTriangle, Search, X } from "lucide-react";
+import { AlertTriangle, Search, UserCheck, X } from "lucide-react";
 
 import { ProjectCard, type ProjectCardData } from "@/components/project-card";
 import { Input } from "@/components/ui/input";
@@ -22,8 +22,12 @@ export function ProjectsGrid({
   projects,
   focusPersonId,
   focusPersonName,
+  mineId,
 }: {
   projects: ProjectCardData[];
+  /** Perfil Junior con sesión: sus proyectos (responsable o con subtareas) van primero,
+   *  en una sección «Asignados a ti», con la tarjeta resaltada. */
+  mineId?: string | null;
   /** Si viene (?focus=<id>), la grilla se limita a los proyectos de esa persona
    *  que están en «❗ Atención Inmediata». */
   focusPersonId?: string;
@@ -75,6 +79,11 @@ export function ProjectsGrid({
       return matchesText && matchesCategory;
     });
   }, [ordered, nq, category, person]);
+
+  const isMine = (p: ProjectCardData) =>
+    !!mineId && (p.assignee?.id === mineId || p.assignees.some((a) => a.id === mineId));
+  const mineList = mineId ? filtered.filter(isMine) : [];
+  const restList = mineId ? filtered.filter((p) => !isMine(p)) : filtered;
 
   return (
     <div className="flex flex-col gap-3">
@@ -170,6 +179,38 @@ export function ProjectsGrid({
               ? `${person.name} no tiene proyectos asignados en este semestre.`
               : "Ningún proyecto coincide con la búsqueda."}
         </p>
+      ) : mineId ? (
+        <div className="flex flex-col gap-6">
+          <section aria-label="Proyectos asignados a ti" className="flex flex-col gap-3">
+            <h3 className="flex items-center gap-2 text-sm font-semibold text-primary">
+              <UserCheck className="h-4 w-4" aria-hidden />
+              Asignados a ti ({mineList.length})
+            </h3>
+            {mineList.length > 0 ? (
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                {mineList.map((project) => (
+                  <ProjectCard key={project.id} project={project} mine />
+                ))}
+              </div>
+            ) : (
+              <p className="rounded-md border border-dashed border-input p-4 text-sm text-muted-foreground">
+                {filtering
+                  ? "Ninguno de tus proyectos coincide con la búsqueda."
+                  : "Todavía no tienes proyectos asignados. Cuando te asignen uno aparecerá aquí."}
+              </p>
+            )}
+          </section>
+          {restList.length > 0 && (
+            <section aria-label="Otros proyectos" className="flex flex-col gap-3">
+              <h3 className="text-sm font-semibold text-muted-foreground">Otros proyectos ({restList.length})</h3>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                {restList.map((project) => (
+                  <ProjectCard key={project.id} project={project} />
+                ))}
+              </div>
+            </section>
+          )}
+        </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {filtered.map((project) => (

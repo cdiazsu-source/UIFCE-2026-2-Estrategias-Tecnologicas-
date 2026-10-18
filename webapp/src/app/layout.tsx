@@ -7,6 +7,7 @@ import { UndoProvider } from "@/components/undo-banner";
 import { QuickNav } from "@/components/quick-nav";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
+import { JUNIOR_PROFILES } from "@/lib/auth";
 import { setJuniorView } from "@/lib/actions/view";
 import { touchLastSeen } from "@/lib/presence";
 
@@ -57,11 +58,21 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const canUseDeveloper = session.authed ? session.isMaster && !session.viewingAsJunior : false;
   if (session.authed) await touchLastSeen(session.who);
   const badges = session.authed ? await loadBadges() : {};
+  // Persona de la credencial propia (si la tiene): queda preseleccionada en «¿Quién eres?».
+  let currentUserId: string | null = null;
+  if (session.authed && session.who) {
+    try {
+      currentUserId = (await prisma.user.findFirst({ where: { credentialKey: session.who }, select: { id: true } }))?.id ?? null;
+    } catch {
+      currentUserId = null;
+    }
+  }
 
   return (
     <html lang="es">
       <body className="min-h-screen bg-background font-sans antialiased">
         <AccessProvider
+          currentUserId={currentUserId}
           canEdit={editable}
           canRecordMetrics={session.authed}
           canManageChecklist={session.authed}
@@ -73,6 +84,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               badges={badges}
               canEdit={editable}
               viewingAsJunior={asJunior}
+              viewingAsKey={session.authed ? session.juniorKey : null}
               canUseJuniorView={canUseJuniorView}
               canUseDeveloper={canUseDeveloper}
             >
@@ -81,7 +93,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-6 py-2 text-xs">
                   <span className="flex items-center gap-1.5 font-medium text-warning">
                     <Eye className="h-3.5 w-3.5" />
-                    Vista Junior activa: ves y editas solo lo que un monitor Junior puede.
+                    Vista Junior activa
+                    {session.authed && session.juniorKey ? ` como ${JUNIOR_PROFILES[session.juniorKey]}` : ""}: ves y
+                    editas solo lo que un monitor Junior puede.
                   </span>
                   <form action={setJuniorView.bind(null, false)}>
                     <button type="submit" className="font-medium underline hover:no-underline">

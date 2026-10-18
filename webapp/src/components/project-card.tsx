@@ -45,7 +45,7 @@ export type ProjectCardData = {
 // libre) y le da a la tarjeta un borde algo más grueso.
 const BASE_NUMERAL_TAG = /^Base #(\d+)$/;
 
-export function ProjectCard({ project }: { project: ProjectCardData }) {
+export function ProjectCard({ project, mine = false }: { project: ProjectCardData; mine?: boolean }) {
   const progress = project.checklistTotal > 0 ? (project.checklistDone / project.checklistTotal) * 100 : 0;
 
   // Franja de color de la tarjeta: el acento del responsable del proyecto; si no
@@ -64,7 +64,7 @@ export function ProjectCard({ project }: { project: ProjectCardData }) {
   return (
     <Link href={`/proyectos/${project.id}`} className="block h-full">
       <Card
-        className={`group relative h-full cursor-pointer transition-[transform,box-shadow,border-color] duration-200 ease-out-strong [@media(hover:hover)]:hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-card-hover active:translate-y-0 active:scale-[0.99] active:shadow-card ${
+        className={`${mine ? "ring-2 ring-primary " : ""}group relative h-full cursor-pointer transition-[transform,box-shadow,border-color] duration-200 ease-out-strong [@media(hover:hover)]:hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-card-hover active:translate-y-0 active:scale-[0.99] active:shadow-card ${
           baseNumeral ? "border-[1.5px] border-foreground/25" : ""
         }`}
       >
@@ -79,6 +79,11 @@ export function ProjectCard({ project }: { project: ProjectCardData }) {
           <div className="flex flex-wrap items-center gap-1.5">
             <Badge variant="outline">{project.category}</Badge>
             <PriorityTag tag={project.priorityTag} className={urgent ? "animate-et-blink" : ""} />
+            {mine && (
+              <span className="rounded-full bg-brand-accent px-2 py-0.5 text-[10px] font-semibold text-brand-accent-foreground">
+                Asignado a ti
+              </span>
+            )}
             {project.isManual && <Badge variant="secondary">Propio</Badge>}
             {visibleTags.slice(0, 3).map((t) => (
               <Badge key={t} variant="secondary">

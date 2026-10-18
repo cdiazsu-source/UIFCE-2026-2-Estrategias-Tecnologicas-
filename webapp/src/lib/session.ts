@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 
-import { type AccessLevel, DIRECTOR_WHO, SESSION_COOKIE, VIEW_COOKIE, verifyToken } from "@/lib/auth";
+import { type AccessLevel, DIRECTOR_WHO, isJuniorWho, SESSION_COOKIE, VIEW_COOKIE, verifyToken } from "@/lib/auth";
 
 export type Session =
   | {
@@ -17,6 +17,10 @@ export type Session =
       /** true = es la credencial compartida del máster (usuario MASTER): full y sin
        *  identidad nominal. Es quien ve el apartado "Desarrollador". */
       isMaster: boolean;
+      /** Clave del perfil Junior cuya vista se muestra («junior-artes» / «junior-et»):
+       *  la del propio monitor si entró con su credencial, o la elegida por el máster en
+       *  «Ver como». null = sin perfil Junior concreto (no se restringe nada por persona). */
+      juniorKey: string | null;
     }
   | { authed: false };
 
@@ -27,12 +31,27 @@ export async function getSession(): Promise<Session> {
   if (!v) return { authed: false };
 
   const canUseJuniorView = v.level === "full" && v.who !== DIRECTOR_WHO;
-  const viewingAsJunior = canUseJuniorView && jar.get(VIEW_COOKIE)?.value === "junior";
+  const viewValue = jar.get(VIEW_COOKIE)?.value ?? "";
+  const viewingAsJunior = canUseJuniorView && (viewValue === "junior" || viewValue.startsWith("junior:"));
   const level: AccessLevel = viewingAsJunior ? "junior" : v.level;
 
   const isMaster = v.level === "full" && v.who === null;
 
-  return { authed: true, level, who: v.who, realLevel: v.level, viewingAsJunior, canUseJuniorView, isMaster };
+  // Perfil Junior concreto: el del propio monitor, o el elegido en «Ver como».
+  const viewKey = viewValue.startsWith("junior:") ? viewValue.slice("junior:".length) : null;
+  const juniorKey =
+    v.level === "junior" && isJuniorWho(v.who) ? v.who : viewingAsJunior && isJuniorWho(viewKey) ? viewKey : null;
+
+  return {
+    authed: true,
+    level,
+    who: v.who,
+    realLevel: v.level,
+    viewingAsJunior,
+    canUseJuniorView,
+    isMaster,
+    juniorKey,
+  };
 }
 
 /** ¿Puede entrar al apartado "Desarrollador"? Solo el máster (usuario MASTER) y

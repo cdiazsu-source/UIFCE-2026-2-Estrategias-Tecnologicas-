@@ -561,8 +561,24 @@ const SEED_USERS: {
   credentialKey?: string;
 }[] = [
   { name: "Cesar Steven Diaz Suarez", email: "cdiazsu@unal.edu.co", role: "MASTER", area: "ET", color: "#1E40AF" },
-  { name: "María Fernanda Celis Mora", email: "mafe@example.com", role: "JUNIOR_ARTES", area: "ET", color: "#DB2777" },
-  { name: "Jean Carlos Baquero Garcia", email: "jean@example.com", role: "JUNIOR_AUXILIAR", area: "ET", color: "#15803D" },
+  {
+    name: "María Fernanda Celis Mora",
+    email: "mafe@example.com",
+    role: "JUNIOR_ARTES",
+    area: "ET",
+    color: "#DB2777",
+    // Casa con NAMED_CREDENTIALS en src/lib/auth.ts (perfil Junior Artes).
+    credentialKey: "junior-artes",
+  },
+  {
+    name: "Jean Carlos Baquero Garcia",
+    email: "jean@example.com",
+    role: "JUNIOR_AUXILIAR",
+    area: "ET",
+    color: "#15803D",
+    // Casa con NAMED_CREDENTIALS en src/lib/auth.ts (perfil Junior ET).
+    credentialKey: "junior-et",
+  },
   { name: "Estrategias Tecnológicas (ET)", email: "et@example.com", role: "EQUIPO", area: "ET", color: "#4A7729" },
   {
     name: "Lina Fernanda Sanabria Muñoz",

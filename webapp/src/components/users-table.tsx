@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Linkedin, Pencil, Plus, Trash2 } from "lucide-react";
+import { Eye, Linkedin, Pencil, Plus, Trash2 } from "lucide-react";
 import type { User, UserRole } from "@prisma/client";
 
 import { addUser, deleteUser, updateUser } from "@/lib/actions/users";
+import { viewAsJunior } from "@/lib/actions/view";
+import { isJuniorWho } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
@@ -37,7 +39,7 @@ function RoleSelect({ name, defaultValue }: { name: string; defaultValue?: UserR
   );
 }
 
-function UserRow({ user }: { user: User }) {
+function UserRow({ user, canViewAs }: { user: User; canViewAs: boolean }) {
   const canEdit = useCanEdit();
   const [editing, setEditing] = useState(false);
   const [, startTransition] = useTransition();
@@ -130,7 +132,19 @@ function UserRow({ user }: { user: User }) {
       </TableCell>
       <TableCell>
         {canEdit && (
-          <div className="flex justify-end gap-1">
+          <div className="flex items-center justify-end gap-1">
+            {canViewAs && isJuniorWho(user.credentialKey) && (
+              <form action={viewAsJunior.bind(null, user.credentialKey ?? "")}>
+                <button
+                  type="submit"
+                  className="inline-flex items-center gap-1 rounded-md border border-input px-2 py-1 text-xs font-medium text-primary hover:bg-accent"
+                  title="Ver la app tal como la ve este monitor (su saludo, sus proyectos y su proyecto de estudio)"
+                >
+                  <Eye className="h-3.5 w-3.5" />
+                  Ver como
+                </button>
+              </form>
+            )}
             <button
               type="button"
               onClick={() => setEditing(true)}
@@ -154,7 +168,7 @@ function UserRow({ user }: { user: User }) {
   );
 }
 
-export function UsersTable({ users }: { users: User[] }) {
+export function UsersTable({ users, canViewAs = false }: { users: User[]; canViewAs?: boolean }) {
   const canEdit = useCanEdit();
   const [showForm, setShowForm] = useState(false);
 
@@ -205,7 +219,7 @@ export function UsersTable({ users }: { users: User[] }) {
         </TableHeader>
         <TableBody>
           {users.map((user) => (
-            <UserRow key={user.id} user={user} />
+            <UserRow key={user.id} user={user} canViewAs={canViewAs} />
           ))}
         </TableBody>
       </Table>

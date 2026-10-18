@@ -14,6 +14,7 @@ import { InfoHint } from "@/components/info-hint";
 import { CollapseToggle, useCollapse } from "@/components/collapsible";
 import { MentionPicker, MentionTags } from "@/components/mention-picker";
 import { useUndo } from "@/components/undo-banner";
+import { useCurrentUserId } from "@/components/access-context";
 import { BITACORA_FOCUS_NOTE_EVENT, BITACORA_TARGET_EVENT } from "@/lib/events";
 import { linkDisplay, NOTE_LINKS_MAX, parseNoteLinks, type NoteLink } from "@/lib/note-links";
 import { formatDateTime, USER_ROLE_LABEL } from "@/lib/utils";
@@ -270,6 +271,9 @@ export function NotesLog({
   const formRef = useRef<HTMLFormElement>(null);
   const bodyRef = useRef<HTMLTextAreaElement>(null);
   const { open, setOpen, toggle } = useCollapse("project:bitacora");
+  // Quien entró con su propia credencial ya aparece como autor de la nota.
+  const me = useCurrentUserId();
+  const defaultAuthor = me && authors.some((a) => a.id === me) ? me : "";
 
   useEffect(() => {
     function onTarget(e: Event) {
@@ -340,7 +344,7 @@ export function NotesLog({
               required
             />
             <div className="flex flex-wrap items-center gap-2">
-              <Select name="authorId" defaultValue="" required className="w-64">
+              <Select name="authorId" defaultValue={defaultAuthor} required className="w-64">
                 <option value="" disabled>
                   ¿Quién deja la nota?
                 </option>

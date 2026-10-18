@@ -41,7 +41,7 @@ const HOME_ITEMS: NavItem[] = [
   { id: "proyectos", label: "Proyectos", icon: FolderKanban, scope: "home:proyectos" },
   { id: "estudio", label: "Proyectos de estudio", icon: GraduationCap, scope: "home:estudio" },
   { id: "comentarios-estudio", label: "Comentarios de proyectos de estudio", icon: MessagesSquare },
-  { id: "actividad", label: "Actividad reciente", icon: Activity },
+  { id: "actividad", label: "Actividad reciente", icon: Activity, scope: "home:actividad" },
 ];
 
 /** Apartados del detalle de un proyecto. */

@@ -19,13 +19,20 @@ const CanManageChecklistContext = createContext(false);
  *  imagen. Perfil completo y junior. */
 const CanManageConsentContext = createContext(false);
 
+/** id del User de la sesión cuando entró con una credencial propia (Junior Artes, Junior ET,
+ *  dirección, coordinación); null con la credencial compartida del máster. Sirve para dejar
+ *  preseleccionada a la persona en los desplegables «¿Quién eres?». */
+const CurrentUserIdContext = createContext<string | null>(null);
+
 export function AccessProvider({
+  currentUserId = null,
   canEdit,
   canRecordMetrics = false,
   canManageChecklist = false,
   canManageConsent = false,
   children,
 }: {
+  currentUserId?: string | null;
   canEdit: boolean;
   canRecordMetrics?: boolean;
   canManageChecklist?: boolean;
@@ -33,6 +40,7 @@ export function AccessProvider({
   children: React.ReactNode;
 }) {
   return (
+    <CurrentUserIdContext.Provider value={currentUserId}>
     <CanEditContext.Provider value={canEdit}>
       <CanRecordMetricsContext.Provider value={canRecordMetrics}>
         <CanManageChecklistContext.Provider value={canManageChecklist}>
@@ -42,7 +50,12 @@ export function AccessProvider({
         </CanManageChecklistContext.Provider>
       </CanRecordMetricsContext.Provider>
     </CanEditContext.Provider>
+    </CurrentUserIdContext.Provider>
   );
+}
+
+export function useCurrentUserId() {
+  return useContext(CurrentUserIdContext);
 }
 
 export function useCanEdit() {

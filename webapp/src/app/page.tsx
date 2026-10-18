@@ -20,11 +20,14 @@ import { InfoHint } from "@/components/info-hint";
 import { NewProjectButton } from "@/components/new-project-button";
 import { ProjectSeedPromptButton } from "@/components/project-seed-prompt-button";
 import { CollapsibleBlock } from "@/components/collapsible";
+import { WelcomeBanner, type WelcomeData } from "@/components/welcome-banner";
+import { getSession } from "@/lib/session";
+import { JUNIOR_PROFILES } from "@/lib/auth";
 import { byUrgency } from "@/lib/project-order";
 import { CategoryDistribution } from "@/components/category-distribution";
 import { DofaOverlay } from "@/components/dofa-overlay";
 import { StrategicAnalysisOverlay } from "@/components/strategic-analysis-overlay";
-import { formatDateTime, JUNIOR_ROLES, STUDY_COMMENT_ROLES } from "@/lib/utils";
+import { formatDateTime, JUNIOR_ROLES, STUDY_COMMENT_ROLES, USER_ROLE_LABEL } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -55,7 +58,16 @@ async function getSemesters(semParam: string | undefined) {
   return { tabs, selected, isSelectedCurrent: !!(selected && current && selected.id === current.id) };
 }
 
-async function getHomeData(semesterId: string | null, includeOrphans: boolean) {
+/** Nombre de pila para el saludo: dos nombres si hay cuatro palabras (p. ej. «María Fernanda
+ *  Celis Mora» → «María Fernanda»), uno en los demás casos. */
+function greetingName(fullName: string): string {
+  const parts = fullName.trim().split(/\s+/);
+  return parts.length >= 4 ? parts.slice(0, 2).join(" ") : parts[0] ?? fullName;
+}
+
+/** `juniorKey`: si la sesión es de un perfil Junior concreto (o el máster lo ve «como»), solo se
+ *  cargan SU proyecto de estudio y los comentarios de ese proyecto. */
+async function getHomeData(semesterId: string | null, includeOrphans: boolean, juniorKey: string | null) {
   const projectWhere =
     semesterId == null
       ? {}
@@ -140,11 +152,11 @@ async function getHomeData(semesterId: string | null, includeOrphans: boolean) {
       prisma.user.findMany({
         where: { credentialKey: { not: null } },
         orderBy: { name: "asc" },
-        select: { name: true, lastSeenAt: true },
+        select: { name: true, role: true, lastSeenAt: true },
       }),
       prisma.areaProfile.findUnique({ where: { id: "area" } }),
       prisma.user.findMany({
-        where: { role: { in: [...JUNIOR_ROLES] } },
+        where: { role: { in: [...JUNIOR_ROLES] }, ...(juniorKey ? { credentialKey: juniorKey } : {}) },
         orderBy: [{ role: "asc" }, { name: "asc" }],
         include: {
           studyProjects: {
@@ -155,7 +167,7 @@ async function getHomeData(semesterId: string | null, includeOrphans: boolean) {
         },
       }),
       prisma.studyProjectComment.findMany({
-        where: { studyProject: projectWhere },
+        where: { studyProject: { ...projectWhere, ...(juniorKey ? { owner: { credentialKey: juniorKey } } : {}) } },
         orderBy: { createdAt: "desc" },
         take: 150,
         select: {
@@ -307,6 +319,28 @@ async function getHomeData(semesterId: string | null, includeOrphans: boolean) {
     )
     .map((m) => ({ ...m, urgentCount: urgentByPerson.get(m.id) ?? 0 }));
 
+  // Perfil Junior con sesión: su saludo y el resumen de lo suyo (proyectos asignados y próximo corte).
+  const meRow = juniorKey ? (studyJuniors.find((j) => j.credentialKey === juniorKey) ?? null) : null;
+  const me: (WelcomeData & { id: string }) | null = meRow
+    ? (() => {
+        const open = projectCards.filter(
+          (p) => p.status !== "COMPLETADO" && (p.assignee?.id === meRow.id || p.assignees.some((a) => a.id === meRow.id)),
+        );
+        return {
+          id: meRow.id,
+          profileKey: juniorKey as string,
+          firstName: greetingName(meRow.name),
+          roleLabel: USER_ROLE_LABEL[meRow.role] ?? meRow.role,
+          mineCount: open.length,
+          urgentCount: open.filter((p) => p.priorityTag === "ATENCION_INMEDIATA").length,
+          study: meRow.studyProjects.map((sp) => {
+            const next = sp.checkpoints.find((c) => c.status !== "CUMPLIDO");
+            return { title: sp.title, next: next ? { label: next.label, due: next.dueDate ? next.dueDate.toISOString() : null } : null };
+          }),
+        };
+      })()
+    : null;
+
   const commentAuthors = people.map((p) => ({ id: p.id, name: p.name, role: p.role }));
   const comments: TeamCommentData[] = teamComments;
   const profile: AreaProfileData | null = areaProfile
@@ -327,6 +361,7 @@ async function getHomeData(semesterId: string | null, includeOrphans: boolean) {
     studyCommentsData,
     studyCommentAuthors,
     studyCommentTargets,
+    me,
   };
 }
 
@@ -336,6 +371,11 @@ export default async function HomePage({
   searchParams: { sem?: string; focus?: string };
 }) {
   const { tabs, selected, isSelectedCurrent } = await getSemesters(searchParams.sem);
+  const session = await getSession();
+  // Perfil Junior concreto (el propio monitor, o el máster con «Ver como»): ve solo su proyecto de estudio.
+  const juniorKey = session.authed ? session.juniorKey : null;
+  // Los últimos accesos los consulta el perfil completo (máster, dirección, coordinación).
+  const seeAccess = session.authed && session.level === "full";
   const {
     stats,
     projectCards,
@@ -350,7 +390,8 @@ export default async function HomePage({
     studyCommentsData,
     studyCommentAuthors,
     studyCommentTargets,
-  } = await getHomeData(selected?.id ?? null, isSelectedCurrent);
+    me,
+  } = await getHomeData(selected?.id ?? null, isSelectedCurrent, juniorKey);
 
   // ?focus=<id>: enfoca la grilla en los pendientes de atención de esa persona.
   const focusPerson = searchParams.focus
@@ -359,13 +400,23 @@ export default async function HomePage({
 
   return (
     <div className="flex flex-col gap-8">
+      {me && <WelcomeBanner data={me} />}
+
+      {juniorKey && !me && (
+        <p className="rounded-md border border-warning/40 bg-warning/10 p-4 text-sm">
+          El perfil <span className="font-semibold">{JUNIOR_PROFILES[juniorKey]}</span> todavía no está enlazado a una
+          persona del Equipo, por eso no se muestran su saludo ni su proyecto de estudio. El máster debe enlazarlo
+          (script <code>apply-junior-profiles</code>).
+        </p>
+      )}
+
       <AreaOverview profile={profile} />
 
-      {namedAccess.length > 0 && (
+      {seeAccess && namedAccess.length > 0 && (
         <p className="-mt-4 flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted-foreground">
           {namedAccess.map((u) => (
             <span key={u.name}>
-              Último acceso de {u.name}:{" "}
+              Último acceso de {u.name} ({USER_ROLE_LABEL[u.role] ?? u.role}):{" "}
               <span className="font-medium text-foreground">
                 {u.lastSeenAt ? formatDateTime(u.lastSeenAt) : "sin registro todavía"}
               </span>
@@ -429,6 +480,7 @@ export default async function HomePage({
           ) : (
             <ProjectsGrid
               projects={projectCards}
+              mineId={me?.id}
               focusPersonId={focusPerson?.id}
               focusPersonName={focusPerson?.name}
             />
@@ -463,13 +515,22 @@ export default async function HomePage({
         </div>
 
         <div className="flex flex-col gap-6">
-          <div id="actividad" className="flex scroll-mt-20 flex-col gap-3">
-            <h2 className="flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+          <CollapsibleBlock
+            scope="home:actividad"
+            label="las últimas actualizaciones"
+            id="actividad"
+            wrapperClassName="flex flex-col gap-3"
+            headerClassName="scroll-mt-20"
+            titleClassName="flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wide text-muted-foreground"
+            title={
+              <>
               Actividad
               <InfoHint text="Lo más reciente de todos los proyectos, en orden cronológico: notas de bitácora y subtareas marcadas como hechas. Bajo una subtarea completada, titilando, aparece la que sigue. El texto largo se recorta; clic en una entrada abre el proyecto. Se alimenta de lo que el equipo escribe en la bitácora de cada proyecto." />
-            </h2>
+              </>
+            }
+          >
             <UpdatesFeed items={feedItems} />
-          </div>
+          </CollapsibleBlock>
 
           <TeamComments comments={comments} authors={commentAuthors} />
         </div>

@@ -14,7 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { InfoHint } from "@/components/info-hint";
-import { useCanEdit } from "@/components/access-context";
+import { useCanEdit, useCurrentUserId } from "@/components/access-context";
 import { useUndo } from "@/components/undo-banner";
 import { formatDateTime, USER_ROLE_LABEL } from "@/lib/utils";
 
@@ -36,8 +36,10 @@ export type TeamCommentData = {
 /** Desplegable «¿Quién eres?» compartido por el formulario principal y las
  *  respuestas. */
 function AuthorSelect({ authors }: { authors: TeamCommentAuthor[] }) {
+  // Quien entró con su propia credencial ya aparece seleccionado.
+  const me = useCurrentUserId();
   return (
-    <Select name="authorId" defaultValue="" required className="w-64">
+    <Select name="authorId" defaultValue={me && authors.some((a) => a.id === me) ? me : ""} required className="w-64">
       <option value="" disabled>
         ¿Quién eres?
       </option>
