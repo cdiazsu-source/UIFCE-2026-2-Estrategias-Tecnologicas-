@@ -18,6 +18,10 @@ const config: Config = {
           active: "hsl(var(--primary-active))",
         },
         link: "hsl(var(--link))",
+        "brand-accent": {
+          DEFAULT: "hsl(var(--brand-accent))",
+          foreground: "hsl(var(--brand-accent-foreground))",
+        },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
           foreground: "hsl(var(--secondary-foreground))",

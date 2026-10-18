@@ -38,7 +38,7 @@ const linkClass = (active: boolean) =>
   cn(
     "press rounded-md px-3 py-1.5 text-sm font-medium transition-[color,background-color] duration-150 ease-out-strong",
     active
-      ? "bg-white/15 text-white shadow-[inset_0_-2px_0_hsl(var(--nav-foreground)/0.9)]"
+      ? "bg-white/15 text-white shadow-[inset_0_-2px_0_hsl(var(--brand-accent))]"
       : "text-nav-foreground/70 hover:bg-white/10 hover:text-white"
   );
 

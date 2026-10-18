@@ -4,48 +4,51 @@
 
 @layer base {
   :root {
-    /* Paleta de la Unidad de Informática (UIFCE). Los valores se expresan en HSL
-       para consumo vía hsl(var(--token)). Regla 60-30-10: 60 % lienzo, 30 %
-       estructura y texto, 10 % foco de acción.
-       - Blanco hielo  #EDEFF3  lienzo: fondo de página (las tarjetas van en blanco)
-       - Navy oscuro   #031A2F  texto principal
-       - Slate oscuro  #1F3864  barra superior y estructura; hover del botón primario
-       - Cobalto       #08549B  foco de acción: botón primario, progreso, pestañas, foco
-       - Azul acero    #2F5496  secundarios: enlaces, etiquetas, botón secundario
-       - Navy clásico  #073763  estados "presionado" y "seleccionado"
-       Cobalto y azul acero tienen casi la misma claridad (1,03:1), por eso el hover
-       del botón primario oscurece (slate) en vez de pasar a azul acero.
-       Los estados (éxito, advertencia, error) conservan matices propios para que
-       "completado", "en curso" y "crítico" no se confundan con el azul de marca. */
+    /* Paleta cromática OFICIAL de la UIFCE (manual de identidad, sección 05), aplicada a
+       la app. Los valores se expresan en HSL para consumo vía hsl(var(--token)).
+       - Azul oscuro   #000066  solidez: texto principal, barra superior, hover/presionado
+       - Azul vibrante #0000FF  eje de la identidad (referencia y gráficos); en la interfaz se
+                                usa su tono medio #1D1DA5, menos brillante, para no cansar la vista
+       - Amarillo      #FFFF00  ACENTO: solo para resaltar lo relevante, sobre azul oscuro;
+                                nunca como texto sobre blanco (contraste 1,07:1)
+       - Lila          #6666FF  apoyo: rellenos y decoración, no texto pequeño (4,3:1)
+       - Blanco y negro de apoyo.
+       Los tintes (lienzo, etiquetas, bordes) son el azul principal a baja opacidad sobre
+       blanco, como se deriva el lila en el manual. Los estados (éxito, advertencia, error)
+       y los colores por persona son semánticos y se mantienen aparte de la marca. */
 
-    --background: 220 20% 94%; /* blanco hielo */
-    --foreground: 209 88% 10%; /* navy oscuro */
+    --background: 240 100% 98%; /* lienzo: azul al 4 % sobre blanco (#F5F5FF) */
+    --foreground: 240 100% 20%; /* azul oscuro #000066 */
 
     --card: 0 0% 100%;
-    --card-foreground: 209 88% 10%;
+    --card-foreground: 240 100% 20%;
 
     /* Barra superior */
-    --nav: 218 53% 26%; /* slate oscuro */
-    --nav-foreground: 220 20% 94%;
+    --nav: 240 100% 20%; /* azul oscuro */
+    --nav-foreground: 240 100% 98%;
 
-    --primary: 209 90% 32%; /* cobalto */
+    --primary: 240 70% 38%; /* azul medio #1D1DA5: botón principal, progreso (11,9:1 sobre blanco) */
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 218 53% 26%; /* slate oscuro */
-    --primary-active: 209 87% 21%; /* navy clásico */
+    --primary-hover: 240 100% 20%; /* azul oscuro */
+    --primary-active: 240 100% 14%; /* #00004D: presionado */
 
-    /* Secundario: azul acero sólido (etiquetas, botón secundario) */
-    --secondary: 218 52% 39%;
-    --secondary-foreground: 0 0% 100%;
+    /* Acento de marca: amarillo, solo sobre azul oscuro (o con texto azul oscuro encima) */
+    --brand-accent: 60 100% 50%; /* #FFFF00 */
+    --brand-accent-foreground: 240 100% 20%;
+
+    /* Secundario: tinte suave del azul (etiquetas, botón secundario), texto azul oscuro */
+    --secondary: 240 100% 95%; /* #E6E6FF */
+    --secondary-foreground: 240 100% 20%;
 
     /* Enlaces */
-    --link: 218 52% 39%; /* azul acero */
+    --link: 240 70% 38%; /* azul medio */
 
-    --muted: 220 20% 91%;
-    --muted-foreground: 218 28% 35%;
+    --muted: 240 100% 96%;
+    --muted-foreground: 240 32% 44%; /* azul oscuro al 70 % (#4D4D94), 7,5:1 sobre blanco */
 
     /* Tintes claros para hover de elementos no rellenos y fondos de acento */
-    --accent: 218 45% 91%;
-    --accent-foreground: 218 53% 26%;
+    --accent: 240 100% 95%;
+    --accent-foreground: 240 100% 20%;
 
     --destructive: 351 74% 37%;
     --destructive-foreground: 0 0% 100%;
@@ -54,13 +57,13 @@
     --success: 152 56% 27%;
     --success-foreground: 0 0% 100%;
 
-    /* Advertencia / en curso: ámbar, por legibilidad */
+    /* Advertencia / en curso: ámbar, por legibilidad (distinto del amarillo de marca) */
     --warning: 38 92% 40%;
     --warning-foreground: 0 0% 100%;
 
-    --border: 218 20% 84%;
-    --input: 218 20% 82%;
-    --ring: 209 90% 32%; /* cobalto */
+    --border: 240 100% 91%;
+    --input: 240 100% 89%;
+    --ring: 240 70% 38%; /* azul medio */
 
     --radius: 0.75rem;
   }
@@ -86,6 +89,11 @@
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
     }
+  }
+
+  /* Barra superior: degradado de azul oscuro a azul medio (tonos de la paleta oficial). */
+  .site-nav {
+    background-image: linear-gradient(90deg, #000066 0%, #0b0b86 55%, #1d1da5 100%);
   }
 
   /* Si el usuario pide menos transparencia, la barra superior va sólida. */
