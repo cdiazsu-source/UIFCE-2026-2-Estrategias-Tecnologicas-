@@ -11,6 +11,7 @@ export const ET_AREA_CONTEXT = `## Contexto del área
 - Principio rector del semestre 2026-2: «calidad sobre cantidad», para posicionar a la Unidad. Si la idea es grande, propón una primera entrega pequeña y de calidad.
 - Terminología fija: UIFCE (en mayúsculas), Hackatón (con tilde), ET, máster, monitores. Canales institucionales: Instagram @ui_fce, LinkedIn (prioritario), TikTok, YouTube.
 - Las piezas siguen los lineamientos de identidad visual de la Universidad (Unimedios / Imagen Institucional). El tono es institucional y de invitación: evita el lenguaje restrictivo («prohibido», «no se permite»).
+- Identidad visual propia de la UIFCE (paleta oficial): base en azules —#000066 (azul oscuro, solidez) y #0000FF (azul vibrante)—, con el amarillo #FFFF00 solo como acento para resaltar lo relevante, el lila #6666FF como apoyo y blanco y negro; se recomiendan los degradados, sobre todo en fondos. La mascota UIFCITO tiene su propia paleta única (#EAE9CB, #5D6289, #44D4FF, #5B5B5B, #2D2D2D, #000000) que no se modifica jamás: se usa en contextos cercanos y pedagógicos (redes, tutoriales, bienvenidas) y de forma limitada en comunicaciones institucionales formales u oficiales.
 - Cuando el proyecto se cruza con otra área, nómbrala; las solicitudes entre áreas pasan por el protocolo de acompañamiento interárea.`;
 
 export const IDEA_PLACEHOLDER = "<<Escribe aquí tu idea en bruto: qué es, por qué surge, qué quieren lograr, quién la haría, fechas.>>";

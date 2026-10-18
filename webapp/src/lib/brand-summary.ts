@@ -3,6 +3,8 @@
 export const SECTION_ORDER = [
   "Lineamientos",
   "Colores",
+  "Paleta cromática UIFCE (oficial)",
+  "UIFCITO (mascota)",
   "Colores de la Unidad (UIFCE)",
   "Franjas",
   "Formatos",

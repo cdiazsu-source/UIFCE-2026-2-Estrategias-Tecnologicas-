@@ -1026,6 +1026,18 @@ async function seedBrandGuidelines() {
     },
   ];
 
+  // Paleta cromática oficial de la UIFCE y paleta de UIFCITO: misma fuente que usa
+  // scripts/apply-brand-palette.mjs para la BD en vivo (el seed solo siembra si la tabla está vacía).
+  const palette = JSON.parse(fs.readFileSync(path.resolve(__dirname, "brand-palette-uifce.json"), "utf-8")) as {
+    updates: { section: string; title: string; body: string }[];
+    add: { section: string; title: string; body: string; colorHex?: string }[];
+  };
+  for (const u of palette.updates) {
+    const g = guidelines.find((x) => x.section === u.section && x.title === u.title);
+    if (g) g.body = u.body;
+  }
+  guidelines.push(...palette.add);
+
   await prisma.brandGuideline.createMany({
     data: guidelines.map((g, i) => ({
       section: g.section,

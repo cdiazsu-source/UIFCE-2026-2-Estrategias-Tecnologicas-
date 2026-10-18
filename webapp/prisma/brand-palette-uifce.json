@@ -1,0 +1,105 @@
+{
+  "fuente": "Manual de identidad de la UIFCE: sección 05 «Paleta cromática» y sección 06 «UIFCITO». Única fuente de estas indicaciones: la leen el seed (instalaciones nuevas) y scripts/apply-brand-palette.mjs (BD en vivo).",
+  "updates": [
+    {
+      "section": "Colores de la Unidad (UIFCE)",
+      "title": "Paleta propia de la Unidad de Informática",
+      "body": "Gama de color que usó la app «ET en Marcha» hasta octubre de 2026 (tonos aproximados de la UIFCE). Quedó reemplazada por la paleta cromática OFICIAL de la Unidad (sección «Paleta cromática UIFCE (oficial)»), que es la que tiene prioridad y la que usa hoy la app. Se conserva aquí solo como referencia histórica. Todo se usa dentro de los mínimos de identidad de la Universidad: no sustituye el escudo, la tipografía ni los colores institucionales."
+    }
+  ],
+  "add": [
+    {
+      "section": "Paleta cromática UIFCE (oficial)",
+      "title": "Principio y uso de la paleta",
+      "body": "La paleta gira en torno al azul como eje principal de la identidad: dos tonos de azul (uno vibrante, cercano al eléctrico, y otro más oscuro, que aporta solidez y estabilidad) y el amarillo, complementario del azul, que refuerza la lógica de dualidad que define a la Unidad. Se suma un lila derivado del azul principal (al reducir su opacidad sobre fondo blanco), que aporta variedad y suavidad, y el blanco y el negro como colores de apoyo. Uso sugerido: los tonos de azul como base principal de las composiciones; el amarillo solo como acento para resaltar información relevante (no como color base); y los degradados, sobre todo en fondos, para aportar dinamismo y representar la constante actualización. Fuente: manual de identidad de la UIFCE, sección 05."
+    },
+    {
+      "section": "Paleta cromática UIFCE (oficial)",
+      "title": "Azul oscuro",
+      "body": "Aporta solidez y estabilidad; base de fondos y de texto de alto contraste. HEX #000066 · RGB (0, 0, 102) · CMYK (100, 94, 32, 30).",
+      "colorHex": "#000066"
+    },
+    {
+      "section": "Paleta cromática UIFCE (oficial)",
+      "title": "Azul vibrante",
+      "body": "Tono vibrante, cercano al eléctrico; eje principal de la identidad. HEX #0000FF · RGB (0, 0, 255) · CMYK (93, 75, 0, 0).",
+      "colorHex": "#0000FF"
+    },
+    {
+      "section": "Paleta cromática UIFCE (oficial)",
+      "title": "Amarillo (acento)",
+      "body": "Complementario del azul principal. Se emplea como acento para resaltar información relevante; no como color base, y nunca como color de texto sobre fondo blanco. HEX #FFFF00 · RGB (255, 255, 0) · CMYK (10, 0, 95, 0).",
+      "colorHex": "#FFFF00"
+    },
+    {
+      "section": "Paleta cromática UIFCE (oficial)",
+      "title": "Lila",
+      "body": "Derivado del azul principal al reducir su opacidad sobre fondo blanco; aporta variedad y suavidad. HEX #6666FF · RGB (102, 102, 255) · CMYK (76, 64, 0, 0).",
+      "colorHex": "#6666FF"
+    },
+    {
+      "section": "Paleta cromática UIFCE (oficial)",
+      "title": "Negro (apoyo)",
+      "body": "Color de apoyo. HEX #000000 · RGB (0, 0, 0) · CMYK (0, 0, 0, 100).",
+      "colorHex": "#000000"
+    },
+    {
+      "section": "Paleta cromática UIFCE (oficial)",
+      "title": "Blanco (apoyo)",
+      "body": "Color de apoyo. HEX #FFFFFF · RGB (255, 255, 255) · CMYK (0, 0, 0, 0). Nota: el manual impreso muestra RGB (0, 0, 0) para el blanco, una errata evidente; el valor correcto es 255, 255, 255.",
+      "colorHex": "#FFFFFF"
+    },
+    {
+      "section": "Paleta cromática UIFCE (oficial)",
+      "title": "Aplicación en la app «ET en Marcha»",
+      "body": "La interfaz de la app usa la paleta oficial con un ajuste de intensidad: el azul principal (botón principal, progreso, enlaces y foco) es el tono medio #1D1DA5, derivado del azul vibrante #0000FF pero menos brillante, porque el vibrante resultaba demasiado fuerte en pantalla (contraste con blanco 11,9:1). Texto y barra superior en azul oscuro #000066; barra superior en degradado de #000066 a #1D1DA5; lienzo #F5F5FF y etiquetas en tinte #E6E6FF (azul a baja opacidad sobre blanco); texto secundario #4D4D94. El amarillo #FFFF00 solo como acento sobre azul oscuro (hoy, el subrayado de la pestaña activa). Los estados de éxito, advertencia y error y los colores por persona son semánticos y no forman parte de la marca.",
+      "colorHex": "#1D1DA5"
+    },
+    {
+      "section": "UIFCITO (mascota)",
+      "title": "Rol y contextos de uso de UIFCITO",
+      "body": "UIFCITO actúa como mediador entre lo técnico y lo humano. Es especialmente pertinente en contextos pedagógicos, de acompañamiento y de divulgación (redes sociales, tutoriales, mensajes informativos o procesos de bienvenida), donde la Unidad adopta un rol cercano y facilitador: humaniza la tecnología, reduce barreras de comprensión y refuerza el valor de la servicialidad. Su uso debe ser limitado en contextos institucionales formales, comunicaciones oficiales o situaciones que requieran mayor rigor técnico y autoridad, donde una presencia lúdica podría afectar la percepción de seriedad. Fuente: manual de identidad de la UIFCE, sección 06."
+    },
+    {
+      "section": "UIFCITO (mascota)",
+      "title": "Paleta única de UIFCITO",
+      "body": "UIFCITO cuenta con una única paleta cromática, que no debe modificarse bajo ninguna circunstancia: garantiza la consistencia visual y refuerza su pertenencia al sistema de identidad. No se le aplican los colores de la paleta de la Unidad, no se tiñe ni se cambian sus tonos, ni siquiera para ajustarlo al fondo de una pieza."
+    },
+    {
+      "section": "UIFCITO (mascota)",
+      "title": "UIFCITO — Crema",
+      "body": "Color de la paleta única de UIFCITO. HEX #EAE9CB.",
+      "colorHex": "#EAE9CB"
+    },
+    {
+      "section": "UIFCITO (mascota)",
+      "title": "UIFCITO — Gris azulado",
+      "body": "Color de la paleta única de UIFCITO. HEX #5D6289.",
+      "colorHex": "#5D6289"
+    },
+    {
+      "section": "UIFCITO (mascota)",
+      "title": "UIFCITO — Cian",
+      "body": "Color de la paleta única de UIFCITO. HEX #44D4FF.",
+      "colorHex": "#44D4FF"
+    },
+    {
+      "section": "UIFCITO (mascota)",
+      "title": "UIFCITO — Gris",
+      "body": "Color de la paleta única de UIFCITO. HEX #5B5B5B.",
+      "colorHex": "#5B5B5B"
+    },
+    {
+      "section": "UIFCITO (mascota)",
+      "title": "UIFCITO — Gris oscuro",
+      "body": "Color de la paleta única de UIFCITO. HEX #2D2D2D.",
+      "colorHex": "#2D2D2D"
+    },
+    {
+      "section": "UIFCITO (mascota)",
+      "title": "UIFCITO — Negro",
+      "body": "Color de la paleta única de UIFCITO. HEX #000000.",
+      "colorHex": "#000000"
+    }
+  ]
+}
