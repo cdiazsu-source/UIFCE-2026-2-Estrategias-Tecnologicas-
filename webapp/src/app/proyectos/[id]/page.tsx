@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { Badge } from "@/components/ui/badge";
 import { CollapseAllControls, CollapsibleCard } from "@/components/collapsible";
 import { InfoHint } from "@/components/info-hint";
-import { DriveLinkEditor } from "@/components/drive-link-editor";
+import { ProjectLinks } from "@/components/project-links";
 import { ProjectStatusSelect } from "@/components/project-status-select";
 import { ProjectPrioritySelect } from "@/components/project-priority-select";
 import { ProjectAssigneeSelect } from "@/components/project-assignee-select";
@@ -195,7 +195,7 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
     rationale: project.rationale,
     schedule: scheduleOf(project.startAt, project.endAt, project.location),
     mainProjectTitle: project.mainProject?.title ?? null,
-    driveFolderUrl: project.driveFolderUrl,
+    links: parseNoteLinks(project.links),
     semesterLabel: semester?.label ?? null,
     semesterObjectives: semester?.objectives ?? [],
     etStrategies: semester?.etStrategies ?? [],
@@ -245,7 +245,7 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
         </div>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <ProjectTitleEditor project={project} />
-          <DriveLinkEditor projectId={project.id} driveFolderUrl={project.driveFolderUrl} />
+          <ProjectLinks projectId={project.id} links={parseNoteLinks(project.links)} />
         </div>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
           <span className="flex items-center gap-1.5 text-sm text-muted-foreground">

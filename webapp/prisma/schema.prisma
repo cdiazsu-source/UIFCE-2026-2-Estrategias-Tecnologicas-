@@ -137,7 +137,12 @@ model Project {
   expectedOutcome String        @db.Text
   rationale       String        @db.Text
   status          ProjectStatus @default(POR_INICIAR)
+  /// OBSOLETO: antes un único enlace de Drive. La migración 20261018120000 lo copió a `links`;
+  /// se conserva sin uso para no perder datos.
   driveFolderUrl  String?
+  /// Enlaces del proyecto (Drive, Canva, una página…): lista de { label, url } con nombre propio
+  /// (ver lib/note-links.ts).
+  links           Json          @default("[]")
   /// Etiquetas libres del proyecto, editables desde la app.
   tags            String[]      @default([])
   /// Semestre al que pertenece. El resync desde el CSV solo lo fija al crear.

@@ -1,4 +1,5 @@
 import { ET_AREA_CONTEXT } from "@/lib/project-seed-prompt";
+import { linkDisplay, type NoteLink } from "@/lib/note-links";
 
 /** Todo lo que se cuenta de un proyecto a una IA (serializable, ya formateado). */
 export type ProjectContext = {
@@ -15,7 +16,8 @@ export type ProjectContext = {
   /** Horario y lugar ya formateados, si el proyecto es un evento. */
   schedule: string | null;
   mainProjectTitle: string | null;
-  driveFolderUrl: string | null;
+  /** Enlaces del proyecto (Drive, Canva, una página…), con su nombre. */
+  links: NoteLink[];
   /** Etiqueta del semestre del proyecto, sus objetivos y los frentes de difusión de ET. */
   semesterLabel: string | null;
   semesterObjectives: string[];
@@ -106,7 +108,7 @@ ${list(ctx.etStrategies)}
 - Etiquetas: ${ctx.tags.length ? ctx.tags.join(", ") : "—"}
 - Horario y lugar: ${dash(ctx.schedule)}
 - Es una actividad del proyecto: ${dash(ctx.mainProjectTitle)}
-- Carpeta de Drive: ${dash(ctx.driveFolderUrl)}
+- Enlaces del proyecto: ${ctx.links.length ? ctx.links.map((l) => `${linkDisplay(l)} (${l.url})`).join("; ") : "—"}
 
 Qué se debe hacer:
 ${dash(ctx.description)}

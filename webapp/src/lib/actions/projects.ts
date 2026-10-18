@@ -7,6 +7,7 @@ import type { ProjectStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { blockedForJunior } from "@/lib/session";
 import { isRequesterValue } from "@/lib/requester";
+import { linksFromForm } from "@/lib/note-links";
 import type { UndoAction } from "@/lib/undo";
 import { fromBogotaInput, PRIORITY_TAGS, WIP_ATENCION_INMEDIATA } from "@/lib/utils";
 
@@ -311,13 +312,12 @@ export async function deleteManualProject(projectId: string) {
   redirect("/");
 }
 
-export async function updateProjectDriveLink(projectId: string, driveFolderUrl: string) {
+/** Reemplaza los enlaces del proyecto (Drive, Canva, una página…): lista de nombre + URL del
+ *  formulario. Las filas sin URL válida se descartan. */
+export async function updateProjectLinks(projectId: string, formData: FormData) {
   if (await blockedForJunior()) return;
-  const trimmed = driveFolderUrl.trim();
-  await prisma.project.update({
-    where: { id: projectId },
-    data: { driveFolderUrl: trimmed.length > 0 ? trimmed : null },
-  });
+  const links = linksFromForm(formData.getAll("linkLabel"), formData.getAll("linkUrl"));
+  await prisma.project.update({ where: { id: projectId }, data: { links } });
   revalidatePath(`/proyectos/${projectId}`);
 }
 
