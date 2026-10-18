@@ -6,9 +6,13 @@
   :root {
     /* Paleta cromática OFICIAL de la UIFCE (manual de identidad, sección 05), aplicada a
        la app. Los valores se expresan en HSL para consumo vía hsl(var(--token)).
-       - Azul oscuro   #000066  solidez: texto principal, barra superior, hover/presionado
-       - Azul vibrante #0000FF  eje de la identidad (referencia y gráficos); en la interfaz se
-                                usa su tono medio #1D1DA5, menos brillante, para no cansar la vista
+       - Azul oscuro   #000066  COLOR PRINCIPAL de la interfaz: texto, barra superior, botón
+                                principal y progreso (aporta solidez y estabilidad)
+       - Azul medio    #1D1DA5  secundario: enlaces, foco y hover del botón principal; es un tono
+                                intermedio entre el azul oscuro y el vibrante (no oficial, derivado)
+       - Azul vibrante #0000FF  eje de la identidad (referencia y gráficos); NO se usa como color
+                                de interfaz: resulta demasiado fuerte en pantalla
+       Sin degradados: todos los fondos son planos.
        - Amarillo      #FFFF00  ACENTO: solo para resaltar lo relevante, sobre azul oscuro;
                                 nunca como texto sobre blanco (contraste 1,07:1)
        - Lila          #6666FF  apoyo: rellenos y decoración, no texto pequeño (4,3:1)
@@ -27,9 +31,9 @@
     --nav: 240 100% 20%; /* azul oscuro */
     --nav-foreground: 240 100% 98%;
 
-    --primary: 240 70% 38%; /* azul medio #1D1DA5: botón principal, progreso (11,9:1 sobre blanco) */
+    --primary: 240 100% 20%; /* azul oscuro #000066: botón principal, progreso (17,6:1 sobre blanco) */
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 240 100% 20%; /* azul oscuro */
+    --primary-hover: 240 70% 38%; /* azul medio #1D1DA5: el botón se aclara al pasar el cursor */
     --primary-active: 240 100% 14%; /* #00004D: presionado */
 
     /* Acento de marca: amarillo, solo sobre azul oscuro (o con texto azul oscuro encima) */
@@ -40,8 +44,8 @@
     --secondary: 240 100% 95%; /* #E6E6FF */
     --secondary-foreground: 240 100% 20%;
 
-    /* Enlaces */
-    --link: 240 70% 38%; /* azul medio */
+    /* Enlaces: azul medio, para distinguirlos del texto (que es azul oscuro) */
+    --link: 240 70% 38%; /* azul medio #1D1DA5 */
 
     --muted: 240 100% 96%;
     --muted-foreground: 240 32% 44%; /* azul oscuro al 70 % (#4D4D94), 7,5:1 sobre blanco */
@@ -91,16 +95,36 @@
     }
   }
 
-  /* Barra superior: degradado de azul oscuro a azul medio (tonos de la paleta oficial). */
-  .site-nav {
-    background-image: linear-gradient(90deg, #000066 0%, #0b0b86 55%, #1d1da5 100%);
-  }
+}
 
-  /* Si el usuario pide menos transparencia, la barra superior va sólida. */
-  @media (prefers-reduced-transparency: reduce) {
-    .site-nav {
-      background-color: hsl(var(--nav)) !important;
-      backdrop-filter: none !important;
+@layer components {
+  /* Pestaña activa del menú lateral: dos esquinas CÓNCAVAS (inverse border radius) arriba y
+     abajo de su borde derecho, que la funden con el panel de contenido blanco (el mismo
+     blanco que --card). Son recortes de un cuadrado blanco de 16 px dibujados como SVG: no
+     hay degradados ni sombras. Solo en pantallas con el menú fijo (lg+). */
+  @media (min-width: 1024px) {
+    .sidebar-tab {
+      --tab-r: 16px;
+    }
+    .sidebar-tab::before,
+    .sidebar-tab::after {
+      content: "";
+      position: absolute;
+      right: 0;
+      z-index: 1;
+      width: var(--tab-r);
+      height: var(--tab-r);
+      background-repeat: no-repeat;
+      background-size: 100% 100%;
+      pointer-events: none;
+    }
+    .sidebar-tab::before {
+      top: calc(var(--tab-r) * -1);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23fff' d='M16 0A16 16 0 0 1 0 16H16Z'/%3E%3C/svg%3E");
+    }
+    .sidebar-tab::after {
+      bottom: calc(var(--tab-r) * -1);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23fff' d='M0 0H16V16A16 16 0 0 0 0 0Z'/%3E%3C/svg%3E");
     }
   }
 }

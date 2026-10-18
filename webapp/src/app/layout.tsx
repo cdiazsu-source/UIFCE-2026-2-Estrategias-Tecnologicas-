@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { Eye } from "lucide-react";
 
-import { SiteNav } from "@/components/site-nav";
+import { AppShell } from "@/components/app-shell";
 import { AccessProvider } from "@/components/access-context";
 import { UndoProvider } from "@/components/undo-banner";
 import { QuickNav } from "@/components/quick-nav";
+import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
 import { setJuniorView } from "@/lib/actions/view";
 import { touchLastSeen } from "@/lib/presence";
@@ -26,6 +27,24 @@ const BUILD_LABEL = new Date(BUILD_ISO).toLocaleString("sv-SE", {
   timeStyle: "short",
 });
 
+/** Contadores del menú lateral (por id de opción). Si la BD no responde, el menú sale sin badges. */
+async function loadBadges(): Promise<Record<string, number>> {
+  try {
+    const now = new Date();
+    const inAWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+    const [urgent, scheduledProjects, events] = await Promise.all([
+      // Panel principal: proyectos en «Atención Inmediata» que siguen abiertos.
+      prisma.project.count({ where: { priorityTag: "ATENCION_INMEDIATA", status: { not: "COMPLETADO" } } }),
+      // Calendario: lo que ocurre en los próximos 7 días (proyectos con horario + eventos sueltos).
+      prisma.project.count({ where: { startAt: { gte: now, lt: inAWeek } } }),
+      prisma.calendarEvent.count({ where: { startAt: { gte: now, lt: inAWeek } } }),
+    ]);
+    return { panel: urgent, calendario: scheduledProjects + events };
+  } catch {
+    return {};
+  }
+}
+
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();
   // `level` es el efectivo: con la Vista Junior activa, editable = false.
@@ -37,6 +56,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   // "Desarrollador": solo el máster (usuario MASTER) y con la Vista Junior apagada.
   const canUseDeveloper = session.authed ? session.isMaster && !session.viewingAsJunior : false;
   if (session.authed) await touchLastSeen(session.who);
+  const badges = session.authed ? await loadBadges() : {};
 
   return (
     <html lang="es">
@@ -48,13 +68,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           canManageConsent={session.authed}
         >
           <UndoProvider>
-            <SiteNav
+            <QuickNav />
+            <AppShell
+              badges={badges}
               canEdit={editable}
               viewingAsJunior={asJunior}
               canUseJuniorView={canUseJuniorView}
               canUseDeveloper={canUseDeveloper}
-            />
-            <QuickNav />
+            >
             {asJunior && (
               <div className="border-b border-warning/40 bg-warning/10">
                 <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-6 py-2 text-xs">
@@ -70,13 +91,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 </div>
               </div>
             )}
-            <main className="mx-auto max-w-6xl px-6 py-8">{children}</main>
+            {/* lg:pr-[4.5rem] deja libre el costado derecho para el menú rápido (QuickNav). */}
+            <main className="mx-auto max-w-6xl px-6 py-8 lg:pr-[4.5rem]">{children}</main>
             <footer
-              className="mx-auto max-w-6xl px-6 pb-8 text-xs text-muted-foreground"
+              className="mx-auto max-w-6xl px-6 pb-8 text-xs text-muted-foreground lg:pr-[4.5rem]"
               title="Fecha y hora de la última publicación (hora de Colombia)"
             >
               Versión {BUILD_LABEL}
             </footer>
+            </AppShell>
           </UndoProvider>
         </AccessProvider>
       </body>
