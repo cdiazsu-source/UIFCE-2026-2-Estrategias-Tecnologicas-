@@ -12,7 +12,8 @@
  *
  * Qué hace (solo la tabla BrandGuideline):
  *   - inserta las indicaciones que falten (se identifican por sección + título);
- *   - actualiza el texto de «Paleta propia de la Unidad de Informática» si es distinto.
+ *   - actualiza el texto (y el color) de las que ya existan si el JSON cambió, incluida
+ *     «Paleta propia de la Unidad de Informática».
  * No borra nada y es idempotente. Escribe en la BD de producción (la de webapp/.env):
  * lo corre una persona del equipo, no el agente. Se puede borrar después de usarlo.
  */
@@ -38,14 +39,21 @@ async function run() {
   const pool = new Pool({ connectionString: url });
   const client = await pool.connect();
   try {
-    const existing = (await client.query(`SELECT id, section, title, body FROM "BrandGuideline"`)).rows;
+    const existing = (await client.query(`SELECT id, section, title, body, "colorHex" FROM "BrandGuideline"`)).rows;
     const key = (s, t) => `${s}\u0000${t}`;
     const byKey = new Map(existing.map((r) => [key(r.section, r.title), r]));
 
     const toAdd = data.add.filter((g) => !byKey.has(key(g.section, g.title)));
-    const toUpdate = data.updates
-      .map((u) => ({ u, row: byKey.get(key(u.section, u.title)) }))
-      .filter(({ u, row }) => row && row.body !== u.body);
+    // Indicaciones del JSON que ya existen pero cuyo texto o color cambió (p. ej. al ajustar la redacción).
+    const changedAdds = data.add
+      .map((g) => ({ u: g, row: byKey.get(key(g.section, g.title)) }))
+      .filter(({ u, row }) => row && (row.body !== u.body || (row.colorHex ?? null) !== (u.colorHex ?? null)));
+    const toUpdate = [
+      ...data.updates
+        .map((u) => ({ u, row: byKey.get(key(u.section, u.title)) }))
+        .filter(({ u, row }) => row && row.body !== u.body),
+      ...changedAdds,
+    ];
     const missingTargets = data.updates.filter((u) => !byKey.has(key(u.section, u.title)));
 
     console.log(`Indicaciones actuales: ${existing.length}`);
@@ -72,7 +80,10 @@ async function run() {
       );
     }
     for (const { u, row } of toUpdate) {
-      await client.query(`UPDATE "BrandGuideline" SET body = $2, "updatedAt" = now() WHERE id = $1`, [row.id, u.body]);
+      await client.query(
+        `UPDATE "BrandGuideline" SET body = $2, "colorHex" = COALESCE($3, "colorHex"), "updatedAt" = now() WHERE id = $1`,
+        [row.id, u.body, u.colorHex ?? null],
+      );
     }
     await client.query("COMMIT");
     console.log(`\nListo: ${toAdd.length} agregada(s), ${toUpdate.length} actualizada(s).`);

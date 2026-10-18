@@ -52,8 +52,8 @@
     {
       "section": "Paleta cromática UIFCE (oficial)",
       "title": "Aplicación en la app «ET en Marcha»",
-      "body": "La interfaz de la app usa la paleta oficial con un ajuste de intensidad: el azul principal (botón principal, progreso, enlaces y foco) es el tono medio #1D1DA5, derivado del azul vibrante #0000FF pero menos brillante, porque el vibrante resultaba demasiado fuerte en pantalla (contraste con blanco 11,9:1). Texto y barra superior en azul oscuro #000066; barra superior en degradado de #000066 a #1D1DA5; lienzo #F5F5FF y etiquetas en tinte #E6E6FF (azul a baja opacidad sobre blanco); texto secundario #4D4D94. El amarillo #FFFF00 solo como acento sobre azul oscuro (hoy, el subrayado de la pestaña activa). Los estados de éxito, advertencia y error y los colores por persona son semánticos y no forman parte de la marca.",
-      "colorHex": "#1D1DA5"
+      "body": "La interfaz de la app usa la paleta oficial. Color principal: azul oscuro #000066 (texto, menú lateral, botón principal y barras de progreso; contraste 17,6:1 sobre blanco). Secundario: azul medio #1D1DA5, un tono intermedio derivado (enlaces, anillo de foco y hover del botón principal); el azul vibrante #0000FF no se usa como color de interfaz porque resulta demasiado fuerte en pantalla. Lienzo #F5F5FF y etiquetas en tinte #E6E6FF (azul a baja opacidad sobre blanco); texto secundario #4D4D94. El amarillo #FFFF00 solo como acento (badges del menú y anillo de foco sobre azul oscuro). Sin degradados: la Unidad decidió no usarlos en la app, aunque el manual los recomiende. Los estados de éxito, advertencia y error y los colores por persona son semánticos y no forman parte de la marca. En el menú lateral conviven el logo de la Unidad y UIFCITO (sobre un círculo lila claro, sin modificar sus colores).",
+      "colorHex": "#000066"
     },
     {
       "section": "UIFCITO (mascota)",
