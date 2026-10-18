@@ -22,14 +22,14 @@ function norm(s: string) {
 type ViewMode = "grid" | "list";
 const VIEW_STORAGE_KEY = "et:proyectos:vista";
 
-/** Cuadrícula (por defecto) o lista; la elección se recuerda en este navegador. */
+/** Lista (por defecto) o cuadrícula; la elección se recuerda en este navegador. */
 function useViewMode(): [ViewMode, (v: ViewMode) => void] {
-  const [view, setView] = useState<ViewMode>("grid");
+  const [view, setView] = useState<ViewMode>("list");
   useEffect(() => {
     try {
-      if (window.localStorage.getItem(VIEW_STORAGE_KEY) === "list") setView("list");
+      if (window.localStorage.getItem(VIEW_STORAGE_KEY) === "grid") setView("grid");
     } catch {
-      // Sin almacenamiento: queda la cuadrícula.
+      // Sin almacenamiento: queda la lista.
     }
   }, []);
   function choose(v: ViewMode) {
@@ -56,7 +56,7 @@ export function ProjectsGrid({
   /** Perfil Junior con sesión: sus proyectos abiertos (responsable o con subtareas) van primero,
    *  en una sección «Asignados a ti», con la tarjeta resaltada. Los completados no se cuentan ahí. */
   mineId?: string | null;
-  /** Clave del perfil Junior (para marcar «novedades» en sus proyectos urgentes). */
+  /** Clave de la persona en sesión (para marcar «novedades» en sus proyectos asignados). */
   profileKey?: string | null;
   /** Si viene (?focus=<id>), la grilla se limita a los proyectos de esa persona
    *  que están en «❗ Atención Inmediata». */
