@@ -22,6 +22,20 @@ export function expandScope(scope: string) {
   window.dispatchEvent(new CustomEvent<CollapseDetail>(COLLAPSE_EVENT, { detail: { scope, open: true } }));
 }
 
+/** Salta a una sección del panel: abre su bloque contraíble (si tiene `scope`) y baja hasta ella,
+ *  con scroll suave salvo que la persona haya pedido reducir el movimiento. */
+export function scrollToSection(id: string, scope?: string) {
+  if (scope) expandScope(scope);
+  // Espera un instante: si la sección estaba contraída, su contenido se abre antes de medir.
+  setTimeout(
+    () => {
+      const smooth = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      document.getElementById(id)?.scrollIntoView({ behavior: smooth ? "smooth" : "auto", block: "start" });
+    },
+    scope ? 60 : 0,
+  );
+}
+
 export function useCollapse(scope: string, defaultOpen = true) {
   const [open, setOpen] = useState(defaultOpen);
 
@@ -131,6 +145,7 @@ export function CollapsibleBlock({
   children,
   id,
   defaultOpen = true,
+  headingLevel: Heading = "h2",
   wrapperClassName,
   headerClassName,
   titleClassName,
@@ -144,6 +159,8 @@ export function CollapsibleBlock({
   children: React.ReactNode;
   id?: string;
   defaultOpen?: boolean;
+  /** Nivel del título: «h2» salvo el título principal de la página. */
+  headingLevel?: "h1" | "h2";
   wrapperClassName?: string;
   headerClassName?: string;
   titleClassName?: string;
@@ -152,10 +169,10 @@ export function CollapsibleBlock({
   return (
     <div className={wrapperClassName}>
       <div id={id} className={headerClassName}>
-        <h2 className={titleClassName}>
+        <Heading className={titleClassName}>
           <CollapseToggle open={open} onToggle={toggle} label={label} />
           {title}
-        </h2>
+        </Heading>
         {actions}
       </div>
       {open && children}

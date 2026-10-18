@@ -1,12 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CalendarClock, FolderKanban, Siren, X } from "lucide-react";
+import Link from "next/link";
+import { CalendarClock, ChevronRight, FolderKanban, Siren, X } from "lucide-react";
 
+import { scrollToSection } from "@/components/collapsible";
 import { initials, resolvePhoto } from "@/components/person-avatar";
 import { formatDate } from "@/lib/utils";
 
 export type WelcomeData = {
+  /** Id de la persona (para enlazar a sus proyectos en Atención Inmediata). */
+  id: string;
   /** Clave del perfil («junior-artes» / «junior-et»): separa el «ya lo cerré» de cada uno. */
   profileKey: string;
   /** Nombre de pila para el saludo (p. ej. «María Fernanda»). */
@@ -24,6 +28,10 @@ export type WelcomeData = {
 };
 
 const STORAGE_PREFIX = "et:bienvenida:";
+
+/** Etiqueta del resumen: es un botón o enlace que lleva al detalle en el panel. */
+const CHIP =
+  "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1.5 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-offset-2 focus-visible:ring-offset-primary";
 
 /** Saludo según la hora de Colombia. */
 function greeting(): string {
@@ -102,21 +110,44 @@ export function WelcomeBanner({ data }: { data: WelcomeData }) {
         </p>
 
         <ul className="mt-3 flex flex-wrap gap-2 text-xs font-medium">
-          <li className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1">
-            <FolderKanban className="h-3.5 w-3.5" aria-hidden />
-            {data.mineCount} {data.mineCount === 1 ? "proyecto asignado" : "proyectos asignados"}
+          <li>
+            <button
+              type="button"
+              onClick={() => scrollToSection("asignados", "home:proyectos")}
+              title="Ver tus proyectos asignados"
+              className={`${CHIP} bg-white/15 hover:bg-white/25`}
+            >
+              <FolderKanban className="h-3.5 w-3.5" aria-hidden />
+              {data.mineCount} {data.mineCount === 1 ? "proyecto asignado" : "proyectos asignados"}
+              <ChevronRight className="h-3.5 w-3.5 opacity-70" aria-hidden />
+            </button>
           </li>
           {data.urgentCount > 0 && (
-            <li className="inline-flex items-center gap-1.5 rounded-full bg-brand-accent px-2.5 py-1 font-semibold text-brand-accent-foreground">
-              <Siren className="h-3.5 w-3.5" aria-hidden />
-              {data.urgentCount} en Atención Inmediata
+            <li>
+              <Link
+                href={`/?focus=${data.id}#proyectos`}
+                title="Ver tus proyectos en Atención Inmediata"
+                className={`${CHIP} bg-brand-accent font-semibold text-brand-accent-foreground hover:brightness-95`}
+              >
+                <Siren className="h-3.5 w-3.5" aria-hidden />
+                {data.urgentCount} en Atención Inmediata
+                <ChevronRight className="h-3.5 w-3.5 opacity-70" aria-hidden />
+              </Link>
             </li>
           )}
           {nextCut && (
-            <li className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1">
-              <CalendarClock className="h-3.5 w-3.5" aria-hidden />
-              Próximo corte: {nextCut.label}
-              {nextCut.due ? ` · ${formatDate(nextCut.due)}` : ""}
+            <li>
+              <button
+                type="button"
+                onClick={() => scrollToSection("estudio", "home:estudio")}
+                title="Ver tu proyecto de estudio y sus cortes"
+                className={`${CHIP} bg-white/15 hover:bg-white/25`}
+              >
+                <CalendarClock className="h-3.5 w-3.5" aria-hidden />
+                Próximo corte: {nextCut.label}
+                {nextCut.due ? ` · ${formatDate(nextCut.due)}` : ""}
+                <ChevronRight className="h-3.5 w-3.5 opacity-70" aria-hidden />
+              </button>
             </li>
           )}
         </ul>

@@ -139,7 +139,9 @@ function MemberCard({ member }: { member: RosterMember }) {
   );
 }
 
-export function TeamRoster({ people }: { people: RosterMember[] }) {
+/** `ownOnly`: vista de un Junior. Solo trae el aviso «requiere tu atención» de la propia persona
+ *  (el servidor pone en 0 el de las demás) y explica por qué no se ven los otros. */
+export function TeamRoster({ people, ownOnly = false }: { people: RosterMember[]; ownOnly?: boolean }) {
   if (people.length === 0) return null;
 
   return (
@@ -148,6 +150,12 @@ export function TeamRoster({ people }: { people: RosterMember[] }) {
         Integrantes
         <InfoHint text="El equipo de ET que ejecuta los proyectos (máster y monitores); solo se listan integrantes del área ET. El anillo alrededor de la foto es el color de acento de esa persona: el mismo que identifica sus subtareas y proyectos en el resto del panel. Cómo se usa: clic en una persona filtra el panel a sus proyectos (otro clic, o «Quitar filtro», lo deshace); el ícono de LinkedIn de la esquina abre su perfil. Con perfil completo, el lápiz permite subir o cambiar su foto (se comprime en el navegador) y pegar su enlace de LinkedIn. Ejemplo: clic en «Jean Baquero» → solo se ven los proyectos donde es responsable o tiene subtareas." />
       </p>
+      {ownOnly && (
+        <p className="text-xs text-muted-foreground">
+          Nota: solo ves tu propia etiqueta de «requiere tu atención». No se muestra la de las demás personas del equipo
+          para no saturarte con asignaciones que no son tuyas.
+        </p>
+      )}
       <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {people.map((m) => (
           <MemberCard key={m.id} member={m} />

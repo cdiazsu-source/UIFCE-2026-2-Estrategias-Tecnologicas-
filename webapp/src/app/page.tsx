@@ -21,13 +21,14 @@ import { NewProjectButton } from "@/components/new-project-button";
 import { ProjectSeedPromptButton } from "@/components/project-seed-prompt-button";
 import { CollapsibleBlock } from "@/components/collapsible";
 import { WelcomeBanner, type WelcomeData } from "@/components/welcome-banner";
+import { AccessLog, type AccessEntry } from "@/components/access-log";
 import { getSession } from "@/lib/session";
 import { JUNIOR_PROFILES } from "@/lib/view-profiles";
 import { byUrgency } from "@/lib/project-order";
 import { CategoryDistribution } from "@/components/category-distribution";
 import { DofaOverlay } from "@/components/dofa-overlay";
 import { StrategicAnalysisOverlay } from "@/components/strategic-analysis-overlay";
-import { formatDateTime, JUNIOR_ROLES, STUDY_COMMENT_ROLES, USER_ROLE_LABEL } from "@/lib/utils";
+import { formatDateTime, JUNIOR_ROLES, STUDY_COMMENT_ROLES, timeAgo, USER_ROLE_LABEL } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -332,15 +333,19 @@ async function getHomeData(semesterId: string | null, includeOrphans: boolean, j
     .sort((a, b) => b.at.getTime() - a.at.getTime())
     .slice(0, 18);
 
+  // Perfil Junior con sesión: su fila (saludo, proyectos asignados, aviso propio de atención).
+  const meRow = juniorKey ? (studyJuniors.find((j) => j.credentialKey === juniorKey) ?? null) : null;
+
   const rosterMembers: RosterMember[] = [...roster]
     .sort(
       (a, b) => ROSTER_ROLES.indexOf(a.role) - ROSTER_ROLES.indexOf(b.role) || a.name.localeCompare(b.name, "es"),
     )
-    .map((m) => ({ ...m, urgentCount: urgentByPerson.get(m.id) ?? 0 }));
+    // Vista Junior: solo conserva el «requiere tu atención» de la propia persona, para no saturar
+    // con las asignaciones de los demás.
+    .map((m) => ({ ...m, urgentCount: juniorKey && m.id !== meRow?.id ? 0 : (urgentByPerson.get(m.id) ?? 0) }));
 
-  // Perfil Junior con sesión: su saludo y el resumen de lo suyo (proyectos asignados y próximo corte).
-  const meRow = juniorKey ? (studyJuniors.find((j) => j.credentialKey === juniorKey) ?? null) : null;
-  const me: (WelcomeData & { id: string }) | null = meRow
+  // Su saludo y el resumen de lo suyo (proyectos asignados y próximo corte).
+  const me: WelcomeData | null = meRow
     ? (() => {
         const open = projectCards.filter(
           (p) => p.status !== "COMPLETADO" && (p.assignee?.id === meRow.id || p.assignees.some((a) => a.id === meRow.id)),
@@ -414,6 +419,16 @@ export default async function HomePage({
     me,
   } = await getHomeData(selected?.id ?? null, isSelectedCurrent, juniorKey);
 
+  // Últimos accesos: el más reciente primero y quienes aún no entran al final.
+  const accessEntries: AccessEntry[] = [...namedAccess]
+    .sort((a, b) => (b.lastSeenAt?.getTime() ?? 0) - (a.lastSeenAt?.getTime() ?? 0) || a.name.localeCompare(b.name, "es"))
+    .map((u) => ({
+      name: u.name,
+      roleLabel: USER_ROLE_LABEL[u.role] ?? u.role,
+      at: u.lastSeenAt ? formatDateTime(u.lastSeenAt) : null,
+      ago: u.lastSeenAt ? timeAgo(u.lastSeenAt) : null,
+    }));
+
   // ?focus=<id>: enfoca la grilla en los pendientes de atención de esa persona.
   const focusPerson = searchParams.focus
     ? commentAuthors.find((p) => p.id === searchParams.focus) ?? null
@@ -431,28 +446,29 @@ export default async function HomePage({
         </p>
       )}
 
-      <AreaOverview profile={profile} />
+      <AreaOverview key={`area-${juniorKey ?? "todos"}`} defaultOpen={!juniorKey} profile={profile} />
 
-      {seeAccess && namedAccess.length > 0 && (
-        <p className="-mt-4 flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted-foreground">
-          {namedAccess.map((u) => (
-            <span key={u.name}>
-              Último acceso de {u.name} ({USER_ROLE_LABEL[u.role] ?? u.role}):{" "}
-              <span className="font-medium text-foreground">
-                {u.lastSeenAt ? formatDateTime(u.lastSeenAt) : "sin registro todavía"}
-              </span>
-            </span>
-          ))}
-        </p>
-      )}
+      {seeAccess && <AccessLog entries={accessEntries} />}
 
-      <section id="situacion" className="flex scroll-mt-20 flex-col gap-3">
-        <h1 className="flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+      <CollapsibleBlock
+        key={`situacion-${juniorKey ?? "todos"}`}
+        defaultOpen={!juniorKey}
+        scope="home:situacion"
+        label="la situación actual"
+        id="situacion"
+        headingLevel="h1"
+        wrapperClassName="flex flex-col gap-3"
+        headerClassName="scroll-mt-20"
+        titleClassName="flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wide text-muted-foreground"
+        title={
+          <>
           Situación actual
           <InfoHint text="Foto fija de cómo llega el área al semestre: canales en riesgo o activos, el principio rector y las alertas críticas abiertas. No se calcula solo. Cómo se usa: con perfil completo, pasa el cursor por una tarjeta y usa el lápiz para editar etiqueta y valor. Ejemplo: «Canal en riesgo → Instagram (cuenta nueva en consolidación)»." />
-        </h1>
+          </>
+        }
+      >
         <SituationStrip stats={stats} />
-      </section>
+      </CollapsibleBlock>
 
       <section className="flex flex-col gap-8">
         <div className="flex flex-col gap-4">
@@ -463,12 +479,14 @@ export default async function HomePage({
               semester={selected ? { id: selected.id, label: selected.label, objectives: selected.objectives } : null}
             />
             <EtStrategiesCard
+              key={`difusion-${juniorKey ?? "todos"}`}
+              defaultOpen={!juniorKey}
               semester={selected ? { id: selected.id, label: selected.label, etStrategies: selected.etStrategies } : null}
             />
           </div>
 
           <div id="integrantes" className="scroll-mt-20">
-            <TeamRoster people={rosterMembers} />
+            <TeamRoster people={rosterMembers} ownOnly={!!juniorKey} />
           </div>
 
           <CollapsibleBlock
@@ -538,7 +556,7 @@ export default async function HomePage({
 
         <div className="flex flex-col gap-6">
           <CollapsibleBlock
-            key={juniorKey ?? "todos"}
+            key={`actividad-${juniorKey ?? "todos"}`}
             defaultOpen={!juniorKey}
             scope="home:actividad"
             label="las últimas actualizaciones"

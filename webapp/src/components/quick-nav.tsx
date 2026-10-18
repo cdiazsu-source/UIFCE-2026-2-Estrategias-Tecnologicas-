@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { expandScope } from "@/components/collapsible";
+import { scrollToSection } from "@/components/collapsible";
 
 type NavItem = {
   /** id del elemento al que se salta; el botón solo aparece si existe en la página. */
@@ -35,7 +35,7 @@ type NavItem = {
 
 /** Apartados del Panel principal, en el orden en que aparecen. */
 const HOME_ITEMS: NavItem[] = [
-  { id: "situacion", label: "Situación actual", icon: Gauge },
+  { id: "situacion", label: "Situación actual", icon: Gauge, scope: "home:situacion" },
   { id: "semestre", label: "Semestre y objetivos", icon: Target },
   { id: "integrantes", label: "Integrantes", icon: Users },
   { id: "proyectos", label: "Proyectos", icon: FolderKanban, scope: "home:proyectos" },
@@ -115,11 +115,7 @@ export function QuickNav() {
   }
 
   function goTo(item: NavItem) {
-    if (item.scope) expandScope(item.scope);
-    // Espera un instante: si la sección estaba contraída, su contenido se abre antes de medir.
-    setTimeout(() => {
-      document.getElementById(item.id)?.scrollIntoView({ behavior: behavior(), block: "start" });
-    }, item.scope ? 60 : 0);
+    scrollToSection(item.id, item.scope);
   }
 
   const btn =

@@ -7,14 +7,18 @@ import { updateAreaProfile } from "@/lib/actions/area";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CollapseToggle, useCollapse } from "@/components/collapsible";
 import { InfoHint } from "@/components/info-hint";
 import { useCanEdit } from "@/components/access-context";
+import { cn } from "@/lib/utils";
 
 export type AreaProfileData = { description: string; objectives: string[] };
 
-export function AreaOverview({ profile }: { profile: AreaProfileData | null }) {
+/** `defaultOpen`: false en la vista de un Junior, que ve la ficha contraída (solo el título). */
+export function AreaOverview({ profile, defaultOpen = true }: { profile: AreaProfileData | null; defaultOpen?: boolean }) {
   const canEdit = useCanEdit();
   const [editing, setEditing] = useState(false);
+  const { open, toggle } = useCollapse("home:area", defaultOpen);
 
   const description = profile?.description ?? "";
   const objectives = profile?.objectives ?? [];
@@ -22,15 +26,16 @@ export function AreaOverview({ profile }: { profile: AreaProfileData | null }) {
   return (
     <section>
       <Card>
-        <CardHeader className="flex-row items-start justify-between space-y-0">
+        <CardHeader className={cn("flex-row items-start justify-between space-y-0", !open && "py-3")}>
           <div className="space-y-1">
             <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              <CollapseToggle open={open} onToggle={toggle} label="la ficha del área" />
               El área
               <InfoHint text="Ficha institucional del área: descripción corporativa y objetivos generales (permanentes). Cómo se usa: con perfil completo, el lápiz edita la descripción y los objetivos (uno por línea). Los objetivos de un semestre concreto están en la sección de Proyectos, en su pestaña. Ejemplo de objetivo general: «Preservar la memoria del área: documentar procesos y aprendizajes»." />
             </p>
             <CardTitle className="text-lg">Estrategias Tecnológicas — Unidad de Informática (UIFCE)</CardTitle>
           </div>
-          {canEdit && !editing && (
+          {canEdit && open && !editing && (
             <button
               type="button"
               onClick={() => setEditing(true)}
@@ -41,6 +46,7 @@ export function AreaOverview({ profile }: { profile: AreaProfileData | null }) {
             </button>
           )}
         </CardHeader>
+        {open && (
         <CardContent>
           {editing ? (
             <form
@@ -94,6 +100,7 @@ export function AreaOverview({ profile }: { profile: AreaProfileData | null }) {
             </div>
           )}
         </CardContent>
+        )}
       </Card>
     </section>
   );

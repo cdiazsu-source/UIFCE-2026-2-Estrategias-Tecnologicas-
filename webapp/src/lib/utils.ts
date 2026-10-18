@@ -22,6 +22,20 @@ export function formatDate(date: Date | string) {
   }).format(d);
 }
 
+/** «hace 5 min», «hace 3 h», «hace 2 días»… respecto a ahora (para resumir un último acceso). */
+export function timeAgo(date: Date | string, now: Date = new Date()) {
+  const d = typeof date === "string" ? new Date(date) : date;
+  const min = Math.max(0, Math.round((now.getTime() - d.getTime()) / 60000));
+  if (min < 1) return "justo ahora";
+  if (min < 60) return `hace ${min} min`;
+  const h = Math.round(min / 60);
+  if (h < 24) return `hace ${h} h`;
+  const days = Math.round(h / 24);
+  if (days < 30) return days === 1 ? "hace 1 día" : `hace ${days} días`;
+  const months = Math.round(days / 30);
+  return months === 1 ? "hace 1 mes" : `hace ${months} meses`;
+}
+
 export function formatDateTime(date: Date | string) {
   const d = typeof date === "string" ? new Date(date) : date;
   return new Intl.DateTimeFormat("es-CO", {

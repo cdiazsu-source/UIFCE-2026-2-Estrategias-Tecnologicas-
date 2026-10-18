@@ -7,30 +7,37 @@ import { updateSemesterEtStrategies } from "@/lib/actions/semesters";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CollapseToggle, useCollapse } from "@/components/collapsible";
 import { InfoHint } from "@/components/info-hint";
 import { useCanEdit } from "@/components/access-context";
+import { cn } from "@/lib/utils";
 
+/** `defaultOpen`: false en la vista de un Junior, que ve la tarjeta contraída (solo el título). */
 export function EtStrategiesCard({
   semester,
+  defaultOpen = true,
 }: {
   semester: { id: string; label: string; etStrategies: string[] } | null;
+  defaultOpen?: boolean;
 }) {
   const canEdit = useCanEdit();
   const [editing, setEditing] = useState(false);
+  const { open, toggle } = useCollapse("home:difusion", defaultOpen);
 
   if (!semester) return null;
 
   return (
     <Card>
-      <CardHeader className="flex-row items-start justify-between space-y-0 pb-2">
+      <CardHeader className={cn("flex-row items-start justify-between space-y-0 pb-2", !open && "py-3")}>
         <div className="space-y-1">
           <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            <CollapseToggle open={open} onToggle={toggle} label="los frentes de difusión y visibilidad" />
             Difusión y visibilidad — {semester.label}
             <InfoHint text="Los frentes concretos de Estrategias Tecnológicas para este semestre: qué canales y qué formatos se usan, sin entrar en el detalle operativo de cada proyecto (eso vive en la sección Proyectos). Cómo se usa: con perfil completo, el lápiz → un frente por línea → Guardar. Ejemplo: «Instagram (@ui_fce): contenido corto — hacks informáticos y reels»." />
           </p>
           <CardTitle className="text-lg">ET</CardTitle>
         </div>
-        {canEdit && !editing && (
+        {canEdit && open && !editing && (
           <button
             type="button"
             onClick={() => setEditing(true)}
@@ -41,6 +48,7 @@ export function EtStrategiesCard({
           </button>
         )}
       </CardHeader>
+      {open && (
       <CardContent>
         {editing ? (
           <form
@@ -80,6 +88,7 @@ export function EtStrategiesCard({
           </ol>
         )}
       </CardContent>
+      )}
     </Card>
   );
 }

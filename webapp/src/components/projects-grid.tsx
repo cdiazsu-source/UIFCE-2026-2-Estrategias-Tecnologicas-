@@ -78,6 +78,7 @@ export function ProjectsGrid({
     return projects.filter(
       (p) =>
         p.priorityTag === "ATENCION_INMEDIATA" &&
+        p.status !== "COMPLETADO" &&
         (p.assignee?.id === focusPersonId || p.assignees.some((a) => a.id === focusPersonId)),
     );
   }, [projects, focusPersonId]);
@@ -253,7 +254,7 @@ export function ProjectsGrid({
         </p>
       ) : mineId ? (
         <div className="flex flex-col gap-6">
-          <section aria-label="Proyectos asignados a ti" className="flex flex-col gap-3">
+          <section id="asignados" aria-label="Proyectos asignados a ti" className="flex scroll-mt-20 flex-col gap-3">
             <h3 className="flex items-center gap-2 text-sm font-semibold text-primary">
               <UserCheck className="h-4 w-4" aria-hidden />
               Asignados a ti ({mineList.length})
