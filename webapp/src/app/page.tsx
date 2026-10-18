@@ -23,6 +23,7 @@ import { CollapsibleBlock } from "@/components/collapsible";
 import { WelcomeBanner, type WelcomeData } from "@/components/welcome-banner";
 import { AccessLog, type AccessEntry } from "@/components/access-log";
 import { getSession } from "@/lib/session";
+import { getAssignedUpdates, getNotifyIdentity } from "@/lib/notify";
 import { JUNIOR_PROFILES } from "@/lib/view-profiles";
 import { byUrgency } from "@/lib/project-order";
 import { CategoryDistribution } from "@/components/category-distribution";
@@ -68,7 +69,12 @@ function greetingName(fullName: string): string {
 
 /** `juniorKey`: si la sesión es de un perfil Junior concreto (o el máster lo ve «como»), solo se
  *  cargan SU proyecto de estudio y los comentarios de ese proyecto. */
-async function getHomeData(semesterId: string | null, includeOrphans: boolean, juniorKey: string | null) {
+async function getHomeData(
+  semesterId: string | null,
+  includeOrphans: boolean,
+  juniorKey: string | null,
+  notifyUser: { userId: string; name: string } | null,
+) {
   const projectWhere =
     semesterId == null
       ? {}
@@ -199,22 +205,12 @@ async function getHomeData(semesterId: string | null, includeOrphans: boolean, j
 
   const peopleById = new Map(people.map((u) => [u.id, u]));
 
-  // Vista de un Junior: la nota de bitácora más reciente de OTRA persona en cada proyecto (últimos
-  // 14 días). Con ella, la tarjeta de un proyecto urgente suyo titila si hay novedades sin ver.
+  // Persona identificada (Junior, máster, etc.): la nota de bitácora más reciente de OTRA persona en
+  // cada proyecto asignado a ella (últimos 14 días). Con ella, la tarjeta lleva «Con novedades» si hay
+  // notas sin ver (y titila si el proyecto está en Atención Inmediata).
   const lastUpdate = new Map<string, string>();
-  if (juniorKey) {
-    const meId = studyJuniors.find((j) => j.credentialKey === juniorKey)?.id ?? null;
-    const since = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);
-    try {
-      const rows = await prisma.projectNote.groupBy({
-        by: ["projectId"],
-        where: { createdAt: { gte: since }, ...(meId ? { OR: [{ authorId: null }, { authorId: { not: meId } }] } : {}) },
-        _max: { createdAt: true },
-      });
-      for (const r of rows) if (r._max.createdAt) lastUpdate.set(r.projectId, r._max.createdAt.toISOString());
-    } catch {
-      // Sin este dato solo no se señalan novedades.
-    }
+  if (notifyUser) {
+    for (const u of await getAssignedUpdates(notifyUser.userId, notifyUser.name)) lastUpdate.set(u.id, u.at);
   }
 
   const studyProjectsData: JuniorWithStudy[] = studyJuniors.map((j) => ({
@@ -400,6 +396,8 @@ export default async function HomePage({
   const session = await getSession();
   // Perfil Junior concreto (el propio monitor, o el máster con «Ver como»): ve solo su proyecto de estudio.
   const juniorKey = session.authed ? session.juniorKey : null;
+  // Quien recibe las novedades de bitácora de sus proyectos asignados (Junior o máster, entre otros).
+  const notify = await getNotifyIdentity();
   // Los últimos accesos los consulta el perfil completo (máster, dirección, coordinación).
   const seeAccess = session.authed && session.level === "full";
   const {
@@ -417,7 +415,7 @@ export default async function HomePage({
     studyCommentAuthors,
     studyCommentTargets,
     me,
-  } = await getHomeData(selected?.id ?? null, isSelectedCurrent, juniorKey);
+  } = await getHomeData(selected?.id ?? null, isSelectedCurrent, juniorKey, notify);
 
   // Últimos accesos: el más reciente primero y quienes aún no entran al final.
   const accessEntries: AccessEntry[] = [...namedAccess]
@@ -520,7 +518,7 @@ export default async function HomePage({
             <ProjectsGrid
               projects={projectCards}
               mineId={me?.id}
-              profileKey={juniorKey}
+              profileKey={notify?.key ?? null}
               focusPersonId={focusPerson?.id}
               focusPersonName={focusPerson?.name}
             />

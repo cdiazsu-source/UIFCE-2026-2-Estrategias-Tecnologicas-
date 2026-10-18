@@ -40,8 +40,8 @@ export type ProjectCardData = {
   /** Posición en el orden de planeación (CSV / creación). Para el modo de orden
    *  «Orden de planeación» y como desempate estable en «Por urgencia». */
   sortIndex: number;
-  /** ISO de la nota de bitácora más reciente de OTRA persona (últimos 14 días). Solo se llena
-   *  en la vista de un Junior; sirve para señalar «novedades» en sus proyectos urgentes. */
+  /** ISO de la nota de bitácora más reciente de OTRA persona (últimos 14 días). Solo se llena en los
+   *  proyectos asignados a quien está en sesión; sirve para señalar «novedades». */
   lastUpdateAt: string | null;
 };
 
@@ -80,8 +80,9 @@ function NoveltyBadge() {
   );
 }
 
-/** `mine` + `profileKey`: vista de un Junior, para sus proyectos asignados. Si el proyecto está en
- *  «Atención Inmediata» y tiene novedades sin ver, la tarjeta titila para llamar su atención. */
+/** `mine`: resalta los proyectos asignados a la persona (vista de un Junior). `profileKey`: con él, un
+ *  proyecto asignado con notas nuevas sin ver lleva el chip «Con novedades»; si además está en
+ *  «Atención Inmediata», la tarjeta titila para llamar la atención. */
 export function ProjectCard({
   project,
   mine = false,
@@ -92,8 +93,8 @@ export function ProjectCard({
   profileKey?: string | null;
 }) {
   const { assigned, accent, urgent, baseNumeral, visibleTags, progress } = projectMeta(project);
-  const unseen = useUnseenUpdate(mine ? profileKey : null, project.id, project.lastUpdateAt);
-  const attention = mine && urgent && project.status !== "COMPLETADO" && unseen;
+  const unseen = useUnseenUpdate(profileKey, project.id, project.lastUpdateAt) && project.status !== "COMPLETADO";
+  const attention = urgent && unseen;
 
   return (
     <Link href={`/proyectos/${project.id}`} className="block h-full">
@@ -121,7 +122,7 @@ export function ProjectCard({
                 Asignado a ti
               </span>
             )}
-            {attention && <NoveltyBadge />}
+            {unseen && <NoveltyBadge />}
             {project.isManual && <Badge variant="secondary">Propio</Badge>}
             {visibleTags.slice(0, 3).map((t) => (
               <Badge key={t} variant="secondary">
@@ -213,8 +214,8 @@ function ProjectRow({
   profileKey: string | null;
 }) {
   const { assigned, accent, urgent, baseNumeral, visibleTags, progress } = projectMeta(project);
-  const unseen = useUnseenUpdate(mine ? profileKey : null, project.id, project.lastUpdateAt);
-  const attention = mine && urgent && project.status !== "COMPLETADO" && unseen;
+  const unseen = useUnseenUpdate(profileKey, project.id, project.lastUpdateAt) && project.status !== "COMPLETADO";
+  const attention = urgent && unseen;
 
   return (
     <li>
@@ -243,7 +244,7 @@ function ProjectRow({
                 Asignado a ti
               </span>
             )}
-            {attention && <NoveltyBadge />}
+            {unseen && <NoveltyBadge />}
             {project.isManual && <Badge variant="secondary">Propio</Badge>}
             {visibleTags.slice(0, 2).map((t) => (
               <Badge key={t} variant="secondary">

@@ -12,7 +12,7 @@ import { ProjectPrioritySelect } from "@/components/project-priority-select";
 import { ProjectAssigneeSelect } from "@/components/project-assignee-select";
 import { ProjectRequesterSelect } from "@/components/project-requester-select";
 import { requesterLabel } from "@/lib/requester";
-import { getSession } from "@/lib/session";
+import { getNotifyIdentity } from "@/lib/notify";
 import { MarkProjectSeen } from "@/components/mark-project-seen";
 import { PriorityTag } from "@/components/priority-tag";
 import { ProjectControls } from "@/components/project-controls";
@@ -98,9 +98,8 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
 
   if (!project) notFound();
 
-  // Vista de un Junior: al abrir el proyecto se anota la visita (deja de titilar en el panel).
-  const session = await getSession();
-  const seenProfile = session.authed ? session.juniorKey : null;
+  // Al abrir el proyecto se anota la visita de la persona identificada (apaga «Con novedades» y la campana).
+  const seenProfile = (await getNotifyIdentity())?.key ?? null;
 
   // Contexto de la Unidad para el botón «Contexto para IA».
   const [areaProfile, semester] = await Promise.all([

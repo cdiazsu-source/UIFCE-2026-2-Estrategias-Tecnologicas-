@@ -24,6 +24,8 @@ type ShellProps = {
   selfKey?: string | null;
   canViewAs?: boolean;
   canUseDeveloper?: boolean;
+  /** Campana de novedades (flotante arriba a la derecha); solo con perfil identificado. */
+  bell?: React.ReactNode;
   children: React.ReactNode;
 };
 
@@ -333,7 +335,7 @@ function SidebarContent({
 /** Estructura de la app autenticada: menú lateral azul oscuro a la izquierda y, pegado a
  *  él, el panel de contenido blanco. En pantallas angostas el menú pasa a un cajón que se
  *  abre desde una barra superior. En /login no hay menú. */
-export function AppShell({ children, ...nav }: ShellProps) {
+export function AppShell({ children, bell, ...nav }: ShellProps) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
@@ -367,6 +369,8 @@ export function AppShell({ children, ...nav }: ShellProps) {
           <span className="text-base font-bold tracking-tight">ET en Marcha</span>
         </Link>
       </header>
+
+      {bell}
 
       {open && <div className="fixed inset-0 z-40 bg-black/50 lg:hidden" onClick={() => setOpen(false)} aria-hidden />}
 

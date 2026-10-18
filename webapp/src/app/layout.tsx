@@ -5,11 +5,13 @@ import { AppShell } from "@/components/app-shell";
 import { AccessProvider } from "@/components/access-context";
 import { UndoProvider } from "@/components/undo-banner";
 import { QuickNav } from "@/components/quick-nav";
+import { NovedadesBell } from "@/components/novedades-bell";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
 import { exitViewAs } from "@/lib/actions/view";
 import { viewProfile } from "@/lib/view-profiles";
 import { touchLastSeen } from "@/lib/presence";
+import { getAssignedUpdates, getNotifyIdentity } from "@/lib/notify";
 
 import "./globals.css";
 
@@ -59,6 +61,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const canUseDeveloper = session.authed ? session.isMaster && !session.viewing : false;
   if (session.authed) await touchLastSeen(session.who);
   const badges = session.authed ? await loadBadges() : {};
+  // Campana de novedades: notas de otras personas en la bitácora de los proyectos asignados.
+  const notify = session.authed ? await getNotifyIdentity() : null;
+  const updates = notify ? await getAssignedUpdates(notify.userId, notify.name) : [];
   // Persona de la credencial propia (o la del perfil que se ve con «Ver como»): queda
   // preseleccionada en «¿Quién eres?».
   let currentUserId: string | null = null;
@@ -90,10 +95,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               selfKey={session.authed ? session.who : null}
               canViewAs={canViewAs}
               canUseDeveloper={canUseDeveloper}
+              bell={notify ? <NovedadesBell profile={notify.key} items={updates} /> : null}
             >
             {viewing && (
               <div className="border-b border-warning/40 bg-warning/10">
-                <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-6 py-2 text-xs">
+                <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-6 py-2 text-xs lg:pr-[4.5rem]">
                   <span className="flex items-center gap-1.5 font-medium text-warning">
                     <Eye className="h-3.5 w-3.5" />
                     Ver como {viewProf ? viewProf.label : "Junior"} activo:{" "}
