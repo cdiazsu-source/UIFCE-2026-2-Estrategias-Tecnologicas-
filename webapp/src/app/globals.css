@@ -130,6 +130,15 @@
 }
 
 @layer utilities {
+  /* Zona desplazable sin barra visible (el desplazamiento con rueda, gesto y teclado sigue). */
+  .scrollbar-none {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
   .press {
     @apply transition-transform duration-150 ease-out-strong active:scale-[0.97];
   }

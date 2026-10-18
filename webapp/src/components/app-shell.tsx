@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Code2, Eye, LogOut, Menu, X } from "lucide-react";
+import { ChevronDown, Code2, Eye, LogOut, Menu, X } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { logout } from "@/lib/actions/auth";
@@ -93,7 +93,7 @@ function BrandLogo({ className }: { className?: string }) {
 function Mascot() {
   return (
     <span
-      className="relative flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-full bg-secondary ring-2 ring-white/25"
+      className="relative flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-full bg-secondary ring-2 ring-white/25 [@media(max-height:820px)]:h-14 [@media(max-height:820px)]:w-14"
       title="UIFCITO"
     >
       <Image
@@ -102,9 +102,53 @@ function Mascot() {
         width={480}
         height={391}
         unoptimized
-        className="h-[52px] w-auto -rotate-3 transition-transform duration-200 ease-out-strong group-hover/brand:rotate-6 group-hover/brand:scale-105"
+        className="h-[52px] w-auto -rotate-3 [@media(max-height:820px)]:h-10 transition-transform duration-200 ease-out-strong group-hover/brand:rotate-6 group-hover/brand:scale-105"
       />
     </span>
+  );
+}
+
+/** Zona desplazable del menú SIN barra de desplazamiento visible (la barra nativa chocaba
+ *  con el borde derecho donde la pestaña activa se funde con el contenido). Si hay más opciones
+ *  abajo, aparece un botón circular con una flecha para bajar; la rueda, el gesto táctil y el
+ *  teclado siguen funcionando igual. */
+function ScrollableNav({ children }: { children: React.ReactNode }) {
+  const ref = useRef<HTMLElement>(null);
+  const [more, setMore] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const update = () => setMore(el.scrollHeight - el.scrollTop - el.clientHeight > 4);
+    update();
+    el.addEventListener("scroll", update, { passive: true });
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => {
+      el.removeEventListener("scroll", update);
+      ro.disconnect();
+    };
+  }, []);
+
+  return (
+    <div className="relative min-h-0 flex-1">
+      {/* pt-4: deja sitio a la esquina cóncava superior de la primera opción activa. */}
+      <nav aria-label="Navegación principal" ref={ref} className="scrollbar-none h-full overflow-y-auto pb-4 pt-4">
+        {children}
+      </nav>
+      <button
+        type="button"
+        aria-label="Ver más opciones del menú"
+        tabIndex={more ? 0 : -1}
+        onClick={() => ref.current?.scrollBy({ top: ref.current.clientHeight * 0.8, behavior: "smooth" })}
+        className={cn(
+          "absolute bottom-2 left-1/2 flex h-8 w-8 -translate-x-1/2 items-center justify-center rounded-full bg-white/15 text-white outline-none backdrop-blur-sm transition-opacity duration-150 hover:bg-white/25 focus-visible:ring-2 focus-visible:ring-brand-accent",
+          more ? "opacity-100" : "pointer-events-none opacity-0"
+        )}
+      >
+        <ChevronDown className="h-4 w-4" aria-hidden />
+      </button>
+    </div>
   );
 }
 
@@ -124,23 +168,23 @@ function SidebarContent({
 
   return (
     <>
-      <div className="px-5 pb-5 pt-5">
+      <div className="px-5 pb-5 pt-5 [@media(max-height:820px)]:pb-3 [@media(max-height:820px)]:pt-3">
         <Link
           href="/"
           onClick={onNavigate}
           className="group/brand block rounded-md outline-none focus-visible:ring-2 focus-visible:ring-brand-accent"
         >
           <span className="flex items-center justify-between gap-3">
-            <BrandLogo className="h-11" />
+            <BrandLogo className="h-11 [@media(max-height:820px)]:h-9" />
             <Mascot />
           </span>
-          <span className="mt-3 block text-lg font-bold leading-tight tracking-tight text-white">ET en Marcha</span>
+          <span className="mt-3 block text-lg [@media(max-height:820px)]:mt-2 font-bold leading-tight tracking-tight text-white">ET en Marcha</span>
         </Link>
       </div>
 
-      <nav aria-label="Navegación principal" className="flex-1 overflow-y-auto pb-4">
+      <ScrollableNav>
         {groups.map((g, i) => (
-          <div key={g.section || `grupo-${i}`} className={cn(i > 0 && "mt-5")}>
+          <div key={g.section || `grupo-${i}`} className={cn(i > 0 && "mt-5 [@media(max-height:820px)]:mt-3")}>
             {g.section && (
               <p className="mb-1.5 px-5 text-[11px] font-semibold uppercase tracking-wider text-nav-foreground/60">
                 {g.section}
@@ -159,9 +203,9 @@ function SidebarContent({
             </ul>
           </div>
         ))}
-      </nav>
+      </ScrollableNav>
 
-      <div className="border-t border-white/15 py-3">
+      <div className="border-t border-white/15 py-3 [@media(max-height:820px)]:py-2">
         <ul className="ml-3 flex flex-col gap-0.5">
           {canUseDeveloper && (
             <NavLink
