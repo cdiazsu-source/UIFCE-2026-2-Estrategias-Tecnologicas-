@@ -23,13 +23,20 @@
  * Este módulo NO importa `next/headers` para poder usarse también en el
  * middleware (Edge). El acceso a cookies vive en src/lib/session.ts.
  */
+import { DIRECTOR_WHO, JUNIOR_ARTES_WHO, JUNIOR_ET_WHO, LINA_WHO, SANTI_WHO } from "@/lib/view-profiles";
+
+// Las claves y rótulos de los perfiles viven en view-profiles.ts (sin secretos, para poder usarlos
+// también en componentes de cliente); aquí se reexportan para no cambiar los imports del servidor.
+export { DIRECTOR_WHO, JUNIOR_ARTES_WHO, JUNIOR_ET_WHO, JUNIOR_PROFILES, isJuniorWho } from "@/lib/view-profiles";
+
 export const SESSION_COOKIE = "et_session";
 export const SESSION_MAX_AGE = 60 * 60 * 24 * 30; // 30 días
 
-/** Cookie de "Vista Junior": si vale "junior" (o "junior:<clave>" para verla como
- *  un monitor concreto) y la sesión real es completa y no es la del director, la
- *  app se comporta como si fuera perfil junior (para que el máster pueda revisar
- *  qué ven y qué pueden hacer los monitores). */
+/** Cookie de «Ver como»: vale "as:<clave>" (clave de un perfil de view-profiles.ts: Junior Artes,
+ *  Junior ET, Dirección, Coordinación) y solo la respeta si la sesión real es completa y no es la
+ *  del director. La app se muestra como la ve ese perfil (para que el máster y la coordinación
+ *  revisen qué ve y qué puede hacer cada uno). Los valores "junior" y "junior:<clave>" son de la
+ *  versión anterior y session.ts los sigue entendiendo. */
 export const VIEW_COOKIE = "et_view";
 
 export type AccessLevel = "full" | "junior";
@@ -45,32 +52,14 @@ export type CredentialCheck = { level: AccessLevel; who: string | null };
 export const SITE_USER_MASTER = process.env.SITE_USER_MASTER || "MASTER";
 const PASS_FULL = process.env.SITE_PASSWORD || "ET2026";
 
-/** Claves de identidad de los dos perfiles Junior; deben coincidir con
- *  User.credentialKey de cada monitor (lo fija scripts/apply-junior-profiles.mjs). */
-export const JUNIOR_ARTES_WHO = "junior-artes";
-export const JUNIOR_ET_WHO = "junior-et";
-/** Rótulo de cada perfil Junior (para el menú, los avisos y «ver como»). */
-export const JUNIOR_PROFILES: Record<string, string> = {
-  [JUNIOR_ARTES_WHO]: "Junior Artes",
-  [JUNIOR_ET_WHO]: "Junior ET",
-};
-export function isJuniorWho(who: string | null | undefined): who is string {
-  return !!who && Object.prototype.hasOwnProperty.call(JUNIOR_PROFILES, who);
-}
-
-/** Clave de identidad del director; debe coincidir con User.credentialKey.
- *  Se mantiene aparte (no solo como entrada de NAMED_CREDENTIALS) porque
- *  session.ts la usa para excluir al director de la "Vista Junior". */
-export const DIRECTOR_WHO = "henry-sarmiento";
-
 /** Credenciales nominales: cada una es identificada (el usuario distingue
  *  mayúsculas). Dan acceso "full" salvo que indiquen `level: "junior"`. Todas
  *  configurables por entorno en Vercel (SITE_USER_<X> / SITE_PASSWORD_<X>) sin
  *  tocar el código. `who` debe coincidir con el User.credentialKey de la persona. */
 const NAMED_CREDENTIALS: { user: string; pass: string; who: string; level?: AccessLevel }[] = [
   { user: process.env.SITE_USER_DIRECTOR || "HENRY", pass: process.env.SITE_PASSWORD_DIRECTOR || "UIFCEUNAL310.", who: DIRECTOR_WHO },
-  { user: process.env.SITE_USER_LINA || "LINA", pass: process.env.SITE_PASSWORD_LINA || "ET", who: "lina-sanabria" },
-  { user: process.env.SITE_USER_SANTI || "SANTI", pass: process.env.SITE_PASSWORD_SANTI || "ET", who: "santiago-parra" },
+  { user: process.env.SITE_USER_LINA || "LINA", pass: process.env.SITE_PASSWORD_LINA || "ET", who: LINA_WHO },
+  { user: process.env.SITE_USER_SANTI || "SANTI", pass: process.env.SITE_PASSWORD_SANTI || "ET", who: SANTI_WHO },
   // Monitores Junior: un perfil por persona (cambiar las contraseñas por defecto en Vercel).
   {
     user: process.env.SITE_USER_JUNIOR_ARTES || "ARTES",

@@ -7,8 +7,8 @@ import { UndoProvider } from "@/components/undo-banner";
 import { QuickNav } from "@/components/quick-nav";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
-import { JUNIOR_PROFILES } from "@/lib/auth";
-import { setJuniorView } from "@/lib/actions/view";
+import { exitViewAs } from "@/lib/actions/view";
+import { viewProfile } from "@/lib/view-profiles";
 import { touchLastSeen } from "@/lib/presence";
 
 import "./globals.css";
@@ -48,21 +48,23 @@ async function loadBadges(): Promise<Record<string, number>> {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();
-  // `level` es el efectivo: con la Vista Junior activa, editable = false.
+  // `level` es el efectivo: con «Ver como» un Junior, editable = false.
   const editable = session.authed && session.level === "full";
   // El perfil junior también registra KPIs, gestiona el checklist y maneja los
-  // consentimientos. La Vista Junior no cambia esto (es lo que un junior puede).
-  const asJunior = session.authed ? session.viewingAsJunior : false;
-  const canUseJuniorView = session.authed ? session.canUseJuniorView : false;
-  // "Desarrollador": solo el máster (usuario MASTER) y con la Vista Junior apagada.
-  const canUseDeveloper = session.authed ? session.isMaster && !session.viewingAsJunior : false;
+  // consentimientos. «Ver como» no cambia esto (es lo que un junior puede).
+  const viewing = session.authed ? session.viewing : false;
+  const viewProf = session.authed ? viewProfile(session.viewKey) : null;
+  const canViewAs = session.authed ? session.canViewAs : false;
+  // "Desarrollador": solo el máster (usuario MASTER) y con «Ver como» apagado.
+  const canUseDeveloper = session.authed ? session.isMaster && !session.viewing : false;
   if (session.authed) await touchLastSeen(session.who);
   const badges = session.authed ? await loadBadges() : {};
-  // Persona de la credencial propia (si la tiene): queda preseleccionada en «¿Quién eres?».
+  // Persona de la credencial propia (o la del perfil que se ve con «Ver como»): queda
+  // preseleccionada en «¿Quién eres?».
   let currentUserId: string | null = null;
-  if (session.authed && session.who) {
+  if (session.authed && session.viewWho) {
     try {
-      currentUserId = (await prisma.user.findFirst({ where: { credentialKey: session.who }, select: { id: true } }))?.id ?? null;
+      currentUserId = (await prisma.user.findFirst({ where: { credentialKey: session.viewWho }, select: { id: true } }))?.id ?? null;
     } catch {
       currentUserId = null;
     }
@@ -83,21 +85,23 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <AppShell
               badges={badges}
               canEdit={editable}
-              viewingAsJunior={asJunior}
-              viewingAsKey={session.authed ? session.juniorKey : null}
-              canUseJuniorView={canUseJuniorView}
+              viewing={viewing}
+              viewKey={session.authed ? session.viewKey : null}
+              selfKey={session.authed ? session.who : null}
+              canViewAs={canViewAs}
               canUseDeveloper={canUseDeveloper}
             >
-            {asJunior && (
+            {viewing && (
               <div className="border-b border-warning/40 bg-warning/10">
                 <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-6 py-2 text-xs">
                   <span className="flex items-center gap-1.5 font-medium text-warning">
                     <Eye className="h-3.5 w-3.5" />
-                    Vista Junior activa
-                    {session.authed && session.juniorKey ? ` como ${JUNIOR_PROFILES[session.juniorKey]}` : ""}: ves y
-                    editas solo lo que un monitor Junior puede.
+                    Ver como {viewProf ? viewProf.label : "Junior"} activo:{" "}
+                    {viewProf?.level === "full"
+                      ? "ves la app con el acceso de ese perfil (sin «Desarrollador»)."
+                      : "ves y editas solo lo que un monitor Junior puede."}
                   </span>
-                  <form action={setJuniorView.bind(null, false)}>
+                  <form action={exitViewAs}>
                     <button type="submit" className="font-medium underline hover:no-underline">
                       Volver a mi vista
                     </button>

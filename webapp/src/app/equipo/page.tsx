@@ -9,8 +9,8 @@ const ROLE_ORDER = ["MASTER", "EQUIPO", "COORDINADOR", "DIRECTOR", "JUNIOR_ARTES
 
 export default async function EquipoPage() {
   const session = await getSession();
-  // «Ver como» un Junior: lo puede usar quien puede activar la Vista Junior (máster, Lina, Santi).
-  const canViewAs = session.authed && session.canUseJuniorView && !session.viewingAsJunior;
+  // «Ver como»: lo puede usar quien tiene ese permiso (máster, Lina, Santi) y no lo está usando ya.
+  const canViewAs = session.authed && session.canViewAs && !session.viewing;
   const users = await prisma.user.findMany();
   users.sort((a, b) => {
     const r = ROLE_ORDER.indexOf(a.role) - ROLE_ORDER.indexOf(b.role);
@@ -22,13 +22,13 @@ export default async function EquipoPage() {
       <div>
         <h1 className="flex items-center gap-1.5 text-xl font-bold">
           Equipo
-          <InfoHint text="Las personas del área y de su entorno cercano (coordinación, dirección), con su correo, rol y color. Cómo se usa: con perfil completo, «Agregar persona» o el lápiz de la fila; el correo es la identidad y el rol define qué aparece en los selectores. Ejemplo: «Maria Fernanda Celis · Junior — Artes · ET». Las personas con acceso propio (director, coordinación y los dos perfiles Junior) muestran su última visita; junto a cada Junior, «Ver como» abre la app tal como la ve ese monitor." />
+          <InfoHint text="Las personas del área y de su entorno cercano (coordinación, dirección), con su correo, rol y color. Cómo se usa: con perfil completo, «Agregar persona» o el lápiz de la fila; el correo es la identidad y el rol define qué aparece en los selectores. Ejemplo: «Maria Fernanda Celis · Junior — Artes · ET». Las personas con acceso propio (director, coordinación y los dos perfiles Junior) muestran su última visita; junto a cada una de ellas, «Ver como» abre la app tal como la ve esa persona." />
         </h1>
         <p className="text-sm text-muted-foreground">
           Directorio interno del equipo de Estrategias Tecnológicas y su entorno cercano. Editable en línea.
         </p>
       </div>
-      <UsersTable users={users} canViewAs={canViewAs} />
+      <UsersTable users={users} canViewAs={canViewAs} selfKey={session.authed ? session.who : null} />
     </div>
   );
 }

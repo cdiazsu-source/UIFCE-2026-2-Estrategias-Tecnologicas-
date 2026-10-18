@@ -1,25 +1,34 @@
 import { cookies } from "next/headers";
 
-import { type AccessLevel, DIRECTOR_WHO, isJuniorWho, SESSION_COOKIE, VIEW_COOKIE, verifyToken } from "@/lib/auth";
+import { type AccessLevel, SESSION_COOKIE, VIEW_COOKIE, verifyToken } from "@/lib/auth";
+import { DIRECTOR_WHO, isJuniorWho, viewProfile } from "@/lib/view-profiles";
 
 export type Session =
   | {
       authed: true;
-      /** Nivel efectivo: "junior" si la Vista Junior está activa. */
+      /** Nivel efectivo: el del perfil que se está viendo con «Ver como» (un Junior ve como
+       *  monitor; dirección y coordinación, con acceso completo). */
       level: AccessLevel;
+      /** Identidad REAL de la credencial (para registrar la última visita). */
       who: string | null;
-      /** Nivel real de la credencial (sin la Vista Junior). */
+      /** Identidad efectiva: la del perfil que se ve con «Ver como», si hay uno; si no, `who`.
+       *  Sirve para preseleccionar a la persona en «¿Quién eres?». */
+      viewWho: string | null;
+      /** Nivel real de la credencial (sin «Ver como»). */
       realLevel: AccessLevel;
-      /** true = está viendo la app como Junior. */
-      viewingAsJunior: boolean;
-      /** true = esta sesión puede activar la Vista Junior (máster: full y no director). */
-      canUseJuniorView: boolean;
+      /** true = está usando «Ver como» (la app se muestra como la ve otro perfil). */
+      viewing: boolean;
+      /** Clave del perfil que se ve con «Ver como» (ver lib/view-profiles.ts), si hay uno concreto. */
+      viewKey: string | null;
+      /** true = esta sesión puede usar «Ver como» (máster, Lina y Santi: acceso completo y
+       *  no es el director). */
+      canViewAs: boolean;
       /** true = es la credencial compartida del máster (usuario MASTER): full y sin
        *  identidad nominal. Es quien ve el apartado "Desarrollador". */
       isMaster: boolean;
       /** Clave del perfil Junior cuya vista se muestra («junior-artes» / «junior-et»):
-       *  la del propio monitor si entró con su credencial, o la elegida por el máster en
-       *  «Ver como». null = sin perfil Junior concreto (no se restringe nada por persona). */
+       *  la del propio monitor si entró con su credencial, o la elegida en «Ver como».
+       *  null = sin perfil Junior concreto (no se restringe nada por persona). */
       juniorKey: string | null;
     }
   | { authed: false };
@@ -30,38 +39,47 @@ export async function getSession(): Promise<Session> {
   const v = await verifyToken(jar.get(SESSION_COOKIE)?.value);
   if (!v) return { authed: false };
 
-  const canUseJuniorView = v.level === "full" && v.who !== DIRECTOR_WHO;
-  const viewValue = jar.get(VIEW_COOKIE)?.value ?? "";
-  const viewingAsJunior = canUseJuniorView && (viewValue === "junior" || viewValue.startsWith("junior:"));
-  const level: AccessLevel = viewingAsJunior ? "junior" : v.level;
+  const canViewAs = v.level === "full" && v.who !== DIRECTOR_WHO;
+
+  // Cookie «Ver como»: «as:<clave>» (actual); «junior:<clave>» y «junior» son de la versión anterior.
+  const viewValue = canViewAs ? (jar.get(VIEW_COOKIE)?.value ?? "") : "";
+  const profile = viewValue.startsWith("as:")
+    ? viewProfile(viewValue.slice(3))
+    : viewValue.startsWith("junior:")
+      ? viewProfile(viewValue.slice("junior:".length))
+      : null;
+  // «junior» a secas: la vista de monitor sin un monitor concreto.
+  const viewing = profile !== null || viewValue === "junior";
+  const level: AccessLevel = profile ? profile.level : viewing ? "junior" : v.level;
 
   const isMaster = v.level === "full" && v.who === null;
 
   // Perfil Junior concreto: el del propio monitor, o el elegido en «Ver como».
-  const viewKey = viewValue.startsWith("junior:") ? viewValue.slice("junior:".length) : null;
   const juniorKey =
-    v.level === "junior" && isJuniorWho(v.who) ? v.who : viewingAsJunior && isJuniorWho(viewKey) ? viewKey : null;
+    v.level === "junior" && isJuniorWho(v.who) ? v.who : profile && isJuniorWho(profile.key) ? profile.key : null;
 
   return {
     authed: true,
     level,
     who: v.who,
+    viewWho: profile ? profile.key : v.who,
     realLevel: v.level,
-    viewingAsJunior,
-    canUseJuniorView,
+    viewing,
+    viewKey: profile ? profile.key : null,
+    canViewAs,
     isMaster,
     juniorKey,
   };
 }
 
 /** ¿Puede entrar al apartado "Desarrollador"? Solo el máster (usuario MASTER) y
- *  con la Vista Junior apagada. Se valida en el servidor, no solo en el menú. */
+ *  con «Ver como» apagado. Se valida en el servidor, no solo en el menú. */
 export async function canUseDeveloper(): Promise<boolean> {
   const s = await getSession();
-  return s.authed && s.isMaster && !s.viewingAsJunior;
+  return s.authed && s.isMaster && !s.viewing;
 }
 
-/** ¿La sesión puede editar? Solo el perfil "full" (y con la Vista Junior apagada).
+/** ¿La sesión puede editar? Solo el perfil "full" (y con «Ver como» un Junior apagado).
  *  El perfil "junior" ve todo pero solo hace lo que un monitor puede. */
 export async function canEdit(): Promise<boolean> {
   const s = await getSession();

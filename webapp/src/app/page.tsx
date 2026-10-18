@@ -22,7 +22,7 @@ import { ProjectSeedPromptButton } from "@/components/project-seed-prompt-button
 import { CollapsibleBlock } from "@/components/collapsible";
 import { WelcomeBanner, type WelcomeData } from "@/components/welcome-banner";
 import { getSession } from "@/lib/session";
-import { JUNIOR_PROFILES } from "@/lib/auth";
+import { JUNIOR_PROFILES } from "@/lib/view-profiles";
 import { byUrgency } from "@/lib/project-order";
 import { CategoryDistribution } from "@/components/category-distribution";
 import { DofaOverlay } from "@/components/dofa-overlay";
@@ -198,6 +198,24 @@ async function getHomeData(semesterId: string | null, includeOrphans: boolean, j
 
   const peopleById = new Map(people.map((u) => [u.id, u]));
 
+  // Vista de un Junior: la nota de bitácora más reciente de OTRA persona en cada proyecto (últimos
+  // 14 días). Con ella, la tarjeta de un proyecto urgente suyo titila si hay novedades sin ver.
+  const lastUpdate = new Map<string, string>();
+  if (juniorKey) {
+    const meId = studyJuniors.find((j) => j.credentialKey === juniorKey)?.id ?? null;
+    const since = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);
+    try {
+      const rows = await prisma.projectNote.groupBy({
+        by: ["projectId"],
+        where: { createdAt: { gte: since }, ...(meId ? { OR: [{ authorId: null }, { authorId: { not: meId } }] } : {}) },
+        _max: { createdAt: true },
+      });
+      for (const r of rows) if (r._max.createdAt) lastUpdate.set(r.projectId, r._max.createdAt.toISOString());
+    } catch {
+      // Sin este dato solo no se señalan novedades.
+    }
+  }
+
   const studyProjectsData: JuniorWithStudy[] = studyJuniors.map((j) => ({
     id: j.id,
     name: j.name,
@@ -275,6 +293,7 @@ async function getHomeData(semesterId: string | null, includeOrphans: boolean, j
         tags: p.tags,
         assignees: [...seen.values()],
         sortIndex: i,
+        lastUpdateAt: lastUpdate.get(p.id) ?? null,
       };
     })
     // Orden por defecto: «Atención Inmediata», luego «En curso», luego el resto
@@ -330,6 +349,8 @@ async function getHomeData(semesterId: string | null, includeOrphans: boolean, j
           id: meRow.id,
           profileKey: juniorKey as string,
           firstName: greetingName(meRow.name),
+          fullName: meRow.name,
+          photoUrl: meRow.photoUrl,
           roleLabel: USER_ROLE_LABEL[meRow.role] ?? meRow.role,
           mineCount: open.length,
           urgentCount: open.filter((p) => p.priorityTag === "ATENCION_INMEDIATA").length,
@@ -460,7 +481,7 @@ export default async function HomePage({
             title={
               <>
               Proyectos {selected ? `${selected.label} ` : ""}({projectCards.length})
-              <InfoHint text="Una tarjeta por iniciativa del semestre seleccionado (pestañas de arriba). Por defecto se ordenan por urgencia (primero «❗ Atención Inmediata», luego los que están «En curso», luego «📅 Próximo Ciclo» y «⏸️ Backlog»; los completados al final); el desplegable «Orden» permite volver al orden de planeación. Cómo se usa: busca por texto, filtra por categoría o haz clic en el nombre de un integrante (arriba) para ver solo sus proyectos; el progreso cuenta subtareas hechas y la franja de color a la izquierda es la persona asignada — titila si el proyecto está en «❗ Atención Inmediata». Con perfil completo, «Nuevo proyecto» lo crea en el semestre visible. Ejemplo: elige «Eventos» para ver solo esos proyectos." />
+              <InfoHint text="Una tarjeta por iniciativa del semestre seleccionado (pestañas de arriba). Por defecto se ordenan por urgencia (primero «❗ Atención Inmediata», luego los que están «En curso», luego «📅 Próximo Ciclo» y «⏸️ Backlog»; los completados al final); el desplegable «Orden» permite volver al orden de planeación, y los botones de cuadrícula y lista cambian la presentación (se recuerda tu elección). Cómo se usa: busca por texto, filtra por categoría o haz clic en el nombre de un integrante (arriba) para ver solo sus proyectos; el progreso cuenta subtareas hechas y la franja de color a la izquierda es la persona asignada — titila si el proyecto está en «❗ Atención Inmediata». Con perfil completo, «Nuevo proyecto» lo crea en el semestre visible. Ejemplo: elige «Eventos» para ver solo esos proyectos." />
               </>
             }
             actions={
@@ -481,6 +502,7 @@ export default async function HomePage({
             <ProjectsGrid
               projects={projectCards}
               mineId={me?.id}
+              profileKey={juniorKey}
               focusPersonId={focusPerson?.id}
               focusPersonName={focusPerson?.name}
             />
@@ -516,6 +538,8 @@ export default async function HomePage({
 
         <div className="flex flex-col gap-6">
           <CollapsibleBlock
+            key={juniorKey ?? "todos"}
+            defaultOpen={!juniorKey}
             scope="home:actividad"
             label="las últimas actualizaciones"
             id="actividad"

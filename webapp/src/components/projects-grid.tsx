@@ -1,15 +1,16 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { AlertTriangle, Search, UserCheck, X } from "lucide-react";
+import { AlertTriangle, LayoutGrid, List, Search, UserCheck, X } from "lucide-react";
 
-import { ProjectCard, type ProjectCardData } from "@/components/project-card";
+import { ProjectCard, ProjectList, type ProjectCardData } from "@/components/project-card";
+import { CollapseToggle, useCollapse } from "@/components/collapsible";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { setPersonFilter, usePersonFilter } from "@/lib/person-filter";
 import { byUrgency } from "@/lib/project-order";
-import { PRIORITY_TAG_LABEL } from "@/lib/utils";
+import { cn, PRIORITY_TAG_LABEL } from "@/lib/utils";
 
 function norm(s: string) {
   return s
@@ -18,16 +19,45 @@ function norm(s: string) {
     .toLowerCase();
 }
 
+type ViewMode = "grid" | "list";
+const VIEW_STORAGE_KEY = "et:proyectos:vista";
+
+/** Cuadrícula (por defecto) o lista; la elección se recuerda en este navegador. */
+function useViewMode(): [ViewMode, (v: ViewMode) => void] {
+  const [view, setView] = useState<ViewMode>("grid");
+  useEffect(() => {
+    try {
+      if (window.localStorage.getItem(VIEW_STORAGE_KEY) === "list") setView("list");
+    } catch {
+      // Sin almacenamiento: queda la cuadrícula.
+    }
+  }, []);
+  function choose(v: ViewMode) {
+    setView(v);
+    try {
+      window.localStorage.setItem(VIEW_STORAGE_KEY, v);
+    } catch {
+      // No se pudo recordar; el cambio sigue valiendo en esta visita.
+    }
+  }
+  return [view, choose];
+}
+
+const GRID_CLASS = "grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3";
+
 export function ProjectsGrid({
   projects,
   focusPersonId,
   focusPersonName,
   mineId,
+  profileKey,
 }: {
   projects: ProjectCardData[];
-  /** Perfil Junior con sesión: sus proyectos (responsable o con subtareas) van primero,
-   *  en una sección «Asignados a ti», con la tarjeta resaltada. */
+  /** Perfil Junior con sesión: sus proyectos abiertos (responsable o con subtareas) van primero,
+   *  en una sección «Asignados a ti», con la tarjeta resaltada. Los completados no se cuentan ahí. */
   mineId?: string | null;
+  /** Clave del perfil Junior (para marcar «novedades» en sus proyectos urgentes). */
+  profileKey?: string | null;
   /** Si viene (?focus=<id>), la grilla se limita a los proyectos de esa persona
    *  que están en «❗ Atención Inmediata». */
   focusPersonId?: string;
@@ -36,6 +66,9 @@ export function ProjectsGrid({
   const [q, setQ] = useState("");
   const [category, setCategory] = useState("");
   const [sortMode, setSortMode] = useState<"urgency" | "plan">("urgency");
+  const [view, setView] = useViewMode();
+  // En la vista de un Junior, «Otros proyectos» arranca contraído para que vea primero lo suyo.
+  const others = useCollapse("home:otros", !mineId);
   // Filtro rápido por persona, activado desde «Integrantes» (clic en el nombre).
   const person = usePersonFilter();
 
@@ -80,10 +113,26 @@ export function ProjectsGrid({
     });
   }, [ordered, nq, category, person]);
 
+  // «Asignados a ti»: solo los abiertos. Un proyecto completado deja de ser ruido en esa sección y
+  // pasa a «Otros proyectos» (sin el resalte de «asignado»).
   const isMine = (p: ProjectCardData) =>
-    !!mineId && (p.assignee?.id === mineId || p.assignees.some((a) => a.id === mineId));
+    !!mineId && p.status !== "COMPLETADO" && (p.assignee?.id === mineId || p.assignees.some((a) => a.id === mineId));
   const mineList = mineId ? filtered.filter(isMine) : [];
   const restList = mineId ? filtered.filter((p) => !isMine(p)) : filtered;
+  // Si hay búsqueda o filtro, «Otros proyectos» se abre solo: lo que se busca no debe quedar oculto.
+  const othersOpen = others.open || filtering;
+
+  function renderItems(items: ProjectCardData[], mine: boolean) {
+    return view === "list" ? (
+      <ProjectList projects={items} mine={mine} profileKey={profileKey} />
+    ) : (
+      <div className={GRID_CLASS}>
+        {items.map((project) => (
+          <ProjectCard key={project.id} project={project} mine={mine} profileKey={profileKey} />
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-3">
@@ -149,6 +198,29 @@ export function ProjectsGrid({
           <option value="urgency">Orden: por urgencia</option>
           <option value="plan">Orden: de planeación</option>
         </Select>
+        <div role="group" aria-label="Presentación de los proyectos" className="inline-flex overflow-hidden rounded-md border border-input">
+          {(
+            [
+              { id: "grid", label: "Cuadrícula", icon: LayoutGrid },
+              { id: "list", label: "Lista", icon: List },
+            ] as const
+          ).map(({ id, label, icon: Icon }) => (
+            <button
+              key={id}
+              type="button"
+              onClick={() => setView(id)}
+              aria-pressed={view === id}
+              aria-label={`Ver en ${label.toLowerCase()}`}
+              title={`Ver en ${label.toLowerCase()}`}
+              className={cn(
+                "press inline-flex h-10 w-10 items-center justify-center outline-none transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
+                view === id ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground hover:bg-accent hover:text-foreground",
+              )}
+            >
+              <Icon className="h-4 w-4" aria-hidden />
+            </button>
+          ))}
+        </div>
         {filtering && (
           <button
             type="button"
@@ -187,36 +259,30 @@ export function ProjectsGrid({
               Asignados a ti ({mineList.length})
             </h3>
             {mineList.length > 0 ? (
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                {mineList.map((project) => (
-                  <ProjectCard key={project.id} project={project} mine />
-                ))}
-              </div>
+              renderItems(mineList, true)
             ) : (
               <p className="rounded-md border border-dashed border-input p-4 text-sm text-muted-foreground">
                 {filtering
-                  ? "Ninguno de tus proyectos coincide con la búsqueda."
-                  : "Todavía no tienes proyectos asignados. Cuando te asignen uno aparecerá aquí."}
+                  ? "Ninguno de tus proyectos abiertos coincide con la búsqueda."
+                  : "No tienes proyectos abiertos asignados. Cuando te asignen uno aparecerá aquí."}
               </p>
             )}
           </section>
           {restList.length > 0 && (
             <section aria-label="Otros proyectos" className="flex flex-col gap-3">
-              <h3 className="text-sm font-semibold text-muted-foreground">Otros proyectos ({restList.length})</h3>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                {restList.map((project) => (
-                  <ProjectCard key={project.id} project={project} />
-                ))}
-              </div>
+              <h3 className="flex items-center gap-1.5 text-sm font-semibold text-muted-foreground">
+                <CollapseToggle open={othersOpen} onToggle={others.toggle} label="los otros proyectos" />
+                <button type="button" onClick={others.toggle} className="text-left hover:text-foreground">
+                  Otros proyectos ({restList.length})
+                </button>
+                {!othersOpen && <span className="text-xs font-normal">· ocultos; incluyen los completados</span>}
+              </h3>
+              {othersOpen && renderItems(restList, false)}
             </section>
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {filtered.map((project) => (
-            <ProjectCard key={project.id} project={project} />
-          ))}
-        </div>
+        renderItems(filtered, false)
       )}
     </div>
   );

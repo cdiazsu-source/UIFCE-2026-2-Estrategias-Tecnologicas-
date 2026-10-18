@@ -8,18 +8,21 @@ import { ChevronDown, Code2, Eye, LogOut, Menu, X } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { logout } from "@/lib/actions/auth";
-import { setJuniorView, viewAsJunior } from "@/lib/actions/view";
-import { JUNIOR_PROFILES } from "@/lib/auth";
+import { exitViewAs, viewAs } from "@/lib/actions/view";
+import { VIEW_PROFILES, viewProfile } from "@/lib/view-profiles";
 import { groupBySection, isItemActive, SIDEBAR_ITEMS, type SidebarItem } from "@/lib/sidebar-nav";
 
 type ShellProps = {
   /** Contadores en vivo por id de opción (ver SIDEBAR_ITEMS); 0 o ausente = sin badge. */
   badges?: Record<string, number>;
   canEdit?: boolean;
-  viewingAsJunior?: boolean;
-  /** Perfil Junior que se está viendo («junior-artes» / «junior-et»), si hay uno concreto. */
-  viewingAsKey?: string | null;
-  canUseJuniorView?: boolean;
+  /** true = está usando «Ver como» (la app se muestra como la ve otro perfil). */
+  viewing?: boolean;
+  /** Perfil que se está viendo (clave de VIEW_PROFILES), si hay uno concreto. */
+  viewKey?: string | null;
+  /** Identidad de la credencial real: no se ofrece «ver como» uno mismo. */
+  selfKey?: string | null;
+  canViewAs?: boolean;
   canUseDeveloper?: boolean;
   children: React.ReactNode;
 };
@@ -155,26 +158,31 @@ function ScrollableNav({ children }: { children: React.ReactNode }) {
   );
 }
 
-/** Selector de la Vista Junior: el máster elige QUÉ Junior quiere ver (Junior Artes o Junior ET) y
- *  la app se muestra tal como la ve ese monitor (su saludo, sus proyectos primero y solo su
- *  proyecto de estudio). Es un desplegable en línea, con las opciones a 44 px. */
-function JuniorViewPicker({
+/** Selector de «Ver como»: la app se muestra tal como la ve el perfil elegido (Junior Artes, Junior ET,
+ *  Dirección o Coordinación). Es un desplegable en línea, agrupado por tipo de perfil, con las
+ *  opciones a 44 px. */
+function ViewAsPicker({
   buttonClass,
   label,
   current,
+  selfKey,
 }: {
   buttonClass: string;
   label: string;
   current: string | null;
+  selfKey?: string | null;
 }) {
   const [open, setOpen] = useState(false);
+  const groups = (["Junior", "Dirección", "Coordinación"] as const)
+    .map((g) => ({ g, items: VIEW_PROFILES.filter((p) => p.group === g && p.key !== selfKey) }))
+    .filter((x) => x.items.length > 0);
   return (
     <li>
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
-        title="Elegir qué Junior ver: Junior Artes o Junior ET"
+        title="Ver la app como la ve otro perfil: Junior Artes, Junior ET, Dirección o Coordinación"
         className={buttonClass}
       >
         <Eye className="h-5 w-5 shrink-0" aria-hidden />
@@ -182,31 +190,38 @@ function JuniorViewPicker({
         <ChevronDown className={cn("h-4 w-4 shrink-0 transition-transform duration-150", open && "rotate-180")} aria-hidden />
       </button>
       {open && (
-        <ul className="ml-8 mt-0.5 flex flex-col gap-0.5">
-          {Object.entries(JUNIOR_PROFILES).map(([key, name]) => {
-            const on = current === key;
-            return (
-              <li key={key}>
-                <form action={viewAsJunior.bind(null, key)}>
-                  <button
-                    type="submit"
-                    aria-current={on ? "true" : undefined}
-                    className={cn(
-                      "flex min-h-11 w-full items-center gap-2.5 rounded-l-xl py-2 pl-3 pr-4 text-left text-sm outline-none transition-colors duration-150 hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-accent",
-                      on ? "bg-white/15 font-semibold text-white" : "font-medium text-nav-foreground"
-                    )}
-                  >
-                    <span
-                      className={cn("h-2 w-2 shrink-0 rounded-full border", on ? "border-brand-accent bg-brand-accent" : "border-white/60")}
-                      aria-hidden
-                    />
-                    {name}
-                  </button>
-                </form>
-              </li>
-            );
-          })}
-        </ul>
+        <div className="ml-8 mt-0.5 flex flex-col gap-1">
+          {groups.map(({ g, items }) => (
+            <div key={g}>
+              <p className="px-3 pb-0.5 pt-1 text-[11px] font-semibold uppercase tracking-wider text-nav-foreground/60">{g}</p>
+              <ul className="flex flex-col gap-0.5">
+                {items.map((p) => {
+                  const on = current === p.key;
+                  return (
+                    <li key={p.key}>
+                      <form action={viewAs.bind(null, p.key)}>
+                        <button
+                          type="submit"
+                          aria-current={on ? "true" : undefined}
+                          className={cn(
+                            "flex min-h-11 w-full items-center gap-2.5 rounded-l-xl py-2 pl-3 pr-4 text-left text-sm outline-none transition-colors duration-150 hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-accent",
+                            on ? "bg-white/15 font-semibold text-white" : "font-medium text-nav-foreground"
+                          )}
+                        >
+                          <span
+                            className={cn("h-2 w-2 shrink-0 rounded-full border", on ? "border-brand-accent bg-brand-accent" : "border-white/60")}
+                            aria-hidden
+                          />
+                          {p.label}
+                        </button>
+                      </form>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ))}
+        </div>
       )}
     </li>
   );
@@ -217,9 +232,10 @@ function SidebarContent({
   pathname,
   badges,
   canEdit,
-  viewingAsJunior,
-  viewingAsKey,
-  canUseJuniorView,
+  viewing,
+  viewKey,
+  selfKey,
+  canViewAs,
   canUseDeveloper,
   onNavigate,
 }: Omit<ShellProps, "children"> & { pathname: string; onNavigate: () => void }) {
@@ -275,25 +291,25 @@ function SidebarContent({
               onNavigate={onNavigate}
             />
           )}
-          {viewingAsJunior ? (
+          {viewing ? (
             <>
               <li>
-                <form action={setJuniorView.bind(null, false)}>
+                <form action={exitViewAs}>
                   <button type="submit" className={cn(footerButton, "text-brand-accent")}>
                     <Eye className="h-5 w-5 shrink-0" aria-hidden />
                     <span className="flex flex-col leading-tight">
-                      Vista Junior · salir
-                      {viewingAsKey && JUNIOR_PROFILES[viewingAsKey] && (
-                        <span className="text-xs font-normal text-nav-foreground/80">Como {JUNIOR_PROFILES[viewingAsKey]}</span>
+                      Ver como · salir
+                      {viewProfile(viewKey)?.label && (
+                        <span className="text-xs font-normal text-nav-foreground/80">Como {viewProfile(viewKey)?.label}</span>
                       )}
                     </span>
                   </button>
                 </form>
               </li>
-              <JuniorViewPicker buttonClass={footerButton} label="Cambiar de Junior" current={viewingAsKey ?? null} />
+              <ViewAsPicker buttonClass={footerButton} label="Cambiar de perfil" current={viewKey ?? null} selfKey={selfKey} />
             </>
-          ) : canUseJuniorView ? (
-            <JuniorViewPicker buttonClass={footerButton} label="Vista Junior" current={null} />
+          ) : canViewAs ? (
+            <ViewAsPicker buttonClass={footerButton} label="Ver como" current={null} selfKey={selfKey} />
           ) : !canEdit ? (
             <li className="flex min-h-11 items-center gap-3 py-2 pl-3 pr-4 text-sm text-nav-foreground/70">
               <Eye className="h-5 w-5 shrink-0" aria-hidden />

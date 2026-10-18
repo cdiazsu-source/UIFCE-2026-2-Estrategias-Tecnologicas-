@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import { CalendarClock, FolderKanban, Siren, X } from "lucide-react";
 
+import { initials, resolvePhoto } from "@/components/person-avatar";
 import { formatDate } from "@/lib/utils";
 
 export type WelcomeData = {
@@ -11,6 +11,9 @@ export type WelcomeData = {
   profileKey: string;
   /** Nombre de pila para el saludo (p. ej. «María Fernanda»). */
   firstName: string;
+  /** Nombre completo y foto de la persona (campo «Foto» de Equipo); sin foto se muestran sus iniciales. */
+  fullName: string;
+  photoUrl: string | null;
   /** Cargo en el equipo (p. ej. «Junior — Artes»). */
   roleLabel: string;
   /** Proyectos abiertos asignados a la persona (responsable o con subtareas) y cuántos están en Atención Inmediata. */
@@ -34,10 +37,11 @@ function greeting(): string {
 
 /** Letrero inicial para los perfiles Junior: saludo con su nombre y un resumen de lo suyo.
  *  Aparece al entrar (una vez por sesión del navegador); se cierra con la X y vuelve a
- *  aparecer en el siguiente ingreso. UIFCITO saluda en un círculo lila, sin recolorearlo. */
+ *  aparecer en el siguiente ingreso. A la izquierda va la foto del Junior (o sus iniciales). */
 export function WelcomeBanner({ data }: { data: WelcomeData }) {
   const [visible, setVisible] = useState(false);
   const [hello, setHello] = useState("¡Hola");
+  const [photoFailed, setPhotoFailed] = useState(false);
 
   useEffect(() => {
     let dismissed = false;
@@ -61,6 +65,7 @@ export function WelcomeBanner({ data }: { data: WelcomeData }) {
 
   if (!visible) return null;
 
+  const photo = !photoFailed && data.photoUrl && data.photoUrl.trim().length > 0 ? data.photoUrl.trim() : null;
   const nextCut = data.study.find((s) => s.next)?.next ?? null;
 
   return (
@@ -68,19 +73,22 @@ export function WelcomeBanner({ data }: { data: WelcomeData }) {
       aria-label="Bienvenida"
       className="relative flex flex-wrap items-center gap-5 rounded-xl bg-primary p-5 text-primary-foreground shadow-card sm:flex-nowrap sm:p-6"
     >
-      <span
-        className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-secondary ring-2 ring-white/25"
-        aria-hidden
-      >
-        <Image
-          src="/uifcito-saludo.png"
-          alt=""
-          width={480}
-          height={391}
-          unoptimized
-          className="h-[60px] w-auto -rotate-3"
+      {photo ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={resolvePhoto(photo)}
+          alt={data.fullName}
+          onError={() => setPhotoFailed(true)}
+          className="h-20 w-20 shrink-0 rounded-full object-cover ring-2 ring-white/40"
         />
-      </span>
+      ) : (
+        <span
+          className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-secondary text-2xl font-bold ring-2 ring-white/25"
+          aria-hidden
+        >
+          {initials(data.fullName)}
+        </span>
+      )}
 
       <div className="min-w-0 flex-1">
         <p className="text-xs font-semibold uppercase tracking-wider text-primary-foreground/70">{data.roleLabel}</p>

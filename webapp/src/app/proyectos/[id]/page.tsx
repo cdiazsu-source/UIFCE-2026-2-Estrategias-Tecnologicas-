@@ -12,6 +12,8 @@ import { ProjectPrioritySelect } from "@/components/project-priority-select";
 import { ProjectAssigneeSelect } from "@/components/project-assignee-select";
 import { ProjectRequesterSelect } from "@/components/project-requester-select";
 import { requesterLabel } from "@/lib/requester";
+import { getSession } from "@/lib/session";
+import { MarkProjectSeen } from "@/components/mark-project-seen";
 import { PriorityTag } from "@/components/priority-tag";
 import { ProjectControls } from "@/components/project-controls";
 import { ProjectTitleEditor } from "@/components/project-title-editor";
@@ -95,6 +97,10 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
   ]);
 
   if (!project) notFound();
+
+  // Vista de un Junior: al abrir el proyecto se anota la visita (deja de titilar en el panel).
+  const session = await getSession();
+  const seenProfile = session.authed ? session.juniorKey : null;
 
   // Contexto de la Unidad para el botón «Contexto para IA».
   const [areaProfile, semester] = await Promise.all([
@@ -219,6 +225,7 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
 
   return (
     <div className="flex flex-col gap-6">
+      {seenProfile && <MarkProjectSeen profile={seenProfile} projectId={project.id} />}
       <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
         <ArrowLeft className="h-4 w-4" />
         Volver al panel principal

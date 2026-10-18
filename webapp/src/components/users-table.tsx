@@ -5,8 +5,8 @@ import { Eye, Linkedin, Pencil, Plus, Trash2 } from "lucide-react";
 import type { User, UserRole } from "@prisma/client";
 
 import { addUser, deleteUser, updateUser } from "@/lib/actions/users";
-import { viewAsJunior } from "@/lib/actions/view";
-import { isJuniorWho } from "@/lib/auth";
+import { viewAs } from "@/lib/actions/view";
+import { viewProfile } from "@/lib/view-profiles";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
@@ -39,7 +39,7 @@ function RoleSelect({ name, defaultValue }: { name: string; defaultValue?: UserR
   );
 }
 
-function UserRow({ user, canViewAs }: { user: User; canViewAs: boolean }) {
+function UserRow({ user, canViewAs, selfKey }: { user: User; canViewAs: boolean; selfKey: string | null }) {
   const canEdit = useCanEdit();
   const [editing, setEditing] = useState(false);
   const [, startTransition] = useTransition();
@@ -133,12 +133,12 @@ function UserRow({ user, canViewAs }: { user: User; canViewAs: boolean }) {
       <TableCell>
         {canEdit && (
           <div className="flex items-center justify-end gap-1">
-            {canViewAs && isJuniorWho(user.credentialKey) && (
-              <form action={viewAsJunior.bind(null, user.credentialKey ?? "")}>
+            {canViewAs && user.credentialKey && user.credentialKey !== selfKey && viewProfile(user.credentialKey) && (
+              <form action={viewAs.bind(null, user.credentialKey)}>
                 <button
                   type="submit"
                   className="inline-flex items-center gap-1 rounded-md border border-input px-2 py-1 text-xs font-medium text-primary hover:bg-accent"
-                  title="Ver la app tal como la ve este monitor (su saludo, sus proyectos y su proyecto de estudio)"
+                  title="Ver la app tal como la ve esta persona (según su perfil: Junior, dirección o coordinación)"
                 >
                   <Eye className="h-3.5 w-3.5" />
                   Ver como
@@ -168,7 +168,15 @@ function UserRow({ user, canViewAs }: { user: User; canViewAs: boolean }) {
   );
 }
 
-export function UsersTable({ users, canViewAs = false }: { users: User[]; canViewAs?: boolean }) {
+export function UsersTable({
+  users,
+  canViewAs = false,
+  selfKey = null,
+}: {
+  users: User[];
+  canViewAs?: boolean;
+  selfKey?: string | null;
+}) {
   const canEdit = useCanEdit();
   const [showForm, setShowForm] = useState(false);
 
@@ -219,7 +227,7 @@ export function UsersTable({ users, canViewAs = false }: { users: User[]; canVie
         </TableHeader>
         <TableBody>
           {users.map((user) => (
-            <UserRow key={user.id} user={user} canViewAs={canViewAs} />
+            <UserRow key={user.id} user={user} canViewAs={canViewAs} selfKey={selfKey} />
           ))}
         </TableBody>
       </Table>

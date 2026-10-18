@@ -152,4 +152,22 @@
   .animate-et-blink {
     animation: et-blink 1.4s ease-in-out infinite;
   }
+
+  /* Titileo de ATENCIÓN para un proyecto urgente con novedades: un contorno azul que aparece y
+     desaparece alrededor de la tarjeta o la fila. Con movimiento reducido queda el contorno fijo
+     (y siempre acompaña el chip «Con novedades», que no depende del movimiento). */
+  @keyframes et-attention {
+    0%, 100% { outline-color: transparent; }
+    50% { outline-color: hsl(var(--ring)); }
+  }
+  .animate-et-attention {
+    outline: 3px solid transparent;
+    outline-offset: var(--attn-offset, 3px);
+    animation: et-attention 1.1s ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .animate-et-attention {
+      outline-color: hsl(var(--ring));
+    }
+  }
 }

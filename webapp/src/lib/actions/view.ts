@@ -3,39 +3,31 @@
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 
-import { isJuniorWho, SESSION_MAX_AGE, VIEW_COOKIE } from "@/lib/auth";
+import { SESSION_MAX_AGE, VIEW_COOKIE } from "@/lib/auth";
 import { getSession } from "@/lib/session";
+import { viewProfile } from "@/lib/view-profiles";
 
-/** Fija (o borra) la cookie de la Vista Junior. Solo la puede usar quien tiene
- *  `canUseJuniorView` (máster, Lina, Santi; no el director). */
-async function writeView(value: string | null) {
+/** «Ver como»: la app se muestra tal como la ve otro perfil (Junior Artes, Junior ET,
+ *  Dirección o Coordinación). La clave es la de `VIEW_PROFILES`. Solo la puede usar quien
+ *  tiene `canViewAs` (máster, Lina, Santi; no el director). */
+export async function viewAs(key: string) {
   const s = await getSession();
-  if (!s.authed || !s.canUseJuniorView) return;
+  if (!s.authed || !s.canViewAs || !viewProfile(key)) return;
 
-  const jar = cookies();
-  if (value) {
-    jar.set(VIEW_COOKIE, value, {
-      httpOnly: true,
-      sameSite: "lax",
-      path: "/",
-      maxAge: SESSION_MAX_AGE,
-    });
-  } else {
-    jar.delete(VIEW_COOKIE);
-  }
+  cookies().set(VIEW_COOKIE, `as:${key}`, {
+    httpOnly: true,
+    sameSite: "lax",
+    path: "/",
+    maxAge: SESSION_MAX_AGE,
+  });
   revalidatePath("/", "layout");
 }
 
-/** Activa o desactiva la "Vista Junior" general (la app con los permisos de un
- *  monitor Junior, sin un monitor concreto). */
-export async function setJuniorView(on: boolean) {
-  await writeView(on ? "junior" : null);
-}
+/** Vuelve a la vista propia (borra la cookie de «Ver como»). */
+export async function exitViewAs() {
+  const s = await getSession();
+  if (!s.authed || !s.canViewAs) return;
 
-/** «Ver como» un monitor concreto: la clave es la del perfil («junior-artes» /
- *  «junior-et»). Se ve exactamente lo que ve ese monitor: su saludo, sus proyectos
- *  asignados primero y solo su proyecto de estudio. */
-export async function viewAsJunior(key: string) {
-  if (!isJuniorWho(key)) return;
-  await writeView(`junior:${key}`);
+  cookies().delete(VIEW_COOKIE);
+  revalidatePath("/", "layout");
 }
