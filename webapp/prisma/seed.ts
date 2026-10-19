@@ -136,6 +136,7 @@ async function ensureCurrentSemester(): Promise<string> {
  *  al CREAR el proyecto: después el responsable se cambia desde la app y el resync no lo pisa. */
 const INITIAL_ASSIGNEES: Record<string, string> = {
   "redes-rastreo-contactos-empresas": "junior-et",
+  "estrategicos-tracker-egresados-uifce": "junior-et",
 };
 
 async function seedProjectsFromCsv() {
