@@ -32,6 +32,7 @@ export default async function AliadosPage() {
       role: lead.role,
       kind: lead.kind,
       status: lead.status,
+      alumni: lead.alumni,
       undergrad: lead.undergrad,
       postgrad: lead.postgrad,
       linkedinUrl: lead.linkedinUrl,

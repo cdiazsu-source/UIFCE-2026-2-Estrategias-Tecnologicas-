@@ -106,9 +106,13 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
     ? (
         await prisma.targetCompany.findMany({
           orderBy: [{ order: "asc" }, { name: "asc" }],
-          select: { name: true, _count: { select: { leads: true } } },
+          select: { name: true, leads: { select: { kind: true, alumni: true } } },
         })
-      ).map((c) => ({ name: c.name, count: c._count.leads }))
+      ).map((c) => ({
+        name: c.name,
+        kinds: c.leads.map((l) => l.kind),
+        alumni: c.leads.filter((l) => l.alumni !== "NONE").length,
+      }))
     : [];
 
   // Al abrir el proyecto se anota la visita de la persona identificada (apaga «Con novedades» y la campana).

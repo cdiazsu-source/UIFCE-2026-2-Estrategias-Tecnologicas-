@@ -6,16 +6,44 @@ export const LEADS_PROJECT_ID = "redes-rastreo-contactos-empresas";
 /** Meta: mínimo de personas registradas por empresa. */
 export const LEADS_PER_COMPANY_GOAL = 4;
 
-/** Avance total frente a la meta: cada empresa aporta hasta `LEADS_PER_COMPANY_GOAL` contactos (los de más no suman). */
-export function leadsGoal(counts: number[]) {
-  const total = counts.length * LEADS_PER_COMPANY_GOAL;
-  const have = counts.reduce((n, c) => n + Math.min(c, LEADS_PER_COMPANY_GOAL), 0);
+/** La meta de cada empresa son 4 casillas: 1 reclutador, 1 gerente o directivo, 1 de recursos humanos y 1 contacto
+ *  libre (de cualquier tipo, además de los anteriores). */
+export const GOAL_SLOTS = [
+  { id: "RECLUTADOR", label: "Reclutador/a" },
+  { id: "GERENTE", label: "Gerente / directivo" },
+  { id: "RECURSOS_HUMANOS", label: "Recursos Humanos" },
+  { id: "LIBRE", label: "Contacto libre" },
+] as const;
+export type GoalSlot = (typeof GOAL_SLOTS)[number]["id"];
+
+/** Qué casillas de la meta tiene cubiertas una empresa, según los tipos de sus contactos (`kinds`). Un contacto
+ *  cubre una sola casilla: la «libre» solo la cubre un contacto que sobre de las tres por tipo. Así cuatro
+ *  reclutadores cubren «reclutador» y «libre» (2 de 4) pero no «gerente» ni «recursos humanos». */
+export function companyCoverage(kinds: string[]) {
+  const covered: Record<GoalSlot, boolean> = {
+    RECLUTADOR: kinds.includes("RECLUTADOR"),
+    GERENTE: kinds.includes("GERENTE"),
+    RECURSOS_HUMANOS: kinds.includes("RECURSOS_HUMANOS"),
+    LIBRE: false,
+  };
+  const typedCovered = [covered.RECLUTADOR, covered.GERENTE, covered.RECURSOS_HUMANOS].filter(Boolean).length;
+  covered.LIBRE = kinds.length - typedCovered >= 1;
+  const done = GOAL_SLOTS.filter((s) => covered[s.id]).length;
+  return { covered, done, complete: done === GOAL_SLOTS.length, missing: GOAL_SLOTS.filter((s) => !covered[s.id]) };
+}
+
+/** Avance total frente a la meta: casillas cubiertas sobre 4 por empresa. `companies` = los tipos de contacto de
+ *  cada empresa. */
+export function leadsGoal(companies: string[][]) {
+  const coverage = companies.map(companyCoverage);
+  const total = companies.length * LEADS_PER_COMPANY_GOAL;
+  const have = coverage.reduce((n, c) => n + c.done, 0);
   return {
     have,
     total,
     percent: total > 0 ? Math.round((have / total) * 100) : 0,
-    companies: counts.length,
-    companiesDone: counts.filter((c) => c >= LEADS_PER_COMPANY_GOAL).length,
+    companies: companies.length,
+    companiesDone: coverage.filter((c) => c.complete).length,
   };
 }
 
@@ -88,6 +116,33 @@ export function normalizeLinkedinUrl(raw: string): string | null {
 export function linkedinCompanySearchUrl(company: string): string {
   const short = company.replace(/\s*\(.*?\)\s*/g, " ").trim();
   return `https://www.linkedin.com/search/results/companies/?keywords=${encodeURIComponent(`${short} Colombia`)}`;
+}
+
+/** Egresados de la Universidad Nacional de Colombia (UNAL) y de su Facultad de Ciencias Económicas (FCE): suelen ser
+ *  los contactos más fáciles de abordar, por eso se destacan. */
+export const LEAD_ALUMNI = [
+  { id: "NONE", label: "No es egresado" },
+  { id: "UNAL", label: "Egresado UNAL" },
+  { id: "FCE", label: "Egresado FCE (UNAL)" },
+] as const;
+export type LeadAlumni = (typeof LEAD_ALUMNI)[number]["id"];
+
+export function normalizeAlumni(raw: unknown): LeadAlumni {
+  return LEAD_ALUMNI.some((a) => a.id === raw) ? (raw as LeadAlumni) : "NONE";
+}
+
+export const ALUMNI_BADGE: Record<string, string> = { UNAL: "Egresado UNAL", FCE: "Egresado FCE" };
+
+/** ¿Es egresado (de la UNAL o de la FCE)? */
+export const isAlumni = (alumni: string) => alumni === "UNAL" || alumni === "FCE";
+
+/** Búsqueda en LinkedIn de personas de esa empresa que estudiaron en la UNAL (o, en el caso FCE, en sus programas
+ *  de Ciencias Económicas). */
+export function linkedinAlumniSearchUrl(company: string, alumni: "UNAL" | "FCE"): string {
+  const short = company.replace(/\s*\(.*?\)\s*/g, " ").trim();
+  const extra = alumni === "FCE" ? ' ("Ciencias Económicas" OR "Administración de Empresas" OR "Contaduría Pública" OR Economía)' : "";
+  const q = `"${short}" "Universidad Nacional de Colombia"${extra}`;
+  return `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(q)}`;
 }
 
 /** Valor del campo de logo: URL completa, data URL o ruta absoluta tal cual; un nombre de archivo suelto

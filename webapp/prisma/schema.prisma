@@ -370,6 +370,8 @@ model CompanyLead {
   kind          String        @default("OTRO")
   /// Avance del contacto: POR_CONTACTAR, CONEXION_ENVIADA, CONECTADO, EN_CONVERSACION o SIN_RESPUESTA.
   status        String        @default("POR_CONTACTAR")
+  /// Egresado de la Universidad Nacional: NONE, UNAL (de la UNAL) o FCE (de la Facultad de Ciencias Económicas).
+  alumni        String        @default("NONE")
   linkedinUrl   String?
   /// Formación de la persona (de su perfil público): pregrado y especialización(es).
   undergrad     String?

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
-import { Check, ChevronDown, Clock, ExternalLink, GraduationCap, Linkedin, Pencil, Plus, Search, Trash2, X } from "lucide-react";
+import { Check, ChevronDown, Circle, Clock, ExternalLink, GraduationCap, Linkedin, Pencil, Plus, Search, Trash2, X } from "lucide-react";
 
 import {
   addCompanyLead,
@@ -32,6 +32,12 @@ import {
   linkedinSearchUrl,
   resolveLogo,
   type LeadKind,
+  ALUMNI_BADGE,
+  companyCoverage,
+  GOAL_SLOTS,
+  isAlumni,
+  LEAD_ALUMNI,
+  linkedinAlumniSearchUrl,
 } from "@/lib/company-leads";
 import { cn, formatDateTime } from "@/lib/utils";
 
@@ -41,6 +47,8 @@ export type CompanyLeadData = {
   role: string;
   kind: string;
   status: string;
+  /** NONE, UNAL o FCE: egresado de la Universidad Nacional o de su Facultad de Ciencias Económicas. */
+  alumni: string;
   linkedinUrl: string | null;
   /** Formación (del perfil público): pregrado y especialización(es). */
   undergrad: string | null;
@@ -94,6 +102,27 @@ function CompanyLogo({ name, logoUrl }: { name: string; logoUrl: string | null }
   );
 }
 
+/** Insignia de egresado: FCE con el amarillo de acento (la más cercana a la Unidad) y UNAL en azul suave. */
+function AlumniBadge({ alumni }: { alumni: string }) {
+  if (!isAlumni(alumni)) return null;
+  const fce = alumni === "FCE";
+  return (
+    <span
+      title={fce ? "Egresado de la Facultad de Ciencias Económicas (UNAL)" : "Egresado de la Universidad Nacional de Colombia"}
+      className={cn(
+        "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold",
+        fce ? "bg-brand-accent text-brand-accent-foreground" : "border border-primary/30 bg-primary/10 text-primary",
+      )}
+    >
+      <GraduationCap className="h-3 w-3" aria-hidden />
+      {ALUMNI_BADGE[alumni]}
+    </span>
+  );
+}
+
+/** Orden dentro de cada tipo: primero los egresados de la FCE, luego los de la UNAL y después el resto. */
+const alumniRank = (alumni: string) => (alumni === "FCE" ? 0 : alumni === "UNAL" ? 1 : 2);
+
 /** Campos del formulario de contacto (alta y edición). El cargo es opcional: si se deja vacío, se usa el tipo. */
 function LeadFields({ lead, defaultKind = "RECLUTADOR" }: { lead?: CompanyLeadData; defaultKind?: LeadKind }) {
   return (
@@ -129,6 +158,13 @@ function LeadFields({ lead, defaultKind = "RECLUTADOR" }: { lead?: CompanyLeadDa
         className="w-64"
         aria-label="Especialización o especializaciones"
       />
+      <Select name="alumni" defaultValue={lead?.alumni ?? "NONE"} className="w-52" aria-label="Egresado de la Universidad Nacional">
+        {LEAD_ALUMNI.map((a) => (
+          <option key={a.id} value={a.id}>
+            {a.label}
+          </option>
+        ))}
+      </Select>
       <Select name="status" defaultValue={lead?.status ?? "POR_CONTACTAR"} className="w-44" aria-label="Avance del contacto">
         {LEAD_STATUSES.map((s) => (
           <option key={s.id} value={s.id}>
@@ -180,6 +216,7 @@ function LeadRow({ lead }: { lead: CompanyLeadData }) {
           )}
           {lead.linkedinUrl && <Linkedin className="h-3.5 w-3.5 shrink-0 text-primary" aria-hidden />}
           <Badge variant="outline">{LEAD_KIND_LABEL[lead.kind] ?? lead.kind}</Badge>
+          <AlumniBadge alumni={lead.alumni} />
         </p>
         <p className="text-xs text-muted-foreground">
           {lead.role}
@@ -310,11 +347,16 @@ function CompanyCard({ company }: { company: TargetCompanyData }) {
   const leads = useMemo(
     () =>
       [...company.leads].sort(
-        (a, b) => LEAD_KIND_ORDER.indexOf(a.kind) - LEAD_KIND_ORDER.indexOf(b.kind) || a.name.localeCompare(b.name, "es"),
+        (a, b) =>
+          LEAD_KIND_ORDER.indexOf(a.kind) - LEAD_KIND_ORDER.indexOf(b.kind) ||
+          alumniRank(a.alumni) - alumniRank(b.alumni) ||
+          a.name.localeCompare(b.name, "es"),
       ),
     [company.leads],
   );
   const pending = company.leads.filter((l) => l.status === "POR_CONTACTAR").length;
+  const alumniCount = company.leads.filter((l) => isAlumni(l.alumni)).length;
+  const coverage = companyCoverage(company.leads.map((l) => l.kind));
 
   return (
     <div className="flex flex-col gap-3 rounded-lg border border-border p-4">
@@ -409,17 +451,35 @@ function CompanyCard({ company }: { company: TargetCompanyData }) {
         </div>
       )}
 
-      <p className="text-xs text-muted-foreground">
-        {company.leads.length === 0
-          ? "Sin contactos todavía"
-          : `${company.leads.length} ${company.leads.length === 1 ? "contacto" : "contactos"}${pending > 0 ? ` · ${pending} por contactar` : ""}`}
-        {" · "}
-        <span className={company.leads.length >= LEADS_PER_COMPANY_GOAL ? "font-medium text-success" : undefined}>
-          {company.leads.length >= LEADS_PER_COMPANY_GOAL
-            ? "meta cumplida"
-            : `meta ${company.leads.length}/${LEADS_PER_COMPANY_GOAL} personas`}
-        </span>
-      </p>
+      <div className="flex flex-col gap-1.5">
+        <p className="text-xs text-muted-foreground">
+          {company.leads.length === 0
+            ? "Sin contactos todavía"
+            : `${company.leads.length} ${company.leads.length === 1 ? "contacto" : "contactos"}${pending > 0 ? ` · ${pending} por contactar` : ""}${alumniCount > 0 ? ` · ${alumniCount} ${alumniCount === 1 ? "egresado" : "egresados"} UNAL/FCE` : ""}`}
+          {" · "}
+          <span className={coverage.complete ? "font-medium text-success" : undefined}>
+            {coverage.complete ? "meta cumplida" : `meta ${coverage.done}/${LEADS_PER_COMPANY_GOAL}`}
+          </span>
+        </p>
+        <ul aria-label={`Meta de contactos de ${company.name}`} className="flex flex-wrap gap-1">
+          {GOAL_SLOTS.map((slot) => {
+            const ok = coverage.covered[slot.id];
+            return (
+              <li
+                key={slot.id}
+                className={cn(
+                  "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium",
+                  ok ? "border-success/40 bg-success/10 text-foreground" : "border-dashed border-input text-muted-foreground",
+                )}
+              >
+                {ok ? <Check className="h-3 w-3 text-success" aria-hidden /> : <Circle className="h-3 w-3" aria-hidden />}
+                {slot.label}
+                <span className="sr-only">{ok ? " (cubierto)" : " (falta)"}</span>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
 
       {open && (
         <>
@@ -437,6 +497,19 @@ function CompanyCard({ company }: { company: TargetCompanyData }) {
               >
                 <Search className="h-3 w-3" aria-hidden />
                 {k.search}
+                <ExternalLink className="h-3 w-3 opacity-60" aria-hidden />
+              </a>
+            ))}
+            {(["UNAL", "FCE"] as const).map((a) => (
+              <a
+                key={a}
+                href={linkedinAlumniSearchUrl(company.name, a)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 text-xs font-medium text-link hover:bg-accent"
+              >
+                <GraduationCap className="h-3 w-3" aria-hidden />
+                Egresados {a}
                 <ExternalLink className="h-3 w-3 opacity-60" aria-hidden />
               </a>
             ))}
@@ -483,6 +556,7 @@ export function CompanyLeadsSection({ companies }: { companies: TargetCompanyDat
   const [showCompanyForm, setShowCompanyForm] = useState(false);
   const [q, setQ] = useState("");
   const [tag, setTag] = useState("");
+  const [onlyAlumni, setOnlyAlumni] = useState(false);
 
   const tags = useMemo(() => Array.from(new Set(companies.flatMap((c) => c.tags))).sort((a, b) => a.localeCompare(b, "es")), [companies]);
   const norm = (s: string) => s.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
@@ -490,32 +564,35 @@ export function CompanyLeadsSection({ companies }: { companies: TargetCompanyDat
   const filtered = companies.filter(
     (c) =>
       (!tag || c.tags.includes(tag)) &&
+      (!onlyAlumni || c.leads.some((l) => isAlumni(l.alumni))) &&
       (!nq || [c.name, c.sector ?? "", c.notes ?? "", ...c.tags].some((f) => norm(f).includes(nq))),
   );
   const totalLeads = companies.reduce((n, c) => n + c.leads.length, 0);
   const toContact = companies.reduce((n, c) => n + c.leads.filter((l) => l.status === "POR_CONTACTAR").length, 0);
-  const goal = leadsGoal(companies.map((c) => c.leads.length));
+  const goal = leadsGoal(companies.map((c) => c.leads.map((l) => l.kind)));
+  const alumniTotal = companies.reduce((n, c) => n + c.leads.filter((l) => isAlumni(l.alumni)).length, 0);
 
   return (
     <div id="empresas-interes" className="flex scroll-mt-20 flex-col gap-3">
       <div>
         <h2 className="flex items-center gap-1.5 text-lg font-bold">
           Empresas de interés
-          <InfoHint text="Empresas donde le interesaría trabajar al equipo y las personas que se les siguen en LinkedIn: reclutadores, gerentes, recursos humanos y otros contactos. Cómo se usa: abre una empresa, usa «Buscar en LinkedIn» para encontrar perfiles de cada tipo, y con perfil completo «Agregar contacto» con su nombre, tipo, cargo y enlace; cambia su avance (por contactar, conexión enviada, conectado, en conversación, sin respuesta) y usa «Marcar revisado hoy» para dejar constancia de cuándo se volvió a mirar. El logo es un archivo en public/logos o una URL." />
+          <InfoHint text="Empresas donde le interesaría trabajar al equipo y las personas que se les siguen en LinkedIn: reclutadores, gerentes, recursos humanos y otros contactos. Cómo se usa: abre una empresa, usa «Buscar en LinkedIn» para encontrar perfiles de cada tipo, y con perfil completo «Agregar contacto» con su nombre, tipo, cargo y enlace; cambia su avance (por contactar, conexión enviada, conectado, en conversación, sin respuesta) y usa «Marcar revisado hoy» para dejar constancia de cuándo se volvió a mirar. La meta de cada empresa son 4 casillas: un reclutador, un gerente o directivo, una persona de recursos humanos y un contacto libre (cuatro reclutadores no cubren las demás). Marca a los egresados de la UNAL o de la FCE: suelen ser los más fáciles de abordar, y «Egresados UNAL / FCE» abre su búsqueda en LinkedIn. El logo es un archivo en public/logos o una URL." />
         </h2>
         <p className="text-sm text-muted-foreground">
           {companies.length} {companies.length === 1 ? "empresa" : "empresas"} · {totalLeads}{" "}
           {totalLeads === 1 ? "contacto" : "contactos"}
           {toContact > 0 ? ` · ${toContact} por contactar` : ""}
+          {alumniTotal > 0 ? ` · ${alumniTotal} ${alumniTotal === 1 ? "egresado" : "egresados"} UNAL/FCE` : ""}
         </p>
       </div>
 
       {companies.length > 0 && (
         <div className="rounded-lg border border-border p-3">
           <div className="flex flex-wrap items-baseline justify-between gap-2 text-sm">
-            <span className="font-medium">Meta: mínimo {LEADS_PER_COMPANY_GOAL} personas por empresa</span>
+            <span className="font-medium">Meta por empresa: 1 reclutador, 1 gerente, 1 de recursos humanos y 1 contacto libre</span>
             <span className="tabular-nums text-muted-foreground">
-              {goal.have} de {goal.total} · {goal.percent}%
+              {goal.have} de {goal.total} casillas · {goal.percent}%
             </span>
           </div>
           <Progress value={goal.percent} className="mt-2 h-2.5" aria-label="Avance total frente a la meta de contactos" />
@@ -546,12 +623,26 @@ export function CompanyLeadsSection({ companies }: { companies: TargetCompanyDat
             ))}
           </Select>
         )}
-        {(q || tag) && (
+        <button
+          type="button"
+          onClick={() => setOnlyAlumni((v) => !v)}
+          aria-pressed={onlyAlumni}
+          title="Muestra solo las empresas donde hay al menos un egresado de la UNAL o de la FCE"
+          className={cn(
+            "inline-flex h-9 items-center gap-1.5 rounded-md border px-3 text-xs font-medium transition-colors",
+            onlyAlumni ? "border-primary bg-primary text-primary-foreground" : "border-input bg-card text-muted-foreground hover:bg-accent",
+          )}
+        >
+          <GraduationCap className="h-3.5 w-3.5" aria-hidden />
+          Con egresados UNAL/FCE
+        </button>
+        {(q || tag || onlyAlumni) && (
           <button
             type="button"
             onClick={() => {
               setQ("");
               setTag("");
+              setOnlyAlumni(false);
             }}
             className="inline-flex items-center gap-1 rounded-md border border-input px-2.5 py-1.5 text-xs text-muted-foreground hover:bg-accent"
           >

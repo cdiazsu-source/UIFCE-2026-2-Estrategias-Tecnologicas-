@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { prisma } from "@/lib/prisma";
 import { blockedForJunior } from "@/lib/session";
-import { LEAD_KIND_LABEL, normalizeKind, normalizeLinkedinUrl, normalizeStatus, parseList, parseTags } from "@/lib/company-leads";
+import { LEAD_KIND_LABEL, normalizeAlumni, normalizeKind, normalizeLinkedinUrl, normalizeStatus, parseList, parseTags } from "@/lib/company-leads";
 
 /** Campos comunes del formulario de empresa. Vacío = null. */
 function companyFields(formData: FormData) {
@@ -57,6 +57,7 @@ function leadFields(formData: FormData) {
     kind,
     role: text("role") || LEAD_KIND_LABEL[kind],
     status: normalizeStatus(formData.get("status")),
+    alumni: normalizeAlumni(formData.get("alumni")),
     linkedinUrl: text("linkedinUrl") || null,
     undergrad: text("undergrad").slice(0, 160) || null,
     postgrad: parseList(text("postgrad")),
