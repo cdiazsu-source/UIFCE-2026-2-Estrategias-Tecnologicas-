@@ -9,6 +9,7 @@ import {
   CalendarRange,
   FileSignature,
   FileText,
+  Building2,
   FolderKanban,
   Gauge,
   GraduationCap,
@@ -46,6 +47,7 @@ const HOME_ITEMS: NavItem[] = [
 
 /** Apartados del detalle de un proyecto. */
 const PROJECT_ITEMS: NavItem[] = [
+  { id: "p-rastreo", label: "Avance del rastreo", icon: Building2, scope: "project:rastreo" },
   { id: "p-descripcion", label: "Qué se debe hacer", icon: FileText, scope: "project:descripcion" },
   { id: "p-actividades", label: "Actividades del proyecto", icon: CalendarRange, scope: "project:actividades" },
   { id: "p-consentimientos", label: "Consentimientos", icon: FileSignature, scope: "project:consentimientos" },

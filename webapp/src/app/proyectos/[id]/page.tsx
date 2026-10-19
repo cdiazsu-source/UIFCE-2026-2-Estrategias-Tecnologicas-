@@ -28,6 +28,8 @@ import { ExpensesPanel, type ExpenseRow } from "@/components/expenses-panel";
 import { wipBlockedBy } from "@/lib/actions/projects";
 import { CONSENT_PROJECT_ID } from "@/lib/consent";
 import { EXPENSES_PROJECT_ID } from "@/lib/expenses";
+import { LEADS_PROJECT_ID } from "@/lib/company-leads";
+import { LeadsCta, LeadsGoalPanel } from "@/components/leads-goal-panel";
 import {
   formatDate,
   formatDateTime,
@@ -48,6 +50,7 @@ export const dynamic = "force-dynamic";
 export default async function ProjectDetailPage({ params }: { params: { id: string } }) {
   const isConsent = params.id === CONSENT_PROJECT_ID;
   const isExpenses = params.id === EXPENSES_PROJECT_ID;
+  const isLeads = params.id === LEADS_PROJECT_ID;
 
   const [project, authors, consentRows, expenseRows, expenseProjects, candidateMains] = await Promise.all([
     prisma.project.findUnique({
@@ -97,6 +100,16 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
   ]);
 
   if (!project) notFound();
+
+  // Proyecto de rastreo de contactos: cuántas personas hay registradas en cada empresa de interés.
+  const leadCounts = isLeads
+    ? (
+        await prisma.targetCompany.findMany({
+          orderBy: [{ order: "asc" }, { name: "asc" }],
+          select: { name: true, _count: { select: { leads: true } } },
+        })
+      ).map((c) => ({ name: c.name, count: c._count.leads }))
+    : [];
 
   // Al abrir el proyecto se anota la visita de la persona identificada (apaga «Con novedades» y la campana).
   const seenProfile = (await getNotifyIdentity())?.key ?? null;
@@ -268,7 +281,15 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
         <ProjectContextButton context={aiContext} />
       </div>
 
+      {isLeads && <LeadsCta />}
+
       <CollapseAllControls scope="project" className="-mb-3 justify-end" />
+
+      {isLeads && (
+        <CollapsibleCard id="p-rastreo" scope="project:rastreo" label="el avance del rastreo" title="Avance del rastreo de contactos">
+          <LeadsGoalPanel companies={leadCounts} />
+        </CollapsibleCard>
+      )}
 
       <CollapsibleCard id="p-descripcion" scope="project:descripcion" label="«Qué se debe hacer»" title="Qué se debe hacer">
         <p className="whitespace-pre-line">{project.description}</p>

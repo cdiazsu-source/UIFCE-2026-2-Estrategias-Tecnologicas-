@@ -341,6 +341,14 @@ model TargetCompany {
   name  String  @unique
   notes String? @db.Text
   order Int     @default(0)
+  /// Sector económico (texto libre): «Hidrocarburos y Energía», «Fintech»…
+  sector  String?
+  /// Logo: nombre de archivo en public/logos/ (p. ej. «ecopetrol.png») o URL completa.
+  logoUrl String?
+  /// Etiquetas para filtrar (p. ej. «Mayores ingresos», «Mayor crecimiento»).
+  tags    String[] @default([])
+  /// Página oficial de la empresa en LinkedIn (la de Colombia, si tiene).
+  linkedinUrl String?
   leads CompanyLead[]
 
   createdAt DateTime @default(now())
@@ -358,7 +366,14 @@ model CompanyLead {
   name          String
   /// Cargo o rol frente a la empresa: "Ejecutivo", "Reclutador", "Referido"… texto libre.
   role          String
+  /// Tipo de contacto: RECLUTADOR, GERENTE, RECURSOS_HUMANOS u OTRO (ver lib/company-leads.ts).
+  kind          String        @default("OTRO")
+  /// Avance del contacto: POR_CONTACTAR, CONEXION_ENVIADA, CONECTADO, EN_CONVERSACION o SIN_RESPUESTA.
+  status        String        @default("POR_CONTACTAR")
   linkedinUrl   String?
+  /// Formación de la persona (de su perfil público): pregrado y especialización(es).
+  undergrad     String?
+  postgrad      String[]      @default([])
   notes         String?       @db.Text
   lastCheckedAt DateTime?
 
