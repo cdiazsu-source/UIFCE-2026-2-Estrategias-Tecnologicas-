@@ -1,6 +1,7 @@
 /**
  * Comparte con Jean los directorios UIFCE (antiguos monitores) en el proyecto del tracker de egresados:
- * agrega los tres enlaces al encabezado del proyecto y deja en su bitácora una nota que lo etiqueta.
+ * agrega los tres enlaces al encabezado del proyecto y deja en su bitácora notas que lo etiquetan (qué se le pide y
+ * dónde está el tracker).
  *
  * Por qué es un script y no código del repositorio: los directorios son hojas de cálculo con datos de
  * personas y el repositorio es PÚBLICO. Los enlaces viven solo en un archivo local que git ignora
@@ -12,7 +13,7 @@
  *
  * Qué hace (idempotente; se puede volver a correr):
  *   - Suma a «Project.links» los enlaces que falten (no repite ni borra los que ya tenga).
- *   - Publica la nota para Jean en la bitácora, si no está ya (lo etiqueta; la campana le avisa).
+ *   - Publica en la bitácora las notas para Jean que falten (las etiqueta; la campana le avisa).
  * Requiere que el proyecto exista (npm run db:seed). Escribe en la BD de producción (la de webapp/.env):
  * lo corre una persona del equipo, no el agente.
  */
@@ -28,10 +29,12 @@ const PROJECT_ID = "estrategicos-tracker-egresados-uifce";
 const JEAN_CREDENTIAL_KEY = "junior-et";
 const LINKS_FILE = join(here, "..", "private", "directorios-uifce.json");
 
-const NOTE = {
-  author: "Asistente de ET en Marcha",
-  authorRole: "Asistente",
-  body: `Jean: este proyecto es para ti · Tracker de egresados UIFCE
+const AUTHOR = { author: "Asistente de ET en Marcha", authorRole: "Asistente" };
+
+const NOTES = [
+  {
+    ...AUTHOR,
+    body: `Jean: este proyecto es para ti · Tracker de egresados UIFCE
 
 Qué te pedimos
 - Rastrear a los antiguos monitores de la Unidad: dónde trabajan hoy (empresa y cargo), qué estudiaron (carrera de graduación) y cómo contactarlos.
@@ -44,7 +47,22 @@ Cómo empezar
 3. Cuando tengas la primera tanda, cuéntanos aquí en la bitácora para definir cómo contactarlos.
 
 Cuidado: usa solo la información que cada persona comparte o publica en su perfil profesional.`,
-};
+  },
+  {
+    ...AUTHOR,
+    body: `Jean: ya está listo el lugar para hacer el seguimiento · Egresados
+
+Dónde: en el menú lateral, «Egresados» (o el botón grande «Ir al tracker de egresados» de este proyecto).
+
+Cómo se usa
+1. Abre un directorio (los botones «Directorios de origen» están arriba en esa página) y copia los nombres de los antiguos monitores: una columna, o las filas completas.
+2. Pégalos en «Agregar egresados», escribe el semestre del directorio (por ejemplo 2025-2) y guarda. Si una persona sale en varios directorios no se duplica: solo se le suma el semestre.
+3. En cada fila, «Buscar su perfil» abre la búsqueda en LinkedIn. Con el lápiz completas su carrera de graduación, su empresa y cargo actuales y el enlace de su perfil.
+4. Cambia su estado a medida que avanzas: por rastrear, situación verificada, contactado, conectado o sin respuesta. «Revisado hoy» deja constancia de cuándo la revisaste.
+
+La barra de arriba muestra cuántos llevan su situación verificada.`,
+  },
+];
 
 if (!existsSync(LINKS_FILE)) {
   console.error(`No encontré ${LINKS_FILE}\nDebe existir webapp/private/directorios-uifce.json (no se sube a git).`);
@@ -76,11 +94,16 @@ async function run() {
     const current = Array.isArray(proj.links) ? proj.links : [];
     const have = new Set(current.map((l) => l.url));
     const toAdd = links.filter((l) => !have.has(l.url));
-    const note = (await client.query(`SELECT id FROM "ProjectNote" WHERE "projectId" = $1 AND body = $2`, [PROJECT_ID, NOTE.body])).rows[0];
+
+    const pending = [];
+    for (const n of NOTES) {
+      const found = (await client.query(`SELECT id FROM "ProjectNote" WHERE "projectId" = $1 AND body = $2`, [PROJECT_ID, n.body])).rows[0];
+      if (!found) pending.push(n);
+    }
 
     console.log(`Proyecto: ${proj.title}`);
     console.log(`Enlaces: ya tiene ${current.length}; se agregan ${toAdd.length}${toAdd.length ? " (" + toAdd.map((l) => l.label).join(", ") + ")" : ""}`);
-    console.log(`Nota para Jean: ${note ? "ya está publicada (no se repite)" : "se publica"}; etiqueta a: ${jean?.name ?? "nadie (no hallé el perfil de Jean)"}`);
+    console.log(`Notas para Jean: se publican ${pending.length} de ${NOTES.length}; etiqueta a: ${jean?.name ?? "nadie (no hallé el perfil de Jean)"}`);
 
     if (!APPLY) {
       console.log("\nSimulación: no se cambió nada. Para aplicar, corre con --apply.");
@@ -94,15 +117,15 @@ async function run() {
         JSON.stringify([...current, ...toAdd.map((l) => ({ label: l.label, url: l.url }))]),
       ]);
     }
-    if (!note) {
+    for (const n of pending) {
       await client.query(
         `INSERT INTO "ProjectNote" (id, "projectId", body, author, "authorRole", "mentionIds", links)
          VALUES ($1, $2, $3, $4, $5, $6::text[], '[]'::jsonb)`,
-        [randomUUID(), PROJECT_ID, NOTE.body, NOTE.author, NOTE.authorRole, jean ? [jean.id] : []],
+        [randomUUID(), PROJECT_ID, n.body, n.author, n.authorRole, jean ? [jean.id] : []],
       );
     }
     await client.query("COMMIT");
-    console.log("\nListo: enlaces agregados al proyecto y nota publicada para Jean.");
+    console.log("\nListo: enlaces al día y notas publicadas para Jean.");
   } catch (e) {
     await client.query("ROLLBACK").catch(() => {});
     throw e;
