@@ -466,6 +466,9 @@ model Template {
   /// Formato o medida, ej. "Reel 1080×1920", "Correo HTML", "Póster A3".
   format      String?
   notes       String?  @db.Text
+  /// Prompt completo (texto para pegar en Claude Code u otra IA), si la plantilla es un prompt. Se ve y se copia
+  /// desde la tarjeta.
+  promptText  String?  @db.Text
   /// Captura de pantalla / miniatura de la pieza. Normalmente una data URL con
   /// la imagen ya reducida (~640px) que pega quien edita; también admite un
   /// enlace o un archivo en /public. Se muestra como vista previa en la tarjeta.

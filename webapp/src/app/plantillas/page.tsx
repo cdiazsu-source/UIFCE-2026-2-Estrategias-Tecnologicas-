@@ -15,6 +15,7 @@ export default async function PlantillasPage() {
     url: t.url,
     format: t.format,
     notes: t.notes,
+    promptText: t.promptText,
     screenshot: t.screenshot,
   }));
 

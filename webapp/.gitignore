@@ -5,3 +5,5 @@ node_modules
 *.tsbuildinfo
 next-env.d.ts
 backups/
+# Textos locales que no deben subirse (p. ej. prompts con rutas personales)
+private/

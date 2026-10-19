@@ -24,6 +24,13 @@ function screenshot(fd: FormData): string | null {
   return v.length <= SCREENSHOT_MAX ? v : null;
 }
 
+/** Tope del prompt: sobra para un prompt maestro (~10 000 caracteres) y evita filas gigantes. */
+const PROMPT_MAX = 60_000;
+
+function promptText(fd: FormData): string | null {
+  return str(fd, "promptText")?.slice(0, PROMPT_MAX) ?? null;
+}
+
 export async function addTemplate(formData: FormData) {
   if (await blockedForJunior()) return;
   const name = String(formData.get("name") ?? "").trim();
@@ -39,6 +46,7 @@ export async function addTemplate(formData: FormData) {
       url: str(formData, "url"),
       format: str(formData, "format"),
       notes: str(formData, "notes"),
+      promptText: promptText(formData),
       screenshot: screenshot(formData),
       order: (last?.order ?? -1) + 1,
     },
@@ -63,6 +71,7 @@ export async function updateTemplate(id: string, formData: FormData): Promise<Un
       url: str(formData, "url"),
       format: str(formData, "format"),
       notes: str(formData, "notes"),
+      promptText: promptText(formData),
       screenshot: screenshot(formData),
     },
   });
@@ -78,6 +87,7 @@ export async function updateTemplate(id: string, formData: FormData): Promise<Un
       url: prev.url,
       format: prev.format,
       notes: prev.notes,
+      promptText: prev.promptText,
       screenshot: prev.screenshot,
     },
   };
@@ -101,6 +111,7 @@ export async function deleteTemplate(id: string): Promise<UndoAction | void> {
       url: prev.url,
       format: prev.format,
       notes: prev.notes,
+      promptText: prev.promptText,
       screenshot: prev.screenshot,
       order: prev.order,
     },

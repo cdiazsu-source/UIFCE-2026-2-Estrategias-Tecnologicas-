@@ -194,6 +194,7 @@ export type UndoAction =
         url: string | null;
         format: string | null;
         notes: string | null;
+        promptText: string | null;
         screenshot: string | null;
       };
     }
@@ -207,6 +208,7 @@ export type UndoAction =
         url: string | null;
         format: string | null;
         notes: string | null;
+        promptText: string | null;
         screenshot: string | null;
         order: number;
       };

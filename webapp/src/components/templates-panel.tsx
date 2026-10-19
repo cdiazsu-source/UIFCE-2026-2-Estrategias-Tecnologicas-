@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState, useTransition } from "react";
-import { Download, ExternalLink, ImagePlus, Pencil, Plus, Search, Trash2, X } from "lucide-react";
+import { Check, Copy, Download, ExternalLink, ImagePlus, Pencil, Plus, Search, Sparkles, Trash2, X } from "lucide-react";
 
 import { addTemplate, deleteTemplate, updateTemplate } from "@/lib/actions/templates";
 import { downscaleToDataUrl } from "@/lib/image-client";
@@ -20,6 +20,8 @@ export type TemplateData = {
   url: string | null;
   format: string | null;
   notes: string | null;
+  /** Texto del prompt, si la plantilla es un prompt. */
+  promptText: string | null;
   screenshot: string | null;
 };
 
@@ -149,8 +151,57 @@ function Fields({ t }: { t?: TemplateData }) {
       </div>
       <Textarea name="description" defaultValue={t?.description ?? ""} placeholder="Para qué sirve / cuándo se usa" className="min-h-[56px]" />
       <Textarea name="notes" defaultValue={t?.notes ?? ""} placeholder="Notas (aprobaciones, responsables, variantes…)" className="min-h-[56px]" />
+      <Textarea
+        name="promptText"
+        defaultValue={t?.promptText ?? ""}
+        placeholder="Prompt (opcional): texto completo para pegar en Claude Code u otra IA"
+        className="min-h-[96px] font-mono text-xs"
+      />
       <ScreenshotField initial={t?.screenshot ?? null} />
     </>
+  );
+}
+
+/** Prompt de la plantilla: botón para copiarlo (lo que se usa a diario) y vista del texto completo. */
+function PromptBlock({ text }: { text: string }) {
+  const [open, setOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2200);
+    } catch {
+      // Sin permiso para el portapapeles: se muestra el texto para copiarlo a mano.
+      setOpen(true);
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-2 rounded-md border border-border p-2">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          <Sparkles className="h-3.5 w-3.5" aria-hidden />
+          Prompt · {text.length.toLocaleString("es-CO")} caracteres
+        </span>
+        <Button type="button" size="sm" onClick={copy}>
+          {copied ? <Check className="h-3.5 w-3.5" aria-hidden /> : <Copy className="h-3.5 w-3.5" aria-hidden />}
+          {copied ? "Copiado" : "Copiar prompt"}
+        </Button>
+        <Button type="button" size="sm" variant="ghost" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
+          {open ? "Ocultar" : "Ver prompt"}
+        </Button>
+        <span className="sr-only" role="status">
+          {copied ? "Prompt copiado al portapapeles" : ""}
+        </span>
+      </div>
+      {open && (
+        <pre className="max-h-80 overflow-auto whitespace-pre-wrap rounded bg-muted/50 p-2 font-mono text-xs leading-relaxed">
+          {text}
+        </pre>
+      )}
+    </div>
   );
 }
 
@@ -240,6 +291,7 @@ function TemplateCard({ template }: { template: TemplateData }) {
           </a>
         )}
         {template.description && <p className="whitespace-pre-line text-muted-foreground">{template.description}</p>}
+        {template.promptText && <PromptBlock text={template.promptText} />}
         {template.url && isImageUrl(template.url) && (
           <div className="flex flex-col gap-2">
             <a href={template.url} target="_blank" rel="noreferrer" className="block w-fit">
