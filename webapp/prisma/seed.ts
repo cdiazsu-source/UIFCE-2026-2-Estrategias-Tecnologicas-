@@ -132,6 +132,12 @@ async function ensureCurrentSemester(): Promise<string> {
   return created.id;
 }
 
+/** Responsable inicial de proyectos nuevos (id del proyecto → credentialKey de la persona). Solo se aplica
+ *  al CREAR el proyecto: después el responsable se cambia desde la app y el resync no lo pisa. */
+const INITIAL_ASSIGNEES: Record<string, string> = {
+  "redes-rastreo-contactos-empresas": "junior-et",
+};
+
 async function seedProjectsFromCsv() {
   const csvText = fs.readFileSync(CSV_PATH, "utf-8");
   const rows: CsvRow[] = parse(csvText, { columns: true, skip_empty_lines: true });
@@ -156,12 +162,18 @@ async function seedProjectsFromCsv() {
       rationale: row["Fundamento"],
     };
 
+    let assigneeId: string | null = null;
+    const assigneeKey = INITIAL_ASSIGNEES[row.ID];
+    if (assigneeKey && !existingProject) {
+      assigneeId = (await prisma.user.findFirst({ where: { credentialKey: assigneeKey }, select: { id: true } }))?.id ?? null;
+    }
+
     // Si alguien editó el contenido en la app, el resync solo mantiene el
     // orden del CSV y respeta el texto editado. El semestre solo se fija al crear.
     const project = await prisma.project.upsert({
       where: { id: row.ID },
       update: existingProject?.editedInApp ? { sourceOrder: i } : { ...csvContent, sourceOrder: i },
-      create: { id: row.ID, ...csvContent, sourceOrder: i, semesterId },
+      create: { id: row.ID, ...csvContent, sourceOrder: i, semesterId, ...(assigneeId ? { assigneeId } : {}) },
     });
 
     if (CHECKLIST_OWNED_ELSEWHERE.has(project.id)) continue;
