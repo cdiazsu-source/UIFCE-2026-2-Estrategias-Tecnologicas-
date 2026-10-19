@@ -40,8 +40,8 @@ export type AssignedUpdate = { id: string; title: string; at: string; author: st
 /** Días hacia atrás que cuenta una nota como «novedad». */
 const UPDATE_WINDOW_DAYS = 14;
 
-/** Proyectos abiertos de la persona (responsable o con subtareas a su nombre) que tienen notas de
- *  bitácora de OTRAS personas en los últimos 14 días, con la más reciente de cada uno. El navegador
+/** Proyectos abiertos de la persona (responsable, con subtareas a su nombre o etiquetada en una nota) que
+ *  tienen notas de bitácora de OTRAS personas en los últimos 14 días, con la más reciente de cada uno. El navegador
  *  decide cuáles ya vio (lib/seen-updates.ts). Una nota es «de otra persona» si su autor no es esta
  *  persona ni por id ni por nombre (las notas antiguas, y las del máster con credencial compartida,
  *  solo guardan el nombre). */
@@ -56,7 +56,12 @@ export const getAssignedUpdates = cache(async (userId: string, name: string): Pr
     const rows = await prisma.project.findMany({
       where: {
         status: { not: "COMPLETADO" },
-        OR: [{ assigneeId: userId }, { checklistItems: { some: { assigneeId: userId } } }],
+        OR: [
+          { assigneeId: userId },
+          { checklistItems: { some: { assigneeId: userId } } },
+          // También los proyectos donde otra persona la etiquetó en una nota.
+          { notes: { some: { ...fromOthers, mentionIds: { has: userId } } } },
+        ],
         notes: { some: fromOthers },
       },
       select: {
