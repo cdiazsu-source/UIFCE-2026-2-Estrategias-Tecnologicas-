@@ -385,6 +385,32 @@ model CompanyLead {
   @@index([companyId])
 }
 
+/// Antiguo monitor de la UIFCE (egresado) al que se le sigue la pista: dónde trabaja hoy, su carrera de graduación y el
+/// estado del contacto. Se alimenta de los directorios UIFCE (2025-2, 2025-1, 2024-2). Ver /egresados y lib/alumni.ts.
+model Alumnus {
+  id             String    @id @default(cuid())
+  name           String
+  /// Semestre(s) de los directorios en que aparece, separados por coma («2025-2, 2024-2»).
+  cohort         String?
+  /// Área de la UIFCE en la que fue monitor (texto libre: «ET», «CL», «GC»…).
+  area           String?
+  /// Carrera de graduación.
+  degree         String?
+  currentCompany String?
+  currentRole    String?
+  linkedinUrl    String?
+  /// POR_RASTREAR, VERIFICADO, CONTACTADO, CONECTADO o SIN_RESPUESTA (ver lib/alumni.ts).
+  status         String    @default("POR_RASTREAR")
+  notes          String?   @db.Text
+  /// Última vez que alguien revisó a esta persona («Revisado hoy»).
+  lastCheckedAt  DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+}
+
 /// Persona del equipo de ET o de su entorno cercano (coordinación, dirección).
 /// Directorio editable desde /equipo. `email` es la identidad; por ahora no
 /// habilita inicio de sesión — es sólo dato de contacto y atribución.

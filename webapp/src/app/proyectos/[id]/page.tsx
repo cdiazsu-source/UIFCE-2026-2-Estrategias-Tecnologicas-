@@ -29,6 +29,8 @@ import { wipBlockedBy } from "@/lib/actions/projects";
 import { CONSENT_PROJECT_ID } from "@/lib/consent";
 import { EXPENSES_PROJECT_ID } from "@/lib/expenses";
 import { LEADS_PROJECT_ID } from "@/lib/company-leads";
+import { ALUMNI_PROJECT_ID } from "@/lib/alumni";
+import { AlumniCta } from "@/components/alumni-cta";
 import { LeadsCta, LeadsGoalPanel } from "@/components/leads-goal-panel";
 import {
   formatDate,
@@ -51,6 +53,7 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
   const isConsent = params.id === CONSENT_PROJECT_ID;
   const isExpenses = params.id === EXPENSES_PROJECT_ID;
   const isLeads = params.id === LEADS_PROJECT_ID;
+  const isAlumni = params.id === ALUMNI_PROJECT_ID;
 
   const [project, authors, consentRows, expenseRows, expenseProjects, candidateMains] = await Promise.all([
     prisma.project.findUnique({
@@ -100,6 +103,9 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
   ]);
 
   if (!project) notFound();
+
+  // Tracker de egresados: estados de los ya registrados (el botón grande de arriba muestra cómo va).
+  const alumniStatuses = isAlumni ? (await prisma.alumnus.findMany({ select: { status: true } })).map((a) => a.status) : [];
 
   // Proyecto de rastreo de contactos: cuántas personas hay registradas en cada empresa de interés.
   const leadCounts = isLeads
@@ -286,6 +292,7 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
       </div>
 
       {isLeads && <LeadsCta />}
+      {isAlumni && <AlumniCta statuses={alumniStatuses} />}
 
       <CollapseAllControls scope="project" className="-mb-3 justify-end" />
 
