@@ -1,6 +1,9 @@
 /** Empresas de interés y sus contactos (reclutadores, gerentes, recursos humanos…). Sin secretos ni
  *  acceso a la BD: lo importan componentes de cliente y acciones del servidor. */
 
+/** Etiqueta de las empresas que miembros del equipo nombraron en la encuesta del perfil de LinkedIn. */
+export const INTERNAL_INTEREST_TAG = "Interés interno";
+
 /** Proyecto de ET que lleva el rastreo de contactos en las empresas de interés. */
 export const LEADS_PROJECT_ID = "redes-rastreo-contactos-empresas";
 /** Meta: mínimo de personas registradas por empresa. */
@@ -143,6 +146,73 @@ export function linkedinAlumniSearchUrl(company: string, alumni: "UNAL" | "FCE")
   const extra = alumni === "FCE" ? ' ("Ciencias Económicas" OR "Administración de Empresas" OR "Contaduría Pública" OR Economía)' : "";
   const q = `"${short}" "Universidad Nacional de Colombia"${extra}`;
   return `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(q)}`;
+}
+
+/** Perfil de LinkedIn de una persona detectado en un texto pegado. `name` es una sugerencia deducida del enlace. */
+export type ProfileLink = { url: string; name: string };
+
+/** Enlace al perfil de LinkedIn de una PERSONA. Acepta lo que se copia de la barra de direcciones, con o sin
+ *  «https://», con «www.» o con el subdominio de un país (co.linkedin.com), con parámetros de seguimiento o sin ellos.
+ *  Devuelve la forma canónica `https://www.linkedin.com/in/<usuario>/`, o el motivo si no sirve. */
+export function normalizeProfileUrl(raw: string): { url: string } | { error: string } {
+  const v = raw.trim().replace(/^[<(["'\s]+|[>)\]"'.,;\s]+$/g, "");
+  if (!v) return { error: "está vacío" };
+  try {
+    const u = new URL(/^[a-z][a-z0-9+.-]*:/i.test(v) ? v : `https://${v}`);
+    if (u.protocol !== "http:" && u.protocol !== "https:") return { error: "no es un enlace web" };
+    const host = u.hostname.toLowerCase();
+    if (host !== "linkedin.com" && !host.endsWith(".linkedin.com")) return { error: "no es un enlace de linkedin.com" };
+    const m = /^\/(in|pub)\/([^/]+)/i.exec(u.pathname);
+    if (!m) {
+      return {
+        error: /^\/(company|school|showcase)\//i.test(u.pathname)
+          ? "es la página de una empresa, no el perfil de una persona"
+          : "no es el perfil de una persona (debe contener /in/…)",
+      };
+    }
+    return { url: `https://www.linkedin.com/${m[1].toLowerCase()}/${m[2]}/` };
+  } catch {
+    return { error: "no es un enlace válido" };
+  }
+}
+
+/** Sugerencia de nombre a partir del enlace: «…/in/juan-perez-9a8b7c6d/» → «Juan Perez». Quita lo que lleva
+ *  números (los identificadores que LinkedIn agrega al final). No puede devolver tildes; se edita a mano. */
+export function guessNameFromProfileUrl(url: string): string {
+  const slug = /\/(?:in|pub)\/([^/]+)/i.exec(url)?.[1] ?? "";
+  let decoded = slug;
+  try {
+    decoded = decodeURIComponent(slug);
+  } catch {
+    // Se deja tal cual.
+  }
+  return decoded
+    .split(/[-_+.]+/)
+    .filter((t) => t && !/\d/.test(t))
+    .map((t) => t.charAt(0).toUpperCase() + t.slice(1).toLowerCase())
+    .join(" ");
+}
+
+/** Busca enlaces de perfil de LinkedIn en un texto pegado (uno por línea, o separados por espacios o comas): ignora lo
+ *  que no es un enlace de LinkedIn (nombres sueltos), quita repetidos y explica por qué se descartó cada enlace inválido. */
+export function parseProfileLinks(text: string): { profiles: ProfileLink[]; problems: { raw: string; error: string }[] } {
+  const profiles: ProfileLink[] = [];
+  const problems: { raw: string; error: string }[] = [];
+  for (const raw of text.split(/[\s,;]+/)) {
+    if (!raw) continue;
+    if (/lnkd\.in/i.test(raw)) {
+      problems.push({ raw: raw.slice(0, 80), error: "es un enlace corto: ábrelo y copia el enlace completo del perfil" });
+      continue;
+    }
+    if (!/linkedin\./i.test(raw)) continue;
+    const r = normalizeProfileUrl(raw);
+    if ("error" in r) {
+      problems.push({ raw: raw.slice(0, 80), error: r.error });
+      continue;
+    }
+    if (!profiles.some((p) => p.url === r.url)) profiles.push({ url: r.url, name: guessNameFromProfileUrl(r.url) });
+  }
+  return { profiles: profiles.slice(0, 20), problems };
 }
 
 /** Valor del campo de logo: URL completa, data URL o ruta absoluta tal cual; un nombre de archivo suelto

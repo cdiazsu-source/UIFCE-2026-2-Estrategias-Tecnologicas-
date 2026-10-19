@@ -19,6 +19,9 @@ const CanManageChecklistContext = createContext(false);
  *  imagen. Perfil completo y junior. */
 const CanManageConsentContext = createContext(false);
 
+/** true = la sesión puede registrar y actualizar contactos de «Empresas de interés». Perfil completo y junior. */
+const CanManageLeadsContext = createContext(false);
+
 /** id del User de la sesión cuando entró con una credencial propia (Junior Artes, Junior ET,
  *  dirección, coordinación); null con la credencial compartida del máster. Sirve para dejar
  *  preseleccionada a la persona en los desplegables «¿Quién eres?». */
@@ -30,6 +33,7 @@ export function AccessProvider({
   canRecordMetrics = false,
   canManageChecklist = false,
   canManageConsent = false,
+  canManageLeads = false,
   children,
 }: {
   currentUserId?: string | null;
@@ -37,6 +41,7 @@ export function AccessProvider({
   canRecordMetrics?: boolean;
   canManageChecklist?: boolean;
   canManageConsent?: boolean;
+  canManageLeads?: boolean;
   children: React.ReactNode;
 }) {
   return (
@@ -45,7 +50,7 @@ export function AccessProvider({
       <CanRecordMetricsContext.Provider value={canRecordMetrics}>
         <CanManageChecklistContext.Provider value={canManageChecklist}>
           <CanManageConsentContext.Provider value={canManageConsent}>
-            {children}
+            <CanManageLeadsContext.Provider value={canManageLeads}>{children}</CanManageLeadsContext.Provider>
           </CanManageConsentContext.Provider>
         </CanManageChecklistContext.Provider>
       </CanRecordMetricsContext.Provider>
@@ -72,4 +77,8 @@ export function useCanManageChecklist() {
 
 export function useCanManageConsent() {
   return useContext(CanManageConsentContext);
+}
+
+export function useCanManageLeads() {
+  return useContext(CanManageLeadsContext);
 }

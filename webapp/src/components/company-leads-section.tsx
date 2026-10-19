@@ -1,10 +1,10 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
-import { Check, ChevronDown, Circle, Clock, ExternalLink, GraduationCap, Linkedin, Pencil, Plus, Search, Trash2, X } from "lucide-react";
+import { useMemo, useRef, useState, useTransition } from "react";
+import { Check, ChevronDown, Circle, Clock, ExternalLink, GraduationCap, Linkedin, Pencil, Plus, Search, Trash2, UserPlus, Users, X } from "lucide-react";
 
 import {
-  addCompanyLead,
+  addCompanyLeadsFromLinks,
   addTargetCompany,
   deleteCompanyLead,
   deleteTargetCompany,
@@ -18,9 +18,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Select } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { InfoHint } from "@/components/info-hint";
 import { initials } from "@/components/person-avatar";
-import { useCanEdit } from "@/components/access-context";
+import { useCanEdit, useCanManageLeads } from "@/components/access-context";
 import {
   LEAD_KIND_LABEL,
   LEAD_KIND_ORDER,
@@ -38,6 +39,8 @@ import {
   isAlumni,
   LEAD_ALUMNI,
   linkedinAlumniSearchUrl,
+  parseProfileLinks,
+  INTERNAL_INTEREST_TAG,
 } from "@/lib/company-leads";
 import { cn, formatDateTime } from "@/lib/utils";
 
@@ -138,9 +141,9 @@ function LeadFields({ lead, defaultKind = "RECLUTADOR" }: { lead?: CompanyLeadDa
       <Input name="role" defaultValue={lead?.role} placeholder="Cargo (ej. Gerente de Talento)" className="w-52" aria-label="Cargo" />
       <Input
         name="linkedinUrl"
-        type="url"
+        inputMode="url"
         defaultValue={lead?.linkedinUrl ?? ""}
-        placeholder="URL del perfil de LinkedIn"
+        placeholder="Enlace del perfil de LinkedIn (linkedin.com/in/…)"
         className="w-60"
         aria-label="URL de LinkedIn"
       />
@@ -179,7 +182,9 @@ function LeadFields({ lead, defaultKind = "RECLUTADOR" }: { lead?: CompanyLeadDa
 
 function LeadRow({ lead }: { lead: CompanyLeadData }) {
   const canEdit = useCanEdit();
+  const canLeads = useCanManageLeads();
   const [editing, setEditing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState(lead.status);
   const [, startTransition] = useTransition();
 
@@ -187,12 +192,22 @@ function LeadRow({ lead }: { lead: CompanyLeadData }) {
     return (
       <form
         action={async (formData) => {
-          await updateCompanyLead(lead.id, formData);
-          setEditing(false);
+          const r = await updateCompanyLead(lead.id, formData);
+          if (r.ok) {
+            setError(null);
+            setEditing(false);
+          } else {
+            setError(r.error);
+          }
         }}
         className="flex flex-wrap items-end gap-2 rounded-md border border-dashed border-input p-2"
       >
         <LeadFields lead={lead} />
+        {error && (
+          <p role="alert" className="basis-full rounded-md border border-destructive/40 bg-destructive/10 px-2.5 py-1.5 text-xs text-destructive">
+            {error}
+          </p>
+        )}
         <Button type="submit" size="sm">
           Guardar
         </Button>
@@ -245,7 +260,7 @@ function LeadRow({ lead }: { lead: CompanyLeadData }) {
         )}
       </div>
       <div className="flex flex-wrap items-center gap-2">
-        {canEdit ? (
+        {canLeads ? (
           <Select
             value={status}
             onChange={(e) => {
@@ -270,7 +285,7 @@ function LeadRow({ lead }: { lead: CompanyLeadData }) {
           <Clock className="h-3 w-3" aria-hidden />
           {lead.lastCheckedAt ? `Revisado: ${formatDateTime(lead.lastCheckedAt)}` : "Sin revisar aún"}
         </span>
-        {canEdit && (
+        {canLeads && (
           <>
             <Button
               type="button"
@@ -289,14 +304,16 @@ function LeadRow({ lead }: { lead: CompanyLeadData }) {
             >
               <Pencil className="h-3.5 w-3.5" />
             </button>
-            <button
-              type="button"
-              onClick={() => startTransition(() => deleteCompanyLead(lead.id))}
-              className="rounded p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-              aria-label="Eliminar contacto"
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </button>
+            {canEdit && (
+              <button
+                type="button"
+                onClick={() => startTransition(() => deleteCompanyLead(lead.id))}
+                className="rounded p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                aria-label="Eliminar contacto"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            )}
           </>
         )}
       </div>
@@ -319,7 +336,7 @@ function CompanyFields({ company }: { company?: TargetCompanyData }) {
       />
       <Input
         name="linkedinUrl"
-        type="url"
+        inputMode="url"
         defaultValue={company?.linkedinUrl ?? ""}
         placeholder="LinkedIn oficial de la empresa en Colombia (URL)"
         className="w-72"
@@ -337,8 +354,190 @@ function CompanyFields({ company }: { company?: TargetCompanyData }) {
   );
 }
 
+/** Anexar perfiles de LinkedIn a una empresa, en tres pasos: buscar a la persona, copiar el enlace de su perfil y pegarlo.
+ *  Acepta uno o varios enlaces (uno por línea), con o sin «https://». El nombre se deduce del enlace y el cargo es
+ *  opcional; el tipo de contacto se elige con botones. La formación, el egresado y las notas van en «Más datos».
+ *  Tras guardar queda abierto para pegar el siguiente. */
+function QuickAddLead({ company, onClose }: { company: TargetCompanyData; onClose: () => void }) {
+  const formRef = useRef<HTMLFormElement>(null);
+  const [text, setText] = useState("");
+  const [kind, setKind] = useState<LeadKind>("RECLUTADOR");
+  const [more, setMore] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [done, setDone] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  const parsed = useMemo(() => parseProfileLinks(text), [text]);
+  const many = parsed.profiles.length > 1;
+  const one = parsed.profiles.length === 1 ? parsed.profiles[0] : null;
+
+  return (
+    <form
+      ref={formRef}
+      action={async (formData) => {
+        setSaving(true);
+        setError(null);
+        setDone(null);
+        formData.set("kind", kind);
+        try {
+          const r = await addCompanyLeadsFromLinks(company.id, formData);
+          if (r.ok) {
+            setDone(r.message);
+            setText("");
+            setMore(false);
+            formRef.current?.reset();
+          } else {
+            setError(r.error);
+          }
+        } catch {
+          setError("No se pudo guardar. Revisa tu conexión (si usas la red del campus, prueba con WARP) e inténtalo de nuevo.");
+        } finally {
+          setSaving(false);
+        }
+      }}
+      className="flex flex-col gap-3 rounded-lg border border-primary/30 bg-primary/5 p-3"
+    >
+      <p className="text-sm font-semibold">Anexar perfil de LinkedIn · {company.name}</p>
+      <ol className="list-decimal space-y-0.5 pl-5 text-xs text-muted-foreground">
+        <li>Busca a la persona con los botones «Buscar en LinkedIn» de arriba y abre su perfil.</li>
+        <li>Copia el enlace de la barra de direcciones (empieza con linkedin.com/in/…).</li>
+        <li>Pégalo aquí, elige el tipo de contacto y guarda.</li>
+      </ol>
+
+      <label className="flex flex-col gap-1 text-xs font-medium">
+        Enlace del perfil de LinkedIn
+        <Textarea
+          name="links"
+          value={text}
+          onChange={(e) => {
+            setText(e.target.value);
+            setError(null);
+            setDone(null);
+          }}
+          rows={2}
+          placeholder="Pega aquí el enlace, por ejemplo linkedin.com/in/nombre-apellido. Si son varios, uno por línea."
+          className="min-h-[56px] bg-background text-sm font-normal"
+        />
+      </label>
+
+      <div aria-live="polite" className="flex flex-col gap-0.5 text-xs">
+        {one && (
+          <p className="flex items-center gap-1.5">
+            <Check className="h-3.5 w-3.5 text-success" aria-hidden />
+            Perfil detectado{one.name ? `: ${one.name}` : ""}
+          </p>
+        )}
+        {many && (
+          <p className="flex items-center gap-1.5">
+            <Check className="h-3.5 w-3.5 text-success" aria-hidden />
+            {parsed.profiles.length} perfiles detectados: se crearán {parsed.profiles.length} contactos y el nombre sale de cada
+            enlace (lo puedes editar después).
+          </p>
+        )}
+        {parsed.problems.map((p) => (
+          <p key={p.raw} className="text-warning">
+            {p.raw}: {p.error}.
+          </p>
+        ))}
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <span className="text-xs font-medium">Tipo de contacto</span>
+        <div role="group" aria-label="Tipo de contacto" className="flex flex-wrap gap-1.5">
+          {LEAD_KINDS.map((k) => (
+            <button
+              key={k.id}
+              type="button"
+              aria-pressed={kind === k.id}
+              onClick={() => setKind(k.id)}
+              className={cn(
+                "rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+                kind === k.id ? "border-primary bg-primary text-primary-foreground" : "border-input bg-card hover:bg-accent",
+              )}
+            >
+              {k.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        <Input
+          name="name"
+          disabled={many}
+          placeholder={many ? "Nombre: se toma de cada enlace" : one?.name ? `Nombre (vacío = ${one.name})` : "Nombre"}
+          className="w-64 bg-background"
+          aria-label="Nombre de la persona"
+        />
+        <Input name="role" disabled={many} placeholder="Cargo (opcional)" className="w-56 bg-background" aria-label="Cargo" />
+      </div>
+
+      {!many && (
+        <div className="flex flex-col gap-2">
+          <button
+            type="button"
+            onClick={() => setMore((m) => !m)}
+            aria-expanded={more}
+            className="inline-flex w-fit items-center gap-1 text-xs font-medium text-link hover:underline"
+          >
+            <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", !more && "-rotate-90")} aria-hidden />
+            Más datos (formación, egresado, avance, notas)
+          </button>
+          {more && (
+            <div className="flex flex-wrap gap-2">
+              <Input name="undergrad" placeholder="Pregrado (ej. Economía)" className="w-52 bg-background" aria-label="Pregrado" />
+              <Input
+                name="postgrad"
+                placeholder="Especialización(es), separadas por ;"
+                className="w-64 bg-background"
+                aria-label="Especialización o especializaciones"
+              />
+              <Select name="alumni" defaultValue="NONE" className="w-52 bg-background" aria-label="Egresado de la Universidad Nacional">
+                {LEAD_ALUMNI.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.label}
+                  </option>
+                ))}
+              </Select>
+              <Select name="status" defaultValue="POR_CONTACTAR" className="w-44 bg-background" aria-label="Avance del contacto">
+                {LEAD_STATUSES.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.label}
+                  </option>
+                ))}
+              </Select>
+              <Input name="notes" placeholder="Notas" className="w-64 bg-background" aria-label="Notas" />
+            </div>
+          )}
+        </div>
+      )}
+
+      {error && (
+        <p role="alert" className="rounded-md border border-destructive/40 bg-destructive/10 px-2.5 py-1.5 text-xs text-destructive">
+          {error}
+        </p>
+      )}
+      {done && (
+        <p role="status" className="rounded-md border border-success/40 bg-success/10 px-2.5 py-1.5 text-xs">
+          {done} Puedes pegar otro enlace.
+        </p>
+      )}
+
+      <div className="flex gap-2">
+        <Button type="submit" size="sm" disabled={saving}>
+          {saving ? "Guardando…" : many ? `Guardar ${parsed.profiles.length} contactos` : "Guardar contacto"}
+        </Button>
+        <Button type="button" variant="ghost" size="sm" onClick={onClose}>
+          Listo
+        </Button>
+      </div>
+    </form>
+  );
+}
+
 function CompanyCard({ company }: { company: TargetCompanyData }) {
   const canEdit = useCanEdit();
+  const canLeads = useCanManageLeads();
   const [open, setOpen] = useState(company.leads.length > 0);
   const [showLeadForm, setShowLeadForm] = useState(false);
   const [editingCompany, setEditingCompany] = useState(false);
@@ -384,11 +583,23 @@ function CompanyCard({ company }: { company: TargetCompanyData }) {
             {company.sector && <p className="text-xs text-muted-foreground">{company.sector}</p>}
             {company.tags.length > 0 && (
               <p className="mt-1 flex flex-wrap gap-1">
-                {company.tags.map((t) => (
-                  <Badge key={t} variant="secondary">
-                    {t}
-                  </Badge>
-                ))}
+                {company.tags.map((t) =>
+                  t === INTERNAL_INTEREST_TAG ? (
+                    <Badge
+                      key={t}
+                      variant="outline"
+                      title="Empresa señalada por miembros del equipo en la encuesta del perfil de LinkedIn"
+                      className="gap-1 border-primary/40 px-1.5 py-0 text-[10px] text-primary"
+                    >
+                      <Users className="h-2.5 w-2.5" aria-hidden />
+                      {t}
+                    </Badge>
+                  ) : (
+                    <Badge key={t} variant="secondary">
+                      {t}
+                    </Badge>
+                  ),
+                )}
               </p>
             )}
             {company.linkedinUrl ? (
@@ -481,6 +692,22 @@ function CompanyCard({ company }: { company: TargetCompanyData }) {
         </ul>
       </div>
 
+      {canLeads && !open && (
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          className="self-start"
+          onClick={() => {
+            setOpen(true);
+            setShowLeadForm(true);
+          }}
+        >
+          <UserPlus className="h-3.5 w-3.5" />
+          Anexar perfil de LinkedIn
+        </Button>
+      )}
+
       {open && (
         <>
           {company.notes && <p className="text-xs leading-relaxed text-muted-foreground">{company.notes}</p>}
@@ -522,27 +749,13 @@ function CompanyCard({ company }: { company: TargetCompanyData }) {
             ))}
           </div>
 
-          {canEdit &&
+          {canLeads &&
             (showLeadForm ? (
-              <form
-                action={async (formData) => {
-                  await addCompanyLead(company.id, formData);
-                  setShowLeadForm(false);
-                }}
-                className="flex flex-wrap items-end gap-2 rounded-md border border-dashed border-input p-2"
-              >
-                <LeadFields />
-                <Button type="submit" size="sm">
-                  Agregar
-                </Button>
-                <Button type="button" variant="ghost" size="sm" onClick={() => setShowLeadForm(false)}>
-                  Cancelar
-                </Button>
-              </form>
+              <QuickAddLead company={company} onClose={() => setShowLeadForm(false)} />
             ) : (
-              <Button type="button" size="sm" variant="outline" className="self-start" onClick={() => setShowLeadForm(true)}>
-                <Plus className="h-3.5 w-3.5" />
-                Agregar contacto
+              <Button type="button" size="sm" className="self-start" onClick={() => setShowLeadForm(true)}>
+                <UserPlus className="h-3.5 w-3.5" />
+                Anexar perfil de LinkedIn
               </Button>
             ))}
         </>

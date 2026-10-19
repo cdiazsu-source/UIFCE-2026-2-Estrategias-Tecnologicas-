@@ -84,6 +84,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           canRecordMetrics={session.authed}
           canManageChecklist={session.authed}
           canManageConsent={session.authed}
+          canManageLeads={session.authed}
         >
           <UndoProvider>
             <QuickNav />

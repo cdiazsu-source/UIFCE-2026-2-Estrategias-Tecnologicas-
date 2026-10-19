@@ -113,3 +113,10 @@ export async function canManageChecklist(): Promise<boolean> {
 export async function canManageConsent(): Promise<boolean> {
   return (await getSession()).authed;
 }
+
+/** ¿La sesión puede registrar y actualizar contactos de «Empresas de interés» (anexar perfiles de LinkedIn, cambiar su
+ *  avance, marcarlos revisados)? Perfil completo y Junior: el proyecto de rastreo de contactos lo lleva un Junior. Borrar
+ *  contactos y gestionar las empresas sigue siendo del perfil completo. */
+export async function canManageLeads(): Promise<boolean> {
+  return (await getSession()).authed;
+}
