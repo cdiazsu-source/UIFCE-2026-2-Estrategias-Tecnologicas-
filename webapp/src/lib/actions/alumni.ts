@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { blockedForJunior, canManageLeads } from "@/lib/session";
 import { normalizeProfileUrl } from "@/lib/company-leads";
-import { foldName, mergeCohorts, normalizeAlumniStatus, parseAlumniRows } from "@/lib/alumni";
+import { canonicalDegree, foldName, mergeCohorts, normalizeAlumniStatus, parseAlumniRows } from "@/lib/alumni";
 
 const PATH = "/egresados";
 
@@ -29,8 +29,10 @@ export async function addAlumniBulk(formData: FormData): Promise<AlumniResult> {
   }
   const cohort = text(formData, "cohort").slice(0, 40) || null;
   const area = text(formData, "area").slice(0, 40) || null;
+  // Carrera elegida en el formulario: se aplica a quienes no la traen en la fila que se pegó.
+  const defaultDegree = canonicalDegree(text(formData, "degree"));
 
-  const existing = await prisma.alumnus.findMany({ select: { id: true, name: true, cohort: true, linkedinUrl: true } });
+  const existing = await prisma.alumnus.findMany({ select: { id: true, name: true, cohort: true, degree: true, linkedinUrl: true } });
   const byName = new Map(existing.map((e) => [foldName(e.name), e]));
   const byLink = new Map(existing.filter((e) => e.linkedinUrl).map((e) => [e.linkedinUrl as string, e]));
 
@@ -44,9 +46,11 @@ export async function addAlumniBulk(formData: FormData): Promise<AlumniResult> {
     const match = byName.get(key) ?? (r.linkedinUrl ? byLink.get(r.linkedinUrl) : undefined);
     if (match) {
       const next = mergeCohorts(match.cohort, cohort);
-      if (next !== match.cohort) {
-        await prisma.alumnus.update({ where: { id: match.id }, data: { cohort: next } });
+      const degree = match.degree ?? r.degree ?? defaultDegree;
+      if (next !== match.cohort || degree !== match.degree) {
+        await prisma.alumnus.update({ where: { id: match.id }, data: { cohort: next, degree } });
         match.cohort = next;
+        match.degree = degree;
         merged++;
       }
       continue;
@@ -60,7 +64,7 @@ export async function addAlumniBulk(formData: FormData): Promise<AlumniResult> {
         name: r.name,
         cohort,
         area,
-        degree: r.degree,
+        degree: r.degree ?? defaultDegree,
         currentCompany: r.company,
         currentRole: r.role,
         linkedinUrl: r.linkedinUrl,
@@ -76,7 +80,7 @@ export async function addAlumniBulk(formData: FormData): Promise<AlumniResult> {
     return { ok: false, error: skipped === 1 ? "Esa persona ya está registrada." : "Esas personas ya están registradas." };
   }
   let message = toCreate.length === 1 ? "Se agregó 1 egresado." : `Se agregaron ${toCreate.length} egresados.`;
-  if (skipped > 0) message += ` ${skipped} ya ${skipped === 1 ? "estaba registrado" : "estaban registrados"}${merged > 0 ? ` (a ${merged} se le sumó el semestre)` : ""}.`;
+  if (skipped > 0) message += ` ${skipped} ya ${skipped === 1 ? "estaba registrado" : "estaban registrados"}${merged > 0 ? ` (a ${merged} se le completó el semestre o la carrera)` : ""}.`;
   if (problems.length > 0) message += ` ${problems.length} ${problems.length === 1 ? "línea se descartó" : "líneas se descartaron"}.`;
   return { ok: true, message };
 }
@@ -102,7 +106,7 @@ export async function updateAlumnus(id: string, formData: FormData): Promise<Alu
       name: name.slice(0, 120),
       cohort: text(formData, "cohort").slice(0, 40) || null,
       area: text(formData, "area").slice(0, 40) || null,
-      degree: text(formData, "degree").slice(0, 160) || null,
+      degree: canonicalDegree(text(formData, "degree")),
       currentCompany: text(formData, "currentCompany").slice(0, 160) || null,
       currentRole: text(formData, "currentRole").slice(0, 160) || null,
       linkedinUrl,

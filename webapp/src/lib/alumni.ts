@@ -20,8 +20,19 @@ export function normalizeAlumniStatus(raw: unknown): AlumniStatus {
   return ALUMNI_STATUSES.some((s) => s.id === raw) ? (raw as AlumniStatus) : "POR_RASTREAR";
 }
 
-/** Semestres de los directorios UIFCE de los que se parte (sugerencias para el campo «semestre»). */
-export const ALUMNI_COHORT_SUGGESTIONS = ["2025-2", "2025-1", "2024-2"];
+/** Semestres que se pueden elegir al registrar un egresado, del más reciente al más antiguo: de 2026-2 hasta 2022-1. */
+export const ALUMNI_COHORTS: string[] = (() => {
+  const out: string[] = [];
+  for (let year = 2026; year >= 2022; year--) {
+    for (const half of [2, 1]) out.push(`${year}-${half}`);
+  }
+  return out;
+})();
+
+/** Carreras de la Facultad que se eligen primero. */
+export const DEGREES_MAIN = ["Economía", "Administración de Empresas", "Contaduría Pública"];
+/** Otras carreras de las que han salido monitores (se despliegan bajo «Otras carreras»). Cualquier otra se escribe con «Otro». */
+export const DEGREES_OTHER = ["Farmacia", "Diseño Industrial", "Diseño Gráfico", "Estadística", "Geología", "Ingeniería de Sistemas"];
 
 /** Avance del tracker: cuántos egresados ya tienen su situación actual verificada (cualquier estado distinto de «por
  *  rastrear» lo implica) y cuántos ya fueron contactados. */
@@ -40,6 +51,20 @@ export function alumniSearchUrl(name: string): string {
 /** Quita tildes y pasa a minúsculas para comparar nombres. */
 export function foldName(s: string): string {
   return s.normalize("NFD").replace(/\p{Diacritic}/gu, "").replace(/\s+/g, " ").trim().toLowerCase();
+}
+
+/** Nombre de la carrera tal como se muestra: si lo escrito coincide con una carrera conocida (sin importar tildes,
+ *  mayúsculas o si falta «Pública» o «de Empresas»), se usa su nombre completo; si no, se deja como se escribió. */
+export function canonicalDegree(raw: string | null | undefined): string | null {
+  const v = (raw ?? "").trim();
+  if (!v) return null;
+  const f = foldName(v);
+  const all = [...DEGREES_MAIN, ...DEGREES_OTHER];
+  const exact = all.find((d) => foldName(d) === f);
+  if (exact) return exact;
+  if (/^ing\.?\s+(de\s+)?sistemas/.test(f) || /^ingenieria de sistemas/.test(f)) return "Ingeniería de Sistemas";
+  const prefix = f.length >= 5 ? all.find((d) => foldName(d).startsWith(f)) : undefined;
+  return prefix ?? v.slice(0, 160);
 }
 
 export type AlumniRow = {
@@ -82,7 +107,7 @@ export function parseAlumniRows(text: string): { rows: AlumniRow[]; problems: st
       problems.push(`Línea ${i + 1}: no encontré el nombre`);
       return;
     }
-    rows.push({ name: name.slice(0, 120), degree: degree || null, company: company || null, role: role || null, linkedinUrl });
+    rows.push({ name: name.slice(0, 120), degree: canonicalDegree(degree), company: company || null, role: role || null, linkedinUrl });
   });
   return { rows: rows.slice(0, 300), problems };
 }

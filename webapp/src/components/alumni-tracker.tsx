@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState, useTransition } from "react";
-import { Building2, Check, Clock, ExternalLink, GraduationCap, Linkedin, Pencil, Search, Trash2, UserPlus, X } from "lucide-react";
+import { Building2, Check, ChevronDown, Clock, ExternalLink, GraduationCap, Linkedin, Pencil, Search, Trash2, UserPlus, X } from "lucide-react";
 
 import { addAlumniBulk, deleteAlumnus, markAlumnusChecked, setAlumnusStatus, updateAlumnus } from "@/lib/actions/alumni";
 import { Badge } from "@/components/ui/badge";
@@ -12,8 +12,10 @@ import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useCanEdit, useCanManageLeads } from "@/components/access-context";
 import {
-  ALUMNI_COHORT_SUGGESTIONS,
+  ALUMNI_COHORTS,
   ALUMNI_STATUSES,
+  DEGREES_MAIN,
+  DEGREES_OTHER,
   alumniProgress,
   alumniSearchUrl,
   foldName,
@@ -45,6 +47,111 @@ const STATUS_VARIANT: Record<string, "secondary" | "warning" | "success" | "outl
   SIN_RESPUESTA: "outline",
 };
 
+const chip = (on: boolean) =>
+  cn(
+    "rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+    on ? "border-primary bg-primary text-primary-foreground" : "border-input bg-card hover:bg-accent",
+  );
+
+const OTHER_DEGREE = "__otro__";
+
+/** Carrera de graduación: las tres de la Facultad a la vista, «Otras carreras» desplegable y «Otro» para escribir cualquier
+ *  otra. Envía el valor elegido en un campo oculto `degree`; al tocar la carrera elegida se quita. */
+function DegreePicker({ defaultValue = "" }: { defaultValue?: string }) {
+  const known = [...DEGREES_MAIN, ...DEGREES_OTHER];
+  const custom0 = defaultValue && !known.includes(defaultValue) ? defaultValue : "";
+  const [selected, setSelected] = useState<string>(custom0 ? OTHER_DEGREE : defaultValue);
+  const [custom, setCustom] = useState(custom0);
+  // «Otras carreras» siempre arranca contraído (menos ruido); la carrera elegida de esa lista se ve como una etiqueta.
+  const [more, setMore] = useState(false);
+  const value = selected === OTHER_DEGREE ? custom.trim() : selected;
+  const pick = (d: string) => setSelected((s) => (s === d ? "" : d));
+  // Carrera elegida que no es de las tres principales: con el panel contraído se muestra aparte, para no perderla de vista.
+  const extra = selected && !DEGREES_MAIN.includes(selected) ? (selected === OTHER_DEGREE ? custom.trim() || "Otro…" : selected) : null;
+
+  return (
+    <div className="flex flex-col gap-2">
+      <input type="hidden" name="degree" value={value} />
+      <div role="group" aria-label="Carrera de graduación" className="flex flex-wrap gap-1.5">
+        {DEGREES_MAIN.map((d) => (
+          <button key={d} type="button" aria-pressed={selected === d} onClick={() => pick(d)} className={chip(selected === d)}>
+            {d}
+          </button>
+        ))}
+        <button
+          type="button"
+          aria-expanded={more}
+          onClick={() => setMore((m) => !m)}
+          className="inline-flex items-center gap-1 rounded-full border border-dashed border-input px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-accent"
+        >
+          Otras carreras
+          <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", !more && "-rotate-90")} aria-hidden />
+        </button>
+        {extra && !more && (
+          <button
+            type="button"
+            aria-pressed
+            onClick={() => pick(selected)}
+            title="Quitar esta carrera"
+            className={cn(chip(true), "inline-flex items-center gap-1")}
+          >
+            {extra}
+            <X className="h-3 w-3" aria-hidden />
+          </button>
+        )}
+      </div>
+      {more && (
+        <div className="flex flex-wrap gap-1.5 rounded-md border border-dashed border-input p-2">
+          {DEGREES_OTHER.map((d) => (
+            <button key={d} type="button" aria-pressed={selected === d} onClick={() => pick(d)} className={chip(selected === d)}>
+              {d}
+            </button>
+          ))}
+          <button
+            type="button"
+            aria-pressed={selected === OTHER_DEGREE}
+            onClick={() => pick(OTHER_DEGREE)}
+            className={chip(selected === OTHER_DEGREE)}
+          >
+            Otro…
+          </button>
+        </div>
+      )}
+      {selected === OTHER_DEGREE && (
+        <Input
+          value={custom}
+          onChange={(e) => setCustom(e.target.value)}
+          placeholder="Escribe la carrera"
+          aria-label="Otra carrera"
+          className="w-72 bg-background"
+        />
+      )}
+    </div>
+  );
+}
+
+/** Semestres de los directorios en que aparece una persona (de 2026-2 a 2022-1): se pueden marcar varios. Envía el valor en un
+ *  campo oculto `cohort`. Los semestres ya guardados que no estén en la lista se conservan. */
+function CohortPicker({ defaultValue }: { defaultValue: string | null }) {
+  const initial = (defaultValue ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+  const options = [...ALUMNI_COHORTS, ...initial.filter((c) => !ALUMNI_COHORTS.includes(c))];
+  const [selected, setSelected] = useState<string[]>(initial);
+  const toggle = (c: string) => setSelected((s) => (s.includes(c) ? s.filter((x) => x !== c) : [...s, c]));
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      <input type="hidden" name="cohort" value={options.filter((c) => selected.includes(c)).join(", ")} />
+      <div role="group" aria-label="Semestres de los directorios" className="flex flex-wrap gap-1">
+        {options.map((c) => (
+          <button key={c} type="button" aria-pressed={selected.includes(c)} onClick={() => toggle(c)} className={cn(chip(selected.includes(c)), "px-2.5 py-1")}>
+            {c}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /** Agregar egresados: se pegan los nombres (o las filas) que se copian del directorio y se guardan de una vez. */
 function QuickAddAlumni({ onClose }: { onClose: () => void }) {
   const formRef = useRef<HTMLFormElement>(null);
@@ -52,6 +159,7 @@ function QuickAddAlumni({ onClose }: { onClose: () => void }) {
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [resetKey, setResetKey] = useState(0);
   const parsed = useMemo(() => parseAlumniRows(text), [text]);
   const n = parsed.rows.length;
 
@@ -68,6 +176,7 @@ function QuickAddAlumni({ onClose }: { onClose: () => void }) {
             setDone(r.message);
             setText("");
             formRef.current?.reset();
+            setResetKey((k) => k + 1);
           } else {
             setError(r.error);
           }
@@ -83,7 +192,7 @@ function QuickAddAlumni({ onClose }: { onClose: () => void }) {
       <ol className="list-decimal space-y-0.5 pl-5 text-xs text-muted-foreground">
         <li>Abre un directorio con los botones «Directorios de origen» de arriba.</li>
         <li>Copia los nombres de la hoja (una columna) o las filas completas (Nombre, Carrera, Empresa, Cargo).</li>
-        <li>Pégalos aquí, escribe el semestre del directorio y guarda. Luego completas el resto con el lápiz de cada fila.</li>
+        <li>Pégalos aquí, elige el semestre del directorio y la carrera, y guarda. Luego completas el resto con el lápiz de cada fila.</li>
       </ol>
 
       <label className="flex flex-col gap-1 text-xs font-medium">
@@ -117,20 +226,27 @@ function QuickAddAlumni({ onClose }: { onClose: () => void }) {
         ))}
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        <Input
-          name="cohort"
-          list="alumni-cohorts"
-          placeholder="Semestre del directorio (ej. 2025-2)"
-          className="w-64 bg-background"
-          aria-label="Semestre del directorio"
-        />
-        <datalist id="alumni-cohorts">
-          {ALUMNI_COHORT_SUGGESTIONS.map((c) => (
-            <option key={c} value={c} />
-          ))}
-        </datalist>
+      <div className="flex flex-wrap items-end gap-3">
+        <label className="flex flex-col gap-1 text-xs font-medium">
+          Semestre del directorio
+          <Select name="cohort" defaultValue="" className="w-52 bg-background font-normal">
+            <option value="">Elige el semestre…</option>
+            {ALUMNI_COHORTS.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </Select>
+        </label>
         <Input name="area" placeholder="Área en la que fue monitor (opcional)" className="w-72 bg-background" aria-label="Área" />
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <span className="text-xs font-medium">
+          Carrera de graduación{" "}
+          <span className="font-normal text-muted-foreground">(se aplica a quienes no la traen en la fila que pegaste)</span>
+        </span>
+        <DegreePicker key={resetKey} />
       </div>
 
       {error && (
@@ -179,9 +295,7 @@ function AlumnusRow({ alumnus, interest }: { alumnus: AlumnusData; interest: boo
         className="flex flex-wrap items-end gap-2 rounded-md border border-dashed border-input p-3"
       >
         <Input name="name" defaultValue={alumnus.name} required placeholder="Nombre" className="w-56" aria-label="Nombre" />
-        <Input name="cohort" defaultValue={alumnus.cohort ?? ""} list="alumni-cohorts" placeholder="Semestre" className="w-36" aria-label="Semestre" />
         <Input name="area" defaultValue={alumnus.area ?? ""} placeholder="Área" className="w-32" aria-label="Área" />
-        <Input name="degree" defaultValue={alumnus.degree ?? ""} placeholder="Carrera de graduación" className="w-56" aria-label="Carrera de graduación" />
         <Input name="currentCompany" defaultValue={alumnus.currentCompany ?? ""} placeholder="Empresa actual" className="w-52" aria-label="Empresa actual" />
         <Input name="currentRole" defaultValue={alumnus.currentRole ?? ""} placeholder="Cargo actual" className="w-52" aria-label="Cargo actual" />
         <Input
@@ -200,6 +314,14 @@ function AlumnusRow({ alumnus, interest }: { alumnus: AlumnusData; interest: boo
           ))}
         </Select>
         <Input name="notes" defaultValue={alumnus.notes ?? ""} placeholder="Notas" className="w-64" aria-label="Notas" />
+        <div className="flex basis-full flex-col gap-1">
+          <span className="text-xs font-medium">Carrera de graduación</span>
+          <DegreePicker defaultValue={alumnus.degree ?? ""} />
+        </div>
+        <div className="flex basis-full flex-col gap-1">
+          <span className="text-xs font-medium">Semestre(s) de los directorios</span>
+          <CohortPicker defaultValue={alumnus.cohort} />
+        </div>
         {error && (
           <p role="alert" className="basis-full rounded-md border border-destructive/40 bg-destructive/10 px-2.5 py-1.5 text-xs text-destructive">
             {error}
