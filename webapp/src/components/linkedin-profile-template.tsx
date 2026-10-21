@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Check, ChevronLeft, ChevronRight, ClipboardList, X } from "lucide-react";
+import { Check, ChevronDown, ChevronLeft, ChevronRight, ClipboardList, X } from "lucide-react";
 
 import { saveProfileAnswer } from "@/lib/actions/linkedin-profile";
-import { PROFILE_QUESTIONS } from "@/lib/linkedin-profile-questions";
+import { PROFILE_QUESTIONS, sameOption, splitAnswer, type ProfileQuestion } from "@/lib/linkedin-profile-questions";
 import { InfoHint } from "@/components/info-hint";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useCanRecordMetrics } from "@/components/access-context";
@@ -14,6 +15,117 @@ const TOTAL = PROFILE_QUESTIONS.length;
 /** Cuánto esperar sin teclear antes de guardar solo, en ms. Corto para que
  *  nunca se sienta que hay que acordarse de guardar. */
 const AUTOSAVE_DELAY = 700;
+
+/** Pregunta con opciones: botones que se marcan (con tope), un desplegable «Más líneas de trabajo» que arranca contraído y un
+ *  campo «Otra». La respuesta sigue siendo un texto con lo elegido separado por coma, así que se guarda como cualquier otra. */
+function OptionPicker({ question, answer, onChange }: { question: ProfileQuestion; answer: string; onChange: (v: string) => void }) {
+  const groups = question.moreOptions ?? [];
+  const all = [...(question.options ?? []), ...groups.flatMap((g) => g.items)];
+  const max = question.maxOptions ?? Infinity;
+  const tokens = splitAnswer(answer);
+  const chosen = tokens.filter((t) => all.some((o) => sameOption(o, t)));
+  const customNow = tokens.filter((t) => !all.some((o) => sameOption(o, t)));
+  const [other, setOther] = useState(customNow.join(", "));
+  const [showMore, setShowMore] = useState(false);
+  const full = tokens.length >= max;
+  const room = (n: number) => Math.max(0, max - n);
+
+  // «Sin idea por ahora, seguir» vacía la respuesta: el campo «Otra» se vacía con ella.
+  useEffect(() => {
+    if (!answer) setOther("");
+  }, [answer]);
+
+  function commit(nextChosen: string[], nextOther: string) {
+    const extra = splitAnswer(nextOther).slice(0, room(nextChosen.length));
+    onChange([...nextChosen, ...extra].join(", "));
+  }
+  function toggle(option: string) {
+    const on = chosen.some((t) => sameOption(t, option));
+    commit(on ? chosen.filter((t) => !sameOption(t, option)) : [...chosen, option], other);
+  }
+
+  const chip = (option: string) => {
+    const on = chosen.some((t) => sameOption(t, option));
+    const blocked = !on && full;
+    return (
+      <button
+        key={option}
+        type="button"
+        aria-pressed={on}
+        disabled={blocked}
+        title={blocked ? `Ya elegiste ${max}: quita una para cambiar` : undefined}
+        onClick={() => toggle(option)}
+        className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-left text-sm font-medium transition-colors ${
+          on
+            ? "border-primary bg-primary text-primary-foreground"
+            : blocked
+              ? "cursor-not-allowed border-input bg-muted/40 text-muted-foreground opacity-60"
+              : "border-input bg-card hover:bg-accent"
+        }`}
+      >
+        {on && <Check className="h-4 w-4" aria-hidden />}
+        {option}
+      </button>
+    );
+  };
+
+  // Elegidas del desplegable: con el panel contraído se muestran aparte, para no perderlas de vista.
+  const chosenInMore = groups.flatMap((g) => g.items).filter((i) => chosen.some((t) => sameOption(t, i)));
+  const overflow = splitAnswer(other).length > room(chosen.length);
+
+  return (
+    <div className="flex flex-col gap-3">
+      <p className="text-xs text-muted-foreground" aria-live="polite">
+        {Number.isFinite(max) ? `${tokens.length} de ${max} elegidas` : `${tokens.length} elegidas`}
+      </p>
+      <div role="group" aria-label="Opciones sugeridas" className="flex flex-wrap gap-2">
+        {(question.options ?? []).map(chip)}
+      </div>
+
+      {groups.length > 0 && (
+        <div className="flex flex-col gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              aria-expanded={showMore}
+              onClick={() => setShowMore((v) => !v)}
+              className="inline-flex items-center gap-1 rounded-full border border-dashed border-input px-3 py-1.5 text-sm font-medium text-muted-foreground hover:bg-accent"
+            >
+              Más líneas de trabajo
+              <ChevronDown className={`h-4 w-4 transition-transform ${showMore ? "" : "-rotate-90"}`} aria-hidden />
+            </button>
+            {!showMore && chosenInMore.map(chip)}
+          </div>
+          {showMore && (
+            <div className="flex flex-col gap-3 rounded-md border border-dashed border-input p-3">
+              {groups.map((g) => (
+                <div key={g.group}>
+                  <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{g.group}</p>
+                  <div className="mt-1 flex flex-wrap gap-2">{g.items.map(chip)}</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      <label className="flex flex-col gap-1 text-xs font-medium">
+        Otra
+        <Input
+          value={other}
+          disabled={room(chosen.length) === 0 && !other}
+          onChange={(e) => {
+            setOther(e.target.value);
+            commit(chosen, e.target.value);
+          }}
+          placeholder={question.placeholder}
+          className="text-base font-normal"
+        />
+      </label>
+      {overflow && <p className="text-xs text-warning">Máximo {max} en total: se guardan las primeras.</p>}
+    </div>
+  );
+}
 
 /** Una pregunta por pantalla, respuestas cortas, autoguardado sin botón de
  *  enviar, se puede saltar de cualquier pregunta a cualquier otra con los
@@ -166,19 +278,31 @@ export function LinkedInProfileTemplate({
                 <span>{question.prompt}</span>
                 <InfoHint text={question.hint} />
               </h2>
-              <Textarea
-                key={question.key}
-                autoFocus
-                value={values[question.key] ?? ""}
-                onChange={(e) => {
-                  const v = e.target.value;
-                  setValues((prev) => ({ ...prev, [question.key]: v }));
-                  scheduleSave(question.key, v);
-                }}
-                placeholder={question.placeholder}
-                rows={5}
-                className="min-h-[9rem] text-base"
-              />
+              {question.options ? (
+                <OptionPicker
+                  key={question.key}
+                  question={question}
+                  answer={values[question.key] ?? ""}
+                  onChange={(v) => {
+                    setValues((prev) => ({ ...prev, [question.key]: v }));
+                    scheduleSave(question.key, v);
+                  }}
+                />
+              ) : (
+                <Textarea
+                  key={question.key}
+                  autoFocus
+                  value={values[question.key] ?? ""}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setValues((prev) => ({ ...prev, [question.key]: v }));
+                    scheduleSave(question.key, v);
+                  }}
+                  placeholder={question.placeholder}
+                  rows={5}
+                  className="min-h-[9rem] text-base"
+                />
+              )}
               <div className="flex items-center justify-between gap-2">
                 <button
                   type="button"
