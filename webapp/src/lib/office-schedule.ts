@@ -95,6 +95,24 @@ export function bogotaNow(date: Date = new Date()): { day: number; minutes: numb
   return { day: WEEKDAY[get("weekday")] ?? 1, minutes: (Number(get("hour")) % 24) * 60 + Number(get("minute")) };
 }
 
+/** Próximo bloque que empieza después de ahora (hoy o en los días siguientes), con cuántos días faltan. */
+export function nextShift(shifts: ShiftData[], now: { day: number; minutes: number }): { shift: ShiftData; daysAhead: number } | null {
+  for (let offset = 0; offset <= 7; offset++) {
+    const day = ((now.day - 1 + offset) % 7) + 1;
+    const candidates = shifts.filter((s) => s.day === day && (offset > 0 || s.start > now.minutes)).sort((a, b) => a.start - b.start);
+    if (candidates.length > 0) return { shift: candidates[0], daysAhead: offset };
+  }
+  return null;
+}
+
+/** «45 min», «1 h 30 min». */
+export function fmtRemaining(minutes: number): string {
+  if (minutes < 60) return `${minutes} min`;
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return m === 0 ? `${h} h` : `${h} h ${m} min`;
+}
+
 /** Bloques que están en curso en ese momento. */
 export function activeNow(shifts: ShiftData[], now: { day: number; minutes: number }): ShiftData[] {
   return shifts.filter((s) => s.day === now.day && s.start <= now.minutes && now.minutes < s.end);

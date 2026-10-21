@@ -421,7 +421,7 @@ type Period = "SEMESTRE" | "MES" | "SEMANA";
 
 /** Estadísticas del equipo por semana, por mes o por todo el semestre (como la app de referencia): cuatro totales y el
  *  desglose por persona. Arranca contraído. */
-function StatsPanel({ people, weeks, entries, initialWeekId }: { people: HourPerson[]; weeks: HourWeekData[]; entries: HourEntryData[]; initialWeekId: string | null }) {
+function StatsPanel({ people, weeks, entries, initialWeekId, personal }: { people: HourPerson[]; weeks: HourWeekData[]; entries: HourEntryData[]; initialWeekId: string | null; personal: boolean }) {
   const { open, toggle } = useCollapse("horas:stats", false);
   const months = useMemo(() => {
     const seen = new Map<string, string>();
@@ -455,7 +455,7 @@ function StatsPanel({ people, weeks, entries, initialWeekId }: { people: HourPer
         <div className="flex items-center gap-1.5">
           <CollapseToggle open={open} onToggle={toggle} label="las estadísticas del equipo" />
           <BarChart3 className="h-4 w-4 text-muted-foreground" aria-hidden />
-          <h2 className="text-sm font-semibold">Estadísticas del equipo</h2>
+          <h2 className="text-sm font-semibold">{personal ? "Mis estadísticas" : "Estadísticas del equipo"}</h2>
         </div>
         {open && (
           <>
@@ -498,11 +498,11 @@ function StatsPanel({ people, weeks, entries, initialWeekId }: { people: HourPer
               {tile("Horas planeadas", `${fmtHours(all.planned)} h`, `meta ${fmtHours(target * people.length)} h`, "text-primary")}
               {tile("Horas hechas", `${fmtHours(all.done)} h`, undefined, "text-success")}
               {tile("Cumplimiento", `${compliance(all)} %`, "hechas / planeadas")}
-              {tile("Integrantes", String(people.length))}
+              {!personal && tile("Integrantes", String(people.length))}
             </div>
 
             <div className="flex flex-col gap-3">
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Desglose individual</h3>
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{personal ? "Mi desglose" : "Desglose individual"}</h3>
               {people.map((p) => {
                 const t = summarize(scoped.filter((e) => e.userId === p.id));
                 return (
@@ -545,8 +545,11 @@ export function HoursBoard({
   projects,
   weeks,
   entries,
+  personal = false,
 }: {
   canManage: boolean;
+  /** true = la persona ve solo lo suyo (cada Junior). */
+  personal?: boolean;
   people: HourPerson[];
   projects: HourProject[];
   weeks: HourWeekData[];
@@ -629,7 +632,7 @@ export function HoursBoard({
       {form === "edit" && <WeekForm key={week.id} week={week} weeks={weeks} onDone={() => setForm(null)} />}
 
       <p className="text-xs text-muted-foreground">
-        Equipo esta semana: {fmtHours(teamTotals.done)} h hechas de {fmtHours(teamTotals.planned)} h planeadas
+        {personal ? "Tú" : "Equipo"} esta semana: {fmtHours(teamTotals.done)} h hechas de {fmtHours(teamTotals.planned)} h planeadas
         {teamTotals.planned > 0 ? ` (${compliance(teamTotals)} %)` : ""} · meta {fmtHours(WEEKLY_HOURS_TARGET * people.length)} h.
       </p>
 
@@ -637,10 +640,14 @@ export function HoursBoard({
         {people.map((p) => (
           <PersonCard key={`${week.id}:${p.id}`} person={p} weekId={week.id} entries={weekEntries.filter((e) => e.userId === p.id)} projects={projects} canManage={canManage} />
         ))}
-        {people.length === 0 && <p className="text-sm text-muted-foreground">No hay personas activas del área ET con rol de máster o Junior.</p>}
+        {people.length === 0 && (
+          <p className="text-sm text-muted-foreground">
+            {personal ? "No encuentro tu perfil en el equipo de ET. Pídele al máster que lo revise." : "No hay personas activas del área ET con rol de máster o Junior."}
+          </p>
+        )}
       </div>
 
-      <StatsPanel people={people} weeks={weeks} entries={entries} initialWeekId={week.id} />
+      <StatsPanel people={people} weeks={weeks} entries={entries} initialWeekId={week.id} personal={personal} />
     </div>
   );
 }

@@ -16,7 +16,9 @@ import {
   activeNow,
   bogotaNow,
   fmtTime,
+  fmtRemaining,
   layoutDay,
+  nextShift,
   timeOptions,
   type ShiftData,
 } from "@/lib/office-schedule";
@@ -160,19 +162,72 @@ function ShiftForm({
   );
 }
 
-/** Horario semanal de oficina de lunes a sábado: cada bloque lleva el color de la persona (o el azul de la marca si es de
- *  todo el equipo) y la sigla del tipo. Solo el máster lo edita; los demás lo consultan. */
-export function ScheduleBoard({ canManage, people, shifts }: { canManage: boolean; people: HourPerson[]; shifts: ShiftData[] }) {
-  const [hidden, setHidden] = useState<Set<string>>(new Set());
-  const [editMode, setEditMode] = useState(false);
-  const [editing, setEditing] = useState<ShiftData | "new" | null>(null);
-  // La hora actual se lee en el navegador tras montar, para que servidor y cliente coincidan al hidratar.
+/** Hora actual en Bogotá, que se refresca sola cada 30 segundos. Se lee en el navegador tras montar (antes es null), para que
+ *  servidor y cliente coincidan al hidratar. */
+export function useNow() {
   const [now, setNow] = useState<{ day: number; minutes: number } | null>(null);
   useEffect(() => {
     setNow(bogotaNow());
-    const t = setInterval(() => setNow(bogotaNow()), 60_000);
+    const t = setInterval(() => setNow(bogotaNow()), 30_000);
     return () => clearInterval(t);
   }, []);
+  return now;
+}
+
+/** «Ahora»: en qué bloque del horario está la persona en este momento, hasta cuándo y dónde (edificio); si no tiene uno, cuál
+ *  sigue. Es lo que ve cada Junior arriba de su página, en tiempo real. */
+export function NowCard({ shifts }: { shifts: ShiftData[] }) {
+  const now = useNow();
+  if (!now) return <div className="h-[4.5rem] rounded-xl border border-border bg-card" aria-hidden />;
+
+  const active = activeNow(shifts, now);
+  const next = nextShift(shifts, now);
+  const when = (daysAhead: number, day: number) => (daysAhead === 0 ? "hoy" : daysAhead === 1 ? "mañana" : (SCHEDULE_DAYS.find((d) => d.n === day)?.name ?? "").toLowerCase());
+  const title = (s: ShiftData) => (s.label ? `${SHIFT_CATEGORY_LABEL[s.category]} · ${s.label}` : SHIFT_CATEGORY_LABEL[s.category]);
+
+  return (
+    <div role="status" aria-live="polite" className={cn("rounded-xl border bg-card p-4", active.length > 0 ? "border-primary/40" : "border-border")}>
+      {active.length > 0 ? (
+        <div className="flex flex-col gap-2">
+          {active.map((s) => (
+            <div key={s.id} className="flex items-start gap-3">
+              <span className="relative mt-1.5 flex h-2.5 w-2.5 shrink-0" aria-hidden>
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-60" />
+                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-success" />
+              </span>
+              <div>
+                <p className="text-sm font-semibold">Ahora: {title(s)}</p>
+                <p className="text-xs text-muted-foreground">
+                  Edificio {s.location} · {fmtTime(s.start)}–{fmtTime(s.end)} · faltan {fmtRemaining(s.end - now.minutes)}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="flex items-start gap-3">
+          <span className="mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full bg-muted-foreground/40" aria-hidden />
+          <div>
+            <p className="text-sm font-semibold">Ahora no tienes un bloque del horario</p>
+            <p className="text-xs text-muted-foreground">
+              {next
+                ? `Sigue ${when(next.daysAhead, next.shift.day)}, ${fmtTime(next.shift.start)}–${fmtTime(next.shift.end)}: ${title(next.shift)} · edificio ${next.shift.location}`
+                : "Todavía no hay bloques en tu horario."}
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Horario semanal de oficina de lunes a sábado: cada bloque lleva el color de la persona (o el azul de la marca si es de
+ *  todo el equipo) y la sigla del tipo. Solo el máster lo edita; los demás lo consultan. */
+export function ScheduleBoard({ canManage, people, shifts, personal = false }: { canManage: boolean; people: HourPerson[]; shifts: ShiftData[]; personal?: boolean }) {
+  const [hidden, setHidden] = useState<Set<string>>(new Set());
+  const [editMode, setEditMode] = useState(false);
+  const [editing, setEditing] = useState<ShiftData | "new" | null>(null);
+  const now = useNow();
 
   const personById = useMemo(() => new Map(people.map((p) => [p.id, p])), [people]);
   const colorOf = (s: ShiftData) => (s.userId ? (personById.get(s.userId)?.color ?? FALLBACK_COLOR) : TEAM_COLOR);
@@ -197,8 +252,8 @@ export function ScheduleBoard({ canManage, people, shifts }: { canManage: boolea
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center gap-2">
-        <span className="text-xs text-muted-foreground">Ver a:</span>
-        {people.map((p) => {
+        {!personal && <span className="text-xs text-muted-foreground">Ver a:</span>}
+        {(personal ? [] : people).map((p) => {
           const on = !hidden.has(p.id);
           return (
             <button
@@ -241,7 +296,7 @@ export function ScheduleBoard({ canManage, people, shifts }: { canManage: boolea
         )}
       </div>
 
-      {now && (
+      {now && !personal && (
         <p className="flex items-center gap-1.5 text-xs text-muted-foreground" aria-live="polite">
           <MapPin className="h-3.5 w-3.5" aria-hidden />
           {here.length > 0 ? (
@@ -312,7 +367,8 @@ export function ScheduleBoard({ canManage, people, shifts }: { canManage: boolea
                       {s.label && s.lanes === 1 && s.end - s.start >= 90 && <span className="block truncate text-muted-foreground">{s.label}</span>}
                     </>
                   );
-                  const cls = "absolute overflow-hidden rounded border-l-[3px] px-1 py-0.5 text-left text-[11px] leading-tight text-foreground";
+                  const live = now !== null && s.day === now.day && s.start <= now.minutes && now.minutes < s.end;
+                  const cls = cn("absolute overflow-hidden rounded border-l-[3px] px-1 py-0.5 text-left text-[11px] leading-tight text-foreground", live && "z-[5] ring-2 ring-primary");
                   return editMode ? (
                     <button
                       key={s.id}
@@ -331,6 +387,12 @@ export function ScheduleBoard({ canManage, people, shifts }: { canManage: boolea
                     </div>
                   );
                 })}
+                {now?.day === d.n && now.minutes >= startHour * 60 && now.minutes <= endHour * 60 && (
+                  <div className="pointer-events-none absolute inset-x-0 z-10 flex items-center" style={{ top: ((now.minutes - startHour * 60) / 60) * ROW }} aria-hidden>
+                    <span className="-ml-1 h-2 w-2 rounded-full bg-destructive" />
+                    <span className="h-px flex-1 bg-destructive" />
+                  </div>
+                )}
               </div>
             );
           })}
