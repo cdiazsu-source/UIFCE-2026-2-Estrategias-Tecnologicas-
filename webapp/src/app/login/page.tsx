@@ -5,6 +5,7 @@ import { login } from "@/lib/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BRAND_SUBTITLE } from "@/lib/brand";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +17,7 @@ export default async function LoginPage({ searchParams }: { searchParams: { erro
       <Card>
         <CardHeader>
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">ET en Marcha</p>
+          <p className="text-xs text-muted-foreground">{BRAND_SUBTITLE}</p>
           <CardTitle className="text-lg">Ingreso</CardTitle>
         </CardHeader>
         <CardContent>

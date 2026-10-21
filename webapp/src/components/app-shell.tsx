@@ -11,6 +11,7 @@ import { logout } from "@/lib/actions/auth";
 import { exitViewAs, viewAs } from "@/lib/actions/view";
 import { VIEW_PROFILES, viewProfile } from "@/lib/view-profiles";
 import { groupBySection, isItemActive, SIDEBAR_ITEMS, type SidebarItem } from "@/lib/sidebar-nav";
+import { BRAND_SUBTITLE } from "@/lib/brand";
 
 type ShellProps = {
   /** Contadores en vivo por id de opción (ver SIDEBAR_ITEMS); 0 o ausente = sin badge. */
@@ -257,7 +258,10 @@ function SidebarContent({
             <BrandLogo className="h-11 [@media(max-height:820px)]:h-9" />
             <Mascot />
           </span>
-          <span className="mt-3 block text-lg [@media(max-height:820px)]:mt-2 font-bold leading-tight tracking-tight text-white">ET en Marcha</span>
+          <span className="mt-3 block [@media(max-height:820px)]:mt-2">
+            <span className="block text-lg font-bold leading-tight tracking-tight text-white">ET en Marcha</span>
+            <span className="mt-0.5 block text-[11px] font-medium leading-snug text-nav-foreground/70">{BRAND_SUBTITLE}</span>
+          </span>
         </Link>
       </div>
 
@@ -366,7 +370,10 @@ export function AppShell({ children, bell, ...nav }: ShellProps) {
         </button>
         <Link href="/" className="flex items-center gap-2.5 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-brand-accent">
           <BrandLogo className="h-8" />
-          <span className="text-base font-bold tracking-tight">ET en Marcha</span>
+          <span className="flex flex-col leading-tight">
+            <span className="text-base font-bold tracking-tight">ET en Marcha</span>
+            <span className="text-[10px] font-medium text-white/70">{BRAND_SUBTITLE}</span>
+          </span>
         </Link>
       </header>
 

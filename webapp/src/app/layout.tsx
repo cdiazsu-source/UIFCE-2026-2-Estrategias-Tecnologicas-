@@ -11,12 +11,13 @@ import { getSession } from "@/lib/session";
 import { exitViewAs } from "@/lib/actions/view";
 import { viewProfile } from "@/lib/view-profiles";
 import { touchLastSeen } from "@/lib/presence";
+import { BRAND_NAME, BRAND_SUBTITLE } from "@/lib/brand";
 import { getAssignedUpdates, getNotifyIdentity } from "@/lib/notify";
 
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "ET en Marcha",
+  title: `${BRAND_NAME} · ${BRAND_SUBTITLE}`,
   description: "Seguimiento en vivo de la planeación de Estrategias Tecnológicas — UIFCE 2026-2",
 };
 
