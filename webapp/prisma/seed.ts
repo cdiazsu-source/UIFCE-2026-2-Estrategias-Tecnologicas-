@@ -137,6 +137,7 @@ async function ensureCurrentSemester(): Promise<string> {
 const INITIAL_ASSIGNEES: Record<string, string> = {
   "redes-rastreo-contactos-empresas": "junior-et",
   "estrategicos-tracker-egresados-uifce": "junior-et",
+  "cursoslibres-piezas-lanzamiento-especial": "junior-artes",
 };
 
 async function seedProjectsFromCsv() {
