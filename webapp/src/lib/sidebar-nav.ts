@@ -1,5 +1,6 @@
 import {
   CalendarDays,
+  Clock,
   GraduationCap,
   Handshake,
   LayoutDashboard,
@@ -46,6 +47,7 @@ export const SIDEBAR_ITEMS: SidebarItem[] = [
   { id: "herramientas", label: "Herramientas y licencias", icon: Wrench, href: "/herramientas", section: "Recursos y equipo" },
   { id: "aliados", label: "Aliados", icon: Handshake, href: "/aliados", section: "Recursos y equipo" },
   { id: "egresados", label: "Egresados", icon: GraduationCap, href: "/egresados", section: "Recursos y equipo" },
+  { id: "horas", label: "Horas del equipo", icon: Clock, href: "/horas", section: "Recursos y equipo" },
   { id: "equipo", label: "Equipo", icon: Users, href: "/equipo", section: "Recursos y equipo" },
 ];
 

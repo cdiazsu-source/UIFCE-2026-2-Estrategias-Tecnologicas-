@@ -119,6 +119,7 @@ model Semester {
 
   projects      Project[]
   studyProjects StudyProject[]
+  hourWeeks     HourWeek[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -190,6 +191,7 @@ model Project {
   contacts       Contact[]
   socialChannels SocialChannel[]
   expenses       Expense[]
+  hourEntries    HourEntry[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -449,6 +451,8 @@ model User {
   teamComments         TeamComment[]
   studyProjectComments StudyProjectComment[]
   expenses             Expense[]
+  hourEntries          HourEntry[]
+  officeShifts         OfficeShift[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -899,4 +903,78 @@ model Expense {
   @@index([category])
   @@index([responsibleId])
   @@index([projectId])
+}
+
+/// Semana de la planeación de horas del equipo (/horas). Va de lunes a sábado, como en la app de referencia de planeación.
+/// Las fechas son "solo día" (medianoche UTC, ver lib/utils.ts).
+model HourWeek {
+  id         String    @id @default(cuid())
+  semesterId String?
+  semester   Semester? @relation(fields: [semesterId], references: [id], onDelete: SetNull)
+  /// Número de la semana dentro del semestre (1, 2, 3…).
+  number     Int
+  startDate  DateTime
+  endDate    DateTime
+
+  entries HourEntry[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([semesterId, number])
+  @@index([startDate])
+}
+
+/// Horas planeadas (y las realmente hechas) de una persona del equipo en una semana, por categoría. Meta semanal por persona:
+/// 20 h, 2 de ellas de Gestión del Conocimiento (GC); ver lib/hours.ts. Categoría y estado son texto validado en el servidor
+/// (mismo criterio que Alumnus.status), para poder ajustarlos sin migración.
+model HourEntry {
+  id           String   @id @default(cuid())
+  weekId       String
+  week         HourWeek @relation(fields: [weekId], references: [id], onDelete: Cascade)
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// GESTION_CONOCIMIENTO | PROYECTO_ESTUDIO | PROYECTO | APOYO_ACADEMICO | CURSOS_LIBRES
+  category     String
+  /// Qué se hace con esas horas (texto corto); si se elige un proyecto, puede quedar vacío.
+  title        String?
+  plannedHours Float
+  doneHours    Float    @default(0)
+  /// POR_HACER | EN_PROGRESO | TERMINADA
+  status       String   @default("POR_HACER")
+  /// Proyecto del tracker al que se dedican las horas, si aplica.
+  projectId    String?
+  project      Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([weekId])
+  @@index([userId])
+  @@index([projectId])
+}
+
+/// Bloque del horario semanal de oficina (/horas → «Horario»): dónde está cada persona de lunes a sábado. Es una plantilla fija
+/// del semestre (se edita cuando cambia), no depende de la semana. `userId` null = todo el equipo (por ejemplo, la
+/// capacitación de Gestión del Conocimiento, fija de 2 a 4 pm). Horas guardadas como minutos desde la medianoche.
+model OfficeShift {
+  id           String   @id @default(cuid())
+  userId       String?
+  user         User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// 1 = lunes … 6 = sábado.
+  dayOfWeek    Int
+  startMinutes Int
+  endMinutes   Int
+  /// Una categoría de horas (GC, PE, PI, proyectos, apoyos, cursos libres) u OFICINA (presencia sin más detalle).
+  category     String
+  /// Detalle opcional: tema de la capacitación, curso, etc.
+  label        String?
+  /// Edificio donde está la persona en ese bloque: «310» (el de la oficina) o «238».
+  location     String   @default("310")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([dayOfWeek])
+  @@index([userId])
 }

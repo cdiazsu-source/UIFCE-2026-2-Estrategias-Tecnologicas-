@@ -120,3 +120,10 @@ export async function canManageConsent(): Promise<boolean> {
 export async function canManageLeads(): Promise<boolean> {
   return (await getSession()).authed;
 }
+
+/** ¿La sesión puede planear y registrar horas del equipo (/horas)? Solo el máster (credencial MASTER) con «Ver como» apagado:
+ *  los monitores Junior, la dirección y la coordinación consultan su contador. Se valida en el servidor, no solo en la pantalla. */
+export async function canManageHours(): Promise<boolean> {
+  const s = await getSession();
+  return s.authed && s.isMaster && s.level === "full";
+}
