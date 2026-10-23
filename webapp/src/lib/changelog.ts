@@ -21,6 +21,24 @@ export const CHANGELOG_SHOWN = 10;
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: "2026.10.23.8",
+    date: "2026-10-23",
+    title: "Reunión coordinación: resumen de cada proyecto",
+    changes: [
+      { type: "NUEVO", text: "Al tocar un proyecto en la presentación se abre un resumen corporativo con lo más importante: estado, responsable, avance, qué se hace y qué se espera, próximas subtareas y últimas novedades, con la plantilla asociada en grande (varias imágenes pasan solas y con flechas)." },
+      { type: "MEJORA", text: "El botón «Ver proyecto» del resumen abre el proyecto y deja el botón flotante para volver a la presentación durante 30 segundos." },
+    ],
+  },
+  {
+    version: "2026.10.23.7",
+    date: "2026-10-23",
+    title: "Plantillas dentro de la página del proyecto",
+    changes: [
+      { type: "NUEVO", text: "Cada proyecto tiene un bloque «Plantillas»: muestra las plantillas enlazadas con su captura y sus piezas en un carrusel, y el botón que abre su enlace (Canva, Drive…)." },
+      { type: "NUEVO", text: "Con perfil completo se enlazan o se quitan plantillas desde ese mismo bloque; las imágenes también salen en la tarjeta del proyecto en Reunión coordinación." },
+    ],
+  },
+  {
     version: "2026.10.23.6",
     date: "2026-10-23",
     title: "Reunión coordinación: proyectos a la medida e imágenes de plantillas",

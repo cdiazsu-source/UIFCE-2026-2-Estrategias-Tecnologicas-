@@ -52,7 +52,7 @@ function ProjectList({ projects, big, empty, onOpen }: { projects: CoordProject[
     <ul className="grid grid-cols-1 gap-2 md:grid-cols-2">
       {projects.map((p) => (
         <li key={p.id}>
-          <button type="button" onClick={() => onOpen?.(p)} title="Abrir el proyecto (queda un botón para volver a la reunión durante 30 segundos)" className="flex w-full items-center justify-between gap-3 rounded-lg border border-border bg-card px-4 py-3 text-left transition-colors hover:border-primary/40 hover:bg-muted/40">
+          <button type="button" onClick={() => onOpen?.(p)} title="Ver el resumen del proyecto" className="flex w-full items-center justify-between gap-3 rounded-lg border border-border bg-card px-4 py-3 text-left transition-colors hover:border-primary/40 hover:bg-muted/40">
           <RotatingImage images={p.images} big={big} />
           <div className="min-w-0 flex-1">
             <p className={cn("font-medium leading-snug", big ? "text-lg" : "text-sm")}>{p.title}</p>

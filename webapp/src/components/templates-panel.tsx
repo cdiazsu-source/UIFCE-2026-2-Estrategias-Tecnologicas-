@@ -235,7 +235,7 @@ function PiecesField({ initial }: { initial: PieceData[] }) {
 
 /** Piezas en la tarjeta: una a la vez, con flechas para pasar de una a otra (también ← → con el teclado), su nombre y el botón que abre su
  *  enlace (Canva); debajo, las miniaturas para saltar directo a cualquiera. */
-function PiecesGallery({ pieces }: { pieces: PieceData[] }) {
+export function PiecesGallery({ pieces }: { pieces: PieceData[] }) {
   const [i, setI] = useState(0);
   const n = pieces.length;
   const at = Math.min(i, n - 1);

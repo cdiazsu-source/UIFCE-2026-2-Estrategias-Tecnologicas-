@@ -7,6 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { CollapseAllControls, CollapsibleCard } from "@/components/collapsible";
 import { InfoHint } from "@/components/info-hint";
 import { ProjectLinks } from "@/components/project-links";
+import { ProjectTemplates } from "@/components/project-templates";
+import { loadProjectTemplates } from "@/lib/project-templates-data";
+import { canEdit } from "@/lib/session";
 import { ProjectStatusSelect } from "@/components/project-status-select";
 import { ProjectPrioritySelect } from "@/components/project-priority-select";
 import { ProjectAssigneeSelect } from "@/components/project-assignee-select";
@@ -103,6 +106,10 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
   ]);
 
   if (!project) notFound();
+
+  // Plantillas enlazadas (tabla nueva: sin la migración el bloque no se muestra).
+  const canEditProject = await canEdit();
+  const templatesBlock = await loadProjectTemplates(project.id, canEditProject);
 
   // Tracker de egresados: estados de los ya registrados (el botón grande de arriba muestra cómo va).
   const alumniStatuses = isAlumni ? (await prisma.alumnus.findMany({ select: { status: true } })).map((a) => a.status) : [];
@@ -313,6 +320,22 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
           <p className="mt-1 whitespace-pre-line text-muted-foreground">{project.rationale}</p>
         </div>
       </CollapsibleCard>
+
+      {templatesBlock && (canEditProject || templatesBlock.linked.length > 0) && (
+        <CollapsibleCard
+          id="p-plantillas"
+          scope="project:plantillas"
+          label="las plantillas"
+          title={
+            <>
+              Plantillas
+              <InfoHint text="Las plantillas de Plantillas que se usaron o se usan en este proyecto, con su captura y sus piezas en un carrusel (flechas o ← →) y el botón que abre su enlace (Canva, Drive…). Las mismas imágenes salen en la tarjeta del proyecto en «Reunión coordinación». Cómo se usa: con perfil completo, elige una plantilla en «Enlazar una plantilla…» y pulsa «Enlazar»; la X la quita de este proyecto sin borrarla de Plantillas." />
+            </>
+          }
+        >
+          <ProjectTemplates projectId={project.id} linked={templatesBlock.linked} options={canEditProject ? templatesBlock.options : null} />
+        </CollapsibleCard>
+      )}
 
       {project.relatedProjects.length > 0 && (
         <CollapsibleCard

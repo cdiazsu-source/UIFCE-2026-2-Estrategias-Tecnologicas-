@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DesignEditor, ProjectsEditor, type ProjectOption, type TemplateOption } from "@/components/coordination-design";
 import { SLIDE_NUMBER, Slide } from "@/components/coordination-slides";
+import { CoordinationProjectSummary } from "@/components/coordination-project";
 
 const longDate = (iso: string) => new Intl.DateTimeFormat("es-CO", { dateStyle: "long", timeZone: "UTC" }).format(new Date(`${iso}T00:00:00Z`));
 const todayBogota = () => new Intl.DateTimeFormat("en-CA", { timeZone: "America/Bogota" }).format(new Date());
@@ -160,13 +161,19 @@ export function CoordinationBoard({
 }) {
   const router = useRouter();
   const [slide, setSlide] = useState<SlideKey>(initialSlide);
+  // Proyecto abierto en su resumen (en lugar de la página); null = se ve la página.
+  const [selected, setSelected] = useState<CoordProject | null>(null);
   const [designMode, setDesignMode] = useState(false);
   const [presenting, setPresenting] = useState(initialPresenting);
   const root = useRef<HTMLDivElement>(null);
   const readOnly = !!viewing;
   const dateLine = viewing ? `Reunión del ${longDate(viewing.date)}` : `Corte al ${new Intl.DateTimeFormat("es-CO", { dateStyle: "long", timeZone: "America/Bogota" }).format(new Date())}`;
   const at = SLIDE_KEYS.indexOf(slide);
-  const go = (delta: number) => setSlide(SLIDE_KEYS[(at + delta + SLIDE_KEYS.length) % SLIDE_KEYS.length]);
+  const selectSlide = (k: SlideKey) => {
+    setSelected(null);
+    setSlide(k);
+  };
+  const go = (delta: number) => selectSlide(SLIDE_KEYS[(at + delta + SLIDE_KEYS.length) % SLIDE_KEYS.length]);
 
   // Flechas para pasar de página (salvo al escribir); Esc sale de presentar; salir de pantalla completa también.
   useEffect(() => {
@@ -264,7 +271,7 @@ export function CoordinationBoard({
               key={k}
               type="button"
               aria-current={k === slide ? "page" : undefined}
-              onClick={() => setSlide(k)}
+              onClick={() => selectSlide(k)}
               className={cn("rounded-full border px-3 py-1 text-xs font-medium transition-colors", k === slide ? "border-primary bg-primary text-primary-foreground" : "border-border hover:bg-muted", presenting && "px-4 py-1.5 text-sm")}
             >
               {SLIDE_NUMBER[k] ? `${SLIDE_NUMBER[k]} · ` : ""}
@@ -273,9 +280,13 @@ export function CoordinationBoard({
           ))}
         </nav>
 
-        <Slide key={slide} slide={slide} data={data} team={team} big={presenting} canEditBlockers={!presenting && !readOnly} onGo={setSlide} onOpenProject={openProject} />
+        {selected ? (
+          <CoordinationProjectSummary key={selected.id} project={selected} big={presenting} backLabel={SLIDE_LABEL[slide]} onBack={() => setSelected(null)} onView={() => openProject(selected)} />
+        ) : (
+          <Slide key={slide} slide={slide} data={data} team={team} big={presenting} canEditBlockers={!presenting && !readOnly} onGo={selectSlide} onOpenProject={setSelected} />
+        )}
 
-        {designMode && !readOnly && !presenting && (
+        {designMode && !readOnly && !presenting && !selected && (
           <>
             {SLIDE_SECTION[slide] && (
               <ProjectsEditor

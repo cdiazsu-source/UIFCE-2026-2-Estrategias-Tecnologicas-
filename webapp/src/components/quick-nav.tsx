@@ -13,6 +13,7 @@ import {
   FolderKanban,
   Gauge,
   GraduationCap,
+  LayoutTemplate,
   ListChecks,
   type LucideIcon,
   MessagesSquare,
@@ -49,6 +50,7 @@ const HOME_ITEMS: NavItem[] = [
 const PROJECT_ITEMS: NavItem[] = [
   { id: "p-rastreo", label: "Avance del rastreo", icon: Building2, scope: "project:rastreo" },
   { id: "p-descripcion", label: "Qué se debe hacer", icon: FileText, scope: "project:descripcion" },
+  { id: "p-plantillas", label: "Plantillas", icon: LayoutTemplate, scope: "project:plantillas" },
   { id: "p-actividades", label: "Actividades del proyecto", icon: CalendarRange, scope: "project:actividades" },
   { id: "p-consentimientos", label: "Consentimientos", icon: FileSignature, scope: "project:consentimientos" },
   { id: "p-gastos", label: "Seguimiento de gastos", icon: Wallet, scope: "project:gastos" },

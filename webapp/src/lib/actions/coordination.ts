@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { canUseDeveloper } from "@/lib/session";
 import { defaultProjectIds, loadCoordination } from "@/lib/coordination-data";
+import { loadProjectSummary, type ProjectSummary } from "@/lib/coordination-summary";
 import {
   BLOCKER_MAX,
   DESIGN_IMAGES_MAX,
@@ -152,6 +153,19 @@ export async function setProjectTemplates(projectId: string, templateIds: string
   }
   revalidatePath("/reunion");
   return { ok: true };
+}
+
+export type ProjectSummaryResult = { ok: true; summary: ProjectSummary } | { ok: false; error: string };
+
+/** Resumen de un proyecto para la presentación (lo más importante y sus plantillas asociadas). */
+export async function getProjectSummary(projectId: string): Promise<ProjectSummaryResult> {
+  if (!(await canUseDeveloper())) return { ok: false, error: "Solo el máster ve el resumen de la reunión." };
+  try {
+    const summary = await loadProjectSummary(projectId);
+    return summary ? { ok: true, summary } : { ok: false, error: "No se encontró el proyecto." };
+  } catch {
+    return { ok: false, error: "No se pudo cargar el resumen del proyecto." };
+  }
 }
 
 export type SaveMeetingResult = { ok: true; id: string } | { ok: false; error: string };
