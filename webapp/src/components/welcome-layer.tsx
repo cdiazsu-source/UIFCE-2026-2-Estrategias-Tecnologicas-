@@ -12,6 +12,9 @@ import { FootprintPanel } from "@/components/footprint-panel";
 import { NowCard } from "@/components/schedule-board";
 import { WeekGlance } from "@/components/week-glance";
 
+/** Evento que dispara el botón «Ver su pantalla de bienvenida» (ver `PreviewWelcomeButton`). */
+export const PREVIEW_WELCOME_EVENT = "et:ver-capa";
+
 const SESSION_PREFIX = "et:capa:";
 const HIDE_PREFIX = "et:capa-hoy:";
 
@@ -54,6 +57,7 @@ export function WelcomeLayer({ profile }: { profile: string }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [hideToday, setHideToday] = useState(false);
+  const [previewing, setPreviewing] = useState(false);
   const closeRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -77,15 +81,36 @@ export function WelcomeLayer({ profile }: { profile: string }) {
     };
   }, [profile]);
 
+  // Vista previa de «Ver como»: abre la capa del perfil que se está viendo, sin tocar lo de «ya la cerré» ni «hoy».
+  useEffect(() => {
+    const show = () => {
+      fetch("/api/bienvenida?vista=previa", { cache: "no-store" })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((d: WelcomePayload | null) => {
+          if (!d) return;
+          setData(d);
+          setPreviewing(true);
+          setOpen(true);
+        })
+        .catch(() => {});
+    };
+    window.addEventListener(PREVIEW_WELCOME_EVENT, show);
+    return () => window.removeEventListener(PREVIEW_WELCOME_EVENT, show);
+  }, []);
+
   const close = useCallback(() => {
     setOpen(false);
+    if (previewing) {
+      setPreviewing(false);
+      return;
+    }
     try {
       sessionStorage.setItem(SESSION_PREFIX + profile, "1");
       if (hideToday) localStorage.setItem(HIDE_PREFIX + profile, bogotaDateKey(new Date()));
     } catch {
       // Sin almacenamiento: se cierra igual.
     }
-  }, [profile, hideToday]);
+  }, [profile, hideToday, previewing]);
 
   useEffect(() => {
     if (!open) return;
@@ -135,23 +160,32 @@ export function WelcomeLayer({ profile }: { profile: string }) {
           </button>
         </div>
 
+        {previewing && data.kind === "member" && data.preview && (
+          <p className="bg-warning/15 px-5 py-1.5 text-xs font-medium text-warning">Vista previa: así abre la app {data.preview.label}. No se guarda nada.</p>
+        )}
+
         <div className="flex flex-col gap-4 overflow-y-auto px-5 py-4">
           {data.kind === "master" ? <MasterBody data={data} loading={loading} onRange={changeRange} /> : <MemberBody data={data} onNavigate={close} />}
         </div>
 
         <div className="flex flex-wrap items-center gap-3 border-t border-border px-5 py-3">
-          <label className="flex min-w-[10rem] flex-1 cursor-pointer items-center gap-2 text-xs text-muted-foreground">
-            <input type="checkbox" checked={hideToday} onChange={(e) => setHideToday(e.target.checked)} className="h-3.5 w-3.5" />
-            No mostrar de nuevo hoy
-          </label>
+          {previewing ? (
+            <span className="flex-1" />
+          ) : (
+            <label className="flex min-w-[10rem] flex-1 cursor-pointer items-center gap-2 text-xs text-muted-foreground">
+              <input type="checkbox" checked={hideToday} onChange={(e) => setHideToday(e.target.checked)} className="h-3.5 w-3.5" />
+              No mostrar de nuevo hoy
+            </label>
+          )}
           <Button
             type="button"
             onClick={() => {
+              const wasPreview = previewing;
               close();
-              if (pathname !== "/") router.push("/");
+              if (!wasPreview && pathname !== "/") router.push("/");
             }}
           >
-            Ir al panel
+            {previewing ? "Cerrar vista previa" : "Ir al panel"}
           </Button>
         </div>
       </div>

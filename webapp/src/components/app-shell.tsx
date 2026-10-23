@@ -9,6 +9,7 @@ import { ChevronDown, Code2, Eye, LogOut, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { logout } from "@/lib/actions/auth";
 import { exitViewAs, viewAs } from "@/lib/actions/view";
+import { PreviewWelcomeButton } from "@/components/preview-welcome-button";
 import { VIEW_PROFILES, viewProfile } from "@/lib/view-profiles";
 import { groupBySection, isItemActive, SIDEBAR_ITEMS, type SidebarItem } from "@/lib/sidebar-nav";
 import { BRAND_SUBTITLE } from "@/lib/brand";
@@ -311,6 +312,11 @@ function SidebarContent({
                     </span>
                   </button>
                 </form>
+              </li>
+              <li>
+                <PreviewWelcomeButton className={footerButton} iconClassName="h-5 w-5 shrink-0" onDone={onNavigate}>
+                  <span className="flex-1 text-left">Ver su pantalla de bienvenida</span>
+                </PreviewWelcomeButton>
               </li>
               <ViewAsPicker buttonClass={footerButton} label="Cambiar de perfil" current={viewKey ?? null} selfKey={selfKey} />
             </>

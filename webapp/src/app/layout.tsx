@@ -8,6 +8,7 @@ import { QuickNav } from "@/components/quick-nav";
 import { NovedadesBell } from "@/components/novedades-bell";
 import { ActivityTracker } from "@/components/activity-tracker";
 import { WelcomeLayer } from "@/components/welcome-layer";
+import { PreviewWelcomeButton } from "@/components/preview-welcome-button";
 import { getTrackedWho } from "@/lib/activity";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
@@ -118,11 +119,16 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                       ? "ves la app con el acceso de ese perfil (sin «Desarrollador»)."
                       : "ves y editas solo lo que un monitor Junior puede."}
                   </span>
-                  <form action={exitViewAs}>
-                    <button type="submit" className="font-medium underline hover:no-underline">
-                      Volver a mi vista
-                    </button>
-                  </form>
+                  <div className="flex items-center gap-4">
+                    <PreviewWelcomeButton className="inline-flex items-center gap-1.5 font-medium underline hover:no-underline" iconClassName="h-3.5 w-3.5">
+                      Ver su pantalla de bienvenida
+                    </PreviewWelcomeButton>
+                    <form action={exitViewAs}>
+                      <button type="submit" className="font-medium underline hover:no-underline">
+                        Volver a mi vista
+                      </button>
+                    </form>
+                  </div>
                 </div>
               </div>
             )}

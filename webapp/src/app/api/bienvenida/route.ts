@@ -11,6 +11,8 @@ const RANGES: FootprintRange[] = ["7", "30", "semestre"];
 export async function GET(req: Request) {
   const param = new URL(req.url).searchParams.get("rango") ?? "7";
   const range = (RANGES as string[]).includes(param) ? (param as FootprintRange) : "7";
-  const data = await loadWelcome(range);
+  // `?vista=previa`: la capa del perfil que se ve con «Ver como» (botón del menú lateral y de la franja de «Ver como»).
+  const preview = new URL(req.url).searchParams.get("vista") === "previa";
+  const data = await loadWelcome(range, preview);
   return NextResponse.json(data, { headers: { "Cache-Control": "no-store" } });
 }

@@ -29,6 +29,8 @@ export type MemberWelcome = {
   shifts: ShiftData[];
   /** true = su actividad en la app queda registrada (monitores Junior): se le avisa en la capa. */
   tracked: boolean;
+  /** Solo en la vista previa de «Ver como»: el perfil cuya capa se está mostrando (no es la del usuario real). */
+  preview?: { label: string };
 };
 
 export type FootprintRange = "7" | "30" | "semestre";

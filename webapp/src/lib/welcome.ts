@@ -3,6 +3,7 @@ import { getSession } from "@/lib/session";
 import { getTrackedWho, loadFootprint } from "@/lib/activity";
 import { isShiftCategory, type ShiftData } from "@/lib/office-schedule";
 import { greetingName } from "@/lib/utils";
+import { isJuniorWho, viewProfile } from "@/lib/view-profiles";
 import type { FootprintRange, MemberWelcome, NewsReason, WelcomeNews, WelcomePayload } from "@/lib/welcome-types";
 
 /** Datos de la capa de bienvenida de esta sesión: la huella digital de los monitores para el máster; para cualquier otra persona
@@ -55,20 +56,23 @@ async function loadNews(userId: string, name: string, since: Date): Promise<{ it
   return { items: items.slice(0, NEWS_SHOWN), total: items.length };
 }
 
-export async function loadWelcome(range: FootprintRange = "7"): Promise<WelcomePayload | null> {
+/** `preview`: la vista previa de «Ver como»: la capa tal como la vería el perfil que se está viendo (solo con «Ver como» activo). */
+export async function loadWelcome(range: FootprintRange = "7", preview = false): Promise<WelcomePayload | null> {
   const session = await getSession();
   if (!session.authed) return null;
+  if (preview && (!session.viewing || !session.viewWho)) return null;
 
   try {
     // Máster (credencial compartida): la huella digital de los monitores.
-    if (session.isMaster) {
+    if (!preview && session.isMaster) {
       const master = await prisma.user.findFirst({ where: { role: "MASTER", area: "ET", active: true }, orderBy: { name: "asc" }, select: { name: true } });
       return { kind: "master", firstName: master ? greetingName(master.name) : "", footprint: await loadFootprint(range) };
     }
 
     // Persona identificada por su credencial propia (Junior, dirección o coordinación).
-    if (!session.who) return null;
-    const user = await prisma.user.findFirst({ where: { credentialKey: session.who }, select: { id: true, name: true } });
+    const key = preview ? session.viewWho : session.who;
+    if (!key) return null;
+    const user = await prisma.user.findFirst({ where: { credentialKey: key }, select: { id: true, name: true } });
     if (!user) return null;
     const previousVisitAt = (await prisma.userVisit.findUnique({ where: { userId: user.id }, select: { previousVisitAt: true } }))?.previousVisitAt ?? null;
 
@@ -77,7 +81,8 @@ export async function loadWelcome(range: FootprintRange = "7"): Promise<WelcomeP
     const [news, shiftRows, tracked] = await Promise.all([
       loadNews(user.id, user.name, since),
       prisma.officeShift.findMany({ where: { OR: [{ userId: user.id }, { userId: null }] }, orderBy: [{ dayOfWeek: "asc" }, { startMinutes: "asc" }] }),
-      getTrackedWho(),
+      // En la vista previa se muestra el aviso que vería ese perfil si es un Junior (aquí no se registra nada).
+      preview ? Promise.resolve(isJuniorWho(key) ? key : null) : getTrackedWho(),
     ]);
     const shifts: ShiftData[] = shiftRows
       .filter((s) => isShiftCategory(s.category))
@@ -93,6 +98,7 @@ export async function loadWelcome(range: FootprintRange = "7"): Promise<WelcomeP
       newsTotal: news.total,
       shifts: own ? shifts : [],
       tracked: tracked !== null,
+      ...(preview ? { preview: { label: viewProfile(key)?.label ?? user.name } } : {}),
     };
   } catch {
     // La capa es un extra: si la BD no responde (o falta la migración), la app sigue sin ella.
