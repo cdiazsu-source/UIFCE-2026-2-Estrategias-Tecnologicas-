@@ -21,6 +21,15 @@ export const CHANGELOG_SHOWN = 10;
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: "2026.10.23.9",
+    date: "2026-10-23",
+    title: "Reunión coordinación: página General con cifras e íconos",
+    changes: [
+      { type: "NUEVO", text: "La página General muestra el total de proyectos de la reunión con un gráfico de círculo por categoría, y una cifra grande por cada parte: proyectos entregados, bloqueos, proyectos en proceso del próximo corte y notas." },
+      { type: "NUEVO", text: "Cada una de las cuatro partes tiene su ícono (paquete entregado, alerta de bloqueo, bandera de corte y mensaje de notas), en la página General, en las pestañas y en el título de cada página." },
+    ],
+  },
+  {
     version: "2026.10.23.8",
     date: "2026-10-23",
     title: "Reunión coordinación: resumen de cada proyecto",

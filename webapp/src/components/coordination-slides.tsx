@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { AlertTriangle, Plus, X } from "lucide-react";
+import { AlertTriangle, Flag, MessageSquareText, OctagonAlert, PackageCheck, Plus, X, type LucideIcon } from "lucide-react";
 
 import { addBlocker, deleteBlocker } from "@/lib/actions/coordination";
 import { BLOCKER_MAX, SLIDE_LABEL, type CoordBlocker, type CoordData, type CoordProject, type CoordTeam, type DesignImage, type PageDesign, type SlideKey, type TeamMember } from "@/lib/coordination";
@@ -205,36 +205,115 @@ function Cover({ team, title, note, big }: { team: CoordTeam; title: string; not
   );
 }
 
-function Overview({ data, big, onGo }: { data: CoordData; big: boolean; onGo: (k: SlideKey) => void }) {
-  const inProgress = data.inProgress;
-  const doneCount = data.delivered.filter((p) => p.status === "COMPLETADO").length;
-  const cards: { key: SlideKey; stat: string; items: string[] }[] = [
-    { key: "entregamos", stat: `${data.delivered.length} proyectos · ${doneCount} entregados`, items: data.delivered.map((p) => p.title) },
-    { key: "bloqueos", stat: `${inProgress.length} en curso · ${data.blockers?.length ?? 0} bloqueos`, items: (data.blockers ?? []).map((b) => b.text) },
-    { key: "corte", stat: `${data.upcoming.length} en atención inmediata`, items: data.upcoming.map((p) => p.title) },
-    { key: "notas", stat: data.design.notas.note ? "Con notas" : "Sin notas", items: data.design.notas.note ? [data.design.notas.note] : [] },
-  ];
+/** Iconografía de las cuatro partes (también en las pestañas y en el título de cada página). */
+export const SLIDE_ICON: Partial<Record<SlideKey, LucideIcon>> = { entregamos: PackageCheck, bloqueos: OctagonAlert, corte: Flag, notas: MessageSquareText };
+
+/** Colores del gráfico de círculo: azules de la marca y tonos de apoyo; lo que no cabe en 6 categorías se agrupa en «Otras». */
+const DONUT_COLORS = ["#000066", "#1D1DA5", "#6666FF", "#44D4FF", "#5D6289", "#9A9AC8", "#C9C9DD"] as const;
+const MAX_SLICES = 6;
+
+/** Gráfico de círculo (dona) hecho a mano en SVG: una porción por categoría y el total al centro. */
+function Donut({ slices, total, size }: { slices: { label: string; value: number; color: string }[]; total: number; size: number }) {
+  const r = 38;
+  const c = 2 * Math.PI * r;
+  let acc = 0;
   return (
-    <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-      {cards.map((c) => (
-        <button key={c.key} type="button" onClick={() => onGo(c.key)} className="flex flex-col gap-2 rounded-xl border border-border bg-card p-4 text-left transition-colors hover:border-primary/40 hover:bg-muted/40">
-          <span className="flex items-baseline gap-2">
-            <span className={cn("font-semibold text-primary", big ? "text-base" : "text-xs")}>{SLIDE_NUMBER[c.key]}</span>
-            <span className={cn("font-semibold", big ? "text-2xl" : "text-base")}>{data.design[c.key].title || SLIDE_LABEL[c.key]}</span>
-          </span>
-          <span className={cn("text-muted-foreground", big ? "text-base" : "text-xs")}>{c.stat}</span>
-          {c.items.length > 0 && (
-            <ul className={cn("flex flex-col gap-0.5", big ? "text-base" : "text-sm")}>
-              {c.items.slice(0, 3).map((t) => (
-                <li key={t} className="line-clamp-1">
-                  · {t}
-                </li>
-              ))}
-              {c.items.length > 3 && <li className="text-muted-foreground">y {c.items.length - 3} más</li>}
-            </ul>
-          )}
-        </button>
-      ))}
+    <svg viewBox="0 0 100 100" width={size} height={size} role="img" aria-label={`Proyectos por categoría: ${slices.map((s) => `${s.label} ${s.value}`).join(", ")}`} className="shrink-0">
+      <circle cx="50" cy="50" r={r} fill="none" stroke="hsl(var(--muted))" strokeWidth="16" />
+      {slices.map((s) => {
+        const len = (s.value / total) * c;
+        const el = <circle key={s.label} cx="50" cy="50" r={r} fill="none" stroke={s.color} strokeWidth="16" strokeDasharray={`${len} ${c - len}`} strokeDashoffset={-acc} transform="rotate(-90 50 50)" />;
+        acc += len;
+        return el;
+      })}
+      <text x="50" y="53" textAnchor="middle" fontSize="20" fontWeight="600" fill="hsl(var(--foreground))">
+        {total}
+      </text>
+      <text x="50" y="65" textAnchor="middle" fontSize="7" fill="hsl(var(--muted-foreground))">
+        proyectos
+      </text>
+    </svg>
+  );
+}
+
+function Overview({ data, big, onGo }: { data: CoordData; big: boolean; onGo: (k: SlideKey) => void }) {
+  // Todos los proyectos de la reunión, sin repetir los que están en más de una parte.
+  const all = Array.from(new Map([...data.delivered, ...data.inProgress, ...data.upcoming].map((p) => [p.id, p])).values());
+  const byCat = new Map<string, number>();
+  for (const p of all) byCat.set(p.category, (byCat.get(p.category) ?? 0) + 1);
+  const sorted = Array.from(byCat.entries()).sort((x, y) => y[1] - x[1] || x[0].localeCompare(y[0], "es"));
+  const head = sorted.slice(0, MAX_SLICES);
+  const rest = sorted.slice(MAX_SLICES).reduce((n, [, v]) => n + v, 0);
+  const slices = [...head.map(([label, value]) => ({ label, value })), ...(rest > 0 ? [{ label: "Otras", value: rest }] : [])].map((s, i) => ({ ...s, color: DONUT_COLORS[i % DONUT_COLORS.length] }));
+
+  const count = (list: CoordProject[], st: string) => list.filter((p) => p.status === st).length;
+  const noteLines = data.design.notas.note.split("\n").filter((l) => l.trim()).length;
+  const cards: { key: SlideKey; n: string; unit: string; sub: string }[] = [
+    {
+      key: "entregamos",
+      n: String(data.delivered.length),
+      unit: "proyectos",
+      sub: `${count(data.delivered, "COMPLETADO")} entregados · ${count(data.delivered, "EN_CURSO")} en curso · ${count(data.delivered, "POR_INICIAR")} por iniciar`,
+    },
+    { key: "bloqueos", n: data.blockers ? String(data.blockers.length) : "—", unit: "bloqueos", sub: `${data.inProgress.length} proyectos en curso` },
+    {
+      key: "corte",
+      n: String(data.upcoming.length),
+      unit: "proyectos en proceso",
+      sub: `${count(data.upcoming, "EN_CURSO")} en curso · ${count(data.upcoming, "POR_INICIAR")} por iniciar`,
+    },
+    { key: "notas", n: String(noteLines), unit: noteLines === 1 ? "nota" : "notas", sub: `${data.design.notas.images.length} ${data.design.notas.images.length === 1 ? "imagen" : "imágenes"}` },
+  ];
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-col items-center gap-6 rounded-xl border border-border bg-card p-5 md:flex-row">
+        {all.length > 0 ? (
+          <>
+            <Donut slices={slices} total={all.length} size={big ? 260 : 180} />
+            <div className="flex min-w-0 flex-1 flex-col gap-3">
+              <p className={cn("font-medium uppercase tracking-wide text-muted-foreground", big ? "text-sm" : "text-xs")}>Proyectos por categoría</p>
+              <ul className={cn("grid grid-cols-1 gap-x-6 gap-y-1.5 sm:grid-cols-2", big ? "text-lg" : "text-sm")}>
+                {slices.map((s) => (
+                  <li key={s.label} className="flex items-center gap-2">
+                    <span className="h-3 w-3 shrink-0 rounded-sm" style={{ background: s.color }} aria-hidden />
+                    <span className="min-w-0 flex-1 truncate">{s.label}</span>
+                    <span className="font-semibold tabular-nums">{s.value}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </>
+        ) : (
+          <p className="text-sm text-muted-foreground">Todavía no hay proyectos en la reunión.</p>
+        )}
+      </div>
+
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+        {cards.map((c) => {
+          const Icon = SLIDE_ICON[c.key];
+          return (
+            <button key={c.key} type="button" onClick={() => onGo(c.key)} className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 text-left transition-colors hover:border-primary/40 hover:bg-muted/40">
+              <span className="flex items-center gap-3">
+                {Icon && (
+                  <span className={cn("flex shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary", big ? "h-12 w-12" : "h-9 w-9")}>
+                    <Icon className={big ? "h-7 w-7" : "h-5 w-5"} aria-hidden />
+                  </span>
+                )}
+                <span className="flex min-w-0 items-baseline gap-2">
+                  <span className={cn("font-semibold text-primary", big ? "text-base" : "text-xs")}>{SLIDE_NUMBER[c.key]}</span>
+                  <span className={cn("truncate font-semibold", big ? "text-2xl" : "text-base")}>{data.design[c.key].title || SLIDE_LABEL[c.key]}</span>
+                </span>
+              </span>
+              <span className="flex items-baseline gap-2">
+                <span className={cn("font-semibold leading-none tracking-tight tabular-nums", big ? "text-7xl" : "text-5xl")}>{c.n}</span>
+                <span className={cn("text-muted-foreground", big ? "text-xl" : "text-sm")}>{c.unit}</span>
+              </span>
+              <span className={cn("text-muted-foreground", big ? "text-base" : "text-xs")}>{c.sub}</span>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -250,6 +329,7 @@ export function Slide({ slide, data, team, big, canEditBlockers, onGo, onOpenPro
       {slide === "portada" && <Cover team={team} title={title} note={design.note} big={big} />}
       {slide !== "portada" && (
       <div className="flex items-baseline gap-3 border-b border-border pb-2">
+        {SLIDE_ICON[slide] && (() => { const Icon = SLIDE_ICON[slide]!; return <Icon className={cn("self-center text-primary", big ? "h-9 w-9" : "h-6 w-6")} aria-hidden />; })()}
         {SLIDE_NUMBER[slide] && <span className={cn("font-semibold text-primary", big ? "text-lg" : "text-sm")}>{SLIDE_NUMBER[slide]}</span>}
         <h2 className={cn("font-semibold tracking-tight", big ? "text-4xl" : "text-2xl")}>{title}</h2>
       </div>

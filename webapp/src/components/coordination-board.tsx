@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DesignEditor, ProjectsEditor, type ProjectOption, type TemplateOption } from "@/components/coordination-design";
-import { SLIDE_NUMBER, Slide } from "@/components/coordination-slides";
+import { SLIDE_ICON, SLIDE_NUMBER, Slide } from "@/components/coordination-slides";
 import { CoordinationProjectSummary } from "@/components/coordination-project";
 
 const longDate = (iso: string) => new Intl.DateTimeFormat("es-CO", { dateStyle: "long", timeZone: "UTC" }).format(new Date(`${iso}T00:00:00Z`));
@@ -274,6 +274,7 @@ export function CoordinationBoard({
               onClick={() => selectSlide(k)}
               className={cn("rounded-full border px-3 py-1 text-xs font-medium transition-colors", k === slide ? "border-primary bg-primary text-primary-foreground" : "border-border hover:bg-muted", presenting && "px-4 py-1.5 text-sm")}
             >
+              {(() => { const Icon = SLIDE_ICON[k]; return Icon ? <Icon className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden /> : null; })()}
               {SLIDE_NUMBER[k] ? `${SLIDE_NUMBER[k]} · ` : ""}
               {data.design[k].title || SLIDE_LABEL[k]}
             </button>
