@@ -21,6 +21,34 @@ export const CHANGELOG_SHOWN = 10;
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: "2026.10.22.9",
+    date: "2026-10-22",
+    title: "Panel principal más limpio: los proyectos primero",
+    changes: [
+      { type: "MEJORA", text: "Para todos los perfiles, las tarjetas anteriores a «Integrantes» (El área, Situación actual, Objetivos y Difusión y visibilidad) arrancan contraídas y se pueden abrir con su ícono, de modo que los proyectos son lo primero desplegado." },
+      { type: "MEJORA", text: "«Actividad» y los comentarios al equipo de ET también arrancan contraídos." },
+      { type: "MEJORA", text: "El menú rápido lateral del Junior en el panel deja solo los íconos de Proyectos, Proyectos de estudio y Actividad reciente." },
+    ],
+  },
+  {
+    version: "2026.10.22.8",
+    date: "2026-10-22",
+    title: "Tiempo tarde acumulado del equipo",
+    changes: [
+      { type: "NUEVO", text: "Nueva pestaña «Puntualidad» en Horas del equipo: el máster registra cuántos minutos llegó tarde cada persona un día y la app acumula el total por persona y del equipo desde el inicio del semestre." },
+      { type: "NUEVO", text: "El tiempo tarde acumulado de cada Junior aparece en su pantalla de bienvenida; cada uno ve solo el suyo." },
+    ],
+  },
+  {
+    version: "2026.10.22.7",
+    date: "2026-10-22",
+    title: "Pantalla de bienvenida con fondo difuminado",
+    changes: [
+      { type: "MEJORA", text: "Mientras se muestra la pantalla de bienvenida, todo lo que hay detrás se difumina para evitar ruido visual." },
+      { type: "MEJORA", text: "Los monitores Junior no pueden cerrarla antes de 3 segundos: el botón de cerrar y «Ir al panel» muestran la cuenta regresiva." },
+    ],
+  },
+  {
     version: "2026.10.22.6",
     date: "2026-10-22",
     title: "Resumen de versiones en Desarrollador",

@@ -415,13 +415,13 @@ export default async function HomePage({
         </p>
       )}
 
-      <AreaOverview key={`area-${juniorKey ?? "todos"}`} defaultOpen={!juniorKey} profile={profile} />
+      <AreaOverview key={`area-${juniorKey ?? "todos"}`} defaultOpen={false} profile={profile} />
 
       {seeAccess && <AccessLog entries={accessEntries} />}
 
       <CollapsibleBlock
         key={`situacion-${juniorKey ?? "todos"}`}
-        defaultOpen={!juniorKey}
+        defaultOpen={false}
         scope="home:situacion"
         label="la situación actual"
         id="situacion"
@@ -449,7 +449,7 @@ export default async function HomePage({
             />
             <EtStrategiesCard
               key={`difusion-${juniorKey ?? "todos"}`}
-              defaultOpen={!juniorKey}
+              defaultOpen={false}
               semester={selected ? { id: selected.id, label: selected.label, etStrategies: selected.etStrategies } : null}
             />
           </div>
@@ -526,7 +526,7 @@ export default async function HomePage({
         <div className="flex flex-col gap-6">
           <CollapsibleBlock
             key={`actividad-${juniorKey ?? "todos"}`}
-            defaultOpen={!juniorKey}
+            defaultOpen={false}
             scope="home:actividad"
             label="las últimas actualizaciones"
             id="actividad"

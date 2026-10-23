@@ -37,7 +37,7 @@ type NavItem = {
 /** Apartados del Panel principal, en el orden en que aparecen. */
 const HOME_ITEMS: NavItem[] = [
   { id: "situacion", label: "Situación actual", icon: Gauge, scope: "home:situacion" },
-  { id: "semestre", label: "Semestre y objetivos", icon: Target },
+  { id: "semestre", label: "Semestre y objetivos", icon: Target, scope: "home:objetivos" },
   { id: "integrantes", label: "Integrantes", icon: Users },
   { id: "proyectos", label: "Proyectos", icon: FolderKanban, scope: "home:proyectos" },
   { id: "estudio", label: "Proyectos de estudio", icon: GraduationCap, scope: "home:estudio" },
@@ -56,8 +56,11 @@ const PROJECT_ITEMS: NavItem[] = [
   { id: "p-bitacora", label: "Bitácora", icon: NotebookPen, scope: "project:bitacora" },
 ];
 
-function itemsFor(pathname: string): NavItem[] {
-  if (pathname === "/") return HOME_ITEMS;
+/** Apartados del Panel principal que conserva el menú rápido de un monitor Junior (y sin las flechas de arriba y abajo). */
+const JUNIOR_HOME_IDS = ["proyectos", "estudio", "actividad"];
+
+function itemsFor(pathname: string, juniorOnly: boolean): NavItem[] {
+  if (pathname === "/") return juniorOnly ? HOME_ITEMS.filter((i) => JUNIOR_HOME_IDS.includes(i.id)) : HOME_ITEMS;
   if (/^\/proyectos\/[^/]+$/.test(pathname)) return PROJECT_ITEMS;
   return [];
 }
@@ -70,19 +73,21 @@ const ACTIVE_OFFSET = 120;
  *  para saltar a él de un clic sin hacer scroll. Siempre incluye «Ir arriba» e «Ir
  *  abajo»; los apartados solo aparecen si existen en la página actual. Resalta el
  *  apartado en el que se está. Solo en pantallas anchas (lg+), para no tapar contenido. */
-export function QuickNav() {
+export function QuickNav({ juniorOnly = false }: { juniorOnly?: boolean }) {
   const pathname = usePathname();
+  // En el Panel principal, el Junior ve solo proyectos, proyecto de estudio y actividad reciente.
+  const trimmed = juniorOnly && pathname === "/";
   const [present, setPresent] = useState<NavItem[]>([]);
   const [active, setActive] = useState("");
 
   useEffect(() => {
-    const all = itemsFor(pathname);
+    const all = itemsFor(pathname, juniorOnly);
     const find = () => setPresent(all.filter((i) => document.getElementById(i.id)));
     find();
     // Segunda pasada por si algún bloque del cliente se pinta un instante después.
     const t = setTimeout(find, 400);
     return () => clearTimeout(t);
-  }, [pathname]);
+  }, [pathname, juniorOnly]);
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | undefined;
@@ -128,6 +133,7 @@ export function QuickNav() {
       aria-label="Menú rápido"
       className="fixed right-3 top-1/2 z-30 hidden -translate-y-1/2 flex-col gap-1 rounded-full border border-border bg-card/95 p-1 shadow-card backdrop-blur print:hidden lg:flex"
     >
+      {!trimmed && (
       <Tip label="Ir arriba">
         <button
           type="button"
@@ -138,8 +144,9 @@ export function QuickNav() {
           <ArrowUp className="h-[18px] w-[18px]" aria-hidden />
         </button>
       </Tip>
+      )}
 
-      {present.length > 0 && <span className="mx-2 my-0.5 h-px bg-border" aria-hidden />}
+      {!trimmed && present.length > 0 && <span className="mx-2 my-0.5 h-px bg-border" aria-hidden />}
 
       {present.map((item) => {
         const Icon = item.icon;
@@ -164,8 +171,9 @@ export function QuickNav() {
         );
       })}
 
-      {present.length > 0 && <span className="mx-2 my-0.5 h-px bg-border" aria-hidden />}
+      {!trimmed && present.length > 0 && <span className="mx-2 my-0.5 h-px bg-border" aria-hidden />}
 
+      {!trimmed && (
       <Tip label="Ir abajo">
         <button
           type="button"
@@ -176,6 +184,7 @@ export function QuickNav() {
           <ArrowDown className="h-[18px] w-[18px]" aria-hidden />
         </button>
       </Tip>
+      )}
     </nav>
   );
 }

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { InfoHint } from "@/components/info-hint";
 import { useCanEdit } from "@/components/access-context";
+import { CollapseToggle, useCollapse } from "@/components/collapsible";
 
 export function SemesterObjectives({
   semester,
@@ -16,6 +17,7 @@ export function SemesterObjectives({
 }) {
   const canEdit = useCanEdit();
   const [editing, setEditing] = useState(false);
+  const { open, toggle } = useCollapse("home:objetivos", false);
 
   if (!semester) {
     return (
@@ -29,10 +31,11 @@ export function SemesterObjectives({
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
         <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          <CollapseToggle open={open} onToggle={toggle} label="los objetivos del semestre" />
           Objetivos {semester.label}
           <InfoHint text="Los objetivos del área para el semestre seleccionado en las pestañas de arriba (distintos de los objetivos generales de «El área»). Cómo se usa: con perfil completo, el lápiz → un objetivo por línea → Guardar. Ejemplo: «Ejecutar la primera edición de la Semana UIFCE: Hackatón, microtaller y conferencia»." />
         </p>
-        {canEdit && !editing && (
+        {canEdit && open && !editing && (
           <button
             type="button"
             onClick={() => setEditing(true)}
@@ -44,7 +47,7 @@ export function SemesterObjectives({
         )}
       </div>
 
-      {editing ? (
+      {!open ? null : editing ? (
         <form
           action={async (formData) => {
             await updateSemesterObjectives(semester.id, String(formData.get("objectives") ?? ""));

@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { InfoHint } from "@/components/info-hint";
+import { CollapseToggle, useCollapse } from "@/components/collapsible";
 import { useCanEdit, useCurrentUserId } from "@/components/access-context";
 import { useUndo } from "@/components/undo-banner";
 import { formatDateTime, USER_ROLE_LABEL } from "@/lib/utils";
@@ -199,6 +200,7 @@ export function TeamComments({
   authors: TeamCommentAuthor[];
 }) {
   const formRef = useRef<HTMLFormElement>(null);
+  const { open, toggle } = useCollapse("home:comentarios", false);
   const [showReviewed, setShowReviewed] = useState(false);
   const [draft, setDraft] = useState("");
   const [draftLoaded, setDraftLoaded] = useState(false);
@@ -247,12 +249,14 @@ export function TeamComments({
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className={open ? undefined : "py-3"}>
         <CardTitle className="flex items-center gap-1.5">
+          <CollapseToggle open={open} onToggle={toggle} label="los comentarios al equipo de ET" />
           Añade un comentario al equipo de ET
           <InfoHint text="Un buzón para comentarios e ideas del equipo. Cómo se usa: escribe el comentario y elige quién eres de la lista (solo personas registradas en Equipo). Cualquiera puede responder a un comentario con «Responder». Por defecto se ven los pendientes; con perfil completo se marca cada uno como «revisado» y se puede borrar (con Deshacer). Ejemplo: «Propuesta: unificar el pie de página de las piezas TV antes de la Semana UIFCE.»" />
         </CardTitle>
       </CardHeader>
+      {open && (
       <CardContent className="flex flex-col gap-4">
         {authors.length === 0 ? (
           <p className="rounded-md border border-dashed border-input p-3 text-sm text-muted-foreground">
@@ -330,6 +334,7 @@ export function TeamComments({
           </ul>
         )}
       </CardContent>
+      )}
     </Card>
   );
 }

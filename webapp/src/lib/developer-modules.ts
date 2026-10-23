@@ -325,17 +325,18 @@ export const DEV_MODULES: DevModule[] = [
     group: "Recursos y equipo",
     route: "/horas",
     summary:
-      "Dos pestañas (`?vista=horario` abre la segunda). Plan semanal y horas reales del máster y los Junior (meta 20 h, con GC, PE, PI) más la grilla de horario de oficina de lunes a sábado con edificio. Cada Junior ve «Mis horas y mi horario» con una tarjeta «Ahora» en tiempo real.",
+      "Tres pestañas (`?vista=horario` y `?vista=puntualidad` abren la segunda y la tercera). Plan semanal y horas reales del máster y los Junior (meta 20 h, con GC, PE, PI) más la grilla de horario de oficina de lunes a sábado con edificio. Cada Junior ve «Mis horas y mi horario» con una tarjeta «Ahora» en tiempo real.",
     page: "app/horas/page.tsx",
-    components: ["hours-tabs.tsx", "hours-board.tsx", "schedule-board.tsx"],
-    actions: ["hours.ts", "office-schedule.ts"],
-    lib: ["hours.ts", "office-schedule.ts", "session.ts"],
-    models: ["HourWeek", "HourEntry", "OfficeShift", "User", "Project", "Semester"],
+    components: ["hours-tabs.tsx", "hours-board.tsx", "schedule-board.tsx", "lateness-board.tsx"],
+    actions: ["hours.ts", "office-schedule.ts", "lateness.ts"],
+    lib: ["hours.ts", "office-schedule.ts", "lateness.ts", "session.ts"],
+    models: ["HourWeek", "HourEntry", "OfficeShift", "LateEntry", "User", "Project", "Semester"],
     permissions:
       "Solo registra el máster (`canManageHours()`: credencial MASTER sin «Ver como»). El Junior consulta solo lo suyo: el servidor (app/horas/page.tsx) filtra por `juniorKey` y no envía los datos de los demás.",
     sections: [
       { id: "panel-horas", label: "Pestaña Horas", detail: "HoursBoard: contador por persona (PersonCard), registros (EntryForm/EntryRow), semanas (WeekForm) y «Estadísticas del equipo» (contraído)." },
       { id: "panel-horario", label: "Pestaña Horario de oficina", detail: "ScheduleBoard: grilla L–S con bloques por persona o del equipo (`userId` null), ShiftForm, línea roja de «ahora»." },
+      { id: "panel-puntualidad", label: "Pestaña Puntualidad", detail: "LatenessBoard: tiempo tarde acumulado del equipo y por persona desde el inicio del semestre; el máster registra cada tardanza (addLate/deleteLate); el Junior ve solo la suya y su acumulado sale en la capa de bienvenida." },
       { id: "ahora", label: "Tarjeta «Ahora»", detail: "NowCard + `useNow` (30 s) para el Junior: bloque actual, edificio y tiempo restante." },
     ],
     notes: [

@@ -96,7 +96,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           canManageLeads={session.authed}
         >
           <UndoProvider>
-            <QuickNav />
+            <QuickNav juniorOnly={session.authed && !!session.juniorKey} />
             {tracked && <ActivityTracker />}
             {welcomeProfile && <WelcomeLayer profile={welcomeProfile} />}
             <AppShell
