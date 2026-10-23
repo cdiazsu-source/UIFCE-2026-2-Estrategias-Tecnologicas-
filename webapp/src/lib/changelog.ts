@@ -21,6 +21,15 @@ export const CHANGELOG_SHOWN = 10;
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: "2026.10.23.4",
+    date: "2026-10-23",
+    title: "Tipo de enlace en las plantillas",
+    changes: [
+      { type: "NUEVO", text: "Al guardar una plantilla se elige de qué es su enlace (Canva, Drive, Figma, YouTube) o se escribe un nombre propio; el botón de la tarjeta dice «Abrir en Canva», «Abrir en Drive», etc." },
+      { type: "MEJORA", text: "Si no se elige, la app lo reconoce por la dirección (Canva, Drive, Google Docs, Figma, YouTube, Dropbox, Notion). Los enlaces de las piezas también lo muestran." },
+    ],
+  },
+  {
     version: "2026.10.23.3",
     date: "2026-10-23",
     title: "Piezas de un evento en Plantillas",

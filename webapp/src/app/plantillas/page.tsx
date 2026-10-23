@@ -21,6 +21,14 @@ export default async function PlantillasPage() {
     piecesBy.clear();
   }
 
+  // Tipo del enlace (Canva, Drive…): tabla nueva; sin la migración se deduce del dominio.
+  const labelBy = new Map<string, string>();
+  try {
+    for (const l of await prisma.templateLinkLabel.findMany()) labelBy.set(l.templateId, l.label);
+  } catch {
+    labelBy.clear();
+  }
+
   const templates: TemplateData[] = rows.map((t) => ({
     id: t.id,
     name: t.name,
@@ -32,6 +40,7 @@ export default async function PlantillasPage() {
     promptText: t.promptText,
     screenshot: t.screenshot,
     pieces: piecesBy.get(t.id) ?? [],
+    urlLabel: labelBy.get(t.id) ?? "",
   }));
 
   return (

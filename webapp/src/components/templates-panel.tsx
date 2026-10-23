@@ -5,6 +5,7 @@ import { Check, ChevronLeft, ChevronRight, Copy, Download, ExternalLink, ImagePl
 
 import { addTemplate, deleteTemplate, updateTemplate } from "@/lib/actions/templates";
 import { downscaleToDataUrl } from "@/lib/image-client";
+import { LINK_LABEL_MAX, LINK_LABEL_PRESETS, detectLinkLabel, openLinkText } from "@/lib/template-links";
 import { PIECES_MAX, PIECE_IMAGE_SIZE, PIECE_LABEL_MAX, type PieceData } from "@/lib/template-pieces";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +27,8 @@ export type TemplateData = {
   screenshot: string | null;
   /** Piezas (imagen pequeña + enlace), en su orden. */
   pieces: PieceData[];
+  /** Tipo del enlace elegido (Canva, Drive…); "" = se deduce del dominio. */
+  urlLabel: string;
 };
 
 export const TEMPLATE_CATEGORIES = [
@@ -281,7 +284,7 @@ function PiecesGallery({ pieces }: { pieces: PieceData[] }) {
         <span className="min-w-0 truncate text-sm font-medium">{cur.label || `Pieza ${at + 1}`}</span>
         {cur.url && (
           <a href={cur.url} target="_blank" rel="noreferrer" className="inline-flex shrink-0 items-center gap-1 text-xs text-link hover:underline">
-            Abrir enlace
+            {openLinkText("", cur.url, "Abrir enlace")}
             <ExternalLink className="h-3 w-3" aria-hidden />
           </a>
         )}
@@ -303,6 +306,27 @@ function PiecesGallery({ pieces }: { pieces: PieceData[] }) {
   );
 }
 
+/** Enlace de la plantilla y su tipo: botones (Canva, Drive, Figma, YouTube) o un nombre propio; vacío = se deduce del dominio. */
+function UrlField({ url, label }: { url: string; label: string }) {
+  const [u, setU] = useState(url);
+  const [l, setL] = useState(label);
+  const guess = detectLinkLabel(u);
+  return (
+    <div className="flex min-w-[14rem] flex-1 flex-col gap-1.5">
+      <Input name="url" value={u} onChange={(e) => setU(e.target.value)} placeholder="Enlace (Canva, Drive, Figma…)" />
+      <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Tipo de enlace">
+        <span className="text-xs text-muted-foreground">Tipo de enlace</span>
+        {LINK_LABEL_PRESETS.map((p) => (
+          <button key={p} type="button" aria-pressed={l === p} onClick={() => setL(l === p ? "" : p)} className={`rounded-full border px-2.5 py-0.5 text-[11px] ${l === p ? "border-primary bg-primary text-primary-foreground" : "border-border hover:bg-muted"}`}>
+            {p}
+          </button>
+        ))}
+        <input name="urlLabel" value={l} maxLength={LINK_LABEL_MAX} onChange={(e) => setL(e.target.value)} placeholder={guess ? `Automático: ${guess}` : "Otro (escribe el nombre)"} aria-label="Nombre del tipo de enlace" className="h-7 min-w-[9rem] flex-1 rounded-md border border-input bg-background px-2 text-xs" />
+      </div>
+    </div>
+  );
+}
+
 function Fields({ t }: { t?: TemplateData }) {
   return (
     <>
@@ -318,7 +342,7 @@ function Fields({ t }: { t?: TemplateData }) {
       </div>
       <div className="flex flex-wrap gap-2">
         <Input name="format" defaultValue={t?.format ?? ""} placeholder="Formato o medida (ej. Reel 1080×1920)" className="min-w-[14rem] flex-1" />
-        <Input name="url" defaultValue={t?.url ?? ""} placeholder="Enlace (Drive, Canva, Figma…)" className="min-w-[14rem] flex-1" />
+        <UrlField url={t?.url ?? ""} label={t?.urlLabel ?? ""} />
       </div>
       <Textarea name="description" defaultValue={t?.description ?? ""} placeholder="Para qué sirve / cuándo se usa" className="min-h-[56px]" />
       <Textarea name="notes" defaultValue={t?.notes ?? ""} placeholder="Notas (aprobaciones, responsables, variantes…)" className="min-h-[56px]" />
@@ -492,7 +516,7 @@ function TemplateCard({ template }: { template: TemplateData }) {
             rel="noreferrer"
             className="inline-flex w-fit items-center gap-1 text-link hover:underline"
           >
-            Abrir plantilla
+            {openLinkText(template.urlLabel, template.url)}
             <ExternalLink className="h-3.5 w-3.5" />
           </a>
         )}

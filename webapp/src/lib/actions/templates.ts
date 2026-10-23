@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { blockedForJunior } from "@/lib/session";
 import { parsePieces } from "@/lib/template-pieces";
+import { LINK_LABEL_MAX } from "@/lib/template-links";
 import type { UndoAction } from "@/lib/undo";
 
 const PATH = "/plantillas";
@@ -48,6 +49,19 @@ async function savePieces(templateId: string, fd: FormData): Promise<void> {
   }
 }
 
+/** Guarda (o quita, si viene vacío) el tipo del enlace elegido en el formulario (campo `urlLabel`). Tabla nueva: sin la migración se ignora. */
+async function saveLinkLabel(templateId: string, fd: FormData): Promise<void> {
+  const raw = fd.get("urlLabel");
+  if (typeof raw !== "string") return;
+  const label = raw.trim().slice(0, LINK_LABEL_MAX);
+  try {
+    if (label) await prisma.templateLinkLabel.upsert({ where: { templateId }, create: { templateId, label }, update: { label } });
+    else await prisma.templateLinkLabel.deleteMany({ where: { templateId } });
+  } catch {
+    // sin la migración del tipo de enlace
+  }
+}
+
 export async function addTemplate(formData: FormData) {
   if (await blockedForJunior()) return;
   const name = String(formData.get("name") ?? "").trim();
@@ -69,6 +83,7 @@ export async function addTemplate(formData: FormData) {
     },
   });
   await savePieces(created.id, formData);
+  await saveLinkLabel(created.id, formData);
   revalidatePath(PATH);
 }
 
@@ -94,6 +109,7 @@ export async function updateTemplate(id: string, formData: FormData): Promise<Un
     },
   });
   await savePieces(id, formData);
+  await saveLinkLabel(id, formData);
   revalidatePath(PATH);
 
   return {
