@@ -21,6 +21,15 @@ export const CHANGELOG_SHOWN = 10;
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: "2026.10.23.1",
+    date: "2026-10-23",
+    title: "Reunión coordinación",
+    changes: [
+      { type: "NUEVO", text: "Nueva pantalla del máster «Reunión coordinación» para presentar a los líderes de área y a coordinación: lo que entregamos (con el estado real de cada proyecto), en curso y bloqueos, y lo de los próximos 15 días (proyectos en atención inmediata)." },
+      { type: "NUEVO", text: "El máster agrega y quita los bloqueos desde la misma pantalla, y el botón «Presentar» la abre a pantalla completa, sin menú ni buscador." },
+    ],
+  },
+  {
     version: "2026.10.22.15",
     date: "2026-10-22",
     title: "Post-it para quien elija el máster",

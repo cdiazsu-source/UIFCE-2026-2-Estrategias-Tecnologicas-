@@ -1017,6 +1017,14 @@ model StickyRecipient {
   profileKey String @id
 }
 
+/// Bloqueos que el máster presenta en «Reunión coordinación» (bloque «En curso y bloqueos»). Los agrega y quita el máster.
+model CoordinationBlocker {
+  id        String   @id @default(cuid())
+  text      String   @db.Text
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
 /// Visita anterior de una persona con credencial propia: cuando empieza una visita nueva (pasaron más de 30 min desde su
 /// actividad anterior) se guarda aquí el `lastSeenAt` previo, para decir «tu último ingreso fue…» en la capa de bienvenida.
 /// Vive aparte de User a propósito: así agregarla no cambia las consultas de User y el despliegue no depende de la migración.

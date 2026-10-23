@@ -248,7 +248,7 @@ function SidebarContent({
   view,
   onNavigate,
 }: Omit<ShellProps, "children"> & { pathname: string; view: string | null; onNavigate: () => void }) {
-  const groups = groupBySection(itemsFor(isJunior));
+  const groups = groupBySection(itemsFor(isJunior, !!canUseDeveloper));
   const footerButton =
     "flex min-h-11 w-full items-center gap-3 rounded-l-xl py-2 pl-3 pr-4 text-left text-sm font-medium text-nav-foreground outline-none transition-colors duration-150 hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-accent";
 

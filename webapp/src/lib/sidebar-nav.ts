@@ -1,6 +1,7 @@
 import {
   CalendarClock,
   CalendarDays,
+  Presentation,
   Clock,
   GraduationCap,
   Handshake,
@@ -29,11 +30,13 @@ export type SidebarItem = {
   juniorOnly?: boolean;
   /** Se oculta a un monitor Junior. */
   hideForJunior?: boolean;
+  /** Solo la ve el máster (sin «Ver como»). */
+  masterOnly?: boolean;
 };
 
 /** Opciones del menú que corresponden a un perfil: los Junior ven sus atajos y no ven las que se les ocultan. */
-export function itemsFor(isJunior: boolean): SidebarItem[] {
-  return SIDEBAR_ITEMS.filter((i) => (isJunior ? !i.hideForJunior : !i.juniorOnly));
+export function itemsFor(isJunior: boolean, isMaster = false): SidebarItem[] {
+  return SIDEBAR_ITEMS.filter((i) => (isJunior ? !i.hideForJunior : !i.juniorOnly) && (isMaster || !i.masterOnly));
 }
 
 /** Rutas del menú lateral, en el orden en que se muestran. Para agregar una opción,
@@ -60,6 +63,7 @@ export const SIDEBAR_ITEMS: SidebarItem[] = [
   { id: "egresados", label: "Egresados", icon: GraduationCap, href: "/egresados", section: "Recursos y equipo" },
   { id: "horas", label: "Horas del equipo", icon: Clock, href: "/horas", section: "Recursos y equipo" },
   { id: "equipo", label: "Equipo", icon: Users, href: "/equipo", section: "Recursos y equipo" },
+  { id: "reunion", label: "Reunión coordinación", icon: Presentation, href: "/reunion", section: "Recursos y equipo", masterOnly: true },
 ];
 
 /** ¿Esta opción corresponde a la ruta actual? «/» solo coincide exacto; las demás por prefijo. */

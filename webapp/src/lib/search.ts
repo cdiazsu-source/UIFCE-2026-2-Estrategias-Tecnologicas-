@@ -55,7 +55,7 @@ const EXTRA_MODULES: { id: string; label: string; href: string; words: string; d
 /** Módulos que coinciden con todas las palabras (por nombre o palabras clave), según lo que ve el perfil. */
 export function searchModules(terms: string[], opts: { isJunior: boolean; canUseDeveloper: boolean }): SearchHit[] {
   const pool = [
-    ...itemsFor(opts.isJunior).map((i) => ({ id: i.id, label: i.label, href: i.href, words: i.section ?? "", detail: i.section ?? null })),
+    ...itemsFor(opts.isJunior, opts.canUseDeveloper).map((i) => ({ id: i.id, label: i.label, href: i.href, words: i.section ?? "", detail: i.section ?? null })),
     ...EXTRA_MODULES.filter((m) => !m.developer || opts.canUseDeveloper).map((m) => ({ ...m, detail: null as string | null })),
   ];
   const wanted = terms.map(fold);
