@@ -15,10 +15,12 @@ import {
   SHIFT_CATEGORY_SHORT,
   activeNow,
   bogotaNow,
+  buildingStyle,
   fmtTime,
   fmtRemaining,
   layoutDay,
   nextShift,
+  shiftLabel,
   timeOptions,
   type ShiftData,
 } from "@/lib/office-schedule";
@@ -230,7 +232,10 @@ export function ScheduleBoard({ canManage, people, shifts, personal = false }: {
   const now = useNow();
 
   const personById = useMemo(() => new Map(people.map((p) => [p.id, p])), [people]);
-  const colorOf = (s: ShiftData) => (s.userId ? (personById.get(s.userId)?.color ?? FALLBACK_COLOR) : TEAM_COLOR);
+  // Con una sola persona a la vista (la vista personal o un solo filtro activo) el color es el del edificio; con varias, el de cada
+  // persona. El edificio siempre va escrito en el bloque.
+  const single = personal || people.filter((p) => !hidden.has(p.id)).length === 1;
+  const colorOf = (s: ShiftData) => (single ? buildingStyle(s.location).border : s.userId ? (personById.get(s.userId)?.color ?? FALLBACK_COLOR) : TEAM_COLOR);
   const nameOf = (s: ShiftData) => (s.userId ? firstName(personById.get(s.userId)?.name ?? "—") : "Equipo");
 
   const visible = shifts.filter((s) => s.userId === null || !hidden.has(s.userId));
@@ -354,16 +359,19 @@ export function ScheduleBoard({ canManage, people, shifts, personal = false }: {
                     height: ((s.end - s.start) / 60) * ROW - 2,
                     left: `calc(${s.lane * w}% + 1px)`,
                     width: `calc(${w}% - 2px)`,
-                    background: `${color}22`,
+                    background: single ? buildingStyle(s.location).bg : `${color}22`,
                     borderColor: color,
                   };
                   const title = `${nameOf(s)} · ${SHIFT_CATEGORY_LABEL[s.category]}${s.label ? ` · ${s.label}` : ""} · edificio ${s.location} · ${fmtTime(s.start)}–${fmtTime(s.end)}`;
                   const body = (
                     <>
-                      <span className="font-semibold">{SHIFT_CATEGORY_SHORT[s.category]}</span>
-                      {s.location !== DEFAULT_BUILDING && <span className="ml-1 rounded bg-foreground/10 px-1 text-[10px] font-semibold">{s.location}</span>}
-                      <br />
-                      {nameOf(s)}
+                      <span className="font-semibold">{shiftLabel(s)}</span>
+                      {!single && (
+                        <>
+                          <br />
+                          {nameOf(s)}
+                        </>
+                      )}
                       {s.label && s.lanes === 1 && s.end - s.start >= 90 && <span className="block truncate text-muted-foreground">{s.label}</span>}
                     </>
                   );
@@ -418,7 +426,10 @@ export function ScheduleBoard({ canManage, people, shifts, personal = false }: {
             </span>{" "}
             = todo el equipo
           </span>
-          <span>Sin marca = edificio {DEFAULT_BUILDING}</span>
+          <span>
+            Cada bloque lleva su edificio ({OFFICE_BUILDINGS.join(" o ")})
+            {single ? "; el color también lo marca" : ""}
+          </span>
         </p>
       )}
     </div>

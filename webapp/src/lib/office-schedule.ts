@@ -17,6 +17,13 @@ export const OFFICE_BUILDINGS = ["310", "238"] as const;
 export const DEFAULT_BUILDING = "310";
 export const isBuilding = (v: string): boolean => (OFFICE_BUILDINGS as readonly string[]).includes(v);
 
+/** Colores de los dos edificios: el 310 en azul de la marca y el 238 en morado. Los usa la grilla de una sola persona y la capa de bienvenida. */
+export const BUILDING_STYLE: Record<string, { bg: string; fg: string; border: string }> = {
+  "310": { bg: "#E6E6FF", fg: "#000066", border: "#1D1DA5" },
+  "238": { bg: "#EFE6FA", fg: "#4A2480", border: "#7C4DC4" },
+};
+export const buildingStyle = (loc: string) => BUILDING_STYLE[loc] ?? BUILDING_STYLE[DEFAULT_BUILDING];
+
 export const SCHEDULE_DAYS = [
   { n: 1, short: "Lun", name: "Lunes" },
   { n: 2, short: "Mar", name: "Martes" },
@@ -46,6 +53,10 @@ export type ShiftData = {
   /** «310» o «238». */
   location: string;
 };
+
+/** Rótulo de un bloque: el edificio («310») si es solo presencia en la oficina, o el tipo y el edificio («PI · 310»). */
+export const shiftLabel = (s: { category: ShiftCategory; location: string }) =>
+  s.category === "OFICINA" ? s.location : `${SHIFT_CATEGORY_SHORT[s.category]} · ${s.location}`;
 
 /** «14:00» desde minutos. */
 export function fmtTime(minutes: number): string {
