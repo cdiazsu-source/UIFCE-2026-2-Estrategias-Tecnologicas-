@@ -49,18 +49,18 @@ function RotatingImage({ images, big }: { images: string[]; big: boolean }) {
 function ProjectList({ projects, big, empty, onOpen, onView }: { projects: CoordProject[]; big: boolean; empty: string; onOpen?: (p: CoordProject) => void; onView?: (p: CoordProject) => void }) {
   if (projects.length === 0) return <p className={cn("text-muted-foreground", big ? "text-lg" : "text-sm")}>{empty}</p>;
   return (
-    <ul className="grid grid-cols-1 gap-2 md:grid-cols-2">
+    <ul className={cn("grid gap-2", big ? "grid-cols-[repeat(auto-fill,minmax(min(100%,26rem),1fr))]" : "grid-cols-[repeat(auto-fill,minmax(min(100%,19rem),1fr))]")}>
       {projects.map((p) => (
         <li key={p.id} className="flex items-stretch overflow-hidden rounded-lg border border-border bg-card transition-colors hover:border-primary/40">
           <button type="button" onClick={() => onOpen?.(p)} title="Ver la plantilla del proyecto" className="flex min-w-0 flex-1 items-center justify-between gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/40">
             <RotatingImage images={p.images} big={big} />
             <div className="min-w-0 flex-1">
               <p className={cn("font-medium leading-snug", big ? "text-lg" : "text-sm")}>{p.title}</p>
-              <p className={cn("mt-0.5 text-muted-foreground", big ? "text-sm" : "text-xs")}>
-                {p.category}
-                {p.assignee ? ` · ${p.assignee}` : ""}
-                {p.total > 0 ? ` · ${p.done} de ${p.total} subtareas` : ""}
-              </p>
+              {p.total > 0 && (
+                <p className={cn("mt-0.5 text-muted-foreground", big ? "text-sm" : "text-xs")}>
+                  {p.done} de {p.total} subtareas
+                </p>
+              )}
             </div>
             <StatusChip status={p.status} />
           </button>
@@ -198,7 +198,7 @@ function Cover({ team, title, note, big }: { team: CoordTeam; title: string; not
           <p className={cn("mb-3 font-semibold uppercase tracking-wide", big ? "text-base" : "text-xs")} style={{ color: UIFCITO.grisAzulado }}>
             El equipo del área
           </p>
-          <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,16rem),1fr))] gap-3">
             {people.map(({ m, master }, i) => (
               <CoverPerson key={m.id} m={m} i={i} big={big} master={master} />
             ))}
@@ -293,7 +293,7 @@ function Overview({ data, big, onGo }: { data: CoordData; big: boolean; onGo: (k
         )}
       </div>
 
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
         {cards.map((c) => {
           const Icon = SLIDE_ICON[c.key];
           return (

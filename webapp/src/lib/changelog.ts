@@ -21,6 +21,15 @@ export const CHANGELOG_SHOWN = 10;
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: "2026.10.23.11",
+    date: "2026-10-23",
+    title: "Reunión coordinación: pantalla completa y tarjetas más limpias",
+    changes: [
+      { type: "MEJORA", text: "La presentación ocupa todo el ancho de la pantalla: las tarjetas de proyectos se reparten en tantas columnas como quepan, y la página General muestra sus cuatro partes en una fila en pantallas anchas." },
+      { type: "MEJORA", text: "Las tarjetas de proyecto ya no muestran la categoría ni al integrante a cargo, solo el nombre, el avance de subtareas y el estado." },
+    ],
+  },
+  {
     version: "2026.10.23.10",
     date: "2026-10-23",
     title: "Reunión coordinación: pop-up de la plantilla del proyecto",
