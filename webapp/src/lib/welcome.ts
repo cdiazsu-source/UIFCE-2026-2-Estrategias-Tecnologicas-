@@ -4,7 +4,7 @@ import { getTrackedWho, loadFootprint } from "@/lib/activity";
 import { isShiftCategory, type ShiftData } from "@/lib/office-schedule";
 import { PROJECT_STATUS_LABEL, greetingName } from "@/lib/utils";
 import { lateSinceDate } from "@/lib/lateness";
-import { STICKY_ID, isStickyColor, type StickyData } from "@/lib/sticky-note";
+import { loadStickyNote } from "@/lib/sticky-load";
 import { isJuniorWho, viewProfile } from "@/lib/view-profiles";
 import type { FootprintRange, WelcomeHighlight, WelcomePayload, WelcomeProject } from "@/lib/welcome-types";
 
@@ -79,18 +79,6 @@ async function loadProjects(userId: string, name: string, since: Date): Promise<
   };
 }
 
-/** Post-it vigente del máster. Tabla nueva: si no existe todavía (migración pendiente) o no hay nota activa, devuelve null. */
-async function loadSticky(): Promise<StickyData | null> {
-  try {
-    const n = await prisma.stickyNote.findUnique({ where: { id: STICKY_ID } });
-    if (!n || !n.active) return null;
-    const at = n.updatedAt.toISOString();
-    return { body: n.body, color: isStickyColor(n.color) ? n.color : "AMARILLO", author: n.author, at, stamp: at };
-  } catch {
-    return null;
-  }
-}
-
 /** `preview`: la vista previa de «Ver como»: la capa tal como la vería el perfil que se está viendo (solo con «Ver como» activo). */
 export async function loadWelcome(range: FootprintRange = "7", preview = false): Promise<WelcomePayload | null> {
   const session = await getSession();
@@ -101,7 +89,7 @@ export async function loadWelcome(range: FootprintRange = "7", preview = false):
     // Máster (credencial compartida): la huella digital de los monitores.
     if (!preview && session.isMaster) {
       const master = await prisma.user.findFirst({ where: { role: "MASTER", area: "ET", active: true }, orderBy: { name: "asc" }, select: { name: true } });
-      return { kind: "master", firstName: master ? greetingName(master.name) : "", sticky: await loadSticky(), footprint: await loadFootprint(range) };
+      return { kind: "master", firstName: master ? greetingName(master.name) : "", sticky: await loadStickyNote(), footprint: await loadFootprint(range) };
     }
 
     // Persona identificada por su credencial propia (Junior, dirección o coordinación).
@@ -145,7 +133,7 @@ export async function loadWelcome(range: FootprintRange = "7", preview = false):
       shifts: own ? shifts : [],
       tracked: tracked !== null,
       late,
-      note: isJuniorWho(key) ? await loadSticky() : null,
+      note: isJuniorWho(key) ? await loadStickyNote(key) : null,
       ...(preview ? { preview: { label: viewProfile(key)?.label ?? user.name } } : {}),
     };
   } catch {

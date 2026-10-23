@@ -21,6 +21,15 @@ export const CHANGELOG_SHOWN = 10;
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: "2026.10.22.15",
+    date: "2026-10-22",
+    title: "Post-it para quien elija el máster",
+    changes: [
+      { type: "NUEVO", text: "Al publicar el post-it, el máster elige si es para todos los Junior o solo para uno o varios (Junior Artes, Junior ET). Quien no es destinatario no lo ve ni en el panel ni en su pantalla de bienvenida." },
+      { type: "MEJORA", text: "El bloque del post-it muestra para quién está vigente la nota." },
+    ],
+  },
+  {
     version: "2026.10.22.14",
     date: "2026-10-22",
     title: "Panel del Junior: el post-it primero",

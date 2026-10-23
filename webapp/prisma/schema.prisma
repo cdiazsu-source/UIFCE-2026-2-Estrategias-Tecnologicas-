@@ -1012,6 +1012,11 @@ model StickyNote {
   updatedAt DateTime @updatedAt
 }
 
+/// Destinatarios del post-it: un perfil Junior (clave de `JUNIOR_PROFILES`) por fila. Sin filas = lo ven todos los Junior.
+model StickyRecipient {
+  profileKey String @id
+}
+
 /// Visita anterior de una persona con credencial propia: cuando empieza una visita nueva (pasaron más de 30 min desde su
 /// actividad anterior) se guarda aquí el `lastSeenAt` previo, para decir «tu último ingreso fue…» en la capa de bienvenida.
 /// Vive aparte de User a propósito: así agregarla no cambia las consultas de User y el despliegue no depende de la migración.

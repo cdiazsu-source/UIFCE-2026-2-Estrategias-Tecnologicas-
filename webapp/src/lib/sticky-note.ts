@@ -20,4 +20,6 @@ export type StickyData = {
   author: string;
   at: string;
   stamp: string;
+  /** Perfiles Junior destinatarios (claves de JUNIOR_PROFILES); vacío = todos. */
+  to: string[];
 };

@@ -22,7 +22,7 @@ import { ProjectSeedPromptButton } from "@/components/project-seed-prompt-button
 import { CollapsibleBlock } from "@/components/collapsible";
 import { AccessLog, type AccessEntry } from "@/components/access-log";
 import { getSession } from "@/lib/session";
-import { STICKY_ID, isStickyColor, type StickyData } from "@/lib/sticky-note";
+import { loadStickyNote } from "@/lib/sticky-load";
 import { StickyPostIt } from "@/components/sticky-note";
 import { getAssignedUpdates, getNotifyIdentity } from "@/lib/notify";
 import { JUNIOR_PROFILES } from "@/lib/view-profiles";
@@ -403,15 +403,7 @@ export default async function HomePage({
 
   // ?focus=<id>: enfoca la grilla en los pendientes de atención de esa persona.
   // Junior: en lugar de El área, Situación actual, Objetivos y Difusión, ve el post-it del máster (tabla nueva: sin ella, no sale).
-  let sticky: StickyData | null = null;
-  if (juniorKey) {
-    try {
-      const n = await prisma.stickyNote.findUnique({ where: { id: STICKY_ID } });
-      if (n && n.active) sticky = { body: n.body, color: isStickyColor(n.color) ? n.color : "AMARILLO", author: n.author, at: n.updatedAt.toISOString(), stamp: n.updatedAt.toISOString() };
-    } catch {
-      sticky = null;
-    }
-  }
+  const sticky = juniorKey ? await loadStickyNote(juniorKey) : null;
 
   const focusPerson = searchParams.focus
     ? commentAuthors.find((p) => p.id === searchParams.focus) ?? null

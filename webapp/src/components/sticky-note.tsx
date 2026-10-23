@@ -6,8 +6,14 @@ import { StickyNote as StickyIcon } from "lucide-react";
 import { clearSticky, saveSticky } from "@/lib/actions/sticky-note";
 import { STICKY_COLORS, STICKY_MAX, type StickyColor, type StickyData } from "@/lib/sticky-note";
 import { cn, timeAgo } from "@/lib/utils";
+import { JUNIOR_PROFILES } from "@/lib/view-profiles";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+
+/** «para Junior Artes» / «para Junior Artes y Junior ET». */
+function audience(to: string[]): string {
+  return `para ${to.map((k) => JUNIOR_PROFILES[k] ?? k).join(" y ")}`;
+}
 
 /** El post-it: una nota grande, de color, con una cinta arriba y un leve giro. Es lo primero que ve el Junior al abrir la app. */
 export function StickyPostIt({ note, preview = false }: { note: Pick<StickyData, "body" | "color" | "author"> & { at?: string }; preview?: boolean }) {
@@ -32,6 +38,7 @@ export function StickyEditor({ current }: { current: StickyData | null }) {
   const [note, setNote] = useState<StickyData | null>(current);
   const [body, setBody] = useState(current?.body ?? "");
   const [color, setColor] = useState<StickyColor>(current?.color ?? "AMARILLO");
+  const [to, setTo] = useState<string[]>(current?.to ?? []);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState<string | null>(null);
   const [pending, start] = useTransition();
@@ -42,11 +49,12 @@ export function StickyEditor({ current }: { current: StickyData | null }) {
     const fd = new FormData();
     fd.set("body", body);
     fd.set("color", color);
+    to.forEach((k) => fd.append("to", k));
     start(async () => {
       const r = await saveSticky(fd);
       if (r.ok) {
-        setNote({ body: body.trim(), color, author: "tú", at: new Date().toISOString(), stamp: String(Date.now()) });
-        setSaved("Publicada: la verán los Junior al abrir la app.");
+        setNote({ body: body.trim(), color, author: "tú", at: new Date().toISOString(), stamp: String(Date.now()), to });
+        setSaved(to.length ? `Publicada: la verán ${audience(to)}.` : "Publicada: la verán los Junior al abrir la app.");
       } else setError(r.error);
     });
   };
@@ -68,7 +76,7 @@ export function StickyEditor({ current }: { current: StickyData | null }) {
       <summary className="flex cursor-pointer select-none flex-wrap items-center gap-2 px-3 py-2 text-sm">
         <StickyIcon className="h-4 w-4 text-muted-foreground" aria-hidden />
         <span className="font-medium">Post-it para los Junior</span>
-        <span className="min-w-0 flex-1 truncate text-xs text-muted-foreground">{note ? `Vigente: «${note.body}»` : "No hay nota vigente"}</span>
+        <span className="min-w-0 flex-1 truncate text-xs text-muted-foreground">{note ? `Vigente${note.to.length ? ` (${audience(note.to)})` : ""}: «${note.body}»` : "No hay nota vigente"}</span>
       </summary>
       <div className="flex flex-col gap-3 border-t border-border p-3">
         <label className="flex flex-col gap-1 text-xs font-medium">
@@ -90,6 +98,23 @@ export function StickyEditor({ current }: { current: StickyData | null }) {
               style={{ background: STICKY_COLORS[k].bg, color: STICKY_COLORS[k].fg, borderColor: STICKY_COLORS[k].edge }}
             >
               {STICKY_COLORS[k].label}
+            </button>
+          ))}
+        </div>
+        <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Para quién es el post-it">
+          <span className="text-xs font-medium">Para</span>
+          <button type="button" aria-pressed={to.length === 0} onClick={() => setTo([])} className={cn("rounded-full border px-3 py-1 text-xs", to.length === 0 ? "border-primary bg-primary text-primary-foreground" : "border-border hover:bg-muted")}>
+            Todos los Junior
+          </button>
+          {Object.entries(JUNIOR_PROFILES).map(([key, label]) => (
+            <button
+              key={key}
+              type="button"
+              aria-pressed={to.includes(key)}
+              onClick={() => setTo((cur) => (cur.includes(key) ? cur.filter((k) => k !== key) : cur.length + 1 >= Object.keys(JUNIOR_PROFILES).length ? [] : [...cur, key]))}
+              className={cn("rounded-full border px-3 py-1 text-xs", to.includes(key) ? "border-primary bg-primary text-primary-foreground" : "border-border hover:bg-muted")}
+            >
+              {label}
             </button>
           ))}
         </div>
