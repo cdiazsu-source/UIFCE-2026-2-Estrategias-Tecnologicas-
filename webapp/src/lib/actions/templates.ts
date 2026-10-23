@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { prisma } from "@/lib/prisma";
 import { blockedForJunior } from "@/lib/session";
+import { parsePieces } from "@/lib/template-pieces";
 import type { UndoAction } from "@/lib/undo";
 
 const PATH = "/plantillas";
@@ -31,6 +32,22 @@ function promptText(fd: FormData): string | null {
   return str(fd, "promptText")?.slice(0, PROMPT_MAX) ?? null;
 }
 
+/** Reemplaza las piezas de la plantilla por las del formulario (campo `pieces`, JSON), en el orden en que llegan. Tabla nueva: si falta la
+ *  migración, la plantilla se guarda igual y las piezas se ignoran. */
+async function savePieces(templateId: string, fd: FormData): Promise<void> {
+  const raw = fd.get("pieces");
+  if (typeof raw !== "string") return;
+  const pieces = parsePieces(raw);
+  try {
+    await prisma.$transaction([
+      prisma.templatePiece.deleteMany({ where: { templateId } }),
+      prisma.templatePiece.createMany({ data: pieces.map((p, order) => ({ templateId, image: p.image, label: p.label, url: p.url, order })) }),
+    ]);
+  } catch {
+    // sin la migración de piezas
+  }
+}
+
 export async function addTemplate(formData: FormData) {
   if (await blockedForJunior()) return;
   const name = String(formData.get("name") ?? "").trim();
@@ -38,7 +55,7 @@ export async function addTemplate(formData: FormData) {
   if (!name) return;
 
   const last = await prisma.template.findFirst({ orderBy: { order: "desc" }, select: { order: true } });
-  await prisma.template.create({
+  const created = await prisma.template.create({
     data: {
       name,
       category,
@@ -51,6 +68,7 @@ export async function addTemplate(formData: FormData) {
       order: (last?.order ?? -1) + 1,
     },
   });
+  await savePieces(created.id, formData);
   revalidatePath(PATH);
 }
 
@@ -75,6 +93,7 @@ export async function updateTemplate(id: string, formData: FormData): Promise<Un
       screenshot: screenshot(formData),
     },
   });
+  await savePieces(id, formData);
   revalidatePath(PATH);
 
   return {

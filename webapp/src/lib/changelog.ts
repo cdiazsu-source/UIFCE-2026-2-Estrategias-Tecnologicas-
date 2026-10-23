@@ -21,6 +21,26 @@ export const CHANGELOG_SHOWN = 10;
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: "2026.10.23.3",
+    date: "2026-10-23",
+    title: "Piezas de un evento en Plantillas",
+    changes: [
+      { type: "NUEVO", text: "Cada plantilla puede guardar varias piezas: una imagen pequeña con su nombre y su enlace de Canva (por ejemplo, todas las piezas del lanzamiento especial de Cursos Libres). Se agregan varias imágenes a la vez, pegando o arrastrando." },
+      { type: "NUEVO", text: "Las piezas se reordenan con un clic en las flechas de cada una. En la tarjeta se ven de una en una, con flechas (o ← → del teclado) para pasar de una a otra, su nombre, el botón que abre su enlace y miniaturas para saltar a cualquiera." },
+    ],
+  },
+  {
+    version: "2026.10.23.2",
+    date: "2026-10-23",
+    title: "Reunión coordinación: páginas, modo diseño e historial",
+    changes: [
+      { type: "NUEVO", text: "La presentación ahora tiene cinco páginas: una general con las cuatro partes y una página para cada una (lo que entregamos, en curso y bloqueos, en el próximo corte, notas y comentarios). Se pasa con los botones o con las flechas del teclado." },
+      { type: "NUEVO", text: "Modo diseño: el máster cambia el título de cada página, agrega una nota y pone imágenes o GIFs tomados de las capturas de Plantillas (a la izquierda, a la derecha o a ancho completo, con pie de imagen)." },
+      { type: "NUEVO", text: "Cada reunión se guarda con su fecha y queda como se presentó: en «Reuniones anteriores» se abre cualquiera de solo lectura." },
+      { type: "MEJORA", text: "«Próximos 15 días» pasó a llamarse «En el próximo corte»." },
+    ],
+  },
+  {
     version: "2026.10.23.1",
     date: "2026-10-23",
     title: "Reunión coordinación",

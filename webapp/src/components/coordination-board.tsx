@@ -1,139 +1,143 @@
 "use client";
 
 import { useEffect, useRef, useState, useTransition } from "react";
-import { AlertTriangle, Maximize2, Plus, X } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { ChevronLeft, ChevronRight, History, Maximize2, Palette, X } from "lucide-react";
 
-import { addBlocker, deleteBlocker } from "@/lib/actions/coordination";
-import { BLOCKER_MAX, type CoordBlocker, type CoordProject } from "@/lib/coordination";
-import { PROJECT_STATUS_LABEL, cn } from "@/lib/utils";
+import { deleteMeeting, saveMeeting } from "@/lib/actions/coordination";
+import { MEETING_LABEL_MAX, SLIDE_KEYS, SLIDE_LABEL, type CoordData, type MeetingSummary, type SlideKey } from "@/lib/coordination";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DesignEditor, type TemplateOption } from "@/components/coordination-design";
+import { SLIDE_NUMBER, Slide } from "@/components/coordination-slides";
 
-const STATUS_STYLE: Record<string, string> = {
-  COMPLETADO: "bg-success/10 text-success",
-  EN_CURSO: "bg-primary/10 text-primary",
-};
+const longDate = (iso: string) => new Intl.DateTimeFormat("es-CO", { dateStyle: "long", timeZone: "UTC" }).format(new Date(`${iso}T00:00:00Z`));
+const todayBogota = () => new Intl.DateTimeFormat("en-CA", { timeZone: "America/Bogota" }).format(new Date());
 
-function StatusChip({ status }: { status: string }) {
-  const label = status === "COMPLETADO" ? "Entregado" : (PROJECT_STATUS_LABEL[status] ?? status);
-  return <span className={cn("shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium", STATUS_STYLE[status] ?? "bg-muted text-muted-foreground")}>{label}</span>;
-}
-
-function ProjectRow({ p, big }: { p: CoordProject; big: boolean }) {
-  return (
-    <li className="flex items-start justify-between gap-3 rounded-lg border border-border bg-card px-4 py-3">
-      <div className="min-w-0">
-        <p className={cn("font-medium leading-snug", big ? "text-lg" : "text-sm")}>{p.title}</p>
-        <p className={cn("mt-0.5 text-muted-foreground", big ? "text-sm" : "text-xs")}>
-          {p.category}
-          {p.assignee ? ` · ${p.assignee}` : ""}
-          {p.total > 0 ? ` · ${p.done} de ${p.total} subtareas` : ""}
-        </p>
-      </div>
-      <StatusChip status={p.status} />
-    </li>
-  );
-}
-
-function Block({ n, title, hint, children, big }: { n: string; title: string; hint?: string; children: React.ReactNode; big: boolean }) {
-  return (
-    <section className="flex flex-col gap-3">
-      <div className="flex items-baseline gap-3 border-b border-border pb-2">
-        <span className={cn("font-semibold text-primary", big ? "text-lg" : "text-sm")}>{n}</span>
-        <h2 className={cn("font-semibold tracking-tight", big ? "text-3xl" : "text-xl")}>{title}</h2>
-        {hint && <span className={cn("text-muted-foreground", big ? "text-base" : "text-sm")}>{hint}</span>}
-      </div>
-      {children}
-    </section>
-  );
-}
-
-function Blockers({ blockers, big, editable }: { blockers: CoordBlocker[] | null; big: boolean; editable: boolean }) {
-  const [text, setText] = useState("");
-  const [error, setError] = useState<string | null>(null);
+/** Guardar la reunión con su fecha y abrir las anteriores. `meetings` null = la tabla no existe todavía. */
+function MeetingBar({ meetings, viewing }: { meetings: MeetingSummary[] | null; viewing: MeetingSummary | null }) {
+  const router = useRouter();
+  const [date, setDate] = useState(todayBogota);
+  const [label, setLabel] = useState("");
+  const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [pending, start] = useTransition();
 
-  if (blockers === null) return <p className="rounded-lg border border-dashed border-input p-4 text-sm text-muted-foreground">Los bloqueos todavía no están disponibles (falta aplicar la migración con db:deploy).</p>;
+  if (meetings === null) return <p className="rounded-lg border border-dashed border-input p-3 text-xs text-muted-foreground">El historial de reuniones todavía no está disponible (falta aplicar la migración con db:deploy).</p>;
 
-  const add = () => {
-    setError(null);
-    const fd = new FormData();
-    fd.set("text", text);
+  if (viewing) {
+    return (
+      <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-primary/30 bg-primary/5 px-4 py-2.5 text-sm">
+        <span>
+          <span className="font-medium">Reunión del {longDate(viewing.date)}</span>
+          {viewing.label ? ` · ${viewing.label}` : ""} <span className="text-muted-foreground">(guardada, solo lectura)</span>
+        </span>
+        <Link href="/reunion" className="text-sm font-medium text-primary underline-offset-2 hover:underline">
+          Volver a la reunión actual
+        </Link>
+      </div>
+    );
+  }
+
+  const save = () => {
+    setMsg(null);
     start(async () => {
-      const r = await addBlocker(fd);
-      if (r.ok) setText("");
-      else setError(r.error);
+      const r = await saveMeeting(date, label);
+      if (r.ok) {
+        setMsg({ ok: true, text: `Reunión del ${longDate(date)} guardada.` });
+        setLabel("");
+        router.refresh();
+      } else setMsg({ ok: false, text: r.error });
     });
   };
 
   return (
     <div className="flex flex-col gap-2">
-      <p className={cn("font-medium uppercase tracking-wide text-muted-foreground", big ? "text-sm" : "text-xs")}>Bloqueos</p>
-      {blockers.length === 0 ? (
-        <p className={cn("text-muted-foreground", big ? "text-lg" : "text-sm")}>Sin bloqueos por ahora.</p>
-      ) : (
-        <ul className="flex flex-col gap-2">
-          {blockers.map((b) => (
-            <li key={b.id} className="flex items-start gap-3 rounded-lg border border-warning/40 bg-warning/10 px-4 py-3">
-              <AlertTriangle className={cn("mt-0.5 shrink-0 text-warning", big ? "h-6 w-6" : "h-4 w-4")} aria-hidden />
-              <p className={cn("min-w-0 flex-1 font-medium", big ? "text-xl" : "text-sm")}>{b.text}</p>
-              {editable && (
+      <div className="flex flex-wrap items-end gap-2">
+        <label className="flex flex-col gap-1 text-xs font-medium">
+          Fecha de la reunión
+          <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="h-9 w-40 text-sm font-normal" />
+        </label>
+        <label className="flex min-w-[10rem] flex-1 flex-col gap-1 text-xs font-medium">
+          Nombre (opcional)
+          <Input value={label} maxLength={MEETING_LABEL_MAX} onChange={(e) => setLabel(e.target.value)} placeholder="Ej.: Coordinación semana 10" className="h-9 text-sm font-normal" />
+        </label>
+        <Button type="button" size="sm" variant="outline" onClick={save} disabled={pending}>
+          {pending ? "Guardando…" : "Guardar reunión"}
+        </Button>
+      </div>
+      {msg && (
+        <p role={msg.ok ? "status" : "alert"} className={cn("text-xs", msg.ok ? "text-success" : "text-destructive")}>
+          {msg.text}
+        </p>
+      )}
+      <details className="rounded-lg border border-border">
+        <summary className="flex cursor-pointer select-none items-center gap-2 px-3 py-2 text-xs font-medium">
+          <History className="h-4 w-4 text-muted-foreground" aria-hidden />
+          Reuniones anteriores ({meetings.length})
+        </summary>
+        {meetings.length === 0 ? (
+          <p className="border-t border-border px-3 py-2 text-xs text-muted-foreground">Todavía no hay reuniones guardadas.</p>
+        ) : (
+          <ul className="divide-y divide-border border-t border-border">
+            {meetings.map((m) => (
+              <li key={m.id} className="flex items-center justify-between gap-2 px-3 py-2 text-sm">
+                <Link href={`/reunion?reunion=${m.id}`} className="min-w-0 flex-1 truncate font-medium text-primary underline-offset-2 hover:underline">
+                  {longDate(m.date)}
+                  {m.label ? ` · ${m.label}` : ""}
+                </Link>
                 <button
                   type="button"
-                  aria-label="Quitar el bloqueo"
-                  disabled={pending}
-                  onClick={() => start(async () => void (await deleteBlocker(b.id)))}
+                  aria-label={`Borrar la reunión del ${longDate(m.date)}`}
+                  onClick={() => window.confirm("¿Borrar esta reunión guardada?") && start(async () => (await deleteMeeting(m.id), router.refresh()))}
                   className="rounded p-1 text-muted-foreground hover:bg-muted"
                 >
                   <X className="h-4 w-4" aria-hidden />
                 </button>
-              )}
-            </li>
-          ))}
-        </ul>
-      )}
-      {editable && (
-        <div className="flex flex-col gap-1">
-          <div className="flex gap-2">
-            <Input value={text} onChange={(e) => setText(e.target.value)} maxLength={BLOCKER_MAX} placeholder="Nuevo bloqueo" className="h-9 text-sm" onKeyDown={(e) => e.key === "Enter" && text.trim() && add()} />
-            <Button type="button" size="sm" variant="outline" onClick={add} disabled={pending}>
-              <Plus className="mr-1 h-4 w-4" aria-hidden />
-              Agregar
-            </Button>
-          </div>
-          {error && (
-            <p role="alert" className="text-xs text-destructive">
-              {error}
-            </p>
-          )}
-        </div>
-      )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </details>
     </div>
   );
 }
 
-/** «Reunión coordinación»: lámina de tres bloques. «Presentar» la abre a pantalla completa, sin menú ni buscador (Esc la cierra). */
-export function CoordinationBoard({ delivered, upcoming, blockers }: { delivered: CoordProject[]; upcoming: CoordProject[]; blockers: CoordBlocker[] | null }) {
+/** «Reunión coordinación»: cinco páginas (general y una por parte), modo diseño, modo presentar e historial de reuniones guardadas. */
+export function CoordinationBoard({ data, meetings, viewing, templates }: { data: CoordData; meetings: MeetingSummary[] | null; viewing: MeetingSummary | null; templates: TemplateOption[] }) {
+  const [slide, setSlide] = useState<SlideKey>("general");
+  const [designMode, setDesignMode] = useState(false);
   const [presenting, setPresenting] = useState(false);
   const root = useRef<HTMLDivElement>(null);
-  const today = new Intl.DateTimeFormat("es-CO", { dateStyle: "long", timeZone: "America/Bogota" }).format(new Date());
+  const readOnly = !!viewing;
+  const dateLine = viewing ? `Reunión del ${longDate(viewing.date)}` : `Corte al ${new Intl.DateTimeFormat("es-CO", { dateStyle: "long", timeZone: "America/Bogota" }).format(new Date())}`;
+  const at = SLIDE_KEYS.indexOf(slide);
+  const go = (delta: number) => setSlide(SLIDE_KEYS[(at + delta + SLIDE_KEYS.length) % SLIDE_KEYS.length]);
 
-  // Al salir de la pantalla completa (Esc del navegador) se sale también del modo presentar.
+  // Flechas para pasar de página (salvo al escribir); Esc sale de presentar; salir de pantalla completa también.
   useEffect(() => {
-    if (!presenting) return;
+    const onKey = (e: KeyboardEvent) => {
+      const el = e.target as HTMLElement | null;
+      if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.tagName === "SELECT" || el.isContentEditable)) return;
+      if (e.key === "ArrowRight") go(1);
+      else if (e.key === "ArrowLeft") go(-1);
+      else if (e.key === "Escape") setPresenting(false);
+    };
     const onFs = () => {
       if (!document.fullscreenElement) setPresenting(false);
     };
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setPresenting(false);
-    document.addEventListener("fullscreenchange", onFs);
     document.addEventListener("keydown", onKey);
+    document.addEventListener("fullscreenchange", onFs);
     return () => {
-      document.removeEventListener("fullscreenchange", onFs);
       document.removeEventListener("keydown", onKey);
+      document.removeEventListener("fullscreenchange", onFs);
     };
-  }, [presenting]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [at]);
 
   const present = () => {
+    setDesignMode(false);
     setPresenting(true);
     try {
       void root.current?.requestFullscreen?.();
@@ -152,50 +156,69 @@ export function CoordinationBoard({ delivered, upcoming, blockers }: { delivered
 
   return (
     <div ref={root} className={cn(presenting ? "fixed inset-0 z-[70] overflow-y-auto bg-card px-10 py-8" : "mx-auto w-full max-w-4xl px-4 py-8")}>
-      <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-6">
         <header className="flex flex-wrap items-end justify-between gap-3 border-b border-border pb-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">UIFCE · Estrategias Tecnológicas</p>
             <h1 className={cn("mt-1 font-semibold tracking-tight", presenting ? "text-5xl" : "text-3xl")}>Reunión de coordinación</h1>
           </div>
-          <div className="flex items-center gap-3">
-            <p className="text-sm text-muted-foreground">Corte al {today}</p>
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="text-sm text-muted-foreground">{dateLine}</p>
             {presenting ? (
               <Button type="button" size="sm" variant="outline" onClick={leave}>
                 Salir (Esc)
               </Button>
             ) : (
-              <Button type="button" size="sm" onClick={present}>
-                <Maximize2 className="mr-1.5 h-4 w-4" aria-hidden />
-                Presentar
-              </Button>
+              <>
+                {!readOnly && (
+                  <Button type="button" size="sm" variant={designMode ? "default" : "outline"} aria-pressed={designMode} onClick={() => setDesignMode((v) => !v)}>
+                    <Palette className="mr-1.5 h-4 w-4" aria-hidden />
+                    Modo diseño
+                  </Button>
+                )}
+                <Button type="button" size="sm" onClick={present}>
+                  <Maximize2 className="mr-1.5 h-4 w-4" aria-hidden />
+                  Presentar
+                </Button>
+              </>
             )}
           </div>
         </header>
 
-        <Block n="01" title="Lo que entregamos" hint={`${delivered.length} proyectos`} big={presenting}>
-          <ul className="grid grid-cols-1 gap-2 md:grid-cols-2">
-            {delivered.map((p) => (
-              <ProjectRow key={p.id} p={p} big={presenting} />
-            ))}
-          </ul>
-        </Block>
+        {!presenting && <MeetingBar meetings={meetings} viewing={viewing} />}
 
-        <Block n="02" title="En curso y bloqueos" big={presenting}>
-          <Blockers blockers={blockers} big={presenting} editable={!presenting} />
-        </Block>
+        <nav aria-label="Páginas de la presentación" className={cn("flex flex-wrap gap-1.5", presenting && "justify-center")}>
+          {SLIDE_KEYS.map((k) => (
+            <button
+              key={k}
+              type="button"
+              aria-current={k === slide ? "page" : undefined}
+              onClick={() => setSlide(k)}
+              className={cn("rounded-full border px-3 py-1 text-xs font-medium transition-colors", k === slide ? "border-primary bg-primary text-primary-foreground" : "border-border hover:bg-muted", presenting && "px-4 py-1.5 text-sm")}
+            >
+              {SLIDE_NUMBER[k] ? `${SLIDE_NUMBER[k]} · ` : ""}
+              {data.design[k].title || SLIDE_LABEL[k]}
+            </button>
+          ))}
+        </nav>
 
-        <Block n="03" title="En los próximos 15 días" hint="Atención inmediata" big={presenting}>
-          {upcoming.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No hay otros proyectos en atención inmediata.</p>
-          ) : (
-            <ul className="grid grid-cols-1 gap-2 md:grid-cols-2">
-              {upcoming.map((p) => (
-                <ProjectRow key={p.id} p={p} big={presenting} />
-              ))}
-            </ul>
-          )}
-        </Block>
+        <Slide key={slide} slide={slide} data={data} big={presenting} canEditBlockers={!presenting && !readOnly} onGo={setSlide} />
+
+        {designMode && !readOnly && !presenting && <DesignEditor key={slide} slide={slide} initial={data.design[slide]} templates={templates} />}
+
+        <div className="flex items-center justify-between border-t border-border pt-3 text-sm text-muted-foreground">
+          <Button type="button" size="sm" variant="ghost" onClick={() => go(-1)}>
+            <ChevronLeft className="mr-1 h-4 w-4" aria-hidden />
+            Anterior
+          </Button>
+          <span>
+            Página {at + 1} de {SLIDE_KEYS.length}
+          </span>
+          <Button type="button" size="sm" variant="ghost" onClick={() => go(1)}>
+            Siguiente
+            <ChevronRight className="ml-1 h-4 w-4" aria-hidden />
+          </Button>
+        </div>
       </div>
     </div>
   );

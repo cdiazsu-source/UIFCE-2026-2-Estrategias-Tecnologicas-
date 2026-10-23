@@ -1,10 +1,11 @@
 "use client";
 
 import { useMemo, useRef, useState, useTransition } from "react";
-import { Check, Copy, Download, ExternalLink, ImagePlus, Pencil, Plus, Search, Sparkles, Trash2, X } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Copy, Download, ExternalLink, ImagePlus, Pencil, Plus, Search, Sparkles, Trash2, X } from "lucide-react";
 
 import { addTemplate, deleteTemplate, updateTemplate } from "@/lib/actions/templates";
 import { downscaleToDataUrl } from "@/lib/image-client";
+import { PIECES_MAX, PIECE_IMAGE_SIZE, PIECE_LABEL_MAX, type PieceData } from "@/lib/template-pieces";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -23,6 +24,8 @@ export type TemplateData = {
   /** Texto del prompt, si la plantilla es un prompt. */
   promptText: string | null;
   screenshot: string | null;
+  /** Piezas (imagen pequeña + enlace), en su orden. */
+  pieces: PieceData[];
 };
 
 export const TEMPLATE_CATEGORIES = [
@@ -132,6 +135,174 @@ function ScreenshotField({ initial }: { initial: string | null }) {
   );
 }
 
+/** Piezas de la plantilla: se agregan varias imágenes a la vez (elegir, pegar o arrastrar), cada una con su nombre y su enlace de Canva, y se
+ *  reordenan con un clic en las flechas. Viajan en un input oculto (`pieces`, JSON) con el resto del formulario. */
+function PiecesField({ initial }: { initial: PieceData[] }) {
+  const [pieces, setPieces] = useState<PieceData[]>(initial);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  async function accept(files: Blob[]) {
+    const imgs = files.filter((f) => f.type.startsWith("image/"));
+    if (imgs.length === 0) return;
+    setBusy(true);
+    setErr(null);
+    try {
+      const room = PIECES_MAX - pieces.length;
+      const made: PieceData[] = [];
+      for (const f of imgs.slice(0, room)) made.push({ image: await downscaleToDataUrl(f, PIECE_IMAGE_SIZE, 0.7), label: "", url: "" });
+      setPieces((cur) => [...cur, ...made]);
+      if (imgs.length > room) setErr(`Solo caben ${PIECES_MAX} piezas por plantilla.`);
+    } catch {
+      setErr("No se pudo procesar alguna imagen.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const move = (i: number, d: -1 | 1) =>
+    setPieces((cur) => {
+      const j = i + d;
+      if (j < 0 || j >= cur.length) return cur;
+      const next = [...cur];
+      [next[i], next[j]] = [next[j], next[i]];
+      return next;
+    });
+  const patchPiece = (i: number, p: Partial<PieceData>) => setPieces((cur) => cur.map((x, j) => (j === i ? { ...x, ...p } : x)));
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      <input type="hidden" name="pieces" value={JSON.stringify(pieces)} />
+      <span className="text-xs font-medium text-muted-foreground">
+        Piezas del evento (opcional) · {pieces.length}/{PIECES_MAX}
+      </span>
+      {pieces.length > 0 && (
+        <ul className="flex flex-col gap-2">
+          {pieces.map((p, i) => (
+            <li key={i} className="flex flex-wrap items-center gap-2 rounded-md border border-border p-2">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={p.image} alt="" className="h-16 w-16 rounded border border-border object-cover" />
+              <div className="flex min-w-[12rem] flex-1 flex-col gap-1">
+                <Input value={p.label} maxLength={PIECE_LABEL_MAX} onChange={(e) => patchPiece(i, { label: e.target.value })} placeholder="Nombre de la pieza (ej. Post de inscripción)" className="h-8 text-xs" />
+                <Input value={p.url} onChange={(e) => patchPiece(i, { url: e.target.value })} placeholder="Enlace en Canva (https://www.canva.com/…)" className="h-8 text-xs" />
+              </div>
+              <div className="flex items-center gap-0.5">
+                <button type="button" onClick={() => move(i, -1)} disabled={i === 0} aria-label={`Mover la pieza ${i + 1} antes`} className="rounded p-1.5 text-muted-foreground hover:bg-accent disabled:opacity-30">
+                  <ChevronLeft className="h-4 w-4" aria-hidden />
+                </button>
+                <button type="button" onClick={() => move(i, 1)} disabled={i === pieces.length - 1} aria-label={`Mover la pieza ${i + 1} después`} className="rounded p-1.5 text-muted-foreground hover:bg-accent disabled:opacity-30">
+                  <ChevronRight className="h-4 w-4" aria-hidden />
+                </button>
+                <button type="button" onClick={() => setPieces((cur) => cur.filter((_, j) => j !== i))} aria-label="Quitar la pieza" className="rounded p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive">
+                  <Trash2 className="h-4 w-4" aria-hidden />
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+      <div
+        tabIndex={0}
+        onPaste={(e) => {
+          const files = Array.from(e.clipboardData.files).filter((x) => x.type.startsWith("image/"));
+          if (files.length) {
+            e.preventDefault();
+            void accept(files);
+          }
+        }}
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={(e) => {
+          e.preventDefault();
+          void accept(Array.from(e.dataTransfer.files));
+        }}
+        className="flex flex-wrap items-center gap-2 rounded-md border border-dashed border-input p-2 text-xs text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        <Button type="button" variant="outline" size="sm" disabled={busy || pieces.length >= PIECES_MAX} onClick={() => inputRef.current?.click()}>
+          <ImagePlus className="h-3.5 w-3.5" />
+          {busy ? "Procesando…" : "Agregar imágenes"}
+        </Button>
+        <span>Elige varias a la vez, pega (Ctrl+V) o arrastra. Cada una se reduce a {PIECE_IMAGE_SIZE} px.</span>
+        <input ref={inputRef} type="file" accept="image/*" multiple className="hidden" onChange={(e) => { void accept(Array.from(e.target.files ?? [])); e.target.value = ""; }} />
+      </div>
+      {err && <span className="text-xs text-destructive">{err}</span>}
+    </div>
+  );
+}
+
+/** Piezas en la tarjeta: una a la vez, con flechas para pasar de una a otra (también ← → con el teclado), su nombre y el botón que abre su
+ *  enlace (Canva); debajo, las miniaturas para saltar directo a cualquiera. */
+function PiecesGallery({ pieces }: { pieces: PieceData[] }) {
+  const [i, setI] = useState(0);
+  const n = pieces.length;
+  const at = Math.min(i, n - 1);
+  const cur = pieces[at];
+  const go = (d: number) => setI((at + d + n) % n);
+
+  return (
+    <div
+      className="flex flex-col gap-2 rounded-md border border-border p-2"
+      tabIndex={0}
+      aria-label={`Piezas de la plantilla, pieza ${at + 1} de ${n}`}
+      onKeyDown={(e) => {
+        if (n < 2) return;
+        if (e.key === "ArrowRight") {
+          e.preventDefault();
+          go(1);
+        } else if (e.key === "ArrowLeft") {
+          e.preventDefault();
+          go(-1);
+        }
+      }}
+    >
+      <div className="flex items-center justify-between text-xs">
+        <span className="font-semibold uppercase tracking-wide text-muted-foreground">Piezas</span>
+        <span className="text-muted-foreground" aria-live="polite">
+          {at + 1} de {n}
+        </span>
+      </div>
+
+      <div className="relative flex items-center justify-center rounded-md bg-muted/40">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={cur.image} alt={cur.label || `Pieza ${at + 1}`} className="max-h-56 w-full rounded-md object-contain" />
+        {n > 1 && (
+          <>
+            <button type="button" onClick={() => go(-1)} aria-label="Pieza anterior" className="absolute left-1 top-1/2 -translate-y-1/2 rounded-full border border-border bg-card/90 p-1.5 shadow-sm hover:bg-card">
+              <ChevronLeft className="h-4 w-4" aria-hidden />
+            </button>
+            <button type="button" onClick={() => go(1)} aria-label="Pieza siguiente" className="absolute right-1 top-1/2 -translate-y-1/2 rounded-full border border-border bg-card/90 p-1.5 shadow-sm hover:bg-card">
+              <ChevronRight className="h-4 w-4" aria-hidden />
+            </button>
+          </>
+        )}
+      </div>
+
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <span className="min-w-0 truncate text-sm font-medium">{cur.label || `Pieza ${at + 1}`}</span>
+        {cur.url && (
+          <a href={cur.url} target="_blank" rel="noreferrer" className="inline-flex shrink-0 items-center gap-1 text-xs text-link hover:underline">
+            Abrir enlace
+            <ExternalLink className="h-3 w-3" aria-hidden />
+          </a>
+        )}
+      </div>
+
+      {n > 1 && (
+        <ul className="flex gap-1.5 overflow-x-auto pb-1">
+          {pieces.map((p, k) => (
+            <li key={k} className="shrink-0">
+              <button type="button" onClick={() => setI(k)} aria-label={`Ir a la pieza ${k + 1}`} aria-current={k === at} className={`rounded border-2 ${k === at ? "border-primary" : "border-transparent opacity-70 hover:opacity-100"}`}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={p.image} alt="" className="h-10 w-10 rounded-sm object-cover" />
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 function Fields({ t }: { t?: TemplateData }) {
   return (
     <>
@@ -158,6 +329,7 @@ function Fields({ t }: { t?: TemplateData }) {
         className="min-h-[96px] font-mono text-xs"
       />
       <ScreenshotField initial={t?.screenshot ?? null} />
+      <PiecesField initial={t?.pieces ?? []} />
     </>
   );
 }
@@ -290,6 +462,7 @@ function TemplateCard({ template }: { template: TemplateData }) {
             />
           </a>
         )}
+        {template.pieces.length > 0 && <PiecesGallery pieces={template.pieces} />}
         {template.description && <p className="whitespace-pre-line text-muted-foreground">{template.description}</p>}
         {template.promptText && <PromptBlock text={template.promptText} />}
         {template.url && isImageUrl(template.url) && (

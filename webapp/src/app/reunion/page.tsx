@@ -2,65 +2,54 @@ import { redirect } from "next/navigation";
 
 import { prisma } from "@/lib/prisma";
 import { canUseDeveloper } from "@/lib/session";
-import { DELIVERED_PROJECT_IDS, type CoordBlocker, type CoordProject } from "@/lib/coordination";
+import { loadCoordination } from "@/lib/coordination-data";
+import { parseSnapshot, type CoordData, type MeetingSummary } from "@/lib/coordination";
 import { CoordinationBoard } from "@/components/coordination-board";
 
 export const dynamic = "force-dynamic";
 
-const select = {
-  id: true,
-  title: true,
-  category: true,
-  status: true,
-  assignee: { select: { name: true } },
-  checklistItems: { select: { done: true } },
-} as const;
-
-type Row = {
-  id: string;
-  title: string;
-  category: string;
-  status: string;
-  assignee: { name: string } | null;
-  checklistItems: { done: boolean }[];
-};
-
-const toProject = (p: Row): CoordProject => ({
-  id: p.id,
-  title: p.title,
-  category: p.category,
-  status: p.status,
-  done: p.checklistItems.filter((c) => c.done).length,
-  total: p.checklistItems.length,
-  assignee: p.assignee?.name ?? null,
-});
-
-/** Reunión coordinación: solo el máster (sin «Ver como»). */
-export default async function ReunionPage() {
+/** Reunión coordinación: solo el máster (sin «Ver como»). `?reunion=<id>` abre una reunión guardada, solo lectura. */
+export default async function ReunionPage({ searchParams }: { searchParams: { reunion?: string } }) {
   if (!(await canUseDeveloper())) redirect("/");
 
-  const [delivered, upcoming] = await Promise.all([
-    prisma.project.findMany({ where: { id: { in: DELIVERED_PROJECT_IDS } }, select }),
-    prisma.project.findMany({
-      where: { priorityTag: "ATENCION_INMEDIATA", status: { not: "COMPLETADO" }, id: { notIn: DELIVERED_PROJECT_IDS } },
-      orderBy: { sourceOrder: "asc" },
-      select,
-    }),
-  ]);
-  const byId = new Map(delivered.map((p) => [p.id, p]));
-  const deliveredOrdered: CoordProject[] = [];
-  for (const id of DELIVERED_PROJECT_IDS) {
-    const p = byId.get(id);
-    if (p) deliveredOrdered.push(toProject(p));
-  }
-
-  // Tabla nueva: sin la migración, el bloque de bloqueos avisa en lugar de tumbar la pantalla.
-  let blockers: CoordBlocker[] | null = null;
+  // Reuniones guardadas: tabla nueva; sin la migración, el historial avisa y el resto sale.
+  let meetings: MeetingSummary[] | null = null;
   try {
-    blockers = (await prisma.coordinationBlocker.findMany({ orderBy: [{ order: "asc" }, { createdAt: "asc" }], select: { id: true, text: true } }));
+    const rows = await prisma.coordinationMeeting.findMany({ orderBy: [{ date: "desc" }, { createdAt: "desc" }], select: { id: true, date: true, label: true } });
+    meetings = rows.map((m) => ({ id: m.id, date: m.date.toISOString().slice(0, 10), label: m.label ?? "" }));
   } catch {
-    blockers = null;
+    meetings = null;
   }
 
-  return <CoordinationBoard delivered={deliveredOrdered} upcoming={upcoming.map(toProject)} blockers={blockers} />;
+  let data: CoordData | null = null;
+  let viewing: MeetingSummary | null = null;
+  if (searchParams.reunion && meetings) {
+    const found = meetings.find((m) => m.id === searchParams.reunion);
+    if (found) {
+      try {
+        const row = await prisma.coordinationMeeting.findUnique({ where: { id: found.id }, select: { snapshot: true } });
+        data = parseSnapshot(row?.snapshot);
+        if (data) viewing = found;
+      } catch {
+        data = null;
+      }
+    }
+  }
+  if (!data) data = await loadCoordination();
+
+  // Plantillas con imagen o GIF para elegir en el modo diseño (sin traer la imagen: se pide aparte por /api/plantillas-imagen/<id>).
+  let templates: { id: string; name: string; category: string }[] = [];
+  if (!viewing) {
+    try {
+      templates = await prisma.template.findMany({
+        where: { NOT: [{ screenshot: null }, { screenshot: "" }] },
+        orderBy: [{ category: "asc" }, { order: "asc" }],
+        select: { id: true, name: true, category: true },
+      });
+    } catch {
+      templates = [];
+    }
+  }
+
+  return <CoordinationBoard data={data} meetings={meetings} viewing={viewing} templates={templates} />;
 }

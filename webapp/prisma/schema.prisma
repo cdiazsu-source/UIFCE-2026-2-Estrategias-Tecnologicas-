@@ -507,11 +507,27 @@ model Template {
   /// enlace o un archivo en /public. Se muestra como vista previa en la tarjeta.
   screenshot  String?  @db.Text
   order       Int      @default(0)
+  /// Piezas de la plantilla (imagen pequeña + enlace), p. ej. todas las de un evento.
+  pieces      TemplatePiece[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([category])
+}
+
+/// Una pieza de una plantilla: imagen pequeña (data URL reducida) con su enlace (Canva, Drive…). `order` es su posición en la plantilla.
+model TemplatePiece {
+  id         String   @id @default(cuid())
+  templateId String
+  template   Template @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  image      String   @db.Text
+  label      String   @default("")
+  url        String   @default("")
+  order      Int      @default(0)
+  createdAt  DateTime @default(now())
+
+  @@index([templateId])
 }
 
 /// Una cuenta institucional (Instagram, LinkedIn, X, …) en el panel de Redes
@@ -1023,6 +1039,28 @@ model CoordinationBlocker {
   text      String   @db.Text
   order     Int      @default(0)
   createdAt DateTime @default(now())
+}
+
+/// Modo diseño de «Reunión coordinación»: una fila por página (general, entregamos, bloqueos, corte, notas) con su título, nota e imágenes
+/// (plantillas: [{ templateId, layout, caption }]).
+model CoordinationPage {
+  key       String   @id
+  title     String?
+  note      String?  @db.Text
+  images    Json     @default("[]")
+  updatedAt DateTime @updatedAt
+}
+
+/// Reuniones de coordinación guardadas: fecha y copia de lo que se presentó (proyectos, bloqueos y diseño), para consultarlas después.
+model CoordinationMeeting {
+  id        String   @id @default(cuid())
+  /// Día de la reunión, a medianoche UTC.
+  date      DateTime
+  label     String?
+  snapshot  Json
+  createdAt DateTime @default(now())
+
+  @@index([date])
 }
 
 /// Visita anterior de una persona con credencial propia: cuando empieza una visita nueva (pasaron más de 30 min desde su
