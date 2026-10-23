@@ -21,6 +21,14 @@ export const CHANGELOG_SHOWN = 10;
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: "2026.10.23.12",
+    date: "2026-10-23",
+    title: "Reunión coordinación: botón de información al presentar",
+    changes: [
+      { type: "MEJORA", text: "Al presentar, «Ver proyecto» ahora es un botón pequeño con ícono de información en la esquina de cada tarjeta, para que la tarjeta use todo el espacio." },
+    ],
+  },
+  {
     version: "2026.10.23.11",
     date: "2026-10-23",
     title: "Reunión coordinación: presentar a pantalla completa",

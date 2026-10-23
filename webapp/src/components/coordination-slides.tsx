@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { AlertTriangle, ExternalLink, Flag, MessageSquareText, OctagonAlert, PackageCheck, Plus, X, type LucideIcon } from "lucide-react";
+import { AlertTriangle, ExternalLink, Flag, Info, MessageSquareText, OctagonAlert, PackageCheck, Plus, X, type LucideIcon } from "lucide-react";
 
 import { addBlocker, deleteBlocker } from "@/lib/actions/coordination";
 import { BLOCKER_MAX, SLIDE_LABEL, type CoordBlocker, type CoordData, type CoordProject, type CoordTeam, type DesignImage, type PageDesign, type SlideKey, type TeamMember } from "@/lib/coordination";
@@ -61,7 +61,7 @@ function ProjectList({ projects, big, empty, onOpen, onView }: { projects: Coord
         const meta = big ? [] : [p.category, p.assignee].filter((x): x is string => !!x);
         if (p.total > 0) meta.push(`${p.done} de ${p.total} subtareas`);
         return (
-          <li key={p.id} className="flex items-stretch overflow-hidden rounded-lg border border-border bg-card transition-colors hover:border-primary/40">
+          <li key={p.id} className="relative flex items-stretch overflow-hidden rounded-lg border border-border bg-card transition-colors hover:border-primary/40">
             <button type="button" onClick={() => onOpen?.(p)} title="Ver la plantilla del proyecto" className={cn("flex min-w-0 flex-1 items-center justify-between text-left transition-colors hover:bg-muted/40", big ? "gap-5 px-6 py-5" : "gap-3 px-4 py-3")}>
               <RotatingImage images={p.images} big={big} />
               <div className="min-w-0 flex-1">
@@ -70,10 +70,17 @@ function ProjectList({ projects, big, empty, onOpen, onView }: { projects: Coord
               </div>
               <StatusChip status={p.status} big={big} />
             </button>
-            <button type="button" onClick={() => onView?.(p)} title="Ir al proyecto" aria-label={`Ir al proyecto ${p.title}`} className={cn("flex shrink-0 items-center gap-1.5 border-l border-border px-3 font-medium text-primary transition-colors hover:bg-muted/40", big ? "text-sm" : "text-xs")}>
-              <ExternalLink className={big ? "h-4 w-4" : "h-3.5 w-3.5"} aria-hidden />
-              <span className="hidden sm:inline">Ver proyecto</span>
-            </button>
+            {big ? (
+              // Al presentar, solo un botón pequeño con ícono de información en la esquina de la tarjeta.
+              <button type="button" onClick={() => onView?.(p)} title="Ver proyecto" aria-label={`Ver proyecto ${p.title}`} className="absolute right-2 top-2 rounded-full p-1.5 text-primary transition-colors hover:bg-muted">
+                <Info className="h-5 w-5" aria-hidden />
+              </button>
+            ) : (
+              <button type="button" onClick={() => onView?.(p)} title="Ir al proyecto" aria-label={`Ir al proyecto ${p.title}`} className="flex shrink-0 items-center gap-1.5 border-l border-border px-3 text-xs font-medium text-primary transition-colors hover:bg-muted/40">
+                <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+                <span className="hidden sm:inline">Ver proyecto</span>
+              </button>
+            )}
           </li>
         );
       })}
