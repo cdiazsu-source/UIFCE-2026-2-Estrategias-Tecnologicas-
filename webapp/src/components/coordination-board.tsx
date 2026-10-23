@@ -239,8 +239,8 @@ export function CoordinationBoard({
   };
 
   return (
-    <div ref={root} className={cn(presenting ? "fixed inset-0 z-[70] overflow-y-auto bg-card px-10 py-8" : "w-full px-4 py-8 md:px-8")}>
-      <div className="flex flex-col gap-6">
+    <div ref={root} className={cn(presenting ? "fixed inset-0 z-[70] overflow-y-auto bg-card px-10 py-8" : "mx-auto w-full max-w-4xl px-4 py-8")}>
+      <div className={cn("flex flex-col gap-6", presenting && "min-h-full")}>
         <div className={cn(presenting && "sticky top-0 z-10")}>
           <MeetingBanner master={team.master} big={presenting} />
         </div>

@@ -19,9 +19,9 @@ const STATUS_STYLE: Record<string, string> = {
   EN_CURSO: "bg-primary/10 text-primary",
 };
 
-function StatusChip({ status }: { status: string }) {
+function StatusChip({ status, big = false }: { status: string; big?: boolean }) {
   const label = status === "COMPLETADO" ? "Entregado" : (PROJECT_STATUS_LABEL[status] ?? status);
-  return <span className={cn("shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium", STATUS_STYLE[status] ?? "bg-muted text-muted-foreground")}>{label}</span>;
+  return <span className={cn("shrink-0 rounded-full font-medium", big ? "px-3 py-1 text-sm" : "px-2 py-0.5 text-[11px]", STATUS_STYLE[status] ?? "bg-muted text-muted-foreground")}>{label}</span>;
 }
 
 /** Imagen mini del proyecto: las de sus plantillas enlazadas; si son varias, se turnan con un fundido cada 4 segundos (salvo que se pida menos movimiento). */
@@ -37,7 +37,7 @@ function RotatingImage({ images, big }: { images: string[]; big: boolean }) {
   }, [n]);
   if (n === 0) return null;
   return (
-    <span className={cn("relative shrink-0 overflow-hidden rounded-md border border-border bg-muted", big ? "h-24 w-24" : "h-14 w-14")} aria-hidden>
+    <span className={cn("relative shrink-0 overflow-hidden rounded-md border border-border bg-muted", big ? "h-32 w-32" : "h-14 w-14")} aria-hidden>
       {images.map((src, k) => (
         // eslint-disable-next-line @next/next/no-img-element
         <img key={src} src={src} alt="" loading="lazy" className={cn("absolute inset-0 h-full w-full object-cover transition-opacity duration-700", k === i ? "opacity-100" : "opacity-0")} />
@@ -46,30 +46,37 @@ function RotatingImage({ images, big }: { images: string[]; big: boolean }) {
   );
 }
 
+/** Columnas de la lista al presentar: las tarjetas se reparten todo el ancho y el alto de la pantalla. */
+const presentCols = (n: number) => (n <= 1 ? 1 : n <= 4 ? 2 : n <= 9 ? 3 : 4);
+
 function ProjectList({ projects, big, empty, onOpen, onView }: { projects: CoordProject[]; big: boolean; empty: string; onOpen?: (p: CoordProject) => void; onView?: (p: CoordProject) => void }) {
   if (projects.length === 0) return <p className={cn("text-muted-foreground", big ? "text-lg" : "text-sm")}>{empty}</p>;
   return (
-    <ul className={cn("grid gap-2", big ? "grid-cols-[repeat(auto-fill,minmax(min(100%,26rem),1fr))]" : "grid-cols-[repeat(auto-fill,minmax(min(100%,19rem),1fr))]")}>
-      {projects.map((p) => (
-        <li key={p.id} className="flex items-stretch overflow-hidden rounded-lg border border-border bg-card transition-colors hover:border-primary/40">
-          <button type="button" onClick={() => onOpen?.(p)} title="Ver la plantilla del proyecto" className="flex min-w-0 flex-1 items-center justify-between gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/40">
-            <RotatingImage images={p.images} big={big} />
-            <div className="min-w-0 flex-1">
-              <p className={cn("font-medium leading-snug", big ? "text-lg" : "text-sm")}>{p.title}</p>
-              {p.total > 0 && (
-                <p className={cn("mt-0.5 text-muted-foreground", big ? "text-sm" : "text-xs")}>
-                  {p.done} de {p.total} subtareas
-                </p>
-              )}
-            </div>
-            <StatusChip status={p.status} />
-          </button>
-          <button type="button" onClick={() => onView?.(p)} title="Ir al proyecto" aria-label={`Ir al proyecto ${p.title}`} className={cn("flex shrink-0 items-center gap-1.5 border-l border-border px-3 font-medium text-primary transition-colors hover:bg-muted/40", big ? "text-sm" : "text-xs")}>
-            <ExternalLink className={big ? "h-4 w-4" : "h-3.5 w-3.5"} aria-hidden />
-            <span className="hidden sm:inline">Ver proyecto</span>
-          </button>
-        </li>
-      ))}
+    <ul
+      className={cn("grid gap-2", big ? "flex-1 auto-rows-fr gap-4" : "grid-cols-1 md:grid-cols-2")}
+      style={big ? { gridTemplateColumns: `repeat(${presentCols(projects.length)}, minmax(0, 1fr))` } : undefined}
+    >
+      {projects.map((p) => {
+        // Al presentar solo importa el nombre, el estado y el avance: sin categoría ni responsable.
+        const meta = big ? [] : [p.category, p.assignee].filter((x): x is string => !!x);
+        if (p.total > 0) meta.push(`${p.done} de ${p.total} subtareas`);
+        return (
+          <li key={p.id} className="flex items-stretch overflow-hidden rounded-lg border border-border bg-card transition-colors hover:border-primary/40">
+            <button type="button" onClick={() => onOpen?.(p)} title="Ver la plantilla del proyecto" className={cn("flex min-w-0 flex-1 items-center justify-between text-left transition-colors hover:bg-muted/40", big ? "gap-5 px-6 py-5" : "gap-3 px-4 py-3")}>
+              <RotatingImage images={p.images} big={big} />
+              <div className="min-w-0 flex-1">
+                <p className={cn("font-medium leading-snug", big ? "text-2xl" : "text-sm")}>{p.title}</p>
+                {meta.length > 0 && <p className={cn("mt-1 text-muted-foreground", big ? "text-base" : "text-xs")}>{meta.join(" · ")}</p>}
+              </div>
+              <StatusChip status={p.status} big={big} />
+            </button>
+            <button type="button" onClick={() => onView?.(p)} title="Ir al proyecto" aria-label={`Ir al proyecto ${p.title}`} className={cn("flex shrink-0 items-center gap-1.5 border-l border-border px-3 font-medium text-primary transition-colors hover:bg-muted/40", big ? "text-sm" : "text-xs")}>
+              <ExternalLink className={big ? "h-4 w-4" : "h-3.5 w-3.5"} aria-hidden />
+              <span className="hidden sm:inline">Ver proyecto</span>
+            </button>
+          </li>
+        );
+      })}
     </ul>
   );
 }
@@ -198,7 +205,7 @@ function Cover({ team, title, note, big }: { team: CoordTeam; title: string; not
           <p className={cn("mb-3 font-semibold uppercase tracking-wide", big ? "text-base" : "text-xs")} style={{ color: UIFCITO.grisAzulado }}>
             El equipo del área
           </p>
-          <ul className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,16rem),1fr))] gap-3">
+          <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {people.map(({ m, master }, i) => (
               <CoverPerson key={m.id} m={m} i={i} big={big} master={master} />
             ))}
@@ -270,7 +277,7 @@ function Overview({ data, big, onGo }: { data: CoordData; big: boolean; onGo: (k
   ];
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className={cn("flex flex-col gap-4", big && "flex-1")}>
       <div className="flex flex-col items-center gap-6 rounded-xl border border-border bg-card p-5 md:flex-row">
         {all.length > 0 ? (
           <>
@@ -293,11 +300,11 @@ function Overview({ data, big, onGo }: { data: CoordData; big: boolean; onGo: (k
         )}
       </div>
 
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+      <div className={cn("grid grid-cols-1 gap-3 md:grid-cols-2", big && "flex-1 auto-rows-fr gap-4")}>
         {cards.map((c) => {
           const Icon = SLIDE_ICON[c.key];
           return (
-            <button key={c.key} type="button" onClick={() => onGo(c.key)} className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 text-left transition-colors hover:border-primary/40 hover:bg-muted/40">
+            <button key={c.key} type="button" onClick={() => onGo(c.key)} className={cn("flex flex-col rounded-xl border border-border bg-card text-left transition-colors hover:border-primary/40 hover:bg-muted/40", big ? "justify-center gap-5 p-8" : "gap-3 p-4")}>
               <span className="flex items-center gap-3">
                 {Icon && (
                   <span className={cn("flex shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary", big ? "h-12 w-12" : "h-9 w-9")}>
@@ -329,7 +336,7 @@ export function Slide({ slide, data, team, big, canEditBlockers, onGo, onOpenPro
   const inProgress = data.inProgress;
 
   return (
-    <section className="flex flex-col gap-5">
+    <section className={cn("flex flex-col gap-5", big && "flex-1")}>
       {slide === "portada" && <Cover team={team} title={title} note={design.note} big={big} />}
       {slide !== "portada" && (
       <div className="flex items-baseline gap-3 border-b border-border pb-2">

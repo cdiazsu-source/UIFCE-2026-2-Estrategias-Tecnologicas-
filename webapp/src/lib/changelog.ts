@@ -23,10 +23,10 @@ export const CHANGELOG: VersionEntry[] = [
   {
     version: "2026.10.23.11",
     date: "2026-10-23",
-    title: "Reunión coordinación: pantalla completa y tarjetas más limpias",
+    title: "Reunión coordinación: presentar a pantalla completa",
     changes: [
-      { type: "MEJORA", text: "La presentación ocupa todo el ancho de la pantalla: las tarjetas de proyectos se reparten en tantas columnas como quepan, y la página General muestra sus cuatro partes en una fila en pantallas anchas." },
-      { type: "MEJORA", text: "Las tarjetas de proyecto ya no muestran la categoría ni al integrante a cargo, solo el nombre, el avance de subtareas y el estado." },
+      { type: "MEJORA", text: "Al presentar, las tarjetas de proyectos y las de la página General se reparten todo el ancho y el alto de la pantalla, con más columnas según cuántos proyectos haya, letra más grande y una imagen mini mayor." },
+      { type: "MEJORA", text: "Al presentar, cada proyecto muestra solo su nombre, su estado y su avance de subtareas: sin categoría ni responsable." },
     ],
   },
   {
