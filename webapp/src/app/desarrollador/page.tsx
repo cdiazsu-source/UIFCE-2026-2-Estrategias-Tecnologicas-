@@ -10,6 +10,7 @@ import type { DeveloperSnapshot } from "@/lib/developer-prompt";
 import type { DevProjectOption } from "@/lib/developer-modules";
 import { InfoHint } from "@/components/info-hint";
 import { DeveloperPromptPanel } from "@/components/developer-prompt-panel";
+import { VersionHistory } from "@/components/version-history";
 
 export const dynamic = "force-dynamic";
 
@@ -101,6 +102,8 @@ export default async function DesarrolladorPage() {
       </div>
 
       <DeveloperPromptPanel snapshot={snapshot} projects={projects} />
+
+      <VersionHistory />
     </div>
   );
 }

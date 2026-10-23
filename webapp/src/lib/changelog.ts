@@ -1,0 +1,141 @@
+/** Historial de versiones de «ET en Marcha» (el «Resumen de versiones» de Desarrollador). Se escribe a mano, de la más nueva a la más
+ *  antigua, en lenguaje claro para el equipo (qué cambió para quien usa la app, no qué archivos). Cada cambio o grupo de cambios que se
+ *  publica suma una entrada ARRIBA: así la versión actual es siempre la primera. La versión es la fecha (AAAA.MM.DD) más un número
+ *  de publicación del día (.1, .2…). Desarrollador muestra solo las últimas 10 (`CHANGELOG_SHOWN`). */
+
+export type ChangeType = "NUEVO" | "MEJORA" | "CORRECCION";
+
+export const CHANGE_TYPE_LABEL: Record<ChangeType, string> = { NUEVO: "Nuevo", MEJORA: "Mejora", CORRECCION: "Corrección" };
+
+export type VersionEntry = {
+  /** «AAAA.MM.DD.N». */
+  version: string;
+  /** Día de la publicación, «AAAA-MM-DD» (hora de Colombia). */
+  date: string;
+  title: string;
+  changes: { type: ChangeType; text: string }[];
+};
+
+/** Cuántas versiones muestra Desarrollador. */
+export const CHANGELOG_SHOWN = 10;
+
+export const CHANGELOG: VersionEntry[] = [
+  {
+    version: "2026.10.22.6",
+    date: "2026-10-22",
+    title: "Resumen de versiones en Desarrollador",
+    changes: [
+      { type: "NUEVO", text: "Desarrollador muestra las últimas 10 versiones de la app, cada una con su fecha y sus cambios, como las notas de actualización de una aplicación." },
+      { type: "MEJORA", text: "El prompt de Desarrollador le pide a la IA que sume una entrada a este historial con cada cambio que publique." },
+    ],
+  },
+  {
+    version: "2026.10.22.5",
+    date: "2026-10-22",
+    title: "Vista previa de la bienvenida en «Ver como»",
+    changes: [
+      { type: "NUEVO", text: "Con «Ver como» activo, el botón «Ver su pantalla de bienvenida» (menú lateral y franja amarilla) abre la capa tal como la verá ese perfil al abrir la app." },
+      { type: "MEJORA", text: "La vista previa no guarda nada: no cuenta como actividad del Junior ni cambia lo de «no mostrar hoy»." },
+    ],
+  },
+  {
+    version: "2026.10.22.4",
+    date: "2026-10-22",
+    title: "Capa de bienvenida y huella digital",
+    changes: [
+      { type: "NUEVO", text: "Al entrar, cada perfil identificado ve una capa con su último ingreso, las novedades que lo involucran (lo etiquetaron, una subtarea suya o un proyecto suyo) y su semana con el bloque actual resaltado." },
+      { type: "NUEVO", text: "El máster ve en esa capa la huella digital de los monitores Junior: días activos, clics, proyectos y cambios por persona, y visitas, clics y cambios por proyecto, con los proyectos sin actividad resaltados." },
+      { type: "MEJORA", text: "La capa reemplaza al saludo anterior del panel. A los Junior se les avisa que su actividad en la app se registra; nunca se guarda lo que escriben." },
+    ],
+  },
+  {
+    version: "2026.10.22.3",
+    date: "2026-10-22",
+    title: "Edificios 310 y 238 en el horario",
+    changes: [
+      { type: "MEJORA", text: "Cada bloque del horario de oficina escribe siempre su edificio, el 310 o el 238." },
+      { type: "MEJORA", text: "Al ver a una sola persona, los bloques se colorean por edificio: azul el 310 y morado el 238." },
+    ],
+  },
+  {
+    version: "2026.10.22.2",
+    date: "2026-10-22",
+    title: "Desarrollador: foco por módulo, apartado o proyecto",
+    changes: [
+      { type: "NUEVO", text: "Se puede elegir el módulo, los apartados o el proyecto que se va a estructurar, y el tipo de cambio (apartado, botones, enlaces, pantalla nueva, reestructurar o campos nuevos)." },
+      { type: "MEJORA", text: "El prompt le entrega a la IA los archivos, modelos, permisos y apartados reales de lo elegido, y el contexto del proyecto con su checklist." },
+    ],
+  },
+  {
+    version: "2026.10.22.1",
+    date: "2026-10-22",
+    title: "Cargador de las horas de las semanas 1 a 8",
+    changes: [{ type: "MEJORA", text: "Nuevo script para cargar el plan de horas de las primeras ocho semanas: comprueba que cada persona sume 20 h por semana y no duplica lo ya cargado." }],
+  },
+  {
+    version: "2026.10.21.4",
+    date: "2026-10-21",
+    title: "Cada Junior ve solo lo suyo en Horas",
+    changes: [
+      { type: "NUEVO", text: "«Mis horas y mi horario»: cada Junior ve únicamente su contador, sus registros y sus bloques; los datos de los demás no llegan a su navegador." },
+      { type: "NUEVO", text: "Tarjeta «Ahora» en tiempo real: el bloque en que está, el edificio, hasta qué hora y cuánto falta, o cuál sigue." },
+      { type: "MEJORA", text: "En la grilla del horario, el bloque en curso lleva contorno y el día de hoy una línea roja con la hora actual." },
+    ],
+  },
+  {
+    version: "2026.10.21.3",
+    date: "2026-10-21",
+    title: "Control de horas del equipo y horario de oficina",
+    changes: [
+      { type: "NUEVO", text: "Nueva sección «Horas del equipo»: plan semanal y horas reales de cada persona, con meta de 20 h por semana (Gestión del Conocimiento, proyecto de estudio, punto de información y el resto)." },
+      { type: "NUEVO", text: "Contador por persona y estadísticas del equipo por semana, mes o semestre. Solo el máster registra." },
+      { type: "NUEVO", text: "Horario de oficina de lunes a sábado con el edificio de cada bloque, para ver dónde está cada persona." },
+    ],
+  },
+  {
+    version: "2026.10.21.2",
+    date: "2026-10-21",
+    title: "Líneas de trabajo en el perfil de LinkedIn",
+    changes: [{ type: "MEJORA", text: "La plantilla del perfil de LinkedIn pregunta por las líneas de trabajo con respuestas sugeridas y un tope de tres." }],
+  },
+  {
+    version: "2026.10.21.1",
+    date: "2026-10-21",
+    title: "Egresados, marca y lanzamiento especial",
+    changes: [
+      { type: "MEJORA", text: "En Egresados, la carrera y el semestre se eligen con listas en lugar de escribirse." },
+      { type: "MEJORA", text: "El nombre «ET en Marcha» muestra debajo «Oficina de Gestión de Proyectos (PMO)»." },
+      { type: "NUEVO", text: "Proyecto de piezas gráficas para el lanzamiento especial de Cursos Libres." },
+    ],
+  },
+  {
+    version: "2026.10.19.3",
+    date: "2026-10-19",
+    title: "Tracker de egresados",
+    changes: [
+      { type: "NUEVO", text: "Sección «Egresados» para rastrear a los antiguos monitores: empresa y cargo actuales, carrera, LinkedIn y estado del contacto." },
+      { type: "NUEVO", text: "Botón grande desde el proyecto de egresados que lleva al tracker y muestra el avance." },
+    ],
+  },
+  {
+    version: "2026.10.19.2",
+    date: "2026-10-19",
+    title: "Empresas de interés con meta de contactos",
+    changes: [
+      { type: "NUEVO", text: "Meta de cuatro contactos por empresa (reclutador, gerente, recursos humanos y uno libre) con barra de progreso." },
+      { type: "NUEVO", text: "Marca de egresados UNAL y FCE en cada contacto, y «Anexar perfil de LinkedIn» pegando uno o varios enlaces." },
+    ],
+  },
+  {
+    version: "2026.10.19.1",
+    date: "2026-10-19",
+    title: "Etiquetas en la campana y prompts en Plantillas",
+    changes: [
+      { type: "NUEVO", text: "La campana de novedades también avisa cuando alguien etiqueta a la persona en una nota de bitácora." },
+      { type: "NUEVO", text: "Las plantillas pueden ser un prompt, con «Copiar prompt» y «Ver prompt»." },
+    ],
+  },
+];
+
+/** Versión actual: la primera del historial. */
+export const CURRENT_VERSION = CHANGELOG[0].version;

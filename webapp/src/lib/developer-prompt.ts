@@ -57,7 +57,7 @@ const TEMPLATE = `Eres un ingeniero de software senior que trabaja en el reposit
 - \`/\` Panel principal (\`app/page.tsx\`): resumen del área, situación actual, pestañas de semestre, objetivos, equipo, grilla de proyectos (\`projects-grid\`, \`project-card\`), proyectos de estudio (\`study-projects\`), comentarios y feed de actividad.
 - \`/proyectos/[id]\` Detalle de proyecto: cabecera editable (estado, urgencia, responsable, solicitante, Drive, horario), «Qué se debe hacer», actividades hijas, \`Checklist\`, \`NotesLog\` (bitácora) y, según el id, paneles especiales: \`ConsentPanel\` (id \`consentimiento-imagen-micrositio\`) y \`ExpensesPanel\` (id \`innovacion-seguimiento-gastos-et\`).
 - \`/proyectos-de-estudio\` · \`/calendario\` · \`/difusion/digital\` (redes y métricas) · \`/difusion/fisica\` (espacios y salas) · \`/plantillas\` · \`/linea-grafica\` · \`/herramientas\` · \`/aliados\` (contactos y empresas objetivo) · \`/equipo\` · \`/linkedin\` (tracker por persona) · \`/login\` · API internas \`/api/bienvenida\` (datos de la capa de bienvenida) y \`/api/actividad\` (lotes de la huella digital).
-- \`/desarrollador\`: solo la ve el máster; genera este mismo prompt (\`src/lib/developer-prompt.ts\`) y, si se elige un módulo, apartado o proyecto como foco, le suma su contexto detallado (catálogo en \`src/lib/developer-modules.ts\`).
+- \`/desarrollador\`: solo la ve el máster; trae también el «Resumen de versiones» (últimas 10 entradas de \`src/lib/changelog.ts\`); genera este mismo prompt (\`src/lib/developer-prompt.ts\`) y, si se elige un módulo, apartado o proyecto como foco, le suma su contexto detallado (catálogo en \`src/lib/developer-modules.ts\`).
 - Las páginas son server components con \`export const dynamic = "force-dynamic"\`: consultan con \`prisma\` directamente y pasan props serializables a componentes \`"use client"\`.
 
 # 5. Modelo de datos (\`webapp/prisma/schema.prisma\` es la fuente; léelo antes de tocar datos)
@@ -102,7 +102,8 @@ const TEMPLATE = `Eres un ingeniero de software senior que trabaja en el reposit
 4. Implementa siguiendo los patrones de la sección 6. Para datos de ejemplo usa valores de prueba, nunca datos reales de personas.
 5. Verifica desde \`webapp/\`: \`npx tsc --noEmit\`, luego \`npm run build\`, y si el cambio es visible, levanta \`npm run dev\` y compruébalo en el navegador (flujo feliz, vista Junior y estados vacíos). Di claramente qué no pudiste verificar.
 6. Si agregaste rutas, modelos o convenciones nuevas, actualiza (a) la sección 10 de \`CLAUDE.md\` y (b) \`webapp/src/lib/developer-prompt.ts\`, para que este prompt no quede desactualizado.
-7. Si algo te bloquea de verdad (un dato imposible de deducir), elige la opción más conservadora y reversible, continúa y anótalo en «Supuestos».
+7. Suma una entrada ARRIBA en \`webapp/src/lib/changelog.ts\` (versión AAAA.MM.DD.N, fecha, título y los cambios en lenguaje claro para el equipo, con su tipo Nuevo / Mejora / Corrección): es el «Resumen de versiones» de Desarrollador y muestra las últimas 10.
+8. Si algo te bloquea de verdad (un dato imposible de deducir), elige la opción más conservadora y reversible, continúa y anótalo en «Supuestos».
 
 # 10. Cierre obligatorio
 Termina con un resumen corto en español: qué hiciste, qué verificaste, qué supuestos tomaste y qué queda pendiente (incluida cualquier migración que yo deba aplicar con \`cd webapp && npm run db:deploy && npm run db:seed\`). Después añade exactamente este bloque, completo:
