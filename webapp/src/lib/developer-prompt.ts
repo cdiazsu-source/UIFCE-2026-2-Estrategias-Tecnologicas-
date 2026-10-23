@@ -1,3 +1,5 @@
+import { buildFocusSection, EMPTY_FOCUS, type DeveloperFocus } from "@/lib/developer-modules";
+
 /** Datos en vivo que se agregan al prompt de «Desarrollador» (los lee la página). */
 export type DeveloperSnapshot = {
   /** Fecha y hora legibles (hora de Colombia) en que se generó el prompt. */
@@ -55,7 +57,7 @@ const TEMPLATE = `Eres un ingeniero de software senior que trabaja en el reposit
 - \`/\` Panel principal (\`app/page.tsx\`): resumen del área, situación actual, pestañas de semestre, objetivos, equipo, grilla de proyectos (\`projects-grid\`, \`project-card\`), proyectos de estudio (\`study-projects\`), comentarios y feed de actividad.
 - \`/proyectos/[id]\` Detalle de proyecto: cabecera editable (estado, urgencia, responsable, solicitante, Drive, horario), «Qué se debe hacer», actividades hijas, \`Checklist\`, \`NotesLog\` (bitácora) y, según el id, paneles especiales: \`ConsentPanel\` (id \`consentimiento-imagen-micrositio\`) y \`ExpensesPanel\` (id \`innovacion-seguimiento-gastos-et\`).
 - \`/proyectos-de-estudio\` · \`/calendario\` · \`/difusion/digital\` (redes y métricas) · \`/difusion/fisica\` (espacios y salas) · \`/plantillas\` · \`/linea-grafica\` · \`/herramientas\` · \`/aliados\` (contactos y empresas objetivo) · \`/equipo\` · \`/linkedin\` (tracker por persona) · \`/login\`.
-- \`/desarrollador\`: solo la ve el máster; genera este mismo prompt (\`src/lib/developer-prompt.ts\`).
+- \`/desarrollador\`: solo la ve el máster; genera este mismo prompt (\`src/lib/developer-prompt.ts\`) y, si se elige un módulo, apartado o proyecto como foco, le suma su contexto detallado (catálogo en \`src/lib/developer-modules.ts\`).
 - Las páginas son server components con \`export const dynamic = "force-dynamic"\`: consultan con \`prisma\` directamente y pasan props serializables a componentes \`"use client"\`.
 
 # 5. Modelo de datos (\`webapp/prisma/schema.prisma\` es la fuente; léelo antes de tocar datos)
@@ -116,13 +118,13 @@ PENDIENTES: …
 # 11. Estado en vivo al generar este prompt
 @@SNAPSHOT@@
 
-# 12. LA MODIFICACIÓN A EJECUTAR
+@@FOCUS@@# @@CHANGE_N@@. LA MODIFICACIÓN A EJECUTAR
 """
 @@CHANGE@@
 """`;
 
 /** Prompt listo para pegar en Claude Code (o cualquier IA con acceso al repo). */
-export function buildDeveloperPrompt(change: string, snapshot: DeveloperSnapshot): string {
+export function buildDeveloperPrompt(change: string, snapshot: DeveloperSnapshot, focus: DeveloperFocus = EMPTY_FOCUS): string {
   const lines = [
     `- Generado: ${snapshot.generatedAt} (hora de Colombia).`,
     `- Última migración aplicada en la BD: ${snapshot.lastMigration ?? "no se pudo leer (revisa webapp/prisma/migrations/)"}.`,
@@ -132,5 +134,12 @@ export function buildDeveloperPrompt(change: string, snapshot: DeveloperSnapshot
       : "- Volumen: no disponible.",
   ].join("\n");
   const raw = change.trim() || DEVELOPER_CHANGE_PLACEHOLDER;
-  return TEMPLATE.replace("@@SNAPSHOT@@", () => lines).replace("@@CHANGE@@", () => raw);
+  const focusText = buildFocusSection(focus);
+  const focusBlock = focusText
+    ? `# 12. FOCO DE LA MODIFICACIÓN\nLa modificación se concentra en lo que sigue. Es el contexto detallado del módulo, apartado o proyecto que vas a estructurar: ábrelo en el código (las rutas son relativas a \`webapp/src/\`) antes de proponer la estructura, y no toques lo que quede fuera del foco salvo que el cambio lo exija.\n\n${focusText}\n\n`
+    : "";
+  return TEMPLATE.replace("@@SNAPSHOT@@", () => lines)
+    .replace("@@FOCUS@@", () => focusBlock)
+    .replace("@@CHANGE_N@@", focusText ? "13" : "12")
+    .replace("@@CHANGE@@", () => raw);
 }
