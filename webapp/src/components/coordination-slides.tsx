@@ -4,14 +4,15 @@ import { useState, useTransition } from "react";
 import { AlertTriangle, Plus, X } from "lucide-react";
 
 import { addBlocker, deleteBlocker } from "@/lib/actions/coordination";
-import { BLOCKER_MAX, SLIDE_LABEL, type CoordBlocker, type CoordData, type CoordProject, type DesignImage, type PageDesign, type SlideKey } from "@/lib/coordination";
+import { BLOCKER_MAX, SLIDE_LABEL, type CoordBlocker, type CoordData, type CoordProject, type CoordTeam, type DesignImage, type PageDesign, type SlideKey, type TeamMember } from "@/lib/coordination";
+import { initials, resolvePhoto } from "@/components/person-avatar";
 import { PROJECT_STATUS_LABEL, cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 /** Contenido de cada página de «Reunión coordinación». `big` = modo presentar (letra grande). */
 
-export const SLIDE_NUMBER: Record<SlideKey, string> = { general: "", entregamos: "01", bloqueos: "02", corte: "03", notas: "04" };
+export const SLIDE_NUMBER: Record<SlideKey, string> = { portada: "", general: "", entregamos: "01", bloqueos: "02", corte: "03", notas: "04" };
 
 const STATUS_STYLE: Record<string, string> = {
   COMPLETADO: "bg-success/10 text-success",
@@ -23,12 +24,13 @@ function StatusChip({ status }: { status: string }) {
   return <span className={cn("shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium", STATUS_STYLE[status] ?? "bg-muted text-muted-foreground")}>{label}</span>;
 }
 
-function ProjectList({ projects, big, empty }: { projects: CoordProject[]; big: boolean; empty: string }) {
+function ProjectList({ projects, big, empty, onOpen }: { projects: CoordProject[]; big: boolean; empty: string; onOpen?: (p: CoordProject) => void }) {
   if (projects.length === 0) return <p className={cn("text-muted-foreground", big ? "text-lg" : "text-sm")}>{empty}</p>;
   return (
     <ul className="grid grid-cols-1 gap-2 md:grid-cols-2">
       {projects.map((p) => (
-        <li key={p.id} className="flex items-start justify-between gap-3 rounded-lg border border-border bg-card px-4 py-3">
+        <li key={p.id}>
+          <button type="button" onClick={() => onOpen?.(p)} title="Abrir el proyecto (queda un botón para volver a la reunión durante 30 segundos)" className="flex w-full items-start justify-between gap-3 rounded-lg border border-border bg-card px-4 py-3 text-left transition-colors hover:border-primary/40 hover:bg-muted/40">
           <div className="min-w-0">
             <p className={cn("font-medium leading-snug", big ? "text-lg" : "text-sm")}>{p.title}</p>
             <p className={cn("mt-0.5 text-muted-foreground", big ? "text-sm" : "text-xs")}>
@@ -38,6 +40,7 @@ function ProjectList({ projects, big, empty }: { projects: CoordProject[]; big: 
             </p>
           </div>
           <StatusChip status={p.status} />
+          </button>
         </li>
       ))}
     </ul>
@@ -118,6 +121,67 @@ export function DesignImages({ images, big }: { images: DesignImage[]; big: bool
   );
 }
 
+/** Colores de la paleta única de UIFCITO (manual de identidad, sección 06): la portada se pinta con ellos y la mascota NO se recolorea. */
+const UIFCITO = { crema: "#EAE9CB", grisAzulado: "#5D6289", cian: "#44D4FF", gris: "#5B5B5B", oscuro: "#2D2D2D" } as const;
+const CARD_ACCENTS = [UIFCITO.cian, UIFCITO.grisAzulado, UIFCITO.gris] as const;
+
+function CoverPerson({ m, i, big, master }: { m: TeamMember; i: number; big: boolean; master?: boolean }) {
+  const accent = master ? UIFCITO.cian : CARD_ACCENTS[(i + 1) % CARD_ACCENTS.length];
+  return (
+    <li className="flex items-center gap-3 rounded-xl p-3" style={{ background: "rgba(255,255,255,0.65)", borderLeft: `6px solid ${accent}`, color: UIFCITO.oscuro }}>
+      {m.photoUrl && m.photoUrl.trim() ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={resolvePhoto(m.photoUrl.trim())} alt={m.name} className={cn("shrink-0 rounded-full object-cover", big ? "h-20 w-20" : "h-14 w-14")} style={{ border: `3px solid ${accent}` }} />
+      ) : (
+        <span className={cn("flex shrink-0 items-center justify-center rounded-full font-semibold text-white", big ? "h-20 w-20 text-xl" : "h-14 w-14 text-base")} style={{ background: accent === UIFCITO.cian ? UIFCITO.grisAzulado : accent }}>
+          {initials(m.name)}
+        </span>
+      )}
+      <div className="min-w-0">
+        <p className={cn("truncate font-semibold", big ? "text-xl" : "text-sm")}>{m.name}</p>
+        <p className={cn("truncate", big ? "text-base" : "text-xs")} style={{ color: UIFCITO.grisAzulado }}>
+          {master ? "Máster a cargo" : m.roleLabel}
+        </p>
+      </div>
+    </li>
+  );
+}
+
+/** Portada: UIFCITO en grande, el nombre de la reunión y los integrantes del área, con la paleta de UIFCITO. */
+function Cover({ team, title, note, big }: { team: CoordTeam; title: string; note: string; big: boolean }) {
+  const people = [...(team.master ? [{ m: team.master, master: true }] : []), ...team.members.map((m) => ({ m, master: false }))];
+  return (
+    <div className="overflow-hidden rounded-2xl" style={{ background: UIFCITO.crema, color: UIFCITO.oscuro }}>
+      <div className="flex flex-col items-center gap-6 p-6 md:flex-row md:p-8">
+        <div className="flex shrink-0 items-center justify-center rounded-full" style={{ background: "rgba(68,212,255,0.28)", padding: big ? "2rem" : "1.25rem" }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/uifcito-saludo.png" alt="UIFCITO, la mascota de la UIFCE" className={cn("w-auto", big ? "h-96" : "h-60 md:h-72")} />
+        </div>
+        <div className="flex min-w-0 flex-1 flex-col gap-2 text-center md:text-left">
+          <p className={cn("font-semibold uppercase tracking-widest", big ? "text-base" : "text-xs")} style={{ color: UIFCITO.grisAzulado }}>
+            UIFCE · Estrategias Tecnológicas
+          </p>
+          <h2 className={cn("font-bold leading-tight tracking-tight", big ? "text-6xl" : "text-4xl")}>{title}</h2>
+          <span className="mx-auto h-1.5 w-24 rounded-full md:mx-0" style={{ background: UIFCITO.cian }} />
+          {note && <p className={cn("whitespace-pre-wrap", big ? "text-2xl" : "text-base")} style={{ color: UIFCITO.gris }}>{note}</p>}
+        </div>
+      </div>
+      {people.length > 0 && (
+        <div className="p-6 pt-0 md:p-8 md:pt-0">
+          <p className={cn("mb-3 font-semibold uppercase tracking-wide", big ? "text-base" : "text-xs")} style={{ color: UIFCITO.grisAzulado }}>
+            El equipo del área
+          </p>
+          <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {people.map(({ m, master }, i) => (
+              <CoverPerson key={m.id} m={m} i={i} big={big} master={master} />
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function Overview({ data, big, onGo }: { data: CoordData; big: boolean; onGo: (k: SlideKey) => void }) {
   const inProgress = data.delivered.filter((p) => p.status === "EN_CURSO");
   const doneCount = data.delivered.filter((p) => p.status === "COMPLETADO").length;
@@ -153,32 +217,35 @@ function Overview({ data, big, onGo }: { data: CoordData; big: boolean; onGo: (k
 }
 
 /** Una página: título (propio o el de la parte), nota de diseño, contenido de la parte e imágenes. */
-export function Slide({ slide, data, big, canEditBlockers, onGo }: { slide: SlideKey; data: CoordData; big: boolean; canEditBlockers: boolean; onGo: (k: SlideKey) => void }) {
+export function Slide({ slide, data, team, big, canEditBlockers, onGo, onOpenProject }: { slide: SlideKey; data: CoordData; team: CoordTeam; big: boolean; canEditBlockers: boolean; onGo: (k: SlideKey) => void; onOpenProject: (p: CoordProject) => void }) {
   const design: PageDesign = data.design[slide];
-  const title = design.title || (slide === "general" ? "Resumen de la reunión" : SLIDE_LABEL[slide]);
+  const title = design.title || (slide === "general" ? "Resumen de la reunión" : slide === "portada" ? "Reunión de coordinación" : SLIDE_LABEL[slide]);
   const inProgress = data.delivered.filter((p) => p.status === "EN_CURSO");
 
   return (
     <section className="flex flex-col gap-5">
+      {slide === "portada" && <Cover team={team} title={title} note={design.note} big={big} />}
+      {slide !== "portada" && (
       <div className="flex items-baseline gap-3 border-b border-border pb-2">
         {SLIDE_NUMBER[slide] && <span className={cn("font-semibold text-primary", big ? "text-lg" : "text-sm")}>{SLIDE_NUMBER[slide]}</span>}
         <h2 className={cn("font-semibold tracking-tight", big ? "text-4xl" : "text-2xl")}>{title}</h2>
       </div>
+      )}
 
-      {slide !== "notas" && design.note && <p className={cn("whitespace-pre-wrap text-muted-foreground", big ? "text-xl" : "text-sm")}>{design.note}</p>}
+      {slide !== "notas" && slide !== "portada" && design.note && <p className={cn("whitespace-pre-wrap text-muted-foreground", big ? "text-xl" : "text-sm")}>{design.note}</p>}
 
       {slide === "general" && <Overview data={data} big={big} onGo={onGo} />}
-      {slide === "entregamos" && <ProjectList projects={data.delivered} big={big} empty="Sin proyectos para mostrar." />}
+      {slide === "entregamos" && <ProjectList projects={data.delivered} big={big} empty="Sin proyectos para mostrar." onOpen={onOpenProject} />}
       {slide === "bloqueos" && (
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-2">
             <p className={cn("font-medium uppercase tracking-wide text-muted-foreground", big ? "text-sm" : "text-xs")}>En curso</p>
-            <ProjectList projects={inProgress} big={big} empty="Nada en curso entre los proyectos presentados." />
+            <ProjectList projects={inProgress} big={big} empty="Nada en curso entre los proyectos presentados." onOpen={onOpenProject} />
           </div>
           <Blockers blockers={data.blockers} big={big} editable={canEditBlockers} />
         </div>
       )}
-      {slide === "corte" && <ProjectList projects={data.upcoming} big={big} empty="No hay otros proyectos en atención inmediata." />}
+      {slide === "corte" && <ProjectList projects={data.upcoming} big={big} empty="No hay otros proyectos en atención inmediata." onOpen={onOpenProject} />}
       {slide === "notas" &&
         (design.note ? (
           <p className={cn("whitespace-pre-wrap leading-relaxed", big ? "text-2xl" : "text-base")}>{design.note}</p>

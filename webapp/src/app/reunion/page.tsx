@@ -3,13 +3,14 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { canUseDeveloper } from "@/lib/session";
 import { loadCoordination } from "@/lib/coordination-data";
-import { parseSnapshot, type CoordData, type MeetingSummary } from "@/lib/coordination";
+import { isSlideKey, parseSnapshot, type CoordData, type CoordTeam, type MeetingSummary, type TeamMember } from "@/lib/coordination";
+import { USER_ROLE_LABEL } from "@/lib/utils";
 import { CoordinationBoard } from "@/components/coordination-board";
 
 export const dynamic = "force-dynamic";
 
 /** Reunión coordinación: solo el máster (sin «Ver como»). `?reunion=<id>` abre una reunión guardada, solo lectura. */
-export default async function ReunionPage({ searchParams }: { searchParams: { reunion?: string } }) {
+export default async function ReunionPage({ searchParams }: { searchParams: { reunion?: string; pagina?: string; presentar?: string } }) {
   if (!(await canUseDeveloper())) redirect("/");
 
   // Reuniones guardadas: tabla nueva; sin la migración, el historial avisa y el resto sale.
@@ -51,5 +52,32 @@ export default async function ReunionPage({ searchParams }: { searchParams: { re
     }
   }
 
-  return <CoordinationBoard data={data} meetings={meetings} viewing={viewing} templates={templates} />;
+  // Integrantes del área (máster primero) para la portada y el banner. Siempre en vivo: la foto no se guarda en las reuniones.
+  let team: CoordTeam = { master: null, members: [] };
+  try {
+    const rows = await prisma.user.findMany({
+      where: { active: true, area: "ET", role: { in: ["MASTER", "JUNIOR_ARTES", "JUNIOR_AUXILIAR"] } },
+      orderBy: { name: "asc" },
+      select: { id: true, name: true, role: true, photoUrl: true },
+    });
+    const all: (TeamMember & { role: string })[] = rows.map((u) => ({ id: u.id, name: u.name, role: u.role, roleLabel: USER_ROLE_LABEL[u.role] ?? u.role, photoUrl: u.photoUrl }));
+    const strip = ({ role: _role, ...m }: TeamMember & { role: string }): TeamMember => m;
+    const master = all.find((u) => u.role === "MASTER");
+    team = { master: master ? strip(master) : null, members: all.filter((u) => u.role !== "MASTER").map(strip) };
+  } catch {
+    team = { master: null, members: [] };
+  }
+
+  const page = searchParams.pagina ?? "";
+  return (
+    <CoordinationBoard
+      data={data}
+      meetings={meetings}
+      viewing={viewing}
+      templates={templates}
+      team={team}
+      initialSlide={isSlideKey(page) ? page : "portada"}
+      initialPresenting={searchParams.presentar === "1"}
+    />
+  );
 }

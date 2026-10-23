@@ -6,7 +6,9 @@ import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight, History, Maximize2, Palette, X } from "lucide-react";
 
 import { deleteMeeting, saveMeeting } from "@/lib/actions/coordination";
-import { MEETING_LABEL_MAX, SLIDE_KEYS, SLIDE_LABEL, type CoordData, type MeetingSummary, type SlideKey } from "@/lib/coordination";
+import { MEETING_LABEL_MAX, SLIDE_KEYS, SLIDE_LABEL, type CoordData, type CoordProject, type CoordTeam, type MeetingSummary, type SlideKey } from "@/lib/coordination";
+import { RETURN_KEY, RETURN_SECONDS } from "@/lib/reunion-return";
+import { initials, resolvePhoto } from "@/components/person-avatar";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -105,10 +107,57 @@ function MeetingBar({ meetings, viewing }: { meetings: MeetingSummary[] | null; 
 }
 
 /** «Reunión coordinación»: cinco páginas (general y una por parte), modo diseño, modo presentar e historial de reuniones guardadas. */
-export function CoordinationBoard({ data, meetings, viewing, templates }: { data: CoordData; meetings: MeetingSummary[] | null; viewing: MeetingSummary | null; templates: TemplateOption[] }) {
-  const [slide, setSlide] = useState<SlideKey>("general");
+/** Banner permanente (en todas las páginas): escudo de la Unidad, nombre de la reunión, área y máster a cargo con su foto. */
+function MeetingBanner({ master, big }: { master: CoordTeam["master"]; big: boolean }) {
+  return (
+    <div className="flex items-center justify-between gap-4 rounded-xl bg-primary px-5 py-3 text-primary-foreground">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/logo-uifce.png" alt="Escudo de la UIFCE" className={big ? "h-14 w-auto" : "h-10 w-auto"} />
+      <div className="min-w-0 flex-1 text-center">
+        <p className={cn("truncate font-semibold tracking-tight", big ? "text-3xl" : "text-lg")}>Reunión de coordinación</p>
+        <p className={cn("truncate text-primary-foreground/70", big ? "text-base" : "text-xs")}>Estrategias Tecnológicas (ET)</p>
+      </div>
+      {master ? (
+        <div className="flex shrink-0 items-center gap-3">
+          <div className="hidden text-right sm:block">
+            <p className={cn("text-primary-foreground/70", big ? "text-sm" : "text-[11px]")}>Máster a cargo</p>
+            <p className={cn("font-semibold", big ? "text-xl" : "text-sm")}>{master.name}</p>
+          </div>
+          {master.photoUrl && master.photoUrl.trim() ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={resolvePhoto(master.photoUrl.trim())} alt={master.name} className={cn("rounded-full border-2 border-white/60 object-cover", big ? "h-16 w-16" : "h-11 w-11")} />
+          ) : (
+            <span className={cn("flex items-center justify-center rounded-full border-2 border-white/60 bg-white/15 font-semibold", big ? "h-16 w-16 text-lg" : "h-11 w-11 text-sm")}>{initials(master.name)}</span>
+          )}
+        </div>
+      ) : (
+        <span className="w-10 shrink-0" aria-hidden />
+      )}
+    </div>
+  );
+}
+
+export function CoordinationBoard({
+  data,
+  meetings,
+  viewing,
+  templates,
+  team,
+  initialSlide,
+  initialPresenting,
+}: {
+  data: CoordData;
+  meetings: MeetingSummary[] | null;
+  viewing: MeetingSummary | null;
+  templates: TemplateOption[];
+  team: CoordTeam;
+  initialSlide: SlideKey;
+  initialPresenting: boolean;
+}) {
+  const router = useRouter();
+  const [slide, setSlide] = useState<SlideKey>(initialSlide);
   const [designMode, setDesignMode] = useState(false);
-  const [presenting, setPresenting] = useState(false);
+  const [presenting, setPresenting] = useState(initialPresenting);
   const root = useRef<HTMLDivElement>(null);
   const readOnly = !!viewing;
   const dateLine = viewing ? `Reunión del ${longDate(viewing.date)}` : `Corte al ${new Intl.DateTimeFormat("es-CO", { dateStyle: "long", timeZone: "America/Bogota" }).format(new Date())}`;
@@ -136,6 +185,24 @@ export function CoordinationBoard({ data, meetings, viewing, templates }: { data
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [at]);
 
+  // Tocar un proyecto lleva a su página; queda guardado a dónde volver y un botón flotante lo ofrece durante 30 segundos.
+  const openProject = (p: CoordProject) => {
+    const q = new URLSearchParams({ pagina: slide });
+    if (viewing) q.set("reunion", viewing.id);
+    if (presenting) q.set("presentar", "1");
+    try {
+      sessionStorage.setItem(RETURN_KEY, JSON.stringify({ href: `/reunion?${q.toString()}`, label: SLIDE_LABEL[slide], until: Date.now() + RETURN_SECONDS * 1000 }));
+    } catch {
+      // sin sessionStorage no hay botón de regreso, pero el proyecto abre igual
+    }
+    try {
+      if (document.fullscreenElement) void document.exitFullscreen();
+    } catch {
+      // nada
+    }
+    router.push(`/proyectos/${p.id}`);
+  };
+
   const present = () => {
     setDesignMode(false);
     setPresenting(true);
@@ -157,11 +224,11 @@ export function CoordinationBoard({ data, meetings, viewing, templates }: { data
   return (
     <div ref={root} className={cn(presenting ? "fixed inset-0 z-[70] overflow-y-auto bg-card px-10 py-8" : "mx-auto w-full max-w-4xl px-4 py-8")}>
       <div className="flex flex-col gap-6">
-        <header className="flex flex-wrap items-end justify-between gap-3 border-b border-border pb-4">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">UIFCE · Estrategias Tecnológicas</p>
-            <h1 className={cn("mt-1 font-semibold tracking-tight", presenting ? "text-5xl" : "text-3xl")}>Reunión de coordinación</h1>
-          </div>
+        <div className={cn(presenting && "sticky top-0 z-10")}>
+          <MeetingBanner master={team.master} big={presenting} />
+        </div>
+        <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4">
+          <h1 className="sr-only">Reunión de coordinación</h1>
           <div className="flex flex-wrap items-center gap-2">
             <p className="text-sm text-muted-foreground">{dateLine}</p>
             {presenting ? (
@@ -202,7 +269,7 @@ export function CoordinationBoard({ data, meetings, viewing, templates }: { data
           ))}
         </nav>
 
-        <Slide key={slide} slide={slide} data={data} big={presenting} canEditBlockers={!presenting && !readOnly} onGo={setSlide} />
+        <Slide key={slide} slide={slide} data={data} team={team} big={presenting} canEditBlockers={!presenting && !readOnly} onGo={setSlide} onOpenProject={openProject} />
 
         {designMode && !readOnly && !presenting && <DesignEditor key={slide} slide={slide} initial={data.design[slide]} templates={templates} />}
 

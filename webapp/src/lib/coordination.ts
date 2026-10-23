@@ -31,10 +31,15 @@ export type CoordProject = {
 export type CoordBlocker = { id: string; text: string };
 
 /** Las cinco páginas, en orden. */
-export const SLIDE_KEYS = ["general", "entregamos", "bloqueos", "corte", "notas"] as const;
+export const SLIDE_KEYS = ["portada", "general", "entregamos", "bloqueos", "corte", "notas"] as const;
 export type SlideKey = (typeof SLIDE_KEYS)[number];
 
+/** Una persona del área para la portada y el banner (la foto es la del Equipo; no se guarda en las reuniones). */
+export type TeamMember = { id: string; name: string; roleLabel: string; photoUrl: string | null };
+export type CoordTeam = { master: TeamMember | null; members: TeamMember[] };
+
 export const SLIDE_LABEL: Record<SlideKey, string> = {
+  portada: "Portada",
   general: "General",
   entregamos: "Lo que entregamos",
   bloqueos: "En curso y bloqueos",
@@ -66,7 +71,7 @@ export type CoordData = {
 export type MeetingSummary = { id: string; date: string; label: string };
 
 export function emptyDesigns(): Record<SlideKey, PageDesign> {
-  return { general: { ...EMPTY_DESIGN }, entregamos: { ...EMPTY_DESIGN }, bloqueos: { ...EMPTY_DESIGN }, corte: { ...EMPTY_DESIGN }, notas: { ...EMPTY_DESIGN } };
+  return { portada: { ...EMPTY_DESIGN }, general: { ...EMPTY_DESIGN }, entregamos: { ...EMPTY_DESIGN }, bloqueos: { ...EMPTY_DESIGN }, corte: { ...EMPTY_DESIGN }, notas: { ...EMPTY_DESIGN } };
 }
 
 /** Lee con cuidado lo guardado como JSON (imágenes de una página o el contenido de una reunión). */

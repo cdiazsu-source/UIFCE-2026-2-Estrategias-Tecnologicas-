@@ -21,6 +21,16 @@ export const CHANGELOG_SHOWN = 10;
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: "2026.10.23.5",
+    date: "2026-10-23",
+    title: "Reunión coordinación: portada, banner y regreso desde los proyectos",
+    changes: [
+      { type: "NUEVO", text: "Nueva página de portada con UIFCITO en grande y los integrantes del área con su foto, pintada con la paleta de UIFCITO." },
+      { type: "NUEVO", text: "Banner permanente en todas las páginas de la presentación: escudo de la Unidad, nombre de la reunión, área y el máster a cargo con su foto." },
+      { type: "NUEVO", text: "Al tocar un proyecto de la presentación se abre el proyecto y aparece un botón flotante «Volver a la reunión» durante 30 segundos, que regresa a la misma página." },
+    ],
+  },
+  {
     version: "2026.10.23.4",
     date: "2026-10-23",
     title: "Tipo de enlace en las plantillas",

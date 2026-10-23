@@ -14,6 +14,7 @@ import { VIEW_PROFILES, viewProfile } from "@/lib/view-profiles";
 import { groupBySection, isItemActive, itemsFor, type SidebarItem } from "@/lib/sidebar-nav";
 import { BRAND_SUBTITLE } from "@/lib/brand";
 import { GlobalSearch } from "@/components/global-search";
+import { ReunionReturnButton } from "@/components/reunion-return";
 
 type ShellProps = {
   /** Contadores en vivo por id de opción (ver SIDEBAR_ITEMS); 0 o ausente = sin badge. */
@@ -390,6 +391,7 @@ export function AppShell({ children, bell, ...nav }: ShellProps) {
       </header>
 
       {bell}
+      <ReunionReturnButton />
 
       {open && <div className="fixed inset-0 z-40 bg-black/50 lg:hidden" onClick={() => setOpen(false)} aria-hidden />}
 
