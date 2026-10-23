@@ -21,6 +21,15 @@ export const CHANGELOG_SHOWN = 10;
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: "2026.10.23.10",
+    date: "2026-10-23",
+    title: "Reunión coordinación: pop-up de la plantilla del proyecto",
+    changes: [
+      { type: "MEJORA", text: "Al tocar un proyecto en la presentación se abre un pop-up flotante con solo su plantilla asociada en grande (varias imágenes pasan solas y con flechas); si el proyecto no tiene plantilla, muestra su título, categoría y estado." },
+      { type: "NUEVO", text: "Cada tarjeta de proyecto tiene su propio botón «Ver proyecto», que lleva directo al proyecto y deja el botón flotante para volver a la presentación durante 30 segundos." },
+    ],
+  },
+  {
     version: "2026.10.23.9",
     date: "2026-10-23",
     title: "Reunión coordinación: página General con cifras e íconos",

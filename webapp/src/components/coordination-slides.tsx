@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { AlertTriangle, Flag, MessageSquareText, OctagonAlert, PackageCheck, Plus, X, type LucideIcon } from "lucide-react";
+import { AlertTriangle, ExternalLink, Flag, MessageSquareText, OctagonAlert, PackageCheck, Plus, X, type LucideIcon } from "lucide-react";
 
 import { addBlocker, deleteBlocker } from "@/lib/actions/coordination";
 import { BLOCKER_MAX, SLIDE_LABEL, type CoordBlocker, type CoordData, type CoordProject, type CoordTeam, type DesignImage, type PageDesign, type SlideKey, type TeamMember } from "@/lib/coordination";
@@ -46,23 +46,27 @@ function RotatingImage({ images, big }: { images: string[]; big: boolean }) {
   );
 }
 
-function ProjectList({ projects, big, empty, onOpen }: { projects: CoordProject[]; big: boolean; empty: string; onOpen?: (p: CoordProject) => void }) {
+function ProjectList({ projects, big, empty, onOpen, onView }: { projects: CoordProject[]; big: boolean; empty: string; onOpen?: (p: CoordProject) => void; onView?: (p: CoordProject) => void }) {
   if (projects.length === 0) return <p className={cn("text-muted-foreground", big ? "text-lg" : "text-sm")}>{empty}</p>;
   return (
     <ul className="grid grid-cols-1 gap-2 md:grid-cols-2">
       {projects.map((p) => (
-        <li key={p.id}>
-          <button type="button" onClick={() => onOpen?.(p)} title="Ver el resumen del proyecto" className="flex w-full items-center justify-between gap-3 rounded-lg border border-border bg-card px-4 py-3 text-left transition-colors hover:border-primary/40 hover:bg-muted/40">
-          <RotatingImage images={p.images} big={big} />
-          <div className="min-w-0 flex-1">
-            <p className={cn("font-medium leading-snug", big ? "text-lg" : "text-sm")}>{p.title}</p>
-            <p className={cn("mt-0.5 text-muted-foreground", big ? "text-sm" : "text-xs")}>
-              {p.category}
-              {p.assignee ? ` · ${p.assignee}` : ""}
-              {p.total > 0 ? ` · ${p.done} de ${p.total} subtareas` : ""}
-            </p>
-          </div>
-          <StatusChip status={p.status} />
+        <li key={p.id} className="flex items-stretch overflow-hidden rounded-lg border border-border bg-card transition-colors hover:border-primary/40">
+          <button type="button" onClick={() => onOpen?.(p)} title="Ver la plantilla del proyecto" className="flex min-w-0 flex-1 items-center justify-between gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/40">
+            <RotatingImage images={p.images} big={big} />
+            <div className="min-w-0 flex-1">
+              <p className={cn("font-medium leading-snug", big ? "text-lg" : "text-sm")}>{p.title}</p>
+              <p className={cn("mt-0.5 text-muted-foreground", big ? "text-sm" : "text-xs")}>
+                {p.category}
+                {p.assignee ? ` · ${p.assignee}` : ""}
+                {p.total > 0 ? ` · ${p.done} de ${p.total} subtareas` : ""}
+              </p>
+            </div>
+            <StatusChip status={p.status} />
+          </button>
+          <button type="button" onClick={() => onView?.(p)} title="Ir al proyecto" aria-label={`Ir al proyecto ${p.title}`} className={cn("flex shrink-0 items-center gap-1.5 border-l border-border px-3 font-medium text-primary transition-colors hover:bg-muted/40", big ? "text-sm" : "text-xs")}>
+            <ExternalLink className={big ? "h-4 w-4" : "h-3.5 w-3.5"} aria-hidden />
+            <span className="hidden sm:inline">Ver proyecto</span>
           </button>
         </li>
       ))}
@@ -319,7 +323,7 @@ function Overview({ data, big, onGo }: { data: CoordData; big: boolean; onGo: (k
 }
 
 /** Una página: título (propio o el de la parte), nota de diseño, contenido de la parte e imágenes. */
-export function Slide({ slide, data, team, big, canEditBlockers, onGo, onOpenProject }: { slide: SlideKey; data: CoordData; team: CoordTeam; big: boolean; canEditBlockers: boolean; onGo: (k: SlideKey) => void; onOpenProject: (p: CoordProject) => void }) {
+export function Slide({ slide, data, team, big, canEditBlockers, onGo, onOpenProject, onViewProject }: { slide: SlideKey; data: CoordData; team: CoordTeam; big: boolean; canEditBlockers: boolean; onGo: (k: SlideKey) => void; onOpenProject: (p: CoordProject) => void; onViewProject: (p: CoordProject) => void }) {
   const design: PageDesign = data.design[slide];
   const title = design.title || (slide === "general" ? "Resumen de la reunión" : slide === "portada" ? "Reunión de coordinación" : SLIDE_LABEL[slide]);
   const inProgress = data.inProgress;
@@ -338,17 +342,17 @@ export function Slide({ slide, data, team, big, canEditBlockers, onGo, onOpenPro
       {slide !== "notas" && slide !== "portada" && design.note && <p className={cn("whitespace-pre-wrap text-muted-foreground", big ? "text-xl" : "text-sm")}>{design.note}</p>}
 
       {slide === "general" && <Overview data={data} big={big} onGo={onGo} />}
-      {slide === "entregamos" && <ProjectList projects={data.delivered} big={big} empty="Sin proyectos para mostrar." onOpen={onOpenProject} />}
+      {slide === "entregamos" && <ProjectList projects={data.delivered} big={big} empty="Sin proyectos para mostrar." onOpen={onOpenProject} onView={onViewProject} />}
       {slide === "bloqueos" && (
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-2">
             <p className={cn("font-medium uppercase tracking-wide text-muted-foreground", big ? "text-sm" : "text-xs")}>En curso</p>
-            <ProjectList projects={inProgress} big={big} empty="Nada en curso entre los proyectos presentados." onOpen={onOpenProject} />
+            <ProjectList projects={inProgress} big={big} empty="Nada en curso entre los proyectos presentados." onOpen={onOpenProject} onView={onViewProject} />
           </div>
           <Blockers blockers={data.blockers} big={big} editable={canEditBlockers} />
         </div>
       )}
-      {slide === "corte" && <ProjectList projects={data.upcoming} big={big} empty="No hay otros proyectos en atención inmediata." onOpen={onOpenProject} />}
+      {slide === "corte" && <ProjectList projects={data.upcoming} big={big} empty="No hay otros proyectos en atención inmediata." onOpen={onOpenProject} onView={onViewProject} />}
       {slide === "notas" &&
         (design.note ? (
           <p className={cn("whitespace-pre-wrap leading-relaxed", big ? "text-2xl" : "text-base")}>{design.note}</p>

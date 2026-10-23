@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DesignEditor, ProjectsEditor, type ProjectOption, type TemplateOption } from "@/components/coordination-design";
 import { SLIDE_ICON, SLIDE_NUMBER, Slide } from "@/components/coordination-slides";
-import { CoordinationProjectSummary } from "@/components/coordination-project";
+import { CoordinationProjectPopup } from "@/components/coordination-project";
 
 const longDate = (iso: string) => new Intl.DateTimeFormat("es-CO", { dateStyle: "long", timeZone: "UTC" }).format(new Date(`${iso}T00:00:00Z`));
 const todayBogota = () => new Intl.DateTimeFormat("en-CA", { timeZone: "America/Bogota" }).format(new Date());
@@ -163,6 +163,8 @@ export function CoordinationBoard({
   const [slide, setSlide] = useState<SlideKey>(initialSlide);
   // Proyecto abierto en su resumen (en lugar de la página); null = se ve la página.
   const [selected, setSelected] = useState<CoordProject | null>(null);
+  const selectedRef = useRef<CoordProject | null>(null);
+  selectedRef.current = selected;
   const [designMode, setDesignMode] = useState(false);
   const [presenting, setPresenting] = useState(initialPresenting);
   const root = useRef<HTMLDivElement>(null);
@@ -182,7 +184,11 @@ export function CoordinationBoard({
       if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.tagName === "SELECT" || el.isContentEditable)) return;
       if (e.key === "ArrowRight") go(1);
       else if (e.key === "ArrowLeft") go(-1);
-      else if (e.key === "Escape") setPresenting(false);
+      else if (e.key === "Escape") {
+        // Con el pop-up abierto, Esc solo lo cierra.
+        if (selectedRef.current) setSelected(null);
+        else setPresenting(false);
+      }
     };
     const onFs = () => {
       if (!document.fullscreenElement) setPresenting(false);
@@ -281,13 +287,10 @@ export function CoordinationBoard({
           ))}
         </nav>
 
-        {selected ? (
-          <CoordinationProjectSummary key={selected.id} project={selected} big={presenting} backLabel={SLIDE_LABEL[slide]} onBack={() => setSelected(null)} onView={() => openProject(selected)} />
-        ) : (
-          <Slide key={slide} slide={slide} data={data} team={team} big={presenting} canEditBlockers={!presenting && !readOnly} onGo={selectSlide} onOpenProject={setSelected} />
-        )}
+        <Slide key={slide} slide={slide} data={data} team={team} big={presenting} canEditBlockers={!presenting && !readOnly} onGo={selectSlide} onOpenProject={setSelected} onViewProject={openProject} />
+        {selected && <CoordinationProjectPopup key={selected.id} project={selected} big={presenting} onClose={() => setSelected(null)} />}
 
-        {designMode && !readOnly && !presenting && !selected && (
+        {designMode && !readOnly && !presenting && (
           <>
             {SLIDE_SECTION[slide] && (
               <ProjectsEditor

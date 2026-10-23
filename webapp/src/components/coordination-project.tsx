@@ -1,14 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, ChevronLeft, ChevronRight, ExternalLink, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, ExternalLink, Loader2, X } from "lucide-react";
 
 import { getProjectSummary } from "@/lib/actions/coordination";
 import type { CoordProject } from "@/lib/coordination";
 import type { ProjectSummary } from "@/lib/coordination-summary";
 import { openLinkText } from "@/lib/template-links";
-import { PRIORITY_TAG_LABEL, PROJECT_STATUS_LABEL, cn, timeAgo } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { PROJECT_STATUS_LABEL, cn } from "@/lib/utils";
 
 type Slide = { src: string; caption: string; template: string; href: string; hrefText: string };
 
@@ -38,8 +37,7 @@ function TemplateShowcase({ summary, big }: { summary: ProjectSummary; big: bool
     return () => clearInterval(t);
   }, [n, hover]);
 
-  if (summary.templates.length === 0) return <p className={cn("text-muted-foreground", big ? "text-lg" : "text-sm")}>Este proyecto no tiene plantillas asociadas.</p>;
-  if (n === 0) return <p className={cn("text-muted-foreground", big ? "text-lg" : "text-sm")}>Las plantillas asociadas todavía no tienen captura ni piezas con imagen.</p>;
+  if (n === 0) return <p className={cn("py-6 text-center text-muted-foreground", big ? "text-lg" : "text-sm")}>La plantilla asociada todavía no tiene captura ni piezas con imagen.</p>;
 
   const cur = slides[Math.min(i, n - 1)];
   const go = (d: number) => setI((x) => (x + d + n) % n);
@@ -54,7 +52,7 @@ function TemplateShowcase({ summary, big }: { summary: ProjectSummary; big: bool
             src={s.src}
             alt={s.caption || s.template}
             loading={k === 0 ? "eager" : "lazy"}
-            className={cn("w-full object-contain transition-opacity duration-700", big ? "max-h-[62vh]" : "max-h-[26rem]", k === i ? "relative opacity-100" : "absolute inset-0 h-full opacity-0")}
+            className={cn("w-full object-contain transition-opacity duration-700", big ? "max-h-[68vh]" : "max-h-[60vh]", k === i ? "relative opacity-100" : "absolute inset-0 h-full opacity-0")}
           />
         ))}
         {n > 1 && (
@@ -91,24 +89,16 @@ function TemplateShowcase({ summary, big }: { summary: ProjectSummary; big: bool
   );
 }
 
-function Metric({ label, children, big }: { label: string; children: React.ReactNode; big: boolean }) {
-  return (
-    <div className="flex flex-col gap-1 rounded-xl border border-border bg-card px-4 py-3">
-      <p className={cn("font-medium uppercase tracking-wide text-muted-foreground", big ? "text-sm" : "text-[11px]")}>{label}</p>
-      <div className={cn("font-semibold leading-snug", big ? "text-xl" : "text-sm")}>{children}</div>
-    </div>
-  );
-}
-
-/** Resumen corporativo de un proyecto dentro de la presentación: lo más importante y su plantilla asociada en grande. «Ver proyecto» abre el proyecto. */
-export function CoordinationProjectSummary({ project, big, backLabel, onBack, onView }: { project: CoordProject; big: boolean; backLabel: string; onBack: () => void; onView: () => void }) {
+/** Pop-up flotante al tocar un proyecto en la presentación: solo su plantilla asociada (captura y piezas en grande); si no tiene, su título,
+ *  categoría y estado. Se cierra con la X, tocando fuera o con Esc (lo maneja el tablero). */
+export function CoordinationProjectPopup({ project, big, onClose }: { project: CoordProject; big: boolean; onClose: () => void }) {
+  const hasTemplate = project.images.length > 0;
   const [summary, setSummary] = useState<ProjectSummary | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!hasTemplate) return;
     let cancelled = false;
-    setSummary(null);
-    setError(null);
     getProjectSummary(project.id).then((r) => {
       if (cancelled) return;
       if (r.ok) setSummary(r.summary);
@@ -117,113 +107,49 @@ export function CoordinationProjectSummary({ project, big, backLabel, onBack, on
     return () => {
       cancelled = true;
     };
-  }, [project.id]);
+  }, [project.id, hasTemplate]);
 
   const statusLabel = project.status === "COMPLETADO" ? "Entregado" : (PROJECT_STATUS_LABEL[project.status] ?? project.status);
-  const pct = summary && summary.total > 0 ? Math.round((summary.done / summary.total) * 100) : 0;
 
   return (
-    <section className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <Button type="button" size="sm" variant="ghost" onClick={onBack}>
-          <ArrowLeft className="mr-1.5 h-4 w-4" aria-hidden />
-          Volver a {backLabel}
-        </Button>
-        <Button type="button" size="sm" onClick={onView}>
-          Ver proyecto
-          <ExternalLink className="ml-1.5 h-4 w-4" aria-hidden />
-        </Button>
+    <div
+      className="fixed inset-0 z-[75] flex items-center justify-center bg-black/60 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-label={hasTemplate ? `Plantilla de ${project.title}` : project.title}
+      onMouseDown={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <div className={cn("relative max-h-[92vh] w-full overflow-y-auto rounded-2xl bg-card p-5 shadow-2xl", big ? "max-w-6xl" : "max-w-3xl")}>
+        <button type="button" onClick={onClose} aria-label="Cerrar" className="absolute right-3 top-3 z-10 rounded-full border border-border bg-card/90 p-1.5 text-muted-foreground shadow-sm hover:bg-muted">
+          <X className="h-5 w-5" aria-hidden />
+        </button>
+
+        {hasTemplate ? (
+          error ? (
+            <p role="alert" className="py-6 text-sm text-destructive">
+              {error}
+            </p>
+          ) : summary ? (
+            <div className="pt-6">
+              <TemplateShowcase summary={summary} big={big} />
+            </div>
+          ) : (
+            <p className="flex items-center justify-center gap-2 py-10 text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+              Cargando la plantilla…
+            </p>
+          )
+        ) : (
+          <div className="flex flex-col gap-3 py-6 pr-8">
+            <p className={cn("font-semibold uppercase tracking-widest text-muted-foreground", big ? "text-base" : "text-xs")}>{project.category}</p>
+            <h2 className={cn("font-semibold leading-tight tracking-tight", big ? "text-5xl" : "text-3xl")}>{project.title}</h2>
+            <div className="flex flex-wrap items-center gap-3">
+              <span className={cn("rounded-full bg-primary/10 px-3 py-1 font-medium text-primary", big ? "text-base" : "text-xs")}>{statusLabel}</span>
+              <span className={cn("text-muted-foreground", big ? "text-lg" : "text-sm")}>Sin plantilla asociada</span>
+            </div>
+          </div>
+        )}
       </div>
-
-      <header className="flex flex-col gap-2 border-b border-border pb-4">
-        <p className={cn("font-semibold uppercase tracking-widest text-muted-foreground", big ? "text-base" : "text-xs")}>{project.category}</p>
-        <h2 className={cn("font-semibold leading-tight tracking-tight", big ? "text-5xl" : "text-3xl")}>{project.title}</h2>
-        <div className="flex flex-wrap items-center gap-2">
-          <span className={cn("rounded-full bg-primary/10 px-3 py-1 font-medium text-primary", big ? "text-base" : "text-xs")}>{statusLabel}</span>
-          {summary?.priorityTag && PRIORITY_TAG_LABEL[summary.priorityTag] && <span className={cn("rounded-full bg-muted px-3 py-1 font-medium text-muted-foreground", big ? "text-base" : "text-xs")}>{PRIORITY_TAG_LABEL[summary.priorityTag]}</span>}
-        </div>
-      </header>
-
-      {error ? (
-        <p role="alert" className="text-sm text-destructive">
-          {error}
-        </p>
-      ) : !summary ? (
-        <p className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-          Cargando el resumen…
-        </p>
-      ) : (
-        <>
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-            <Metric label="Responsable" big={big}>
-              {summary.assignee ?? "Sin asignar"}
-            </Metric>
-            <Metric label="Avance" big={big}>
-              {summary.total > 0 ? (
-                <div className="flex flex-col gap-1.5">
-                  <span>
-                    {summary.done} de {summary.total} subtareas · {pct} %
-                  </span>
-                  <span className="h-2 overflow-hidden rounded-full bg-muted" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
-                    <span className="block h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
-                  </span>
-                </div>
-              ) : (
-                "Sin subtareas"
-              )}
-            </Metric>
-            <Metric label="Sigue" big={big}>
-              {summary.nextPending[0] ?? (summary.total > 0 ? "Todo al día" : "—")}
-            </Metric>
-          </div>
-
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <div className="flex flex-col gap-1.5">
-              <p className={cn("font-medium uppercase tracking-wide text-muted-foreground", big ? "text-sm" : "text-xs")}>Qué se hace</p>
-              <p className={cn("leading-relaxed", big ? "text-xl" : "text-sm")}>{summary.description}</p>
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <p className={cn("font-medium uppercase tracking-wide text-muted-foreground", big ? "text-sm" : "text-xs")}>Qué se espera</p>
-              <p className={cn("leading-relaxed", big ? "text-xl" : "text-sm")}>{summary.expectedOutcome}</p>
-            </div>
-          </div>
-
-          {(summary.nextPending.length > 1 || summary.notes.length > 0) && (
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              {summary.nextPending.length > 1 && (
-                <div className="flex flex-col gap-1.5">
-                  <p className={cn("font-medium uppercase tracking-wide text-muted-foreground", big ? "text-sm" : "text-xs")}>Próximas subtareas</p>
-                  <ul className={cn("flex flex-col gap-1", big ? "text-lg" : "text-sm")}>
-                    {summary.nextPending.map((t) => (
-                      <li key={t}>· {t}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              {summary.notes.length > 0 && (
-                <div className="flex flex-col gap-1.5">
-                  <p className={cn("font-medium uppercase tracking-wide text-muted-foreground", big ? "text-sm" : "text-xs")}>Últimas novedades</p>
-                  <ul className={cn("flex flex-col gap-2", big ? "text-lg" : "text-sm")}>
-                    {summary.notes.map((n, k) => (
-                      <li key={k}>
-                        <span className="font-medium">{n.author}</span> <span className="text-muted-foreground">· {timeAgo(n.at)}</span>
-                        <br />
-                        {n.text}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          )}
-
-          <div className="flex flex-col gap-2">
-            <p className={cn("font-medium uppercase tracking-wide text-muted-foreground", big ? "text-sm" : "text-xs")}>Plantilla asociada</p>
-            <TemplateShowcase summary={summary} big={big} />
-          </div>
-        </>
-      )}
-    </section>
+    </div>
   );
 }
