@@ -6,6 +6,9 @@ import { AccessProvider } from "@/components/access-context";
 import { UndoProvider } from "@/components/undo-banner";
 import { QuickNav } from "@/components/quick-nav";
 import { NovedadesBell } from "@/components/novedades-bell";
+import { ActivityTracker } from "@/components/activity-tracker";
+import { WelcomeLayer } from "@/components/welcome-layer";
+import { getTrackedWho } from "@/lib/activity";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
 import { exitViewAs } from "@/lib/actions/view";
@@ -62,6 +65,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const canUseDeveloper = session.authed ? session.isMaster && !session.viewing : false;
   if (session.authed) await touchLastSeen(session.who);
   const badges = session.authed ? await loadBadges() : {};
+  // Huella digital: solo se registra a un Junior con su credencial propia. La capa de bienvenida es para cualquier perfil identificado
+  // (el máster ve la huella del equipo); su «ya la cerré» se guarda por perfil.
+  const tracked = session.authed ? await getTrackedWho() : null;
+  const welcomeProfile = session.authed ? (session.isMaster ? "master" : session.who) : null;
   // Campana de novedades: notas de otras personas en la bitácora de los proyectos asignados.
   const notify = session.authed ? await getNotifyIdentity() : null;
   const updates = notify ? await getAssignedUpdates(notify.userId, notify.name) : [];
@@ -89,6 +96,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         >
           <UndoProvider>
             <QuickNav />
+            {tracked && <ActivityTracker />}
+            {welcomeProfile && <WelcomeLayer profile={welcomeProfile} />}
             <AppShell
               badges={badges}
               canEdit={editable}

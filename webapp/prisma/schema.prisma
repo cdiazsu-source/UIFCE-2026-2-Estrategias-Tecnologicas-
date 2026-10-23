@@ -453,6 +453,8 @@ model User {
   expenses             Expense[]
   hourEntries          HourEntry[]
   officeShifts         OfficeShift[]
+  activityEvents       ActivityEvent[]
+  visit                UserVisit?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -977,4 +979,39 @@ model OfficeShift {
 
   @@index([dayOfWeek])
   @@index([userId])
+}
+
+/// Visita anterior de una persona con credencial propia: cuando empieza una visita nueva (pasaron más de 30 min desde su
+/// actividad anterior) se guarda aquí el `lastSeenAt` previo, para decir «tu último ingreso fue…» en la capa de bienvenida.
+/// Vive aparte de User a propósito: así agregarla no cambia las consultas de User y el despliegue no depende de la migración.
+model UserVisit {
+  userId          String   @id
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  previousVisitAt DateTime
+  updatedAt       DateTime @updatedAt
+}
+
+/// Huella digital de los monitores Junior: qué módulos y proyectos abrieron, a qué botones o enlaces dieron clic y cuántas
+/// acciones de guardado ejecutaron. Solo se registra a los Junior con su credencial propia (no «Ver como», no el máster).
+/// Nunca guarda lo escrito, solo el nombre del botón. Se borra lo que pasa de 90 días (ver lib/activity.ts).
+model ActivityEvent {
+  id         String   @id @default(cuid())
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  /// Clave del perfil («junior-artes» / «junior-et»); se conserva aunque se borre la persona.
+  profileKey String
+  /// MODULE (entró a una pantalla) | PROJECT (entró a un proyecto) | CLICK (botón o enlace) | CHANGE (acción de guardado).
+  kind       String
+  path       String
+  /// Pantalla a la que pertenece la ruta («/horas», «/», …).
+  module     String?
+  /// Proyecto en el que ocurrió, si la ruta es /proyectos/[id]. Sin FK: la huella sobrevive al borrado del proyecto.
+  projectId  String?
+  /// Nombre del botón o enlace (máx. 60 caracteres).
+  label      String?
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([userId, createdAt])
+  @@index([projectId, createdAt])
 }

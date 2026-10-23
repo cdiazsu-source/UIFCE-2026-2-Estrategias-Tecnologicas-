@@ -170,3 +170,10 @@ export const JUNIOR_ROLES = ["JUNIOR_ARTES", "JUNIOR_AUXILIAR"] as const;
  *  exportar funciones async, así que esta lista vive aquí (la usan la acción
  *  en lib/actions/study-comments.ts y la consulta de la página principal). */
 export const STUDY_COMMENT_ROLES = ["MASTER", "JUNIOR_ARTES", "JUNIOR_AUXILIAR", "COORDINADOR"] as const;
+
+/** Nombre de pila para el saludo: dos nombres si hay cuatro palabras (p. ej. «María Fernanda
+ *  Celis Mora» → «María Fernanda»), uno en los demás casos. */
+export function greetingName(fullName: string): string {
+  const parts = fullName.trim().split(/\s+/);
+  return parts.length >= 4 ? parts.slice(0, 2).join(" ") : parts[0] ?? fullName;
+}

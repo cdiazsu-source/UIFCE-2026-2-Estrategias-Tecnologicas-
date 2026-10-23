@@ -20,7 +20,6 @@ import { InfoHint } from "@/components/info-hint";
 import { NewProjectButton } from "@/components/new-project-button";
 import { ProjectSeedPromptButton } from "@/components/project-seed-prompt-button";
 import { CollapsibleBlock } from "@/components/collapsible";
-import { WelcomeBanner, type WelcomeData } from "@/components/welcome-banner";
 import { AccessLog, type AccessEntry } from "@/components/access-log";
 import { getSession } from "@/lib/session";
 import { getAssignedUpdates, getNotifyIdentity } from "@/lib/notify";
@@ -58,13 +57,6 @@ async function getSemesters(semParam: string | undefined) {
   const selected = (semParam ? rows.find((s) => s.label === semParam) : null) ?? current;
 
   return { tabs, selected, isSelectedCurrent: !!(selected && current && selected.id === current.id) };
-}
-
-/** Nombre de pila para el saludo: dos nombres si hay cuatro palabras (p. ej. «María Fernanda
- *  Celis Mora» → «María Fernanda»), uno en los demás casos. */
-function greetingName(fullName: string): string {
-  const parts = fullName.trim().split(/\s+/);
-  return parts.length >= 4 ? parts.slice(0, 2).join(" ") : parts[0] ?? fullName;
 }
 
 /** `juniorKey`: si la sesión es de un perfil Junior concreto (o el máster lo ve «como»), solo se
@@ -340,28 +332,8 @@ async function getHomeData(
     // con las asignaciones de los demás.
     .map((m) => ({ ...m, urgentCount: juniorKey && m.id !== meRow?.id ? 0 : (urgentByPerson.get(m.id) ?? 0) }));
 
-  // Su saludo y el resumen de lo suyo (proyectos asignados y próximo corte).
-  const me: WelcomeData | null = meRow
-    ? (() => {
-        const open = projectCards.filter(
-          (p) => p.status !== "COMPLETADO" && (p.assignee?.id === meRow.id || p.assignees.some((a) => a.id === meRow.id)),
-        );
-        return {
-          id: meRow.id,
-          profileKey: juniorKey as string,
-          firstName: greetingName(meRow.name),
-          fullName: meRow.name,
-          photoUrl: meRow.photoUrl,
-          roleLabel: USER_ROLE_LABEL[meRow.role] ?? meRow.role,
-          mineCount: open.length,
-          urgentCount: open.filter((p) => p.priorityTag === "ATENCION_INMEDIATA").length,
-          study: meRow.studyProjects.map((sp) => {
-            const next = sp.checkpoints.find((c) => c.status !== "CUMPLIDO");
-            return { title: sp.title, next: next ? { label: next.label, due: next.dueDate ? next.dueDate.toISOString() : null } : null };
-          }),
-        };
-      })()
-    : null;
+  // La persona del perfil Junior (el saludo y el resumen ahora los da la capa de bienvenida: components/welcome-layer.tsx).
+  const me = meRow ? { id: meRow.id } : null;
 
   const commentAuthors = people.map((p) => ({ id: p.id, name: p.name, role: p.role }));
   const comments: TeamCommentData[] = teamComments;
@@ -434,7 +406,6 @@ export default async function HomePage({
 
   return (
     <div className="flex flex-col gap-8">
-      {me && <WelcomeBanner data={me} />}
 
       {juniorKey && !me && (
         <p className="rounded-md border border-warning/40 bg-warning/10 p-4 text-sm">
