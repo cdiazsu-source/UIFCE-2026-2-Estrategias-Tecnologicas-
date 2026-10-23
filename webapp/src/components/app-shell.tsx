@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { ChevronDown, Code2, Eye, LogOut, Menu, X } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -11,8 +11,9 @@ import { logout } from "@/lib/actions/auth";
 import { exitViewAs, viewAs } from "@/lib/actions/view";
 import { PreviewWelcomeButton } from "@/components/preview-welcome-button";
 import { VIEW_PROFILES, viewProfile } from "@/lib/view-profiles";
-import { groupBySection, isItemActive, SIDEBAR_ITEMS, type SidebarItem } from "@/lib/sidebar-nav";
+import { groupBySection, isItemActive, itemsFor, type SidebarItem } from "@/lib/sidebar-nav";
 import { BRAND_SUBTITLE } from "@/lib/brand";
+import { GlobalSearch } from "@/components/global-search";
 
 type ShellProps = {
   /** Contadores en vivo por id de opción (ver SIDEBAR_ITEMS); 0 o ausente = sin badge. */
@@ -26,6 +27,8 @@ type ShellProps = {
   selfKey?: string | null;
   canViewAs?: boolean;
   canUseDeveloper?: boolean;
+  /** Monitor Junior (también con «Ver como»): ve «Mi horario» y no ve «Calendario». */
+  isJunior?: boolean;
   /** Campana de novedades (flotante arriba a la derecha); solo con perfil identificado. */
   bell?: React.ReactNode;
   children: React.ReactNode;
@@ -241,9 +244,11 @@ function SidebarContent({
   selfKey,
   canViewAs,
   canUseDeveloper,
+  isJunior = false,
+  view,
   onNavigate,
-}: Omit<ShellProps, "children"> & { pathname: string; onNavigate: () => void }) {
-  const groups = groupBySection(SIDEBAR_ITEMS);
+}: Omit<ShellProps, "children"> & { pathname: string; view: string | null; onNavigate: () => void }) {
+  const groups = groupBySection(itemsFor(isJunior));
   const footerButton =
     "flex min-h-11 w-full items-center gap-3 rounded-l-xl py-2 pl-3 pr-4 text-left text-sm font-medium text-nav-foreground outline-none transition-colors duration-150 hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-accent";
 
@@ -279,7 +284,7 @@ function SidebarContent({
                 <NavLink
                   key={item.id}
                   item={item}
-                  active={isItemActive(item, pathname)}
+                  active={isItemActive(item, pathname, view, isJunior)}
                   badge={badges?.[item.id]}
                   onNavigate={onNavigate}
                 />
@@ -347,6 +352,7 @@ function SidebarContent({
  *  abre desde una barra superior. En /login no hay menú. */
 export function AppShell({ children, bell, ...nav }: ShellProps) {
   const pathname = usePathname();
+  const view = useSearchParams()?.get("vista") ?? null;
   const [open, setOpen] = useState(false);
 
   // El cajón móvil se cierra al navegar y con Escape.
@@ -401,11 +407,17 @@ export function AppShell({ children, bell, ...nav }: ShellProps) {
         >
           <X className="h-5 w-5" aria-hidden />
         </button>
-        <SidebarContent pathname={pathname} onNavigate={() => setOpen(false)} {...nav} />
+        <SidebarContent pathname={pathname} view={view} onNavigate={() => setOpen(false)} {...nav} />
       </aside>
 
       {/* Panel de contenido: blanco y pegado al menú, para que la pestaña activa se funda con él. */}
-      <div className="min-h-screen bg-card lg:pl-64">{children}</div>
+      <div className="min-h-screen bg-card lg:pl-64">
+        {/* Buscador global: barra fija arriba del contenido (deja libre la esquina de la campana). */}
+        <div className="sticky top-14 z-30 border-b border-border bg-card/95 px-4 py-2 backdrop-blur lg:top-0 lg:pr-20">
+          <GlobalSearch />
+        </div>
+        {children}
+      </div>
     </>
   );
 }

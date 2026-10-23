@@ -1,4 +1,5 @@
 import {
+  CalendarClock,
   CalendarDays,
   Clock,
   GraduationCap,
@@ -24,7 +25,16 @@ export type SidebarItem = {
   section?: string;
   /** Rutas adicionales que también marcan esta opción como activa (por prefijo). */
   alsoActiveFor?: string[];
+  /** Solo se muestra a un monitor Junior (su atajo personal). */
+  juniorOnly?: boolean;
+  /** Se oculta a un monitor Junior. */
+  hideForJunior?: boolean;
 };
+
+/** Opciones del menú que corresponden a un perfil: los Junior ven sus atajos y no ven las que se les ocultan. */
+export function itemsFor(isJunior: boolean): SidebarItem[] {
+  return SIDEBAR_ITEMS.filter((i) => (isJunior ? !i.hideForJunior : !i.juniorOnly));
+}
 
 /** Rutas del menú lateral, en el orden en que se muestran. Para agregar una opción,
  *  basta con sumarla aquí; el estado activo lo da la ruta actual. */
@@ -37,7 +47,8 @@ export const SIDEBAR_ITEMS: SidebarItem[] = [
     // El detalle de un proyecto y los proyectos de estudio cuelgan del panel.
     alsoActiveFor: ["/proyectos"],
   },
-  { id: "calendario", label: "Calendario", icon: CalendarDays, href: "/calendario" },
+  { id: "mi-horario", label: "Mi horario", icon: CalendarClock, href: "/horas?vista=horario", juniorOnly: true },
+  { id: "calendario", label: "Calendario", icon: CalendarDays, href: "/calendario", hideForJunior: true },
 
   { id: "difusion-digital", label: "Difusión digital", icon: Megaphone, href: "/difusion/digital", section: "Difusión y visibilidad", alsoActiveFor: ["/linkedin"] },
   { id: "difusion-fisica", label: "Difusión física", icon: PanelsTopLeft, href: "/difusion/fisica", section: "Difusión y visibilidad" },
@@ -52,8 +63,12 @@ export const SIDEBAR_ITEMS: SidebarItem[] = [
 ];
 
 /** ¿Esta opción corresponde a la ruta actual? «/» solo coincide exacto; las demás por prefijo. */
-export function isItemActive(item: SidebarItem, pathname: string): boolean {
+export function isItemActive(item: SidebarItem, pathname: string, view?: string | null, isJunior = false): boolean {
   const starts = (base: string) => pathname === base || pathname.startsWith(`${base}/`);
+  const [base, query] = item.href.split("?");
+  // Una opción con «?vista=…» (Mi horario) solo está activa con esa vista; sin ella, la pantalla es de «Horas del equipo».
+  if (query) return starts(base) && view === new URLSearchParams(query).get("vista");
+  if (item.id === "horas" && view === "horario" && starts(base) && isJunior) return false;
   if (item.href === "/") return pathname === "/" || (item.alsoActiveFor ?? []).some(starts);
   return starts(item.href) || (item.alsoActiveFor ?? []).some(starts);
 }

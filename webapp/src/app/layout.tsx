@@ -107,6 +107,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               selfKey={session.authed ? session.who : null}
               canViewAs={canViewAs}
               canUseDeveloper={canUseDeveloper}
+              isJunior={session.authed && !!session.juniorKey}
               bell={notify ? <NovedadesBell profile={notify.key} items={updates} /> : null}
             >
             {viewing && (

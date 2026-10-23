@@ -21,6 +21,24 @@ export const CHANGELOG_SHOWN = 10;
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: "2026.10.22.13",
+    date: "2026-10-22",
+    title: "Buscador en la barra superior",
+    changes: [
+      { type: "NUEVO", text: "Barra de búsqueda arriba de todas las pantallas: escribe una o varias palabras y encuentra módulos, proyectos, subtareas, notas de bitácora, proyectos de estudio, empresas de interés, plantillas y herramientas, agrupados por tipo. La tecla «/» la enfoca y se navega con las flechas y Enter." },
+      { type: "MEJORA", text: "Cada perfil busca solo en lo que puede ver: un Junior encuentra únicamente su propio proyecto de estudio y no ve Calendario ni Desarrollador entre los módulos." },
+    ],
+  },
+  {
+    version: "2026.10.22.12",
+    date: "2026-10-22",
+    title: "Mi horario en el menú del Junior",
+    changes: [
+      { type: "NUEVO", text: "Los monitores Junior tienen «Mi horario» debajo de «Panel principal», que abre directo el horario de oficina. «Horas del equipo» conserva su pestaña de horario." },
+      { type: "MEJORA", text: "«Calendario» ya no aparece en el menú lateral de los Junior." },
+    ],
+  },
+  {
     version: "2026.10.22.11",
     date: "2026-10-22",
     title: "Post-it virtual del máster para los Junior",
