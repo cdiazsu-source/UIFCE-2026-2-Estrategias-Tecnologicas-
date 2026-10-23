@@ -41,7 +41,7 @@ function FocusPill({ member }: { member: RosterMember }) {
   );
 }
 
-function MemberCard({ member }: { member: RosterMember }) {
+function MemberCard({ member, mine = false }: { member: RosterMember; mine?: boolean }) {
   const canEdit = useCanEdit();
   const [editing, setEditing] = useState(false);
 
@@ -97,8 +97,9 @@ function MemberCard({ member }: { member: RosterMember }) {
           aria-pressed={active}
           title={active ? "Quitar el filtro de proyectos" : `Ver los proyectos de ${member.name}`}
           className={`flex w-full items-center gap-3 rounded-md border p-3 text-left transition-colors hover:border-primary/30 hover:bg-muted/50 ${
-            active ? "border-primary-active bg-primary-active/10 ring-1 ring-primary-active" : "border-border"
+            active ? "border-primary-active bg-primary-active/10 ring-1 ring-primary-active" : mine ? "border-2 bg-muted/40 shadow-sm" : "border-border"
           }`}
+          style={mine && !active ? { borderColor: personColor(member) } : undefined}
         >
           <PersonAvatar
             name={member.name}
@@ -107,7 +108,10 @@ function MemberCard({ member }: { member: RosterMember }) {
             ringColor={personColor(member)}
           />
           <div className="min-w-0 pr-6">
-            <p className="truncate text-sm font-medium">{member.name}</p>
+            <p className="truncate text-sm font-medium">
+              {member.name}
+              {mine && <span className="ml-1.5 rounded-full bg-primary px-1.5 py-0.5 align-middle text-[10px] font-semibold uppercase tracking-wide text-primary-foreground">Tú</span>}
+            </p>
             <p className="truncate text-xs text-muted-foreground">{roleLabel}</p>
           </div>
         </button>
@@ -141,8 +145,10 @@ function MemberCard({ member }: { member: RosterMember }) {
 
 /** `ownOnly`: vista de un Junior. Solo trae el aviso «requiere tu atención» de la propia persona
  *  (el servidor pone en 0 el de las demás) y explica por qué no se ven los otros. */
-export function TeamRoster({ people, ownOnly = false }: { people: RosterMember[]; ownOnly?: boolean }) {
+export function TeamRoster({ people, ownOnly = false, mineId }: { people: RosterMember[]; ownOnly?: boolean; mineId?: string }) {
   if (people.length === 0) return null;
+  // Vista Junior: su propia tarjeta va primero.
+  if (mineId) people = [...people].sort((a, b) => Number(b.id === mineId) - Number(a.id === mineId));
 
   return (
     <div className="flex flex-col gap-2">
@@ -158,7 +164,7 @@ export function TeamRoster({ people, ownOnly = false }: { people: RosterMember[]
       )}
       <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {people.map((m) => (
-          <MemberCard key={m.id} member={m} />
+          <MemberCard key={m.id} member={m} mine={!!mineId && m.id === mineId} />
         ))}
       </ul>
     </div>

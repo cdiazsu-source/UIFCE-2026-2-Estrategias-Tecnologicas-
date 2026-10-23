@@ -21,6 +21,15 @@ export const CHANGELOG_SHOWN = 10;
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: "2026.10.22.14",
+    date: "2026-10-22",
+    title: "Panel del Junior: el post-it primero",
+    changes: [
+      { type: "MEJORA", text: "En el panel principal del Junior ya no aparecen El área, Situación actual, Objetivos del semestre ni Difusión y visibilidad; en su lugar va el post-it del máster." },
+      { type: "MEJORA", text: "En «Integrantes», la tarjeta del propio Junior va primero, con su color, el borde resaltado y la marca «Tú»." },
+    ],
+  },
+  {
     version: "2026.10.22.13",
     date: "2026-10-22",
     title: "Buscador en la barra superior",

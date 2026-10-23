@@ -22,6 +22,8 @@ import { ProjectSeedPromptButton } from "@/components/project-seed-prompt-button
 import { CollapsibleBlock } from "@/components/collapsible";
 import { AccessLog, type AccessEntry } from "@/components/access-log";
 import { getSession } from "@/lib/session";
+import { STICKY_ID, isStickyColor, type StickyData } from "@/lib/sticky-note";
+import { StickyPostIt } from "@/components/sticky-note";
 import { getAssignedUpdates, getNotifyIdentity } from "@/lib/notify";
 import { JUNIOR_PROFILES } from "@/lib/view-profiles";
 import { byUrgency } from "@/lib/project-order";
@@ -400,6 +402,17 @@ export default async function HomePage({
     }));
 
   // ?focus=<id>: enfoca la grilla en los pendientes de atención de esa persona.
+  // Junior: en lugar de El área, Situación actual, Objetivos y Difusión, ve el post-it del máster (tabla nueva: sin ella, no sale).
+  let sticky: StickyData | null = null;
+  if (juniorKey) {
+    try {
+      const n = await prisma.stickyNote.findUnique({ where: { id: STICKY_ID } });
+      if (n && n.active) sticky = { body: n.body, color: isStickyColor(n.color) ? n.color : "AMARILLO", author: n.author, at: n.updatedAt.toISOString(), stamp: n.updatedAt.toISOString() };
+    } catch {
+      sticky = null;
+    }
+  }
+
   const focusPerson = searchParams.focus
     ? commentAuthors.find((p) => p.id === searchParams.focus) ?? null
     : null;
@@ -415,12 +428,17 @@ export default async function HomePage({
         </p>
       )}
 
-      <AreaOverview key={`area-${juniorKey ?? "todos"}`} defaultOpen={false} profile={profile} />
+      {juniorKey ? (
+        sticky && <StickyPostIt note={sticky} />
+      ) : (
+        <AreaOverview key="area-todos" defaultOpen={false} profile={profile} />
+      )}
 
       {seeAccess && <AccessLog entries={accessEntries} />}
 
+      {!juniorKey && (
       <CollapsibleBlock
-        key={`situacion-${juniorKey ?? "todos"}`}
+        key="situacion-todos"
         defaultOpen={false}
         scope="home:situacion"
         label="la situación actual"
@@ -438,11 +456,13 @@ export default async function HomePage({
       >
         <SituationStrip stats={stats} />
       </CollapsibleBlock>
+      )}
 
       <section className="flex flex-col gap-8">
         <div className="flex flex-col gap-4">
           <SemesterTabs semesters={tabs} selectedId={selected?.id ?? ""} />
 
+          {!juniorKey && (
           <div id="semestre" className="flex scroll-mt-20 flex-col gap-4">
             <SemesterObjectives
               semester={selected ? { id: selected.id, label: selected.label, objectives: selected.objectives } : null}
@@ -453,9 +473,10 @@ export default async function HomePage({
               semester={selected ? { id: selected.id, label: selected.label, etStrategies: selected.etStrategies } : null}
             />
           </div>
+          )}
 
           <div id="integrantes" className="scroll-mt-20">
-            <TeamRoster people={rosterMembers} ownOnly={!!juniorKey} />
+            <TeamRoster people={rosterMembers} ownOnly={!!juniorKey} mineId={me?.id} />
           </div>
 
           <CollapsibleBlock
