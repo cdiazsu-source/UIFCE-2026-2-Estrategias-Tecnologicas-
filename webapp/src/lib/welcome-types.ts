@@ -1,4 +1,5 @@
 import type { ShiftData } from "@/lib/office-schedule";
+import type { StickyData } from "@/lib/sticky-note";
 
 /** Lo que la capa de bienvenida recibe del servidor (JSON serializable). Vive aparte de `lib/welcome.ts` para que el
  *  componente de cliente pueda importar los tipos sin traer Prisma. */
@@ -49,6 +50,8 @@ export type MemberWelcome = {
   tracked: boolean;
   /** Tiempo tarde acumulado de la persona desde el inicio del semestre (minutos y número de tardanzas); null si no se pudo leer. */
   late: { minutes: number; count: number } | null;
+  /** Post-it vigente del máster (solo monitores Junior): va primero en la capa. null si no hay. */
+  note: StickyData | null;
   /** Solo en la vista previa de «Ver como»: el perfil cuya capa se está mostrando (no es la del usuario real). */
   preview?: { label: string };
 };
@@ -95,6 +98,8 @@ export type Footprint = {
 export type MasterWelcome = {
   kind: "master";
   firstName: string;
+  /** Post-it vigente que ven los Junior (para el editor); null si no hay. */
+  sticky: StickyData | null;
   footprint: Footprint;
 };
 

@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/session";
+import { canPostSticky, getSession } from "@/lib/session";
+import { STICKY_ID, isStickyColor, type StickyData } from "@/lib/sticky-note";
+import { StickyEditor } from "@/components/sticky-note";
 import { UsersTable } from "@/components/users-table";
 import { InfoHint } from "@/components/info-hint";
 
@@ -12,6 +14,18 @@ export default async function EquipoPage() {
   // «Ver como»: lo puede usar quien tiene ese permiso (máster, Lina, Santi) y no lo está usando ya.
   const canViewAs = session.authed && session.canViewAs && !session.viewing;
   const users = await prisma.user.findMany();
+  // Post-it para los Junior: solo el máster lo edita. Tabla nueva: sin ella (migración pendiente) el editor no sale.
+  let sticky: StickyData | null = null;
+  let showSticky = false;
+  if (await canPostSticky()) {
+    try {
+      const n = await prisma.stickyNote.findUnique({ where: { id: STICKY_ID } });
+      if (n && n.active) sticky = { body: n.body, color: isStickyColor(n.color) ? n.color : "AMARILLO", author: n.author, at: n.updatedAt.toISOString(), stamp: n.updatedAt.toISOString() };
+      showSticky = true;
+    } catch {
+      showSticky = false;
+    }
+  }
   users.sort((a, b) => {
     const r = ROLE_ORDER.indexOf(a.role) - ROLE_ORDER.indexOf(b.role);
     return r !== 0 ? r : a.name.localeCompare(b.name, "es");
@@ -28,6 +42,7 @@ export default async function EquipoPage() {
           Directorio interno del equipo de Estrategias Tecnológicas y su entorno cercano. Editable en línea.
         </p>
       </div>
+      {showSticky && <StickyEditor current={sticky} />}
       <UsersTable users={users} canViewAs={canViewAs} selfKey={session.authed ? session.who : null} />
     </div>
   );

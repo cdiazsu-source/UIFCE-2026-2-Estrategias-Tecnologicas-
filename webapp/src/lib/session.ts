@@ -121,6 +121,12 @@ export async function canManageLeads(): Promise<boolean> {
   return (await getSession()).authed;
 }
 
+/** ¿Puede dejar el post-it para los Junior? Solo el máster (credencial MASTER) con «Ver como» apagado; se valida en el servidor. */
+export async function canPostSticky(): Promise<boolean> {
+  const s = await getSession();
+  return s.authed && s.isMaster && !s.viewing;
+}
+
 /** ¿La sesión puede planear y registrar horas del equipo (/horas)? Solo el máster (credencial MASTER) con «Ver como» apagado:
  *  los monitores Junior, la dirección y la coordinación consultan su contador. Se valida en el servidor, no solo en la pantalla. */
 export async function canManageHours(): Promise<boolean> {

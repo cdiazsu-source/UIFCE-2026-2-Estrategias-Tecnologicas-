@@ -10,6 +10,7 @@ import { fmtMinutes } from "@/lib/lateness";
 import type { FootprintRange, MasterWelcome, MemberWelcome, WelcomeHighlight, WelcomePayload } from "@/lib/welcome-types";
 import { Button } from "@/components/ui/button";
 import { FootprintPanel } from "@/components/footprint-panel";
+import { StickyEditor, StickyPostIt } from "@/components/sticky-note";
 import { NowCard, useNow } from "@/components/schedule-board";
 import { WeekGlance } from "@/components/week-glance";
 import { SCHEDULE_DAYS, SHIFT_CATEGORY_LABEL, fmtTime, type ShiftData } from "@/lib/office-schedule";
@@ -22,6 +23,8 @@ const WAIT_SECONDS = 3;
 
 const SESSION_PREFIX = "et:capa:";
 const HIDE_PREFIX = "et:capa-hoy:";
+/** Última versión del post-it que el Junior ya vio: una nota nueva se muestra aunque haya pedido no ver la capa hoy. */
+const NOTE_SEEN_PREFIX = "et:nota-vista:";
 
 /** Saludo según la hora de Colombia. */
 function greeting(): string {
@@ -61,9 +64,10 @@ export function WelcomeLayer({ profile }: { profile: string }) {
   const closeRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
+    let hiddenToday = false;
     try {
       if (sessionStorage.getItem(SESSION_PREFIX + profile) === "1") return;
-      if (localStorage.getItem(HIDE_PREFIX + profile) === bogotaDateKey(new Date())) return;
+      hiddenToday = localStorage.getItem(HIDE_PREFIX + profile) === bogotaDateKey(new Date());
     } catch {
       // Sin almacenamiento (modo privado): se muestra siempre.
     }
@@ -72,6 +76,16 @@ export function WelcomeLayer({ profile }: { profile: string }) {
       .then((r) => (r.ok ? r.json() : null))
       .then((d: WelcomePayload | null) => {
         if (cancelled || !d) return;
+        // «No mostrar hoy» solo se salta si hay un post-it nuevo que esa persona aún no ha visto.
+        if (hiddenToday) {
+          let seen = "";
+          try {
+            seen = localStorage.getItem(NOTE_SEEN_PREFIX + profile) ?? "";
+          } catch {
+            seen = "";
+          }
+          if (!(d.kind === "member" && d.note && d.note.stamp !== seen)) return;
+        }
         setData(d);
         setOpen(true);
       })
@@ -126,11 +140,12 @@ export function WelcomeLayer({ profile }: { profile: string }) {
     }
     try {
       sessionStorage.setItem(SESSION_PREFIX + profile, "1");
+      if (data?.kind === "member" && data.note) localStorage.setItem(NOTE_SEEN_PREFIX + profile, data.note.stamp);
       if (hideToday) localStorage.setItem(HIDE_PREFIX + profile, bogotaDateKey(new Date()));
     } catch {
       // Sin almacenamiento: se cierra igual.
     }
-  }, [profile, hideToday, previewing, locked]);
+  }, [profile, hideToday, previewing, locked, data]);
 
   useEffect(() => {
     if (!open) return;
@@ -232,6 +247,7 @@ export function WelcomeLayer({ profile }: { profile: string }) {
 function MasterBody({ data, loading, onRange }: { data: MasterWelcome; loading: boolean; onRange: (r: FootprintRange) => void }) {
   return (
     <>
+      <StickyEditor current={data.sticky} />
       <FootprintPanel footprint={data.footprint} loading={loading} onRange={onRange} />
       <p className="text-[11px] leading-relaxed text-muted-foreground">
         Se registra el nombre del botón o enlace que tocan los monitores, nunca lo que escriben. «Ver como» y tu propia actividad no cuentan. Se conservan {data.footprint.retentionDays} días.
@@ -364,6 +380,8 @@ function MemberBody({ data, onNavigate, locked }: { data: MemberWelcome; onNavig
   const hiddenProjects = data.projectsTotal - data.projects.length;
   return (
     <>
+      {data.note && <StickyPostIt note={data.note} />}
+
       <p className="flex items-center gap-2 text-xs text-muted-foreground">
         <Clock className="h-3.5 w-3.5 shrink-0" aria-hidden />
         {data.lastVisit ? (

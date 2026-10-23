@@ -999,6 +999,19 @@ model LateEntry {
   @@index([date])
 }
 
+/// Post-it virtual del máster para los monitores Junior: una sola nota vigente (id fijo «main») que sale primero en su pantalla
+/// de bienvenida. Solo la escribe el máster (`canPostSticky`). `active` = false cuando la retira.
+model StickyNote {
+  id        String   @id
+  body      String   @db.Text
+  /// AMARILLO | AZUL | VERDE | ROSA (ver lib/sticky-note.ts).
+  color     String   @default("AMARILLO")
+  active    Boolean  @default(true)
+  /// Nombre de quien la dejó (el máster).
+  author    String
+  updatedAt DateTime @updatedAt
+}
+
 /// Visita anterior de una persona con credencial propia: cuando empieza una visita nueva (pasaron más de 30 min desde su
 /// actividad anterior) se guarda aquí el `lastSeenAt` previo, para decir «tu último ingreso fue…» en la capa de bienvenida.
 /// Vive aparte de User a propósito: así agregarla no cambia las consultas de User y el despliegue no depende de la migración.

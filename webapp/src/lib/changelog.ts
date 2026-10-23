@@ -21,6 +21,15 @@ export const CHANGELOG_SHOWN = 10;
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: "2026.10.22.11",
+    date: "2026-10-22",
+    title: "Post-it virtual del máster para los Junior",
+    changes: [
+      { type: "NUEVO", text: "El máster puede dejar una nota grande, con color y un leve giro de post-it, que es lo primero que ve cada Junior al abrir la app. Se escribe y se retira desde su pantalla de bienvenida o desde Equipo." },
+      { type: "MEJORA", text: "Una nota nueva se muestra al Junior aunque haya pedido no ver la bienvenida hoy." },
+    ],
+  },
+  {
     version: "2026.10.22.10",
     date: "2026-10-22",
     title: "Pantalla de bienvenida del Junior más clara",
