@@ -3,17 +3,31 @@ import type { ShiftData } from "@/lib/office-schedule";
 /** Lo que la capa de bienvenida recibe del servidor (JSON serializable). Vive aparte de `lib/welcome.ts` para que el
  *  componente de cliente pueda importar los tipos sin traer Prisma. */
 
-/** Por qué una novedad involucra a la persona: la etiquetaron, es una nota sobre una subtarea suya o es de un proyecto suyo. */
-export type NewsReason = "TAG" | "SUBTASK" | "PROJECT";
-
-export type WelcomeNews = {
-  id: string;
-  projectId: string;
-  projectTitle: string;
-  reason: NewsReason;
-  author: string;
+/** Un hecho importante de un proyecto desde la última visita: una nota de otra persona, una nota que la etiqueta o una subtarea terminada. */
+export type WelcomeHighlight = {
+  kind: "NOTA" | "ETIQUETA" | "HECHA";
+  /** Texto de la nota (recortado) o de la subtarea. */
+  text: string;
+  /** Quién escribió la nota; null en una subtarea terminada. */
+  who: string | null;
   at: string;
-  excerpt: string;
+};
+
+/** Un proyecto abierto en el que la persona participa (es responsable, tiene subtareas o la etiquetaron). */
+export type WelcomeProject = {
+  id: string;
+  title: string;
+  /** «Responsable», «Con subtareas tuyas» o «Te etiquetaron». */
+  role: string;
+  urgent: boolean;
+  statusLabel: string;
+  done: number;
+  total: number;
+  /** Subtareas suyas sin terminar y cuántas de ellas están vencidas. */
+  myPending: number;
+  myOverdue: number;
+  /** Lo importante desde su último ingreso (máx. 4, lo más nuevo primero). */
+  highlights: WelcomeHighlight[];
 };
 
 /** Capa de una persona identificada (Junior, dirección o coordinación). */
@@ -22,9 +36,13 @@ export type MemberWelcome = {
   firstName: string;
   /** Visita anterior (ISO), o null si no hay registro. */
   lastVisit: string | null;
-  /** Hasta 3 novedades que la involucran, y cuántas hay en total. */
-  news: WelcomeNews[];
-  newsTotal: number;
+  /** Sus proyectos abiertos (los 5 con más novedades o más urgentes) y cuántos son en total. */
+  projects: WelcomeProject[];
+  projectsTotal: number;
+  /** Totales para el resumen: novedades desde su último ingreso y subtareas suyas pendientes (y vencidas). */
+  updatesTotal: number;
+  pendingTotal: number;
+  overdueTotal: number;
   /** Sus bloques del horario y los de todo el equipo; vacío si no tiene horario propio. */
   shifts: ShiftData[];
   /** true = su actividad en la app queda registrada (monitores Junior): se le avisa en la capa. */

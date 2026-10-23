@@ -21,6 +21,16 @@ export const CHANGELOG_SHOWN = 10;
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: "2026.10.22.10",
+    date: "2026-10-22",
+    title: "Pantalla de bienvenida del Junior más clara",
+    changes: [
+      { type: "MEJORA", text: "Resumen en cifras al inicio: proyectos activos, novedades nuevas, subtareas pendientes (y vencidas) y tiempo tarde." },
+      { type: "MEJORA", text: "«Tus proyectos»: un bloque por proyecto con su nombre, su rol, el avance de subtareas y, en viñetas, lo importante desde el último ingreso (notas de otras personas, etiquetas y subtareas terminadas)." },
+      { type: "MEJORA", text: "«Tu horario»: el bloque de ahora, la lista de hoy y la semana completa plegada." },
+    ],
+  },
+  {
     version: "2026.10.22.9",
     date: "2026-10-22",
     title: "Panel principal más limpio: los proyectos primero",

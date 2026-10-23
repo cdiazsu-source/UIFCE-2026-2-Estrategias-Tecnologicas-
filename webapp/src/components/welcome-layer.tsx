@@ -3,15 +3,16 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Clock, Timer, X } from "lucide-react";
+import { CalendarClock, CheckCircle2, Clock, FolderKanban, ListChecks, MessageSquareText, Siren, Tag, Timer, X } from "lucide-react";
 
 import { bogotaDateKey, cn, timeAgo } from "@/lib/utils";
 import { fmtMinutes } from "@/lib/lateness";
-import type { FootprintRange, MasterWelcome, MemberWelcome, NewsReason, WelcomePayload } from "@/lib/welcome-types";
+import type { FootprintRange, MasterWelcome, MemberWelcome, WelcomeHighlight, WelcomePayload } from "@/lib/welcome-types";
 import { Button } from "@/components/ui/button";
 import { FootprintPanel } from "@/components/footprint-panel";
-import { NowCard } from "@/components/schedule-board";
+import { NowCard, useNow } from "@/components/schedule-board";
 import { WeekGlance } from "@/components/week-glance";
+import { SCHEDULE_DAYS, SHIFT_CATEGORY_LABEL, fmtTime, type ShiftData } from "@/lib/office-schedule";
 
 /** Evento que dispara el botón «Ver su pantalla de bienvenida» (ver `PreviewWelcomeButton`). */
 export const PREVIEW_WELCOME_EVENT = "et:ver-capa";
@@ -21,12 +22,6 @@ const WAIT_SECONDS = 3;
 
 const SESSION_PREFIX = "et:capa:";
 const HIDE_PREFIX = "et:capa-hoy:";
-
-const REASON: Record<NewsReason, { label: string; cls: string }> = {
-  TAG: { label: "Te etiquetaron", cls: "bg-warning/15 text-warning" },
-  SUBTASK: { label: "Tu subtarea", cls: "bg-accent text-primary" },
-  PROJECT: { label: "Tu proyecto", cls: "bg-accent text-primary" },
-};
 
 /** Saludo según la hora de Colombia. */
 function greeting(): string {
@@ -245,63 +240,178 @@ function MasterBody({ data, loading, onRange }: { data: MasterWelcome; loading: 
   );
 }
 
+const HIGHLIGHT: Record<WelcomeHighlight["kind"], { label: string; Icon: typeof Tag; cls: string }> = {
+  NOTA: { label: "Nota", Icon: MessageSquareText, cls: "text-primary" },
+  ETIQUETA: { label: "Te etiquetaron", Icon: Tag, cls: "text-warning" },
+  HECHA: { label: "Subtarea terminada", Icon: CheckCircle2, cls: "text-success" },
+};
+
+/** Cifra grande con su rótulo, para el resumen de arriba. */
+function Stat({ value, label, tone }: { value: string; label: string; tone?: "warning" }) {
+  return (
+    <div className="rounded-lg border border-border px-3 py-2">
+      <p className={cn("text-xl font-semibold leading-tight", tone === "warning" && "text-warning")}>{value}</p>
+      <p className="text-xs text-muted-foreground">{label}</p>
+    </div>
+  );
+}
+
+function SectionTitle({ icon: Icon, children }: { icon: typeof Clock; children: React.ReactNode }) {
+  return (
+    <h2 className="flex items-center gap-2 border-b border-border pb-1.5 text-sm font-semibold text-primary">
+      <Icon className="h-4 w-4" aria-hidden />
+      {children}
+    </h2>
+  );
+}
+
+/** «Hoy»: los bloques de hoy de la persona y el siguiente, en viñetas, junto con el «Ahora». */
+function TodayList({ shifts }: { shifts: ShiftData[] }) {
+  const now = useNow();
+  if (!now) return null;
+  const day = SCHEDULE_DAYS.find((d) => d.n === now.day);
+  const today = shifts.filter((s) => s.day === now.day).sort((a, b) => a.start - b.start);
+  const row = (s: ShiftData) => (
+    <li key={s.id} className={cn("flex flex-wrap gap-x-2", s.end <= now.minutes && "text-muted-foreground line-through decoration-muted-foreground/50")}>
+      <span className="font-medium tabular-nums">
+        {fmtTime(s.start)}–{fmtTime(s.end)}
+      </span>
+      <span>
+        {s.category === "OFICINA" ? "Oficina" : SHIFT_CATEGORY_LABEL[s.category]}
+        {s.label ? ` · ${s.label}` : ""} · Edificio {s.location}
+      </span>
+    </li>
+  );
+  return (
+    <div className="flex flex-col gap-1.5 text-sm">
+      <p className="text-xs font-medium text-muted-foreground">{day ? `Hoy, ${day.name.toLowerCase()}` : "Hoy"}</p>
+      {today.length > 0 ? <ul className="list-disc space-y-0.5 pl-5 marker:text-primary">{today.map(row)}</ul> : <p className="text-muted-foreground">No tienes bloques hoy.</p>}
+    </div>
+  );
+}
+
+function ProjectBlock({ p, locked, onNavigate }: { p: MemberWelcome["projects"][number]; locked: boolean; onNavigate: () => void }) {
+  const pct = p.total > 0 ? Math.round((p.done / p.total) * 100) : 0;
+  return (
+    <article className="flex flex-col gap-2 rounded-lg border border-border p-3">
+      <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1">
+        <Link
+          href={`/proyectos/${encodeURIComponent(p.id)}`}
+          onClick={(e) => {
+            if (locked) e.preventDefault();
+            else onNavigate();
+          }}
+          className="min-w-0 flex-1 text-sm font-semibold leading-snug hover:underline"
+        >
+          {p.title}
+        </Link>
+        <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
+          {p.urgent && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 font-medium text-destructive">
+              <Siren className="h-3 w-3" aria-hidden />
+              Atención inmediata
+            </span>
+          )}
+          <span className="rounded-full bg-accent px-2 py-0.5 text-primary">{p.role}</span>
+          <span className="rounded-full border border-border px-2 py-0.5 text-muted-foreground">{p.statusLabel}</span>
+        </div>
+      </div>
+
+      {p.total > 0 && (
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <div className="h-1.5 w-28 overflow-hidden rounded-full bg-muted" role="img" aria-label={`${pct} % de las subtareas terminadas`}>
+            <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
+          </div>
+          <span>
+            {p.done} de {p.total} subtareas
+          </span>
+          {p.myPending > 0 && (
+            <span className={cn(p.myOverdue > 0 && "font-medium text-warning")}>
+              · {p.myPending} {p.myPending === 1 ? "pendiente tuya" : "pendientes tuyas"}
+              {p.myOverdue > 0 ? ` (${p.myOverdue} ${p.myOverdue === 1 ? "vencida" : "vencidas"})` : ""}
+            </span>
+          )}
+        </div>
+      )}
+
+      {p.highlights.length > 0 ? (
+        <div className="flex flex-col gap-1">
+          <p className="text-xs font-medium text-muted-foreground">Lo importante desde tu último ingreso</p>
+          <ul className="space-y-1 text-sm">
+            {p.highlights.map((h, i) => {
+              const { label, Icon, cls } = HIGHLIGHT[h.kind];
+              return (
+                <li key={i} className="flex items-start gap-2">
+                  <Icon className={cn("mt-0.5 h-3.5 w-3.5 shrink-0", cls)} aria-hidden />
+                  <span className="min-w-0">
+                    <span className={cn("font-medium", cls)}>{label}</span>
+                    {h.who ? ` de ${h.who}` : ""} <span className="text-xs text-muted-foreground">({timeAgo(h.at)})</span>: {h.kind === "HECHA" ? h.text : `«${h.text}»`}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      ) : (
+        <p className="text-xs text-muted-foreground">Sin novedades desde tu último ingreso.</p>
+      )}
+    </article>
+  );
+}
+
 function MemberBody({ data, onNavigate, locked }: { data: MemberWelcome; onNavigate: () => void; locked: boolean }) {
+  const hasLate = data.tracked && data.late !== null;
+  const hiddenProjects = data.projectsTotal - data.projects.length;
   return (
     <>
-      <p className="flex items-center gap-2 rounded-md bg-muted/60 px-3 py-2 text-sm">
-        <Clock className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+      <p className="flex items-center gap-2 text-xs text-muted-foreground">
+        <Clock className="h-3.5 w-3.5 shrink-0" aria-hidden />
         {data.lastVisit ? (
           <span>
-            Tu último ingreso fue <span className="font-medium">{visitLabel(data.lastVisit)}</span> <span className="text-muted-foreground">({timeAgo(data.lastVisit)})</span>
+            Último ingreso: <span className="font-medium text-foreground">{visitLabel(data.lastVisit)}</span> ({timeAgo(data.lastVisit)})
           </span>
         ) : (
           <span>Es tu primer ingreso registrado.</span>
         )}
       </p>
 
-      {data.tracked && data.late && (
-        <p className="flex items-center gap-2 rounded-md bg-muted/60 px-3 py-2 text-sm">
-          <Timer className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
-          {data.late.minutes > 0 ? (
-            <span>
-              Tiempo tarde acumulado: <span className="font-medium text-warning">{fmtMinutes(data.late.minutes)}</span>{" "}
-              <span className="text-muted-foreground">({data.late.count} {data.late.count === 1 ? "tardanza" : "tardanzas"})</span>
-            </span>
-          ) : (
-            <span className="text-muted-foreground">Sin tardanzas registradas este semestre.</span>
-          )}
-        </p>
-      )}
+      <section aria-label="Resumen" className={cn("grid grid-cols-2 gap-2", hasLate ? "sm:grid-cols-4" : "sm:grid-cols-3")}>
+        <Stat value={String(data.projectsTotal)} label={data.projectsTotal === 1 ? "proyecto activo" : "proyectos activos"} />
+        <Stat value={String(data.updatesTotal)} label={data.updatesTotal === 1 ? "novedad nueva" : "novedades nuevas"} />
+        <Stat
+          value={String(data.pendingTotal)}
+          label={data.overdueTotal > 0 ? `subtareas tuyas (${data.overdueTotal} vencidas)` : "subtareas tuyas pendientes"}
+          tone={data.overdueTotal > 0 ? "warning" : undefined}
+        />
+        {hasLate && data.late && (
+          <Stat value={fmtMinutes(data.late.minutes)} label={data.late.count === 0 ? "sin tardanzas este semestre" : `tiempo tarde (${data.late.count} ${data.late.count === 1 ? "vez" : "veces"})`} tone={data.late.minutes > 0 ? "warning" : undefined} />
+        )}
+      </section>
 
-      {data.news.length > 0 && (
-        <section className="flex flex-col gap-0.5">
-          <h2 className="text-xs font-medium text-muted-foreground">Para ti desde tu último ingreso · {data.newsTotal}</h2>
-          {data.news.map((n) => (
-            <div key={n.id} className="flex items-baseline gap-2.5 border-b border-border py-2 text-sm last:border-b-0">
-              <span className={cn("shrink-0 rounded-full px-2 py-0.5 text-[11px]", REASON[n.reason].cls)}>{REASON[n.reason].label}</span>
-              <p className="min-w-0 flex-1">
-                <Link href={`/proyectos/${encodeURIComponent(n.projectId)}#p-bitacora`} onClick={(e) => {
-                  if (locked) e.preventDefault();
-                  else onNavigate();
-                }}
-                className="font-medium hover:underline">
-                  {n.projectTitle}
-                </Link>
-                <span className="text-muted-foreground">
-                  {" "}
-                  · {n.author}, {timeAgo(n.at)} — «{n.excerpt}»
-                </span>
-              </p>
-            </div>
-          ))}
-          {data.newsTotal > data.news.length && <p className="pt-1 text-xs text-muted-foreground">Y {data.newsTotal - data.news.length} más para ti en la bitácora de tus proyectos.</p>}
-        </section>
-      )}
+      <section className="flex flex-col gap-2">
+        <SectionTitle icon={FolderKanban}>Tus proyectos</SectionTitle>
+        {data.projects.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Todavía no tienes proyectos abiertos asignados.</p>
+        ) : (
+          data.projects.map((p) => <ProjectBlock key={p.id} p={p} locked={locked} onNavigate={onNavigate} />)
+        )}
+        {hiddenProjects > 0 && <p className="text-xs text-muted-foreground">Y {hiddenProjects} {hiddenProjects === 1 ? "proyecto más" : "proyectos más"} en «Asignados a ti» del panel.</p>}
+      </section>
 
       {data.shifts.length > 0 && (
-        <section className="flex flex-col gap-3">
+        <section className="flex flex-col gap-2">
+          <SectionTitle icon={CalendarClock}>Tu horario</SectionTitle>
           <NowCard shifts={data.shifts} />
-          <WeekGlance shifts={data.shifts} />
+          <TodayList shifts={data.shifts} />
+          <details className="rounded-lg border border-border text-sm">
+            <summary className="flex cursor-pointer select-none items-center gap-2 px-3 py-2 text-muted-foreground">
+              <ListChecks className="h-4 w-4" aria-hidden />
+              Ver mi semana completa
+            </summary>
+            <div className="border-t border-border p-3">
+              <WeekGlance shifts={data.shifts} />
+            </div>
+          </details>
         </section>
       )}
 
