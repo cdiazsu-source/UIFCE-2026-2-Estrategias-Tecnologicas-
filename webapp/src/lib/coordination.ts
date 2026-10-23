@@ -26,11 +26,24 @@ export type CoordProject = {
   done: number;
   total: number;
   assignee: string | null;
+  /** Imágenes mini de las plantillas enlazadas (direcciones de /api/plantillas-imagen); varias rotan. */
+  images: string[];
+  /** Plantillas enlazadas al proyecto, en su orden. */
+  templateIds: string[];
 };
 
 export type CoordBlocker = { id: string; text: string };
 
-/** Las cinco páginas, en orden. */
+/** Secciones con proyectos que el máster puede agregar o quitar: lo que entregamos, en curso (página «En curso y bloqueos») y el próximo corte. */
+export const SECTION_KEYS = ["entregamos", "curso", "corte"] as const;
+export type SectionKey = (typeof SECTION_KEYS)[number];
+export const SECTION_LABEL: Record<SectionKey, string> = { entregamos: "Lo que entregamos", curso: "En curso", corte: "En el próximo corte" };
+/** Qué sección edita cada página (las demás no tienen lista de proyectos). */
+export const SLIDE_SECTION: Partial<Record<string, SectionKey>> = { entregamos: "entregamos", bloqueos: "curso", corte: "corte" };
+/** Tope de imágenes que rotan por proyecto. */
+export const PROJECT_IMAGES_MAX = 8;
+
+/** Las seis páginas, en orden. */
 export const SLIDE_KEYS = ["portada", "general", "entregamos", "bloqueos", "corte", "notas"] as const;
 export type SlideKey = (typeof SLIDE_KEYS)[number];
 
@@ -62,7 +75,11 @@ export const EMPTY_DESIGN: PageDesign = { title: "", note: "", images: [] };
 
 export type CoordData = {
   delivered: CoordProject[];
+  /** Proyectos en curso (página «En curso y bloqueos»). */
+  inProgress: CoordProject[];
   upcoming: CoordProject[];
+  /** Qué secciones personalizó el máster (si no, se arman solas). */
+  customized: Record<SectionKey, boolean>;
   /** null = la tabla de bloqueos no existe todavía (falta la migración). */
   blockers: CoordBlocker[] | null;
   design: Record<SlideKey, PageDesign>;
@@ -96,7 +113,13 @@ export function parseImages(raw: unknown): DesignImage[] {
 export function parseSnapshot(raw: unknown): CoordData | null {
   if (!raw || typeof raw !== "object") return null;
   const o = raw as Record<string, unknown>;
-  const projects = (v: unknown): CoordProject[] => (Array.isArray(v) ? (v as CoordProject[]).filter((p) => p && typeof p.id === "string" && typeof p.title === "string") : []);
+  const strings = (v: unknown, prefix?: string): string[] => (Array.isArray(v) ? v.filter((s): s is string => typeof s === "string" && (!prefix || s.startsWith(prefix))) : []);
+  const projects = (v: unknown): CoordProject[] =>
+    Array.isArray(v)
+      ? (v as CoordProject[])
+          .filter((p) => p && typeof p.id === "string" && typeof p.title === "string")
+          .map((p) => ({ ...p, images: strings(p.images, "/api/plantillas-imagen/").slice(0, PROJECT_IMAGES_MAX), templateIds: strings(p.templateIds) }))
+      : [];
   const designs = emptyDesigns();
   const d = (o.design ?? {}) as Record<string, Partial<PageDesign>>;
   for (const k of SLIDE_KEYS) {
@@ -104,5 +127,8 @@ export function parseSnapshot(raw: unknown): CoordData | null {
     if (p) designs[k] = { title: typeof p.title === "string" ? p.title : "", note: typeof p.note === "string" ? p.note : "", images: parseImages(p.images) };
   }
   const blockers = Array.isArray(o.blockers) ? (o.blockers as CoordBlocker[]).filter((b) => b && typeof b.text === "string").map((b) => ({ id: String(b.id ?? b.text), text: b.text })) : [];
-  return { delivered: projects(o.delivered), upcoming: projects(o.upcoming), blockers, design: designs };
+  // Las reuniones guardadas antes no traen «en curso»: se deduce de lo entregado.
+  const delivered = projects(o.delivered);
+  const inProgress = Array.isArray(o.inProgress) ? projects(o.inProgress) : delivered.filter((p) => p.status === "EN_CURSO");
+  return { delivered, inProgress, upcoming: projects(o.upcoming), blockers, design: designs, customized: { entregamos: false, curso: false, corte: false } };
 }

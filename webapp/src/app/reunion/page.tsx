@@ -52,6 +52,19 @@ export default async function ReunionPage({ searchParams }: { searchParams: { re
     }
   }
 
+  // Para el modo diseño: todos los proyectos (para agregar a una sección) y todas las plantillas (para enlazar sus imágenes).
+  let projectOptions: { id: string; title: string; status: string }[] = [];
+  let linkTemplates: { id: string; name: string; category: string }[] = [];
+  if (!viewing) {
+    try {
+      projectOptions = await prisma.project.findMany({ orderBy: { sourceOrder: "asc" }, select: { id: true, title: true, status: true } });
+      linkTemplates = await prisma.template.findMany({ orderBy: [{ category: "asc" }, { order: "asc" }], select: { id: true, name: true, category: true } });
+    } catch {
+      projectOptions = [];
+      linkTemplates = [];
+    }
+  }
+
   // Integrantes del área (máster primero) para la portada y el banner. Siempre en vivo: la foto no se guarda en las reuniones.
   let team: CoordTeam = { master: null, members: [] };
   try {
@@ -75,6 +88,8 @@ export default async function ReunionPage({ searchParams }: { searchParams: { re
       meetings={meetings}
       viewing={viewing}
       templates={templates}
+      projectOptions={projectOptions}
+      linkTemplates={linkTemplates}
       team={team}
       initialSlide={isSlideKey(page) ? page : "portada"}
       initialPresenting={searchParams.presentar === "1"}

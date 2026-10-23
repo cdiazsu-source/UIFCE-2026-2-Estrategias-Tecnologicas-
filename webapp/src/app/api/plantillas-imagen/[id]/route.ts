@@ -11,9 +11,13 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
   const session = await getSession();
   if (!session.authed) return new NextResponse(null, { status: 401 });
 
+  // `?pieza=<id>`: la imagen de una pieza de la plantilla; sin él, su captura.
+  const piece = new URL(req.url).searchParams.get("pieza");
   let src: string | null = null;
   try {
-    src = (await prisma.template.findUnique({ where: { id: params.id }, select: { screenshot: true } }))?.screenshot ?? null;
+    src = piece
+      ? ((await prisma.templatePiece.findFirst({ where: { id: piece, templateId: params.id }, select: { image: true } }))?.image ?? null)
+      : ((await prisma.template.findUnique({ where: { id: params.id }, select: { screenshot: true } }))?.screenshot ?? null);
   } catch {
     src = null;
   }

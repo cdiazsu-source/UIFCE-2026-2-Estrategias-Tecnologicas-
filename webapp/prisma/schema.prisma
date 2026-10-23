@@ -192,6 +192,9 @@ model Project {
   socialChannels SocialChannel[]
   expenses       Expense[]
   hourEntries    HourEntry[]
+  /// Apariciones en «Reunión coordinación» y plantillas enlazadas (imágenes mini).
+  coordinationItems CoordinationItem[]
+  templateLinks     ProjectTemplateLink[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -511,6 +514,8 @@ model Template {
   pieces      TemplatePiece[]
   /// Nombre elegido para el enlace (Canva, Drive…); sin fila, se deduce del dominio.
   linkLabel   TemplateLinkLabel?
+  /// Proyectos que enlazan esta plantilla (sus imágenes aparecen en «Reunión coordinación»).
+  projectLinks ProjectTemplateLink[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -523,6 +528,37 @@ model TemplateLinkLabel {
   templateId String   @id
   template   Template @relation(fields: [templateId], references: [id], onDelete: Cascade)
   label      String
+}
+
+/// Secciones de «Reunión coordinación» que el máster personalizó (entregamos, curso, corte). Una fila = la lista sale de CoordinationItem;
+/// sin fila, la sección se arma sola.
+model CoordinationSection {
+  section String @id
+}
+
+/// Un proyecto en una sección personalizada de «Reunión coordinación» (`section`: entregamos | curso | corte), en su orden.
+model CoordinationItem {
+  id        String   @id @default(cuid())
+  section   String
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@unique([section, projectId])
+  @@index([projectId])
+}
+
+/// Plantilla enlazada a un proyecto: su captura y sus piezas (imágenes mini) salen en la tarjeta del proyecto, rotando si son varias.
+model ProjectTemplateLink {
+  projectId  String
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  templateId String
+  template   Template @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  order      Int      @default(0)
+
+  @@id([projectId, templateId])
+  @@index([templateId])
 }
 
 /// Una pieza de una plantilla: imagen pequeña (data URL reducida) con su enlace (Canva, Drive…). `order` es su posición en la plantilla.

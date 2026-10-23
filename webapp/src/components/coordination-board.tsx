@@ -6,13 +6,13 @@ import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight, History, Maximize2, Palette, X } from "lucide-react";
 
 import { deleteMeeting, saveMeeting } from "@/lib/actions/coordination";
-import { MEETING_LABEL_MAX, SLIDE_KEYS, SLIDE_LABEL, type CoordData, type CoordProject, type CoordTeam, type MeetingSummary, type SlideKey } from "@/lib/coordination";
+import { MEETING_LABEL_MAX, SLIDE_KEYS, SLIDE_LABEL, SLIDE_SECTION, type CoordData, type CoordProject, type CoordTeam, type MeetingSummary, type SlideKey } from "@/lib/coordination";
 import { RETURN_KEY, RETURN_SECONDS } from "@/lib/reunion-return";
 import { initials, resolvePhoto } from "@/components/person-avatar";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { DesignEditor, type TemplateOption } from "@/components/coordination-design";
+import { DesignEditor, ProjectsEditor, type ProjectOption, type TemplateOption } from "@/components/coordination-design";
 import { SLIDE_NUMBER, Slide } from "@/components/coordination-slides";
 
 const longDate = (iso: string) => new Intl.DateTimeFormat("es-CO", { dateStyle: "long", timeZone: "UTC" }).format(new Date(`${iso}T00:00:00Z`));
@@ -142,6 +142,8 @@ export function CoordinationBoard({
   meetings,
   viewing,
   templates,
+  projectOptions,
+  linkTemplates,
   team,
   initialSlide,
   initialPresenting,
@@ -150,6 +152,8 @@ export function CoordinationBoard({
   meetings: MeetingSummary[] | null;
   viewing: MeetingSummary | null;
   templates: TemplateOption[];
+  projectOptions: ProjectOption[];
+  linkTemplates: TemplateOption[];
   team: CoordTeam;
   initialSlide: SlideKey;
   initialPresenting: boolean;
@@ -271,7 +275,21 @@ export function CoordinationBoard({
 
         <Slide key={slide} slide={slide} data={data} team={team} big={presenting} canEditBlockers={!presenting && !readOnly} onGo={setSlide} onOpenProject={openProject} />
 
-        {designMode && !readOnly && !presenting && <DesignEditor key={slide} slide={slide} initial={data.design[slide]} templates={templates} />}
+        {designMode && !readOnly && !presenting && (
+          <>
+            {SLIDE_SECTION[slide] && (
+              <ProjectsEditor
+                key={`p-${slide}`}
+                section={SLIDE_SECTION[slide]!}
+                projects={SLIDE_SECTION[slide] === "entregamos" ? data.delivered : SLIDE_SECTION[slide] === "curso" ? data.inProgress : data.upcoming}
+                options={projectOptions}
+                linkTemplates={linkTemplates}
+                customized={data.customized[SLIDE_SECTION[slide]!]}
+              />
+            )}
+            <DesignEditor key={slide} slide={slide} initial={data.design[slide]} templates={templates} />
+          </>
+        )}
 
         <div className="flex items-center justify-between border-t border-border pt-3 text-sm text-muted-foreground">
           <Button type="button" size="sm" variant="ghost" onClick={() => go(-1)}>

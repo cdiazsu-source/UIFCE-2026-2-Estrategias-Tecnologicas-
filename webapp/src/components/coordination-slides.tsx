@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { AlertTriangle, Plus, X } from "lucide-react";
 
 import { addBlocker, deleteBlocker } from "@/lib/actions/coordination";
@@ -24,14 +24,37 @@ function StatusChip({ status }: { status: string }) {
   return <span className={cn("shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium", STATUS_STYLE[status] ?? "bg-muted text-muted-foreground")}>{label}</span>;
 }
 
+/** Imagen mini del proyecto: las de sus plantillas enlazadas; si son varias, se turnan con un fundido cada 4 segundos (salvo que se pida menos movimiento). */
+function RotatingImage({ images, big }: { images: string[]; big: boolean }) {
+  const [i, setI] = useState(0);
+  const n = images.length;
+  useEffect(() => {
+    if (n < 2) return;
+    if (typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+    setI(Math.floor(Math.random() * n));
+    const t = setInterval(() => setI((x) => (x + 1) % n), 4000);
+    return () => clearInterval(t);
+  }, [n]);
+  if (n === 0) return null;
+  return (
+    <span className={cn("relative shrink-0 overflow-hidden rounded-md border border-border bg-muted", big ? "h-24 w-24" : "h-14 w-14")} aria-hidden>
+      {images.map((src, k) => (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img key={src} src={src} alt="" loading="lazy" className={cn("absolute inset-0 h-full w-full object-cover transition-opacity duration-700", k === i ? "opacity-100" : "opacity-0")} />
+      ))}
+    </span>
+  );
+}
+
 function ProjectList({ projects, big, empty, onOpen }: { projects: CoordProject[]; big: boolean; empty: string; onOpen?: (p: CoordProject) => void }) {
   if (projects.length === 0) return <p className={cn("text-muted-foreground", big ? "text-lg" : "text-sm")}>{empty}</p>;
   return (
     <ul className="grid grid-cols-1 gap-2 md:grid-cols-2">
       {projects.map((p) => (
         <li key={p.id}>
-          <button type="button" onClick={() => onOpen?.(p)} title="Abrir el proyecto (queda un botón para volver a la reunión durante 30 segundos)" className="flex w-full items-start justify-between gap-3 rounded-lg border border-border bg-card px-4 py-3 text-left transition-colors hover:border-primary/40 hover:bg-muted/40">
-          <div className="min-w-0">
+          <button type="button" onClick={() => onOpen?.(p)} title="Abrir el proyecto (queda un botón para volver a la reunión durante 30 segundos)" className="flex w-full items-center justify-between gap-3 rounded-lg border border-border bg-card px-4 py-3 text-left transition-colors hover:border-primary/40 hover:bg-muted/40">
+          <RotatingImage images={p.images} big={big} />
+          <div className="min-w-0 flex-1">
             <p className={cn("font-medium leading-snug", big ? "text-lg" : "text-sm")}>{p.title}</p>
             <p className={cn("mt-0.5 text-muted-foreground", big ? "text-sm" : "text-xs")}>
               {p.category}
@@ -183,7 +206,7 @@ function Cover({ team, title, note, big }: { team: CoordTeam; title: string; not
 }
 
 function Overview({ data, big, onGo }: { data: CoordData; big: boolean; onGo: (k: SlideKey) => void }) {
-  const inProgress = data.delivered.filter((p) => p.status === "EN_CURSO");
+  const inProgress = data.inProgress;
   const doneCount = data.delivered.filter((p) => p.status === "COMPLETADO").length;
   const cards: { key: SlideKey; stat: string; items: string[] }[] = [
     { key: "entregamos", stat: `${data.delivered.length} proyectos · ${doneCount} entregados`, items: data.delivered.map((p) => p.title) },
@@ -220,7 +243,7 @@ function Overview({ data, big, onGo }: { data: CoordData; big: boolean; onGo: (k
 export function Slide({ slide, data, team, big, canEditBlockers, onGo, onOpenProject }: { slide: SlideKey; data: CoordData; team: CoordTeam; big: boolean; canEditBlockers: boolean; onGo: (k: SlideKey) => void; onOpenProject: (p: CoordProject) => void }) {
   const design: PageDesign = data.design[slide];
   const title = design.title || (slide === "general" ? "Resumen de la reunión" : slide === "portada" ? "Reunión de coordinación" : SLIDE_LABEL[slide]);
-  const inProgress = data.delivered.filter((p) => p.status === "EN_CURSO");
+  const inProgress = data.inProgress;
 
   return (
     <section className="flex flex-col gap-5">

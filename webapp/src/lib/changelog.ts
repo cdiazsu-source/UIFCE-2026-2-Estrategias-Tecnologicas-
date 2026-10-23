@@ -21,6 +21,15 @@ export const CHANGELOG_SHOWN = 10;
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: "2026.10.23.6",
+    date: "2026-10-23",
+    title: "Reunión coordinación: proyectos a la medida e imágenes de plantillas",
+    changes: [
+      { type: "NUEVO", text: "En el modo diseño, el máster agrega o quita proyectos en «Lo que entregamos», «En curso» y «En el próximo corte», y puede volver a la lista automática de cada sección." },
+      { type: "NUEVO", text: "Cada proyecto puede enlazar plantillas: su captura y sus piezas salen como imagen mini en la tarjeta del proyecto, y si son varias se turnan con un fundido cada pocos segundos. Las imágenes también aparecen en los informes de reuniones guardadas." },
+    ],
+  },
+  {
     version: "2026.10.23.5",
     date: "2026-10-23",
     title: "Reunión coordinación: portada, banner y regreso desde los proyectos",
