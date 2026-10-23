@@ -3,6 +3,7 @@ import { getSession } from "@/lib/session";
 import { getTrackedWho, loadFootprint } from "@/lib/activity";
 import { isShiftCategory, type ShiftData } from "@/lib/office-schedule";
 import { greetingName } from "@/lib/utils";
+import { lateSinceDate } from "@/lib/lateness";
 import { isJuniorWho, viewProfile } from "@/lib/view-profiles";
 import type { FootprintRange, MemberWelcome, NewsReason, WelcomeNews, WelcomePayload } from "@/lib/welcome-types";
 
@@ -87,6 +88,14 @@ export async function loadWelcome(range: FootprintRange = "7", preview = false):
     const shifts: ShiftData[] = shiftRows
       .filter((s) => isShiftCategory(s.category))
       .map((s) => ({ id: s.id, userId: s.userId, day: s.dayOfWeek, start: s.startMinutes, end: s.endMinutes, category: s.category as ShiftData["category"], label: s.label, location: s.location }));
+    // Tiempo tarde acumulado: tabla nueva, en su propio try para que la capa salga aunque falte la migración.
+    let late: { minutes: number; count: number } | null = null;
+    try {
+      const agg = await prisma.lateEntry.aggregate({ where: { userId: user.id, date: { gte: lateSinceDate() } }, _sum: { minutes: true }, _count: true });
+      late = { minutes: agg._sum.minutes ?? 0, count: agg._count };
+    } catch {
+      late = null;
+    }
     // Sin bloques propios no hay semana que mostrar (los del equipo solos no dicen dónde está esta persona).
     const own = shifts.some((s) => s.userId === user.id);
 
@@ -98,6 +107,7 @@ export async function loadWelcome(range: FootprintRange = "7", preview = false):
       newsTotal: news.total,
       shifts: own ? shifts : [],
       tracked: tracked !== null,
+      late,
       ...(preview ? { preview: { label: viewProfile(key)?.label ?? user.name } } : {}),
     };
   } catch {

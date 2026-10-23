@@ -455,6 +455,7 @@ model User {
   officeShifts         OfficeShift[]
   activityEvents       ActivityEvent[]
   visit                UserVisit?
+  lateEntries          LateEntry[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -979,6 +980,23 @@ model OfficeShift {
 
   @@index([dayOfWeek])
   @@index([userId])
+}
+
+/// Tardanza de una persona: minutos que llegó tarde un día (a su bloque del horario de oficina). Solo la registra el máster
+/// (`canManageHours`); el acumulado de cada Junior aparece en su capa de bienvenida y en la pestaña «Puntualidad» de /horas.
+model LateEntry {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// Día de la tardanza (solo día: medianoche UTC, como las demás fechas «solo día»).
+  date      DateTime
+  minutes   Int
+  /// Detalle opcional (bloque al que llegó tarde, motivo).
+  note      String?
+  createdAt DateTime @default(now())
+
+  @@index([userId, date])
+  @@index([date])
 }
 
 /// Visita anterior de una persona con credencial propia: cuando empieza una visita nueva (pasaron más de 30 min desde su

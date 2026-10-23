@@ -4,15 +4,16 @@ import { useState } from "react";
 
 import { cn } from "@/lib/utils";
 
-type Tab = "horas" | "horario";
+type Tab = "horas" | "horario" | "puntualidad";
 
-/** Pestañas de /horas: «Horas» (plan y contador por semana) y «Horario» (horario de oficina de lunes a sábado). Los dos
- *  paneles se montan siempre y se oculta el que no está a la vista, para no perder lo que se estaba haciendo al cambiar. */
-export function HoursTabs({ initial, hours, schedule }: { initial: Tab; hours: React.ReactNode; schedule: React.ReactNode }) {
+/** Pestañas de /horas: «Horas» (plan y contador por semana), «Horario de oficina» (de lunes a sábado) y «Puntualidad» (tiempo tarde
+ *  acumulado). Los paneles se montan siempre y se oculta el que no está a la vista, para no perder lo que se estaba haciendo al cambiar. */
+export function HoursTabs({ initial, hours, schedule, lateness }: { initial: Tab; hours: React.ReactNode; schedule: React.ReactNode; lateness: React.ReactNode }) {
   const [tab, setTab] = useState<Tab>(initial);
   const tabs: { id: Tab; label: string }[] = [
     { id: "horas", label: "Horas" },
     { id: "horario", label: "Horario de oficina" },
+    { id: "puntualidad", label: "Puntualidad" },
   ];
   return (
     <div className="flex flex-col gap-4">
@@ -40,6 +41,9 @@ export function HoursTabs({ initial, hours, schedule }: { initial: Tab; hours: R
       </div>
       <div role="tabpanel" id="panel-horario" aria-labelledby="tab-horario" hidden={tab !== "horario"}>
         {schedule}
+      </div>
+      <div role="tabpanel" id="panel-puntualidad" aria-labelledby="tab-puntualidad" hidden={tab !== "puntualidad"}>
+        {lateness}
       </div>
     </div>
   );

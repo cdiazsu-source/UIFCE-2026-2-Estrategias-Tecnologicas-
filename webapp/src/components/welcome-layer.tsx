@@ -3,9 +3,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Clock, X } from "lucide-react";
+import { Clock, Timer, X } from "lucide-react";
 
 import { bogotaDateKey, cn, timeAgo } from "@/lib/utils";
+import { fmtMinutes } from "@/lib/lateness";
 import type { FootprintRange, MasterWelcome, MemberWelcome, NewsReason, WelcomePayload } from "@/lib/welcome-types";
 import { Button } from "@/components/ui/button";
 import { FootprintPanel } from "@/components/footprint-panel";
@@ -14,6 +15,9 @@ import { WeekGlance } from "@/components/week-glance";
 
 /** Evento que dispara el botón «Ver su pantalla de bienvenida» (ver `PreviewWelcomeButton`). */
 export const PREVIEW_WELCOME_EVENT = "et:ver-capa";
+
+/** Segundos que un monitor Junior debe esperar antes de poder cerrar la capa (la vista previa y los demás perfiles no esperan). */
+const WAIT_SECONDS = 3;
 
 const SESSION_PREFIX = "et:capa:";
 const HIDE_PREFIX = "et:capa-hoy:";
@@ -58,6 +62,7 @@ export function WelcomeLayer({ profile }: { profile: string }) {
   const [loading, setLoading] = useState(false);
   const [hideToday, setHideToday] = useState(false);
   const [previewing, setPreviewing] = useState(false);
+  const [secondsLeft, setSecondsLeft] = useState(WAIT_SECONDS);
   const closeRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -81,6 +86,25 @@ export function WelcomeLayer({ profile }: { profile: string }) {
     };
   }, [profile]);
 
+  // El Junior no puede cerrar la capa hasta que pasen 3 segundos (la ve completa antes de entrar a la app).
+  const needsWait = open && data?.kind === "member" && data.tracked && !previewing;
+  const locked = needsWait && secondsLeft > 0;
+  useEffect(() => {
+    // Sin espera no se toca el contador: arranca en 3 para que, al abrirse, la capa nazca ya bloqueada (sin un cuadro desbloqueado).
+    if (!needsWait) return;
+    setSecondsLeft(WAIT_SECONDS);
+    const timer = setInterval(() => {
+      setSecondsLeft((s) => {
+        if (s <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+        return s - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [needsWait]);
+
   // Vista previa de «Ver como»: abre la capa del perfil que se está viendo, sin tocar lo de «ya la cerré» ni «hoy».
   useEffect(() => {
     const show = () => {
@@ -99,6 +123,7 @@ export function WelcomeLayer({ profile }: { profile: string }) {
   }, []);
 
   const close = useCallback(() => {
+    if (locked) return;
     setOpen(false);
     if (previewing) {
       setPreviewing(false);
@@ -110,7 +135,7 @@ export function WelcomeLayer({ profile }: { profile: string }) {
     } catch {
       // Sin almacenamiento: se cierra igual.
     }
-  }, [profile, hideToday, previewing]);
+  }, [profile, hideToday, previewing, locked]);
 
   useEffect(() => {
     if (!open) return;
@@ -139,7 +164,7 @@ export function WelcomeLayer({ profile }: { profile: string }) {
 
   const first = data.firstName;
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/45 p-3 sm:p-6" role="presentation">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/45 p-3 backdrop-blur-md sm:p-6" role="presentation">
       <div role="dialog" aria-modal="true" aria-label="Bienvenida" className="flex max-h-[92vh] w-full max-w-2xl flex-col overflow-hidden rounded-xl border border-border bg-card shadow-lg">
         <div className="flex items-center gap-3 bg-primary px-5 py-3.5 text-primary-foreground">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent text-sm font-semibold text-primary" aria-hidden>
@@ -155,8 +180,21 @@ export function WelcomeLayer({ profile }: { profile: string }) {
               {data.kind === "master" ? " · Huella digital del equipo" : ""}
             </p>
           </div>
-          <button ref={closeRef} type="button" onClick={close} aria-label="Cerrar" className="rounded p-1.5 hover:bg-white/15 focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-accent">
-            <X className="h-5 w-5" aria-hidden />
+          <button
+            ref={closeRef}
+            type="button"
+            onClick={close}
+            aria-label={locked ? `Cerrar (disponible en ${secondsLeft} s)` : "Cerrar"}
+            aria-disabled={locked}
+            className={cn("rounded p-1.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-accent", locked ? "cursor-not-allowed opacity-60" : "hover:bg-white/15")}
+          >
+            {locked ? (
+              <span className="flex h-5 w-5 items-center justify-center text-sm font-semibold" aria-hidden>
+                {secondsLeft}
+              </span>
+            ) : (
+              <X className="h-5 w-5" aria-hidden />
+            )}
           </button>
         </div>
 
@@ -165,7 +203,7 @@ export function WelcomeLayer({ profile }: { profile: string }) {
         )}
 
         <div className="flex flex-col gap-4 overflow-y-auto px-5 py-4">
-          {data.kind === "master" ? <MasterBody data={data} loading={loading} onRange={changeRange} /> : <MemberBody data={data} onNavigate={close} />}
+          {data.kind === "master" ? <MasterBody data={data} loading={loading} onRange={changeRange} /> : <MemberBody data={data} onNavigate={close} locked={locked} />}
         </div>
 
         <div className="flex flex-wrap items-center gap-3 border-t border-border px-5 py-3">
@@ -179,13 +217,16 @@ export function WelcomeLayer({ profile }: { profile: string }) {
           )}
           <Button
             type="button"
+            aria-disabled={locked}
+            className={cn(locked && "cursor-not-allowed opacity-60")}
             onClick={() => {
+              if (locked) return;
               const wasPreview = previewing;
               close();
               if (!wasPreview && pathname !== "/") router.push("/");
             }}
           >
-            {previewing ? "Cerrar vista previa" : "Ir al panel"}
+            {previewing ? "Cerrar vista previa" : locked ? `Ir al panel (${secondsLeft})` : "Ir al panel"}
           </Button>
         </div>
       </div>
@@ -204,7 +245,7 @@ function MasterBody({ data, loading, onRange }: { data: MasterWelcome; loading: 
   );
 }
 
-function MemberBody({ data, onNavigate }: { data: MemberWelcome; onNavigate: () => void }) {
+function MemberBody({ data, onNavigate, locked }: { data: MemberWelcome; onNavigate: () => void; locked: boolean }) {
   return (
     <>
       <p className="flex items-center gap-2 rounded-md bg-muted/60 px-3 py-2 text-sm">
@@ -218,6 +259,20 @@ function MemberBody({ data, onNavigate }: { data: MemberWelcome; onNavigate: () 
         )}
       </p>
 
+      {data.tracked && data.late && (
+        <p className="flex items-center gap-2 rounded-md bg-muted/60 px-3 py-2 text-sm">
+          <Timer className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+          {data.late.minutes > 0 ? (
+            <span>
+              Tiempo tarde acumulado: <span className="font-medium text-warning">{fmtMinutes(data.late.minutes)}</span>{" "}
+              <span className="text-muted-foreground">({data.late.count} {data.late.count === 1 ? "tardanza" : "tardanzas"})</span>
+            </span>
+          ) : (
+            <span className="text-muted-foreground">Sin tardanzas registradas este semestre.</span>
+          )}
+        </p>
+      )}
+
       {data.news.length > 0 && (
         <section className="flex flex-col gap-0.5">
           <h2 className="text-xs font-medium text-muted-foreground">Para ti desde tu último ingreso · {data.newsTotal}</h2>
@@ -225,7 +280,11 @@ function MemberBody({ data, onNavigate }: { data: MemberWelcome; onNavigate: () 
             <div key={n.id} className="flex items-baseline gap-2.5 border-b border-border py-2 text-sm last:border-b-0">
               <span className={cn("shrink-0 rounded-full px-2 py-0.5 text-[11px]", REASON[n.reason].cls)}>{REASON[n.reason].label}</span>
               <p className="min-w-0 flex-1">
-                <Link href={`/proyectos/${encodeURIComponent(n.projectId)}#p-bitacora`} onClick={onNavigate} className="font-medium hover:underline">
+                <Link href={`/proyectos/${encodeURIComponent(n.projectId)}#p-bitacora`} onClick={(e) => {
+                  if (locked) e.preventDefault();
+                  else onNavigate();
+                }}
+                className="font-medium hover:underline">
                   {n.projectTitle}
                 </Link>
                 <span className="text-muted-foreground">

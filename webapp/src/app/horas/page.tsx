@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma";
 import { InfoHint } from "@/components/info-hint";
 import { HoursBoard, type HourPerson } from "@/components/hours-board";
 import { HoursTabs } from "@/components/hours-tabs";
+import { LatenessBoard } from "@/components/lateness-board";
+import { LATE_SINCE, lateSinceDate, type LateData } from "@/lib/lateness";
 import { NowCard, ScheduleBoard } from "@/components/schedule-board";
 import { isShiftCategory, type ShiftData } from "@/lib/office-schedule";
 import { canManageHours, getSession } from "@/lib/session";
@@ -29,6 +31,16 @@ export default async function HorasPage({ searchParams }: { searchParams: { vist
     prisma.project.findMany({ where: { status: { not: "COMPLETADO" } }, orderBy: { title: "asc" }, select: { id: true, title: true } }),
     prisma.officeShift.findMany({ orderBy: [{ dayOfWeek: "asc" }, { startMinutes: "asc" }] }),
   ]);
+
+  // Puntualidad: si la tabla aún no existe (migración pendiente), la pestaña avisa y el resto de la página sigue.
+  let lateRows: LateData[] = [];
+  let lateReady = true;
+  try {
+    const rows = await prisma.lateEntry.findMany({ where: { date: { gte: lateSinceDate() } }, orderBy: [{ date: "desc" }, { createdAt: "desc" }] });
+    lateRows = rows.map((r) => ({ id: r.id, userId: r.userId, date: r.date.toISOString().slice(0, 10), minutes: r.minutes, note: r.note }));
+  } catch {
+    lateReady = false;
+  }
 
   const shifts: ShiftData[] = shiftRows
     .filter((s) => isShiftCategory(s.category))
@@ -68,6 +80,7 @@ export default async function HorasPage({ searchParams }: { searchParams: { vist
   const shownPeople = personal ? people.filter((p) => p.isMe) : people;
   const shownIds = new Set(shownPeople.map((p) => p.id));
   const shownEntries = personal ? entries.filter((e) => shownIds.has(e.userId)) : entries;
+  const shownLate = personal ? lateRows.filter((r) => shownIds.has(r.userId)) : lateRows;
   const shownShifts = personal ? shifts.filter((s) => s.userId === null || shownIds.has(s.userId)) : shifts;
 
   return (
@@ -76,7 +89,7 @@ export default async function HorasPage({ searchParams }: { searchParams: { vist
         <h1 className="flex items-center gap-1.5 text-xl font-bold">
           {personal ? "Mis horas y mi horario" : "Horas del equipo"}
           <InfoHint
-            text={`Control de horas semanales del máster y de los monitores Junior. Cada persona tiene una meta de ${WEEKLY_HOURS_TARGET} horas por semana, ${fmtHours(GC_WEEKLY_HOURS)} de ellas de Gestión del Conocimiento (GC); cada Junior tiene además ${fmtHours(PE_WEEKLY_HOURS)} h de su proyecto de estudio (PE) y ${fmtHours(PI_WEEKLY_HOURS)} h de punto de información (PI); el resto se reparte entre proyectos, apoyos académicos y cursos libres (quien dicta un curso libre dedica ${fmtHours(CL_COURSE_WEEKLY_HOURS)} h semanales mientras dura, y salen de las de proyectos). GC es la capacitación interna fija de 2 a 4 pm, en la que se capacita todo el equipo. Cómo se usa: elige la semana, planea las horas de cada persona por categoría con «Agregar horas» y, al cerrar la semana, anota las horas hechas o marca cada registro como terminado. El contador de cada persona compara lo planeado y lo hecho contra la meta; «Estadísticas» resume por semana, por mes o por todo el semestre. «Copiar a la semana siguiente» repite el plan. Solo el máster registra; los demás consultan. La pestaña «Horario de oficina» muestra dónde está cada persona de lunes a sábado; el máster lo configura con «Editar horario».`}
+            text={`Control de horas semanales del máster y de los monitores Junior. Cada persona tiene una meta de ${WEEKLY_HOURS_TARGET} horas por semana, ${fmtHours(GC_WEEKLY_HOURS)} de ellas de Gestión del Conocimiento (GC); cada Junior tiene además ${fmtHours(PE_WEEKLY_HOURS)} h de su proyecto de estudio (PE) y ${fmtHours(PI_WEEKLY_HOURS)} h de punto de información (PI); el resto se reparte entre proyectos, apoyos académicos y cursos libres (quien dicta un curso libre dedica ${fmtHours(CL_COURSE_WEEKLY_HOURS)} h semanales mientras dura, y salen de las de proyectos). GC es la capacitación interna fija de 2 a 4 pm, en la que se capacita todo el equipo. Cómo se usa: elige la semana, planea las horas de cada persona por categoría con «Agregar horas» y, al cerrar la semana, anota las horas hechas o marca cada registro como terminado. El contador de cada persona compara lo planeado y lo hecho contra la meta; «Estadísticas» resume por semana, por mes o por todo el semestre. «Copiar a la semana siguiente» repite el plan. Solo el máster registra; los demás consultan. La pestaña «Horario de oficina» muestra dónde está cada persona de lunes a sábado; el máster lo configura con «Editar horario». La pestaña «Puntualidad» acumula el tiempo que cada persona llegó tarde desde el inicio del semestre: el máster registra cada tardanza (persona, día y minutos) y cada Junior ve solo la suya, que también aparece en su pantalla de bienvenida.`}
           />
         </h1>
         <p className="text-sm text-muted-foreground">
@@ -86,7 +99,7 @@ export default async function HorasPage({ searchParams }: { searchParams: { vist
       </div>
       {personal && <NowCard shifts={shownShifts} />}
       <HoursTabs
-        initial={searchParams.vista === "horario" ? "horario" : "horas"}
+        initial={searchParams.vista === "horario" ? "horario" : searchParams.vista === "puntualidad" ? "puntualidad" : "horas"}
         hours={
           <HoursBoard
             canManage={manage}
@@ -98,6 +111,7 @@ export default async function HorasPage({ searchParams }: { searchParams: { vist
           />
         }
         schedule={<ScheduleBoard canManage={manage} people={shownPeople} shifts={shownShifts} personal={personal} />}
+        lateness={<LatenessBoard canManage={manage} people={shownPeople} entries={shownLate} personal={personal} since={LATE_SINCE} ready={lateReady} />}
       />
     </div>
   );
