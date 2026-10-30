@@ -1,7 +1,6 @@
 import {
   CalendarClock,
   CalendarDays,
-  Presentation,
   Clock,
   GraduationCap,
   Handshake,
@@ -64,8 +63,7 @@ export const SIDEBAR_ITEMS: SidebarItem[] = [
   { id: "egresados", label: "Egresados", icon: GraduationCap, href: "/egresados", section: "Recursos y equipo" },
   { id: "horas", label: "Horas del equipo", icon: Clock, href: "/horas", section: "Recursos y equipo" },
   { id: "equipo", label: "Equipo", icon: Users, href: "/equipo", section: "Recursos y equipo" },
-  { id: "reunion", label: "Reunión coordinación", icon: Presentation, href: "/reunion", section: "Recursos y equipo", masterOnly: true },
-  { id: "comites", label: "Comités de Gestión", icon: Landmark, href: "/comites", section: "Recursos y equipo", masterOnly: true },
+  { id: "comites", label: "Comités de Gestión", icon: Landmark, href: "/comites", alsoActiveFor: ["/reunion"], section: "Recursos y equipo", masterOnly: true },
 ];
 
 /** ¿Esta opción corresponde a la ruta actual? «/» solo coincide exacto; las demás por prefijo. */

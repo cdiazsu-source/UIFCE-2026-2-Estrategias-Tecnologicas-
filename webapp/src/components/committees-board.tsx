@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { CalendarClock, CalendarPlus, Loader2, Trash2, X } from "lucide-react";
+import Link from "next/link";
+import { CalendarClock, CalendarPlus, Loader2, Presentation, Trash2, X } from "lucide-react";
 
 import { createCommittee, deleteCommittee } from "@/lib/actions/committees";
-import { COMMITTEE_KINDS, COMMITTEE_KIND_LABEL, COMMITTEE_NAME_MAX, type CommitteeKind, type CommitteeRow } from "@/lib/committees";
+import { COMMITTEE_KINDS, COMMITTEE_KIND_LABEL, COMMITTEE_NAME_MAX, PRESENTATION_COMMITTEE_ID, type CommitteeKind, type CommitteeRow } from "@/lib/committees";
 import { InfoHint } from "@/components/info-hint";
 import { cn } from "@/lib/utils";
 
@@ -81,6 +82,12 @@ export function CommitteesBoard({ committees }: { committees: CommitteeRow[] | n
                     <span className="capitalize">{DATE_FMT.format(d)}</span> · {TIME_FMT.format(d)}
                   </p>
                 </div>
+                {c.id === PRESENTATION_COMMITTEE_ID && (
+                  <Link href="/reunion" className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-primary px-3 py-1.5 text-xs font-semibold text-primary transition-colors hover:bg-primary hover:text-primary-foreground">
+                    <Presentation className="h-4 w-4" aria-hidden />
+                    Abrir reunión
+                  </Link>
+                )}
                 <span className={cn("shrink-0 rounded-full px-3 py-1 text-xs font-semibold", KIND_STYLE[c.kind])}>{COMMITTEE_KIND_LABEL[c.kind]}</span>
                 <button type="button" onClick={() => remove(c)} disabled={pending} title="Quitar reunión" aria-label={`Quitar ${c.name}`} className="shrink-0 rounded-full p-1.5 text-muted-foreground hover:bg-muted hover:text-destructive disabled:opacity-50">
                   <Trash2 className="h-4 w-4" aria-hidden />

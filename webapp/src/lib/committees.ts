@@ -7,6 +7,9 @@ export const COMMITTEE_KIND_LABEL: Record<CommitteeKind, string> = { COORDINACIO
 
 export const COMMITTEE_NAME_MAX = 120;
 
+/** Comité cuya reunión se presenta con la herramienta de coordinación (`/reunion`): «Reunión de dirección 2» (la inserta la migración). */
+export const PRESENTATION_COMMITTEE_ID = "comite_direccion_2";
+
 export type CommitteeRow = { id: string; name: string; startsAt: string; kind: CommitteeKind };
 
 export function isCommitteeKind(v: string): v is CommitteeKind {

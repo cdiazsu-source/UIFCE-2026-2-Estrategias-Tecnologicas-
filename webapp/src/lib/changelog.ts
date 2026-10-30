@@ -21,6 +21,14 @@ export const CHANGELOG_SHOWN = 10;
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: "2026.10.30.2",
+    date: "2026-10-30",
+    title: "La reunión de coordinación ahora vive en Comités de Gestión",
+    changes: [
+      { type: "MEJORA", text: "«Reunión coordinación» salió del menú lateral: ahora se abre desde «Comités de Gestión», con el botón «Abrir reunión» de la «Reunión de dirección 2» (30 de octubre de 2026), la primera reunión." },
+    ],
+  },
+  {
     version: "2026.10.30.1",
     date: "2026-10-30",
     title: "Comités de Gestión",
