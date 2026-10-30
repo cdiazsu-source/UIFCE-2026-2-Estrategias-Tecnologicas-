@@ -1142,3 +1142,15 @@ model ActivityEvent {
   @@index([userId, createdAt])
   @@index([projectId, createdAt])
 }
+
+/// Comités de Gestión: reuniones programadas por el máster (coordinación o dirección). `kind`: COORDINACION | DIRECCION.
+model ManagementCommittee {
+  id        String   @id @default(cuid())
+  name      String
+  /// Fecha y hora de la reunión (UTC; se muestra en hora de Colombia).
+  startsAt  DateTime
+  kind      String
+  createdAt DateTime @default(now())
+
+  @@index([startsAt])
+}

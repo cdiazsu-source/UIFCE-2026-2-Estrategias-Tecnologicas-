@@ -21,6 +21,14 @@ export const CHANGELOG_SHOWN = 10;
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: "2026.10.30.1",
+    date: "2026-10-30",
+    title: "Comités de Gestión",
+    changes: [
+      { type: "NUEVO", text: "Nueva sección «Comités de Gestión» en el menú lateral (solo máster): «Nueva reunión» pide nombre, fecha y hora y tipo de comité (Coordinación o Dirección), y las reuniones quedan en orden cronológico. Incluye de ejemplo la «Reunión de dirección 2» del 30 de octubre de 2026." },
+    ],
+  },
+  {
     version: "2026.10.23.12",
     date: "2026-10-23",
     title: "Reunión coordinación: botón de información al presentar",

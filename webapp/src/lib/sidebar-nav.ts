@@ -5,6 +5,7 @@ import {
   Clock,
   GraduationCap,
   Handshake,
+  Landmark,
   LayoutDashboard,
   LayoutTemplate,
   type LucideIcon,
@@ -64,6 +65,7 @@ export const SIDEBAR_ITEMS: SidebarItem[] = [
   { id: "horas", label: "Horas del equipo", icon: Clock, href: "/horas", section: "Recursos y equipo" },
   { id: "equipo", label: "Equipo", icon: Users, href: "/equipo", section: "Recursos y equipo" },
   { id: "reunion", label: "Reunión coordinación", icon: Presentation, href: "/reunion", section: "Recursos y equipo", masterOnly: true },
+  { id: "comites", label: "Comités de Gestión", icon: Landmark, href: "/comites", section: "Recursos y equipo", masterOnly: true },
 ];
 
 /** ¿Esta opción corresponde a la ruta actual? «/» solo coincide exacto; las demás por prefijo. */
