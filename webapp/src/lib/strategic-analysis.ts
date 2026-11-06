@@ -97,7 +97,7 @@ export const STRATEGIC_THEMES: StrategicTheme[] = [
     title: "Liderazgo y alianzas empresariales",
     findings: [
       { quadrant: "F", text: "Director con perfil y red empresarial afines al área" },
-      { quadrant: "O", text: "Esa red hoy solo se usa para la Hackatón" },
+      { quadrant: "O", text: "Esa red hoy solo se usa para el Concurso/Hackatón" },
       { quadrant: "A", text: "Alianzas externas sin trayectoria pueden fallar (antecedente: Fundación VGB, 2025)" },
     ],
     projects: ["Red de Aliados Académicos UIFCE"],
@@ -145,14 +145,14 @@ export const STRATEGIC_THEMES: StrategicTheme[] = [
   },
   {
     id: "hackaton-semana",
-    title: "Semana UIFCE y Hackatón Bizagi",
+    title: "Semana UIFCE y Concurso/Hackatón Bizagi",
     findings: [
-      { quadrant: "D", text: "Hackatón cancelada en 2025-II por baja inscripción" },
+      { quadrant: "D", text: "Concurso/Hackatón cancelado en 2025-II por baja inscripción" },
       { quadrant: "O", text: "Semana UIFCE es la plataforma para relanzarla en 2026-2" },
     ],
     projects: [
       "Semana UIFCE — primera edición",
-      "Hackatón Bizagi UIFCE: Optimización y Simulación de Procesos Empresariales",
+      "Concurso/Hackatón Bizagi UIFCE: Optimización y Simulación de Procesos Empresariales",
     ],
     status: "covered",
     action: ["La causa de fondo de 2025-II (baja inscripción) sigue sin respuesta explícita — tema pendiente"],
@@ -176,7 +176,7 @@ export const STRATEGIC_THEMES: StrategicTheme[] = [
     ],
     projects: ["Repositorio de material con IA y automatización de producción de video"],
     status: "partial",
-    action: ["La Hackatón Bizagi ya responde (Bizagi = BPM); el resto alimenta el catálogo de próximos MicroTalleres"],
+    action: ["El Concurso/Hackatón Bizagi ya responde (Bizagi = BPM); el resto alimenta el catálogo de próximos MicroTalleres"],
   },
 ];
 

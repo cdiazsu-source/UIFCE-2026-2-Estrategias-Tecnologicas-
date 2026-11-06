@@ -47,7 +47,7 @@ const MODULE_LABEL: Record<string, string> = {
   ...Object.fromEntries(SIDEBAR_ITEMS.map((i) => [i.id, i.label])),
   proyecto: "Detalle de proyecto",
 };
-const moduleLabel = (m: string | null) => (m ? (MODULE_LABEL[m] ?? m) : "—");
+export const moduleLabel = (m: string | null) => (m ? (MODULE_LABEL[m] ?? m) : "—");
 
 export type CleanEvent = { kind: ActivityKind; path: string; label: string | null };
 

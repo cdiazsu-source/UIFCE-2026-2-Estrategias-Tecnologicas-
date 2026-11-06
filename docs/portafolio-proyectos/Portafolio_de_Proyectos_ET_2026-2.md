@@ -47,7 +47,7 @@ cerrarse o ejecutarse durante 2026-2.
 | **Proyecto**                           | **Estado a cierre de 2026-1**                                                                  | **Meta 2026-2**                                                                        | **Responsable**                       |
 |----------------------------------------|------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------|---------------------------------------|
 | Semana UIFCE                           | Documento técnico, estudio de viabilidad y cronograma preliminar formulados                    | Ejecutar la primera edición, articulada con la Semana de Investigación (VIE)           | Máster ET                             |
-| Hackatón (Bizagi)                      | Propuesta técnica lista (base documental de Gabriel); cancelada en 2025-2 por baja inscripción | Ejecutar dentro de Semana UIFCE con convocatoria anticipada y alianzas con asignaturas | Máster ET + Ad Honorem                |
+| Concurso/Hackatón (Bizagi)                      | Propuesta técnica lista (base documental de Gabriel); cancelada en 2025-2 por baja inscripción | Ejecutar dentro de Semana UIFCE con convocatoria anticipada y alianzas con asignaturas | Máster ET + Ad Honorem                |
 | Extensión Solidaria                    | Propuesta técnica, metodología y cotizaciones completas; falta presupuesto formal y aval       | Presentar y obtener aval de Vicedecanatura; iniciar gestión de ejecución               | Máster ET                             |
 | Blog UIFCE                             | Diseño validado y desplegado en el micrositio                                                  | Aprobar y ejecutar la estrategia de difusión del blog                                  | Máster ET (difusión) + GC (contenido) |
 | Términos y Condiciones ET              | Pendiente ("\<3" en seguimiento 2026-1)                                                        | Documento formal aprobado y difundido                                                  | Máster ET                             |
@@ -112,7 +112,7 @@ analógico/institucional**
 - **Alcance.** Listado vivo de profesores y asignaturas aliadas por
   programa curricular (administración, economía, contaduría); esquema de
   incentivos académicos coordinado con los docentes; protocolo de
-  activación para cada evento (Semana UIFCE, microtalleres, Hackatón).
+  activación para cada evento (Semana UIFCE, microtalleres, Concurso/Hackatón).
 
 - **Entregables.** Base de datos de aliados; convenio informal de
   colaboración por asignatura; reporte de asistencia atribuible a cada
@@ -281,7 +281,7 @@ Video — Innovación y eficiencia operativa**
 | **Proyecto**                                 | **Tipo**                                       | **Trimestre objetivo**              | **Responsable**             | **Entregable clave**                              |
 |----------------------------------------------|------------------------------------------------|-------------------------------------|-----------------------------|---------------------------------------------------|
 | Semana UIFCE                                 | Continuidad                                    | Semana 8-9                          | Máster ET                   | Primera edición ejecutada                         |
-| Hackatón                                     | Continuidad                                    | Semana 8-9 (dentro de Semana UIFCE) | Máster ET                   | Competencia ejecutada                             |
+| Concurso/Hackatón                                     | Continuidad                                    | Semana 8-9 (dentro de Semana UIFCE) | Máster ET                   | Competencia ejecutada                             |
 | Extensión Solidaria                          | Continuidad                                    | Todo el semestre                    | Máster ET                   | Aval de Vicedecanatura                            |
 | Blog UIFCE                                   | Continuidad                                    | Semanas 1-4                         | Máster ET / GC              | Estrategia de difusión ejecutada                  |
 | Términos y Condiciones ET                    | Continuidad                                    | Semanas 1-6                         | Máster ET                   | Documento aprobado                                |
@@ -312,7 +312,7 @@ Video — Innovación y eficiencia operativa**
   comprometer su ejecución.
 
 - **Calendario académico.** Con base en la lección aprendida de 2026-1,
-  ningún evento de convocatoria masiva (Hackatón, microtalleres clave,
+  ningún evento de convocatoria masiva (Concurso/Hackatón, microtalleres clave,
   Semana UIFCE) debe programarse en las últimas semanas del calendario
   académico.
 

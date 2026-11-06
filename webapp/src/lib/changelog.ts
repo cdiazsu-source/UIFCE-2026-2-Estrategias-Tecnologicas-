@@ -21,6 +21,32 @@ export const CHANGELOG_SHOWN = 10;
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: "2026.11.06.2",
+    date: "2026-11-06",
+    title: "Filtro «Planeación Excel» en el panel de proyectos",
+    changes: [
+      { type: "NUEVO", text: "Nuevo botón «Planeación Excel» junto a los filtros del panel principal: muestra exclusivamente los 19 proyectos de la hoja «Planeación» del Excel 2026-2, en el mismo orden de esa hoja. Se combina con la búsqueda y la categoría, y «Limpiar» lo quita." },
+    ],
+  },
+  {
+    version: "2026.11.06.1",
+    date: "2026-11-06",
+    title: "Términos y Condiciones de ET aprobados y nombre «Concurso/Hackatón»",
+    changes: [
+      { type: "NUEVO", text: "Quedó aprobado el documento de Términos y Condiciones de Estrategias Tecnológicas: asistencia (70 % presencial, 90 % virtual), cancelación, lista de espera por inasistencia, certificado de asistencia, horas de corresponsabilidad con Bienestar y propuestas de eventos virtuales." },
+      { type: "MEJORA", text: "«Hackatón» pasa a llamarse «Concurso/Hackatón» en la planeación, el análisis estratégico, el DOFA y los demás textos de la app." },
+    ],
+  },
+  {
+    version: "2026.11.04.1",
+    date: "2026-11-04",
+    title: "Equipo agrupa Personas y Horas, y nueva Actividad de los Junior",
+    changes: [
+      { type: "MEJORA", text: "«Horas del equipo» y «Equipo» ahora son una sola opción del menú: «Equipo», con pestañas «Personas» y «Horas y horario»." },
+      { type: "NUEVO", text: "Pestaña «Actividad de los Junior» (solo máster): línea de tiempo con lo último que hicieron los monitores —guardados, notas de bitácora, comentarios de su proyecto de estudio y subtareas que cambiaron—, con filtro por persona y la opción «Todo el movimiento» para ver también entradas y clics." },
+    ],
+  },
+  {
     version: "2026.10.30.2",
     date: "2026-10-30",
     title: "La reunión de coordinación ahora vive en Comités de Gestión",

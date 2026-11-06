@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { AlertTriangle, LayoutGrid, List, Search, UserCheck, X } from "lucide-react";
+import { AlertTriangle, LayoutGrid, List, ListOrdered, Search, UserCheck, X } from "lucide-react";
 
 import { ProjectCard, ProjectList, type ProjectCardData } from "@/components/project-card";
 import { CollapseToggle, useCollapse } from "@/components/collapsible";
@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { setPersonFilter, usePersonFilter } from "@/lib/person-filter";
 import { byUrgency } from "@/lib/project-order";
+import { PLAN_EXCEL_IDS } from "@/lib/plan-excel-order";
 import { cn, PRIORITY_TAG_LABEL } from "@/lib/utils";
 
 function norm(s: string) {
@@ -67,6 +68,8 @@ export function ProjectsGrid({
   const [category, setCategory] = useState("");
   const [sortMode, setSortMode] = useState<"urgency" | "plan">("urgency");
   const [view, setView] = useViewMode();
+  // Filtro «Planeación Excel»: solo los proyectos de la hoja del Excel, en el orden de esa hoja.
+  const [onlyExcel, setOnlyExcel] = useState(false);
   // En la vista de un Junior, «Otros proyectos» arranca contraído para que vea primero lo suyo.
   const others = useCollapse("home:otros", !mineId);
   // Filtro rápido por persona, activado desde «Integrantes» (clic en el nombre).
@@ -85,10 +88,14 @@ export function ProjectsGrid({
 
   // Orden automático: por urgencia (por defecto) u orden de planeación.
   const ordered = useMemo(() => {
+    if (onlyExcel) {
+      const byId = new Map(base.map((p) => [p.id, p]));
+      return PLAN_EXCEL_IDS.map((id) => byId.get(id)).filter((p): p is ProjectCardData => !!p);
+    }
     const arr = [...base];
     arr.sort(sortMode === "plan" ? (a, b) => a.sortIndex - b.sortIndex : byUrgency);
     return arr;
-  }, [base, sortMode]);
+  }, [base, sortMode, onlyExcel]);
 
   const categories = useMemo(
     () => Array.from(new Set(ordered.map((p) => p.category))).sort((a, b) => a.localeCompare(b, "es")),
@@ -96,7 +103,7 @@ export function ProjectsGrid({
   );
 
   const nq = norm(q.trim());
-  const filtering = nq.length > 0 || category.length > 0 || person !== null;
+  const filtering = nq.length > 0 || category.length > 0 || person !== null || onlyExcel;
 
   const filtered = useMemo(() => {
     return ordered.filter((p) => {
@@ -190,10 +197,24 @@ export function ProjectsGrid({
             </option>
           ))}
         </Select>
+        <button
+          type="button"
+          onClick={() => setOnlyExcel((v) => !v)}
+          aria-pressed={onlyExcel}
+          title="Solo los proyectos de la hoja «Planeación» del Excel 2026-2, en su orden"
+          className={cn(
+            "inline-flex h-10 items-center gap-1.5 rounded-md border px-3 text-sm font-medium transition-colors",
+            onlyExcel ? "border-primary bg-primary text-primary-foreground" : "border-input bg-card text-muted-foreground hover:bg-accent hover:text-foreground",
+          )}
+        >
+          <ListOrdered className="h-4 w-4" aria-hidden />
+          Planeación Excel
+        </button>
         <Select
           value={sortMode}
           onChange={(e) => setSortMode(e.target.value as "urgency" | "plan")}
           className="w-52"
+          disabled={onlyExcel}
           aria-label="Ordenar proyectos"
         >
           <option value="urgency">Orden: por urgencia</option>
@@ -228,6 +249,7 @@ export function ProjectsGrid({
             onClick={() => {
               setQ("");
               setCategory("");
+              setOnlyExcel(false);
               setPersonFilter(null);
             }}
             className="inline-flex items-center gap-1 rounded-md border border-input px-2.5 py-1.5 text-xs text-muted-foreground hover:bg-accent"

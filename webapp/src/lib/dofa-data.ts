@@ -65,9 +65,9 @@ export const COMPARATIVO_SEMESTRAL: { indicador: string; antes: string; ahora: s
     ahora: "2026-I: reactivado — 7 publicaciones, 1.491 impresiones, 42 reacciones",
   },
   {
-    indicador: "Hackatón",
+    indicador: "Concurso/Hackatón",
     antes: "2025-II: cancelada por baja inscripción",
-    ahora: "2026-2S: retomada («Hackatón Bizagi UIFCE», proyecto en curso)",
+    ahora: "2026-2S: retomado («Concurso/Hackatón Bizagi UIFCE», proyecto en curso)",
   },
 ];
 
@@ -206,8 +206,8 @@ export const DEBILIDADES: DofaItem[] = [
     thesis: "Sin una guía de marca vigente, cada monitor de diseño termina interpretando la identidad visual a su criterio.",
   },
   {
-    topic: "Hackatón",
-    text: "Hackatón cancelada en 2025-II por baja inscripción — retomada en 2026-2S («Hackatón Bizagi UIFCE», en curso)",
+    topic: "Concurso/Hackatón",
+    text: "Concurso/Hackatón cancelado en 2025-II por baja inscripción — retomado en 2026-2S («Concurso/Hackatón Bizagi UIFCE», en curso)",
     source: "Informe 2025-II",
     period: "2025-II",
     thesis: "La baja convocatoria de 2025-II es la razón de fondo para probar un formato o una difusión distinta en la edición retomada.",
@@ -266,9 +266,9 @@ export const OPORTUNIDADES: DofaItem[] = [
   },
   {
     topic: "Alianzas empresariales",
-    text: "Red de contactos empresariales del Director (Hackatón, financiamiento externo)",
+    text: "Red de contactos empresariales del Director (Concurso/Hackatón, financiamiento externo)",
     period: "Estructural",
-    thesis: "La relación del Director con el sector empresarial es un activo del área que hoy se usa poco fuera de la Hackatón.",
+    thesis: "La relación del Director con el sector empresarial es un activo del área que hoy se usa poco fuera del Concurso/Hackatón.",
   },
 ];
 

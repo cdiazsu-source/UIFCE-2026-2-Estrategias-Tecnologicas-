@@ -65,7 +65,7 @@ const CURRENT_SEMESTER_LABEL = "2026-2S";
 const OBJETIVOS_2026_2 = [
   "Restablecer y consolidar la presencia en los canales oficiales: recuperar o recrear Instagram, priorizar LinkedIn, poner en marcha TikTok y cerrar la oficialización de YouTube.",
   "Sostener una producción de contenido constante y con estándar de calidad, bajo un calendario editorial único y con licencias institucionales de diseño y edición.",
-  "Ejecutar la primera edición de la Semana UIFCE —Hackatón, microtaller y conferencia— y racionalizar los microtalleres priorizando la asistencia efectiva y la certificación de participación.",
+  "Ejecutar la primera edición de la Semana UIFCE —Concurso/Hackatón, microtaller y conferencia— y racionalizar los microtalleres priorizando la asistencia efectiva y la certificación de participación.",
   "Formalizar la gobernanza y la memoria del área: Términos y Condiciones, repositorio documental permanente y propuesta de repositorio compartido a Gestión del Conocimiento.",
   "Incorporar inteligencia artificial como palanca de eficiencia operativa, para sostener la calidad sin aumentar la carga del equipo.",
   "Garantizar el acompañamiento a las demás áreas de la UIFCE con niveles de servicio (SLA) definidos y un canal único de solicitudes.",
@@ -79,7 +79,7 @@ const ET_STRATEGIES_2026_2 = [
   "TikTok: canal nuevo, mismo formato de contenido corto",
   "YouTube: cierre de la oficialización institucional",
   "Micrositio y Blog UIFCE como cara digital permanente de la Unidad",
-  "MicroTalleres y MicroEventos: Semana UIFCE y Hackatón Bizagi",
+  "MicroTalleres y MicroEventos: Semana UIFCE y Concurso/Hackatón Bizagi",
   "Difusión física: fachadas, carteleras y stands intervenidos",
   "Alianza con Comunicaciones e Imagen Institucional: correo masivo y validación de piezas",
 ];
@@ -516,7 +516,7 @@ async function seedContacts() {
     {
       name: "Carlos Osorio Ramírez",
       role: "CIID",
-      notes: "Donación de cupos en diplomados como premio de la Hackatón (Semana UIFCE).",
+      notes: "Donación de cupos en diplomados como premio del Concurso/Hackatón (Semana UIFCE).",
       projectId: "eventos-semana-uifce",
     },
     {
@@ -551,8 +551,8 @@ async function seedContacts() {
     },
     {
       name: "Gau y Ángela",
-      role: "Coordinación Hackatón Bizagi",
-      notes: "Ya tienen la capacitación y el proyecto de estudio documentados para la Hackatón.",
+      role: "Coordinación Concurso/Hackatón Bizagi",
+      notes: "Ya tienen la capacitación y el proyecto de estudio documentados para el Concurso/Hackatón.",
       projectId: "eventos-semana-uifce",
     },
   ];
@@ -1409,7 +1409,7 @@ async function seedTemplates() {
       name: "Kit gráfico de evento",
       category: "Eventos",
       format: "Pieza feed + historia + pendón + certificado",
-      description: "Set base para microtalleres, Semana UIFCE y Hackatón: anuncio, recordatorio, agenda y certificado.",
+      description: "Set base para microtalleres, Semana UIFCE y Concurso/Hackatón: anuncio, recordatorio, agenda y certificado.",
     },
     {
       name: "Registro de asistencia de evento",

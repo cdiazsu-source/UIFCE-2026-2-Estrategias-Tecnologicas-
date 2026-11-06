@@ -32,6 +32,8 @@ export type SidebarItem = {
   hideForJunior?: boolean;
   /** Solo la ve el máster (sin «Ver como»). */
   masterOnly?: boolean;
+  /** Sigue siendo una pantalla (búsqueda, huella, etiquetas) pero no ocupa una fila en el menú: cuelga de otra opción. */
+  hiddenInMenu?: boolean;
 };
 
 /** Opciones del menú que corresponden a un perfil: los Junior ven sus atajos y no ven las que se les ocultan. */
@@ -61,8 +63,8 @@ export const SIDEBAR_ITEMS: SidebarItem[] = [
   { id: "herramientas", label: "Herramientas y licencias", icon: Wrench, href: "/herramientas", section: "Recursos y equipo" },
   { id: "aliados", label: "Aliados", icon: Handshake, href: "/aliados", section: "Recursos y equipo" },
   { id: "egresados", label: "Egresados", icon: GraduationCap, href: "/egresados", section: "Recursos y equipo" },
-  { id: "horas", label: "Horas del equipo", icon: Clock, href: "/horas", section: "Recursos y equipo" },
-  { id: "equipo", label: "Equipo", icon: Users, href: "/equipo", section: "Recursos y equipo" },
+  { id: "horas", label: "Horas del equipo", icon: Clock, href: "/horas", section: "Recursos y equipo", hiddenInMenu: true },
+  { id: "equipo", label: "Equipo", icon: Users, href: "/equipo", alsoActiveFor: ["/horas"], section: "Recursos y equipo" },
   { id: "comites", label: "Comités de Gestión", icon: Landmark, href: "/comites", alsoActiveFor: ["/reunion"], section: "Recursos y equipo", masterOnly: true },
 ];
 
@@ -73,6 +75,8 @@ export function isItemActive(item: SidebarItem, pathname: string, view?: string 
   // Una opción con «?vista=…» (Mi horario) solo está activa con esa vista; sin ella, la pantalla es de «Horas del equipo».
   if (query) return starts(base) && view === new URLSearchParams(query).get("vista");
   if (item.id === "horas" && view === "horario" && starts(base) && isJunior) return false;
+  // «Equipo» agrupa Horas: a un Junior en su horario le corresponde «Mi horario», no «Equipo».
+  if (item.id === "equipo" && view === "horario" && starts("/horas") && isJunior) return false;
   if (item.href === "/") return pathname === "/" || (item.alsoActiveFor ?? []).some(starts);
   return starts(item.href) || (item.alsoActiveFor ?? []).some(starts);
 }

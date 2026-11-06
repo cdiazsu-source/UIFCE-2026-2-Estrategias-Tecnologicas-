@@ -33,7 +33,7 @@ export function SemesterObjectives({
         <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           <CollapseToggle open={open} onToggle={toggle} label="los objetivos del semestre" />
           Objetivos {semester.label}
-          <InfoHint text="Los objetivos del área para el semestre seleccionado en las pestañas de arriba (distintos de los objetivos generales de «El área»). Cómo se usa: con perfil completo, el lápiz → un objetivo por línea → Guardar. Ejemplo: «Ejecutar la primera edición de la Semana UIFCE: Hackatón, microtaller y conferencia»." />
+          <InfoHint text="Los objetivos del área para el semestre seleccionado en las pestañas de arriba (distintos de los objetivos generales de «El área»). Cómo se usa: con perfil completo, el lápiz → un objetivo por línea → Guardar. Ejemplo: «Ejecutar la primera edición de la Semana UIFCE: Concurso/Hackatón, microtaller y conferencia»." />
         </p>
         {canEdit && open && !editing && (
           <button

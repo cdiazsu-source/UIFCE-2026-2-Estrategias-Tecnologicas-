@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
-import { canPostSticky, getSession } from "@/lib/session";
+import { canPostSticky, canUseDeveloper, getSession } from "@/lib/session";
+import { TeamNav } from "@/components/team-nav";
 import { loadStickyNote } from "@/lib/sticky-load";
 import type { StickyData } from "@/lib/sticky-note";
 import { StickyEditor } from "@/components/sticky-note";
@@ -42,6 +43,7 @@ export default async function EquipoPage() {
           Directorio interno del equipo de Estrategias Tecnológicas y su entorno cercano. Editable en línea.
         </p>
       </div>
+      <TeamNav current="personas" showActivity={await canUseDeveloper()} />
       {showSticky && <StickyEditor current={sticky} />}
       <UsersTable users={users} canViewAs={canViewAs} selfKey={session.authed ? session.who : null} />
     </div>

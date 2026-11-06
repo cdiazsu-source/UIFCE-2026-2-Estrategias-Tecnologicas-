@@ -106,7 +106,7 @@ experiencia acumulada en 2025-2 y 2026-1:
   edición de video.
 
 - **Gestión de eventos.** Microtalleres, microeventos,
-  Hackatón/competencias de simulación, Semana UIFCE y demás actividades
+  Concursos/Hackatones de simulación, Semana UIFCE y demás actividades
   de formación complementaria.
 
 - **Gestión y fortalecimiento del área.** Documentación, estandarización
@@ -119,8 +119,8 @@ Los informes de gestión de 2025-1, 2025-2 y 2026-1 muestran de forma
 consistente que el volumen de actividad del área —número de piezas, de
 microtalleres, de eventos formulados— no siempre se traduce en una
 proporción equivalente de impacto o posicionamiento institucional:
-microtalleres con alta inscripción y baja asistencia efectiva, una
-Hackatón formulada dos veces antes de lograr ejecutarse, y piezas
+microtalleres con alta inscripción y baja asistencia efectiva, un
+Concurso/Hackatón formulado dos veces antes de lograr ejecutarse, y piezas
 producidas sin licencias institucionales adecuadas.
 
 Por esta razón, ET adopta para 2026-2 la calidad sobre la cantidad como
@@ -148,7 +148,7 @@ estructura de roles:
 
 | **Rol**                    | **Dedicación**                                            | **Responsabilidades clave**                                                                                                                                                                                                                         |
 |----------------------------|-----------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Monitor Máster ET          | 20 h/semana (10 h investigación + 10 h proyecto)          | Lidera el área: calendario editorial, supervisión de imagen institucional, gestión de microtalleres, Hackatón, Extensión Solidaria, alianzas interfacultades, actualización de certificados, gestión de YouTube y reporte quincenal a Coordinación. |
+| Monitor Máster ET          | 20 h/semana (10 h investigación + 10 h proyecto)          | Lidera el área: calendario editorial, supervisión de imagen institucional, gestión de microtalleres, Concurso/Hackatón, Extensión Solidaria, alianzas interfacultades, actualización de certificados, gestión de YouTube y reporte quincenal a Coordinación. |
 | Monitor Junior de Artes ET | 16 h/semana (8 h investigación + 4 h proyecto + 4 h sala) | Diseño de piezas gráficas, publicación en redes, reels, actualización de televisores, apoyo logístico en eventos, mantenimiento de LinkTree y plantillas.                                                                                           |
 | Monitor Ad Honorem ET      | Variable (colaboración voluntaria)                        | Apoyo puntual en publicación de disponibilidad de salas y otras tareas operativas delegables, según disponibilidad.                                                                                                                                 |
 
@@ -169,7 +169,7 @@ participación directa o compartida.
 | Certificados institucionales                                    | ET (diseño) / AA y CL (generación)                | Diseña las plantillas conforme a Imagen Institucional                  | AA y CL generan los certificados vía script (AppScript) con sus propios datos      |
 | YouTube — gestión del canal                                     | ET (canal) / Virtualización (contenido de cursos) | Administra la cuenta, sube y nombra los videos                         | Virtualización entrega los videos de cursos virtualizados para incrustar en Moodle |
 | Imagen institucional y rebranding                               | ET                                                | Interlocutor oficial con la Oficina de Imagen Institucional de la UNAL | Coordinación avala cambios de marca                                                |
-| Eventos institucionales (Hackatón, Semana UIFCE, 40 años, etc.) | ET                                                | Formula, planea y ejecuta                                              | Coordinación aprueba presupuesto y logística mayor; VIE en el caso de Semana UIFCE |
+| Eventos institucionales (Concurso/Hackatón, Semana UIFCE, 40 años, etc.) | ET                                                | Formula, planea y ejecuta                                              | Coordinación aprueba presupuesto y logística mayor; VIE en el caso de Semana UIFCE |
 | Extensión Solidaria                                             | ET                                                | Formula la propuesta técnica y gestiona su aprobación                  | Vicedecanatura avala; Coordinación gestiona presupuesto ante el Consejo            |
 | Informe de gestión semestral                                    | Coordinación (consolida)                          | Contribuye con el reporte de métricas y logros del área                | Todas las áreas contribuyen; Coordinación presenta a Decanatura                    |
 
@@ -192,7 +192,7 @@ La siguiente matriz aplica el esquema Responsable / Aprueba / Consultado
 | Calendario editorial y estrategia de difusión | Máster ET           | Coordinación       | Comunicaciones FCE                | Todas las áreas         |
 | Piezas gráficas y contenido audiovisual       | Junior de Artes ET  | Máster ET          | Imagen Institucional UNAL         | Área solicitante        |
 | Microtalleres y microeventos                  | Máster ET           | Coordinación       | Ad Honorem / egresados            | Comunidad UIFCE         |
-| Hackatón (Semana UIFCE)                       | Máster ET           | Coordinación       | Profesores aliados                | Comunidad universitaria |
+| Concurso/Hackatón (Semana UIFCE)                       | Máster ET           | Coordinación       | Profesores aliados                | Comunidad universitaria |
 | Extensión Solidaria                           | Máster ET           | Vicedecanatura     | Gestión de Fomento Socioeconómico | Coordinación            |
 | Semana UIFCE                                  | Máster ET           | Coordinación / VIE | Profesores y dependencias aliadas | Comunidad universitaria |
 | Blog UIFCE (diseño y despliegue)              | Máster ET           | Coordinación       | GC (contenido)                    | Comunicaciones FCE      |

@@ -45,7 +45,7 @@ La estructura de 2025-2 que enviaste (carpetas `0.` a `7.` planas, por proceso) 
 │   └── Blog UIFCE
 │
 ├── 05. Eventos
-│   ├── Semana UIFCE 2026-2 (Hackatón, microtaller, conferencia, stand)
+│   ├── Semana UIFCE 2026-2 (Concurso/Hackatón, microtaller, conferencia, stand)
 │   └── Microtalleres (cronograma, formatos, certificados)
 │
 ├── 06. Proyectos Estratégicos

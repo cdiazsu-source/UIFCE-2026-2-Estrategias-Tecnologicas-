@@ -6,7 +6,8 @@ import { LatenessBoard } from "@/components/lateness-board";
 import { LATE_SINCE, lateSinceDate, type LateData } from "@/lib/lateness";
 import { NowCard, ScheduleBoard } from "@/components/schedule-board";
 import { isShiftCategory, type ShiftData } from "@/lib/office-schedule";
-import { canManageHours, getSession } from "@/lib/session";
+import { canManageHours, canUseDeveloper, getSession } from "@/lib/session";
+import { TeamNav } from "@/components/team-nav";
 import { CL_COURSE_WEEKLY_HOURS, GC_WEEKLY_HOURS, HOUR_AREA, PE_WEEKLY_HOURS, PI_WEEKLY_HOURS, HOUR_ROLES, WEEKLY_HOURS_TARGET, fmtHours, type HourCategory, type HourEntryData, type HourStatus } from "@/lib/hours";
 
 export const dynamic = "force-dynamic";
@@ -97,6 +98,7 @@ export default async function HorasPage({ searchParams }: { searchParams: { vist
           {semester ? ` · semestre ${semester.label}` : ""}.
         </p>
       </div>
+      <TeamNav current="horas" showActivity={await canUseDeveloper()} />
       {personal && <NowCard shifts={shownShifts} />}
       <HoursTabs
         initial={searchParams.vista === "horario" ? "horario" : searchParams.vista === "puntualidad" ? "puntualidad" : "horas"}

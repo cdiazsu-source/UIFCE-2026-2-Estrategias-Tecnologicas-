@@ -38,11 +38,11 @@ children.push(h2('2.4 Servicios fundamentales'));
 children.push(p('ET presta cuatro servicios fundamentales, consolidados a partir de la experiencia acumulada en 2025-2 y 2026-1:'));
 children.push(bulletBold('Comunicación y difusión institucional. ', 'Administración de redes sociales (Instagram, LinkedIn, YouTube), calendario editorial, gestión del micrositio y del correo institucional.'));
 children.push(bulletBold('Diseño y producción de contenido digital. ', 'Piezas gráficas, material audiovisual, imagen institucional y apoyo gráfico a otras áreas y dependencias de la Facultad, apoyada progresivamente en herramientas de IA para clasificación de material y automatización de edición de video.'));
-children.push(bulletBold('Gestión de eventos. ', 'Microtalleres, microeventos, Hackatón/competencias de simulación, Semana UIFCE y demás actividades de formación complementaria.'));
+children.push(bulletBold('Gestión de eventos. ', 'Microtalleres, microeventos, Concursos/Hackatones de simulación, Semana UIFCE y demás actividades de formación complementaria.'));
 children.push(bulletBold('Gestión y fortalecimiento del área. ', 'Documentación, estandarización y mejora continua de los procesos propios de ET (manuales, términos y condiciones, reglamentaciones, repositorio documental permanente).'));
 
 children.push(h2('2.5 Principio rector: calidad sobre cantidad'));
-children.push(p('Los informes de gestión de 2025-1, 2025-2 y 2026-1 muestran de forma consistente que el volumen de actividad del área —número de piezas, de microtalleres, de eventos formulados— no siempre se traduce en una proporción equivalente de impacto o posicionamiento institucional: microtalleres con alta inscripción y baja asistencia efectiva, una Hackatón formulada dos veces antes de lograr ejecutarse, y piezas producidas sin licencias institucionales adecuadas.'));
+children.push(p('Los informes de gestión de 2025-1, 2025-2 y 2026-1 muestran de forma consistente que el volumen de actividad del área —número de piezas, de microtalleres, de eventos formulados— no siempre se traduce en una proporción equivalente de impacto o posicionamiento institucional: microtalleres con alta inscripción y baja asistencia efectiva, un Concurso/Hackatón formulado dos veces antes de lograr ejecutarse, y piezas producidas sin licencias institucionales adecuadas.'));
 children.push(p('Por esta razón, ET adopta para 2026-2 la calidad sobre la cantidad como principio rector transversal a todo su portafolio, no solo a los microtalleres: menos piezas mejor dirigidas, eventos con convocatoria asegurada antes de ejecutarse y canales consolidados —no multiplicados sin criterio— como vía real de posicionamiento de la Unidad frente a la comunidad universitaria.'));
 children.push(p('Como palanca para sostener este estándar sin incrementar la carga del único monitor de artes del área, ET trabajará activamente con inteligencia artificial en dos frentes: (1) un repositorio de material asistido por IA que facilite la búsqueda, clasificación y reutilización de piezas, hacks y videos ya producidos, evitando que el conocimiento se pierda entre semestres, y (2) la automatización de tareas repetitivas de edición y producción de video (subtitulado, recortes, adaptación de formato por plataforma), liberando tiempo del equipo para el trabajo creativo y estratégico. El detalle operativo de esta iniciativa se desarrolla como proyecto propio en el Portafolio de Proyectos 2026-2.'));
 
@@ -54,7 +54,7 @@ children.push(p('De acuerdo con la Guía de Empalme UIFCE, el área opera con la
   const widths = [2400, 1600, 5540];
   const rows = [headerRow(['Rol', 'Dedicación', 'Responsabilidades clave'], widths)];
   const data = [
-    ['Monitor Máster ET', '20 h/semana (10 h investigación + 10 h proyecto)', 'Lidera el área: calendario editorial, supervisión de imagen institucional, gestión de microtalleres, Hackatón, Extensión Solidaria, alianzas interfacultades, actualización de certificados, gestión de YouTube y reporte quincenal a Coordinación.'],
+    ['Monitor Máster ET', '20 h/semana (10 h investigación + 10 h proyecto)', 'Lidera el área: calendario editorial, supervisión de imagen institucional, gestión de microtalleres, Concurso/Hackatón, Extensión Solidaria, alianzas interfacultades, actualización de certificados, gestión de YouTube y reporte quincenal a Coordinación.'],
     ['Monitor Junior de Artes ET', '16 h/semana (8 h investigación + 4 h proyecto + 4 h sala)', 'Diseño de piezas gráficas, publicación en redes, reels, actualización de televisores, apoyo logístico en eventos, mantenimiento de LinkTree y plantillas.'],
     ['Monitor Ad Honorem ET', 'Variable (colaboración voluntaria)', 'Apoyo puntual en publicación de disponibilidad de salas y otras tareas operativas delegables, según disponibilidad.'],
   ];
@@ -79,7 +79,7 @@ children.push(p('Con el fin de evitar solapamientos, este manual adopta como ref
     ['Certificados institucionales', 'ET (diseño) / AA y CL (generación)', 'Diseña las plantillas conforme a Imagen Institucional', 'AA y CL generan los certificados vía script (AppScript) con sus propios datos'],
     ['YouTube — gestión del canal', 'ET (canal) / Virtualización (contenido de cursos)', 'Administra la cuenta, sube y nombra los videos', 'Virtualización entrega los videos de cursos virtualizados para incrustar en Moodle'],
     ['Imagen institucional y rebranding', 'ET', 'Interlocutor oficial con la Oficina de Imagen Institucional de la UNAL', 'Coordinación avala cambios de marca'],
-    ['Eventos institucionales (Hackatón, Semana UIFCE, 40 años, etc.)', 'ET', 'Formula, planea y ejecuta', 'Coordinación aprueba presupuesto y logística mayor; VIE en el caso de Semana UIFCE'],
+    ['Eventos institucionales (Concurso/Hackatón, Semana UIFCE, 40 años, etc.)', 'ET', 'Formula, planea y ejecuta', 'Coordinación aprueba presupuesto y logística mayor; VIE en el caso de Semana UIFCE'],
     ['Extensión Solidaria', 'ET', 'Formula la propuesta técnica y gestiona su aprobación', 'Vicedecanatura avala; Coordinación gestiona presupuesto ante el Consejo'],
     ['Informe de gestión semestral', 'Coordinación (consolida)', 'Contribuye con el reporte de métricas y logros del área', 'Todas las áreas contribuyen; Coordinación presenta a Decanatura'],
   ];
@@ -100,7 +100,7 @@ children.push(p('La siguiente matriz aplica el esquema Responsable / Aprueba / C
     ['Calendario editorial y estrategia de difusión', 'Máster ET', 'Coordinación', 'Comunicaciones FCE', 'Todas las áreas'],
     ['Piezas gráficas y contenido audiovisual', 'Junior de Artes ET', 'Máster ET', 'Imagen Institucional UNAL', 'Área solicitante'],
     ['Microtalleres y microeventos', 'Máster ET', 'Coordinación', 'Ad Honorem / egresados', 'Comunidad UIFCE'],
-    ['Hackatón (Semana UIFCE)', 'Máster ET', 'Coordinación', 'Profesores aliados', 'Comunidad universitaria'],
+    ['Concurso/Hackatón (Semana UIFCE)', 'Máster ET', 'Coordinación', 'Profesores aliados', 'Comunidad universitaria'],
     ['Extensión Solidaria', 'Máster ET', 'Vicedecanatura', 'Gestión de Fomento Socioeconómico', 'Coordinación'],
     ['Semana UIFCE', 'Máster ET', 'Coordinación / VIE', 'Profesores y dependencias aliadas', 'Comunidad universitaria'],
     ['Blog UIFCE (diseño y despliegue)', 'Máster ET', 'Coordinación', 'GC (contenido)', 'Comunicaciones FCE'],

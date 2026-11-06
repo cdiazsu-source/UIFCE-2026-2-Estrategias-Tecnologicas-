@@ -131,7 +131,7 @@ ${notesBlock}
 ## Cómo quiero que trabajes
 - Usa solo lo que está en este mensaje. No inventes datos, cifras, fechas ni nombres; si falta algo, dilo o escribe «[por confirmar]».
 - Si te falta algo esencial para ayudarme bien, pregúntame (máximo 4 preguntas cortas) antes de continuar.
-- Español, tono institucional y sobrio, sin relleno. Terminología fija: UIFCE (mayúsculas), Hackatón (con tilde), ET, máster, monitores.
+- Español, tono institucional y sobrio, sin relleno. Terminología fija: UIFCE (mayúsculas), Concurso/Hackatón (con tilde), ET, máster, monitores.
 - Respeta lo ya avanzado: no propongas rehacer lo que está marcado como hecho.
 
 ${ask}`;

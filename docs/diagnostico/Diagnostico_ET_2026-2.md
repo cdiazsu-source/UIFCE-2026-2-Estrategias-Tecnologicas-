@@ -36,9 +36,9 @@ Con las ocho fuentes anteriores, el diagnóstico cubre tres semestres consecutiv
 
 ## 1.2 Trayectoria: qué construyó el área en tres semestres
 
-**2025-I — línea base.** Extensión Solidaria ya llevaba entonces dos años de intentos fallidos (275 instituciones contactadas en 2024, solo 2 interesadas; una alianza con la Fundación VGB suspendida por falta de garantías de equipos). La Hackatón se formuló por primera vez, ligada a los 40 años de la UIFCE. Solo se dictó un microtaller en todo el semestre, por una restricción física estructural que persiste hoy (ver 2.4). LinkedIn se oficializó con una cuenta personal, no con la cuenta empresa ya existente — decisión aplazada "a discreción de futuros semestres". Se completó desde cero la maqueta del Micrositio UIFCE.
+**2025-I — línea base.** Extensión Solidaria ya llevaba entonces dos años de intentos fallidos (275 instituciones contactadas en 2024, solo 2 interesadas; una alianza con la Fundación VGB suspendida por falta de garantías de equipos). El Concurso/Hackatón se formuló por primera vez, ligado a los 40 años de la UIFCE. Solo se dictó un microtaller en todo el semestre, por una restricción física estructural que persiste hoy (ver 2.4). LinkedIn se oficializó con una cuenta personal, no con la cuenta empresa ya existente — decisión aplazada "a discreción de futuros semestres". Se completó desde cero la maqueta del Micrositio UIFCE.
 
-**2025-II — expansión y primer intento de escalar eventos.** El área migró de piezas estáticas a contenido audiovisual (reels, historias, videos cortos protagonizados por monitores). Se conmemoraron los 40 años de la UIFCE con dos eventos (96 y 88 asistentes), ejecutados desde cero y sin plantilla previa. La Hackatón, ya formulada, se canceló por baja inscripción — la convocatoria se hizo tarde. Se renovó la línea gráfica de Cursos Libres y la cartelera física.
+**2025-II — expansión y primer intento de escalar eventos.** El área migró de piezas estáticas a contenido audiovisual (reels, historias, videos cortos protagonizados por monitores). Se conmemoraron los 40 años de la UIFCE con dos eventos (96 y 88 asistentes), ejecutados desde cero y sin plantilla previa. El Concurso/Hackatón, ya formulado, se canceló por baja inscripción — la convocatoria se hizo tarde. Se renovó la línea gráfica de Cursos Libres y la cartelera física.
 
 **2026-I — consolidación y primeros resultados medibles.** Instagram alcanzó 25 reels con 83.649 visualizaciones y 2.323 interacciones; LinkedIn pasó de canal subutilizado a 7 publicaciones con 1.491 impresiones y 42 reacciones; ambos quedaron oficializados ante la Oficina de Medios Digitales de la UNAL. Se publicaron 11 hacks informáticos nuevos (23.029 visualizaciones, 526 "me gusta"). Se dictaron 10 microtalleres (267 asistentes). Se redactó el primer Manual de Microtalleres y Microeventos del área.
 
@@ -93,7 +93,7 @@ Confirmado en los tres semestres: la brecha entre quienes se inscriben y quienes
 
 ## 2.7 Convocatoria tardía en eventos participativos (coyuntural, pero repetida)
 
-La Hackatón se canceló en 2025-2 por baja inscripción, después de anunciarse con muy poca anticipación ("de un día para otro"). Es un patrón que ya se había repetido con la propia Hackatón formulada en 2025-I. La lección, confirmada de forma independiente tanto en los informes como en la reunión de empalme, es que la convocatoria anticipada no es opcional para este tipo de evento.
+El Concurso/Hackatón se canceló en 2025-2 por baja inscripción, después de anunciarse con muy poca anticipación ("de un día para otro"). Es un patrón que ya se había repetido con el propio Concurso/Hackatón formulado en 2025-I. La lección, confirmada de forma independiente tanto en los informes como en la reunión de empalme, es que la convocatoria anticipada no es opcional para este tipo de evento.
 
 ## 2.8 Dependencia de intermediarios externos poco predecibles (coyuntural, recurrente en eventos)
 
@@ -115,7 +115,7 @@ A diferencia de Cursos Libres, ET no tiene un documento de Términos y Condicion
 |---|---|---|
 | **Recuperación/recreación de Instagram @uifce_un** | En gestión activa, con incertidumbre sobre el resultado | Agotar vías de recuperación ante Meta; si no funciona en 2-3 semanas, crear cuenta nueva y oficializarla |
 | **Extensión Solidaria** | Propuesta técnica y cotizaciones completas desde 2025-I; aval institucional pendiente hace tres años | Esperar la transición de Vicedecanatura en curso, luego formalizar el presupuesto |
-| **Semana UIFCE — primera edición (incl. Hackatón)** | Documento técnico, estudio de viabilidad y cronograma formulados; Hackatón ya capacitada (Bizagi) por el equipo a cargo | Confirmar presupuesto (CIID, Vicedecanatura de Investigación y Extensión), invitado externo a la conferencia, y convocatoria anticipada |
+| **Semana UIFCE — primera edición (incl. Concurso/Hackatón)** | Documento técnico, estudio de viabilidad y cronograma formulados; Concurso/Hackatón ya capacitado (Bizagi) por el equipo a cargo | Confirmar presupuesto (CIID, Vicedecanatura de Investigación y Extensión), invitado externo a la conferencia, y convocatoria anticipada |
 | **Oficialización de YouTube** | Trámite iniciado en 2025-2 | Resolver titularidad de cuenta ante la Oficina de Medios Digitales UNAL |
 | **Blog UIFCE** | Diseño completo desde 2022, nunca publicado | Definir si la publicación corresponde a ET o a Gestión del Conocimiento (GC), y ejecutarla |
 | **Micrositio — enlace de fotos del equipo a LinkedIn** | Idea propuesta y validada informalmente con Desarrollo | Confirmación técnica formal de Desarrollo |
@@ -135,7 +135,7 @@ Estas recomendaciones ya están traducidas, una a una, en `Estrategias Tecnológ
 
 **Canales y comunicación.** Tratar la recuperación/recreación de Instagram como prioridad crítica, con fecha límite explícita antes de escalar a una cuenta nueva. Declarar LinkedIn como canal prioritario y evaluar la migración a cuenta empresa. Crear TikTok con un formato propio, no una réplica de Instagram, complementado con difusión presencial. Cerrar la oficialización de YouTube.
 
-**Eventos y formación.** Limitar los microtalleres a un máximo de 5 por semestre, priorizando asistencia efectiva sobre volumen, e implementar certificados de participación desde el primero. Asegurar la convocatoria anticipada de la Hackatón y activar una Red de Aliados Académicos que no dependa de reconstruirse cada semestre. Formalizar con anticipación los contactos de presupuesto (CIID, Vicedecanatura de Investigación y Extensión) en vez de retomarlos cada semestre desde cero.
+**Eventos y formación.** Limitar los microtalleres a un máximo de 5 por semestre, priorizando asistencia efectiva sobre volumen, e implementar certificados de participación desde el primero. Asegurar la convocatoria anticipada del Concurso/Hackatón y activar una Red de Aliados Académicos que no dependa de reconstruirse cada semestre. Formalizar con anticipación los contactos de presupuesto (CIID, Vicedecanatura de Investigación y Extensión) en vez de retomarlos cada semestre desde cero.
 
 **Recursos y sostenibilidad operativa.** Verificar y, de ser necesario, gestionar formalmente licencias institucionales de software de diseño/edición. Adoptar IA como palanca operativa concreta —repositorio de material clasificado y automatización de tareas repetitivas de edición— para sostener la calidad del contenido sin aumentar la carga del único monitor de artes. Gestionar con Coordinación una negociación formal de franjas horarias de sala para mitigar la restricción estructural de espacio físico.
 

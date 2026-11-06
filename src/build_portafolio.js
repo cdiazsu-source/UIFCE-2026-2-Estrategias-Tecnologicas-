@@ -24,7 +24,7 @@ children.push(p('Iniciativas formuladas o iniciadas en semestres anteriores que 
   const rows = [headerRow(['Proyecto', 'Estado a cierre de 2026-1', 'Meta 2026-2', 'Responsable'], widths)];
   const data = [
     ['Semana UIFCE', 'Documento técnico, estudio de viabilidad y cronograma preliminar formulados', 'Ejecutar la primera edición, articulada con la Semana de Investigación (VIE)', 'Máster ET'],
-    ['Hackatón (Bizagi)', 'Propuesta técnica lista (base documental de Gabriel); cancelada en 2025-2 por baja inscripción', 'Ejecutar dentro de Semana UIFCE con convocatoria anticipada y alianzas con asignaturas', 'Máster ET + Ad Honorem'],
+    ['Concurso/Hackatón (Bizagi)', 'Propuesta técnica lista (base documental de Gabriel); cancelada en 2025-2 por baja inscripción', 'Ejecutar dentro de Semana UIFCE con convocatoria anticipada y alianzas con asignaturas', 'Máster ET + Ad Honorem'],
     ['Extensión Solidaria', 'Propuesta técnica, metodología y cotizaciones completas; falta presupuesto formal y aval', 'Presentar y obtener aval de Vicedecanatura; iniciar gestión de ejecución', 'Máster ET'],
     ['Blog UIFCE', 'Diseño validado y desplegado en el micrositio', 'Aprobar y ejecutar la estrategia de difusión del blog', 'Máster ET (difusión) + GC (contenido)'],
     ['Términos y Condiciones ET', 'Pendiente ("<3" en seguimiento 2026-1)', 'Documento formal aprobado y difundido', 'Máster ET'],
@@ -54,7 +54,7 @@ children.push(bulletBold('Responsable. ', 'Máster ET, con contenido aportado po
 children.push(h2('3.2 Red de Aliados Académicos UIFCE — Alcance analógico/institucional'));
 children.push(bulletBold('Objetivo. ', 'Construir una red formal de profesores y asignaturas aliadas que faciliten la convocatoria presencial a los eventos y servicios de la UIFCE.'));
 children.push(bulletBold('Justificación. ', 'La planeación 2026-1 ya identificaba la necesidad de "aumentar difusión implementando alianzas con asignaturas/profesores que incentiven a sus estudiantes a la participación... por medio de un bono/ensayo/resumen/trabajo" para la Semana UIFCE, y de mantener un listado de profesores/dependencias aliadas. Este proyecto generaliza esa necesidad puntual en un mecanismo permanente del área, en lugar de reconstruirlo cada vez que se organiza un evento.'));
-children.push(bulletBold('Alcance. ', 'Listado vivo de profesores y asignaturas aliadas por programa curricular (administración, economía, contaduría); esquema de incentivos académicos coordinado con los docentes; protocolo de activación para cada evento (Semana UIFCE, microtalleres, Hackatón).'));
+children.push(bulletBold('Alcance. ', 'Listado vivo de profesores y asignaturas aliadas por programa curricular (administración, economía, contaduría); esquema de incentivos académicos coordinado con los docentes; protocolo de activación para cada evento (Semana UIFCE, microtalleres, Concurso/Hackatón).'));
 children.push(bulletBold('Entregables. ', 'Base de datos de aliados; convenio informal de colaboración por asignatura; reporte de asistencia atribuible a cada alianza.'));
 children.push(bulletBold('Cronograma tentativo. ', 'Semanas 1-3: identificación y primer contacto con docentes. Semana 6: red activa para la convocatoria de Semana UIFCE. Cierre de semestre: evaluación de la red.'));
 children.push(bulletBold('Indicadores. ', 'Número de asignaturas aliadas; porcentaje de asistentes a eventos ET provenientes de la red; renovación de alianzas para 2027-1.'));
@@ -117,7 +117,7 @@ children.push(h1('4. Cuadro Consolidado del Portafolio'));
   const rows = [headerRow(['Proyecto', 'Tipo', 'Trimestre objetivo', 'Responsable', 'Entregable clave'], widths)];
   const data = [
     ['Semana UIFCE', 'Continuidad', 'Semana 8-9', 'Máster ET', 'Primera edición ejecutada'],
-    ['Hackatón', 'Continuidad', 'Semana 8-9 (dentro de Semana UIFCE)', 'Máster ET', 'Competencia ejecutada'],
+    ['Concurso/Hackatón', 'Continuidad', 'Semana 8-9 (dentro de Semana UIFCE)', 'Máster ET', 'Competencia ejecutada'],
     ['Extensión Solidaria', 'Continuidad', 'Todo el semestre', 'Máster ET', 'Aval de Vicedecanatura'],
     ['Blog UIFCE', 'Continuidad', 'Semanas 1-4', 'Máster ET / GC', 'Estrategia de difusión ejecutada'],
     ['Términos y Condiciones ET', 'Continuidad', 'Semanas 1-6', 'Máster ET', 'Documento aprobado'],
@@ -140,7 +140,7 @@ children.push(h1('5. Riesgos y Prerrequisitos'));
 children.push(bulletBold('Licencias de software de diseño y edición. ', 'El área no cuenta con licencias institucionales de edición de imagen; varios proyectos de este portafolio dependen de licencias personales de los monitores. Se recomienda gestionar su adquisición como prerrequisito transversal.'));
 children.push(bulletBold('Capacidad instalada limitada. ', 'Un único monitor Junior de artes atiende tanto el portafolio propio de ET como las solicitudes de otras áreas; el Boletín Digital y la Red de Aliados incrementan la carga de coordinación, no solo de producción gráfica.'));
 children.push(bulletBold('Dependencia de aprobaciones externas. ', 'Extensión Solidaria depende de Vicedecanatura y Semana UIFCE de la articulación con VIE; ambos proyectos deben iniciarse en las primeras semanas del semestre para no comprometer su ejecución.'));
-children.push(bulletBold('Calendario académico. ', 'Con base en la lección aprendida de 2026-1, ningún evento de convocatoria masiva (Hackatón, microtalleres clave, Semana UIFCE) debe programarse en las últimas semanas del calendario académico.'));
+children.push(bulletBold('Calendario académico. ', 'Con base en la lección aprendida de 2026-1, ningún evento de convocatoria masiva (Concurso/Hackatón, microtalleres clave, Semana UIFCE) debe programarse en las últimas semanas del calendario académico.'));
 children.push(bulletBold('Contingencia de canal principal. ', 'Mientras no se resuelva la recuperación o recreación de Instagram (numeral 3.3.1), buena parte de la difusión del resto del portafolio —Boletín, Semana UIFCE, microtalleres— debe apoyarse temporalmente en LinkedIn y en los canales físicos (carteleras) para no perder alcance.'));
 children.push(bulletBold('Curva de adopción de herramientas de IA. ', 'El repositorio con IA y la automatización de edición de video (numeral 3.4) requieren una fase de aprendizaje del equipo; su cronograma contempla un piloto antes de exigir operación regular, para no comprometer la calidad del contenido mientras el equipo se adapta.'));
 
