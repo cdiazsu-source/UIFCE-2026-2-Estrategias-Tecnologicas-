@@ -298,11 +298,31 @@ model LabSeat {
   /// true = esta fila no es un puesto físico sino el tablero/proyector de la
   /// sala (número 0), que también se puede alimentar desde cualquier equipo.
   isProjector Boolean @default(false)
+  /// Claves de software solicitado/en cola de instalación en este equipo
+  /// (estado «pendiente»; el instalado va en `software`).
+  pending   String[] @default([])
+  /// Códigos de la torre: inventario/placa y serie/CPU.
+  assetTag1 String?
+  assetTag2 String?
+  comments  LabSeatComment[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@unique([room, number])
   @@index([room])
+}
+
+/// Observación o nota técnica de un equipo (falla, mantenimiento, pendiente).
+model LabSeatComment {
+  id        String   @id @default(cuid())
+  seatId    String
+  seat      LabSeat  @relation(fields: [seatId], references: [id], onDelete: Cascade)
+  /// Quién la escribió (identidad de la sesión), si se conoce.
+  author    String?
+  content   String
+  createdAt DateTime @default(now())
+
+  @@index([seatId, createdAt])
 }
 
 /// Fila de la tabla de Herramientas y licencias.

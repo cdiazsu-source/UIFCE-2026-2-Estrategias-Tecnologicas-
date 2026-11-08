@@ -21,6 +21,25 @@ export const CHANGELOG_SHOWN = 10;
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: "2026.11.08.2",
+    date: "2026-11-08",
+    title: "Ficha completa de cada equipo de la Sala 1",
+    changes: [
+      { type: "NUEVO", text: "Al hacer click en un equipo se abre un cajón con los dos códigos de la torre (inventario y serie), con aviso si falta alguno o si se repite en otro equipo." },
+      { type: "NUEVO", text: "Cada programa se marca como Instalado, Pendiente o No, agrupado por categoría y con buscador. Al filtrar por un programa, los equipos con instalación pendiente se ven con un anillo punteado." },
+      { type: "NUEVO", text: "Nueva bitácora «Observaciones y Comentarios» por equipo, con fecha, autor y opción de borrar. En el plano, un icono de etiqueta marca los equipos con códigos y una burbuja los que tienen comentarios." },
+    ],
+  },
+  {
+    version: "2026.11.08.1",
+    date: "2026-11-08",
+    title: "Plano real de la Sala 1",
+    changes: [
+      { type: "MEJORA", text: "En Herramientas y licencias → Sala 1, el esquema ahora es el plano real de la sala: entrada, proyector y board, ventana en diagonal y los dos bloques, con las filas en rojo, rosa, azul y verde. Los equipos conservan su número y sus datos." },
+      { type: "NUEVO", text: "El filtro de software de la Sala 1 ahora incluye los 18 programas del tablero de la unidad (SPSS, STATA, Tableau, Zotero, etc.), no solo cuatro." },
+    ],
+  },
+  {
     version: "2026.11.06.2",
     date: "2026-11-06",
     title: "Filtro «Planeación Excel» en el panel de proyectos",
