@@ -21,6 +21,17 @@ export const CHANGELOG_SHOWN = 10;
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: "2026.11.12.1",
+    date: "2026-11-12",
+    title: "Ajuste de categorías, prompt de proyecto y bitácora de la plataforma",
+    changes: [
+      { type: "MEJORA", text: "El proyecto de la plataforma pasa a llamarse «Oficina de Gestión de Proyectos (PMO) de Estrategias Tecnológicas \"ET en Marcha\"» y su bitácora cuenta, en 7 etapas, cómo se construyó la plataforma desde el 21 de agosto." },
+      { type: "MEJORA", text: "El prompt para generar un proyecto con IA ahora trae el catálogo de líneas de trabajo y categorías, y devuelve la línea de trabajo, la categoría y una explicación breve de por qué se clasificó así (y qué otra categoría descartó), para que la revises antes de copiarla al formulario." },
+      { type: "CORRECCION", text: "Lo que pide Coordinación queda en «Articulación con Coordinación»: las cápsulas de Noticias UIFCE y el video tutorial de Programación de salones, además de las plantillas de PowerPoint." },
+      { type: "CORRECCION", text: "La página de oferta de Eventos y el canal de WhatsApp Business pasan a «Canales digitales»; el correo unificado, a «Mejora de procesos»; y la experiencia NFC, a «Producción de contenido»." },
+    ],
+  },
+  {
     version: "2026.11.11.2",
     date: "2026-11-11",
     title: "Proyectos organizados por línea de trabajo",

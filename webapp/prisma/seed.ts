@@ -218,7 +218,7 @@ const ET_EN_MARCHA_ITEMS: { text: string; done: boolean }[] = [
   },
   { text: "Publicar el Diagnóstico DOFA interactivo y el análisis estratégico cruzado con el portafolio", done: true },
   { text: "Habilitar acceso por perfil (completo, junior, director) con Vista Junior", done: true },
-  { text: "Construir Difusión física (catálogo de espacios) y el módulo Calendario", done: false },
+  { text: "Construir Difusión física (catálogo de espacios) y el módulo Calendario", done: true },
   { text: "Documentar la guía de administración y traspaso técnico para quien continúe el área", done: false },
   { text: "Transferir propiedad y datos desarrollo para subir al servidor de la unidad", done: false },
 ];
@@ -235,7 +235,7 @@ async function seedEtEnMarchaProject() {
         id: ET_EN_MARCHA_ID,
         category: "Mejora de procesos",
         priorityTag: "ATENCION_INMEDIATA",
-        title: "ET en Marcha — plataforma de seguimiento del área",
+        title: 'Oficina de Gestión de Proyectos (PMO) de Estrategias Tecnológicas "ET en Marcha"',
         description:
           "Diseñar, construir y mantener «ET en Marcha» —la plataforma propia de seguimiento del área—: modelo de " +
           "datos, autenticación por perfil, paneles operativos (proyectos, difusión digital y física, plantillas, " +

@@ -39,7 +39,6 @@ export const NEW_CATEGORY_BY_ID = {
   // Comunicación
   "produccion-senaletica-salas": CART,
   "produccion-carteleras": CART,
-  "produccion-capsulas-tecnologia-pantallas": CART,
   "estrategicos-boletin-digital": CANAL,
   "continuidad-blog": CANAL,
   "continuidad-micrositio": CANAL,
@@ -55,6 +54,14 @@ export const NEW_CATEGORY_BY_ID = {
   "estrategicos-tracker-egresados-uifce": ALIAN,
   // Gestión interna (los de «Documentación», «Normativa» e «Innovación» salen por nombre antiguo)
   "et-en-marcha": MEJ,
+  // Revisión de categorías (2026-11-12). Lo que pide Coordinación va a «Articulación con Coordinación»,
+  // sea cual sea el formato; el resto se ajustó a la definición de cada categoría.
+  "produccion-capsulas-tecnologia-pantallas": COORD,
+  "video-tutorial-para-el-aplicativo-programacion-de-salones": COORD,
+  "pagina-permanente-de-oferta-de-eventos": CANAL, // es una página web de ET, no un evento
+  "canal-oficial-de-atencion-virtual-via-whatsapp-business-uifc": CANAL, // canal de cara al usuario
+  "correo-institucional-unificado-de-redes-comunicaciones-y-eve": MEJ, // herramienta interna de gestión
+  "innovacion-experiencia-nfc-uifce": PROD, // experiencia audiovisual para el público, no un proceso interno
   // Es ET pidiéndole algo a Gestión del Conocimiento (no apoyándola): va a Documentación.
   "documentacion-propuesta-drive-gc": DOC,
 };
@@ -101,5 +108,6 @@ export function newCategoryFor(id, oldCategory) {
   // Ya está en una categoría vigente (p. ej. el seed la reclasificó, o se creó así en la app): se respeta.
   if (CURRENT_CATEGORIES.has(String(oldCategory ?? "").trim())) return String(oldCategory).trim();
   const base = String(oldCategory ?? "").split(" — ")[0].trim();
+  if (CURRENT_CATEGORIES.has(base)) return base;
   return OLD_NAME_TO_NEW[base] ?? null;
 }

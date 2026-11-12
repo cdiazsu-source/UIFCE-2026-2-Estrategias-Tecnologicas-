@@ -352,7 +352,7 @@ IDEAS = [
     ),
     dict(
         id="innovacion-experiencia-nfc-uifce",
-        cat="Mejora de procesos — Próximo ciclo",
+        cat="Producción de contenido — Próximo ciclo",
         idea="Experiencia NFC de identificación sonora y audiovisual de la UIFCE",
         hacer="Diseñar una experiencia con chips NFC que permita a las personas interactuar con contenidos audiovisuales de la UIFCE mediante el escaneo. Producir una primera serie de videos breves orientados a presentar la Unidad y facilitar su interacción con el público. Definir una propuesta de identificación sonora breve y distintiva para su uso en contenidos audiovisuales de la UIFCE. Solicitar el acompañamiento de Desarrollo para la programación e integración técnica de los chips NFC.",
         espera="Contar con un prototipo funcional de experiencia NFC, una primera serie de videos [por confirmar] y una propuesta de identificación sonora aprobada para uso institucional.",
@@ -432,7 +432,7 @@ IDEAS = [
     ),
     dict(
         id="produccion-capsulas-tecnologia-pantallas",
-        cat="Carteleras y pantallas — Próximo ciclo",
+        cat="Articulación con Coordinación — Próximo ciclo",
         idea="Cápsulas de tecnología y difusión de aplicativos en pantallas UIFCE",
         hacer="Se realiza la curaduría de noticias de actualidad en informática, tecnología y economía desde fuentes oficiales para estructurar cápsulas audiovisuales breves. Cada pieza integra información de interés como gancho para promocionar los aplicativos de la UIFCE (Programación de salones, Cursos Libres, Prácticas y pasantías, y Solicitudes). El contenido se produce dinámicamente mediante la herramienta Remotion y se proyecta en las pantallas de televisión de los pasillos de la Unidad de Informática para la comunidad académica de la FCE.",
         espera="Se contempla la entrega y despliegue del piloto funcional del video en las pantallas TV para [por confirmar], alcanzando una meta de [por confirmar] cápsulas producidas. El éxito de la primera entrega se verifica mediante la reproducción continua y correcta del material en los televisores de la UIFCE.",

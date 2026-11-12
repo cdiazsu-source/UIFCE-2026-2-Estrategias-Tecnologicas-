@@ -1,8 +1,14 @@
 import { CATEGORY_GROUPS } from "@/lib/category-groups";
 import { WIP_ATENCION_INMEDIATA } from "@/lib/utils";
 
-/** Categorías canónicas (una por subgrupo) para que el modelo no invente otras. */
-const CATEGORIES = CATEGORY_GROUPS.flatMap((g) => g.subgroups.map((sg) => sg.categories[0]));
+/** Catálogo de líneas de trabajo y categorías (con su descripción) para que el modelo elija
+ *  solo entre las que existen y pueda explicar la clasificación. Sale de CATEGORY_GROUPS. */
+const CATALOG = CATEGORY_GROUPS.map(
+  (g) =>
+    `### Línea de trabajo: ${g.label}\n${g.description}\n${g.subgroups
+      .map((sg) => `- «${sg.categories[0]}»: ${sg.description}`)
+      .join("\n")}`,
+).join("\n\n");
 
 /** Contexto fijo del área ET. Lo comparten los prompts «semilla» (proyecto y checklist). */
 export const ET_AREA_CONTEXT = `## Contexto del área
@@ -12,8 +18,7 @@ export const ET_AREA_CONTEXT = `## Contexto del área
 - Terminología fija: UIFCE (en mayúsculas), Concurso/Hackatón (con tilde), ET, máster, monitores. Canales institucionales: Instagram @ui_fce, LinkedIn (prioritario), TikTok, YouTube.
 - Las piezas siguen los lineamientos de identidad visual de la Universidad (Unimedios / Imagen Institucional). El tono es institucional y de invitación: evita el lenguaje restrictivo («prohibido», «no se permite»).
 - Identidad visual propia de la UIFCE (paleta oficial): base en azules —#000066 (azul oscuro, solidez) y #0000FF (azul vibrante)—, con el amarillo #FFFF00 solo como acento para resaltar lo relevante, el lila #6666FF como apoyo y blanco y negro; se recomiendan los degradados, sobre todo en fondos. La mascota UIFCITO tiene su propia paleta única (#EAE9CB, #5D6289, #44D4FF, #5B5B5B, #2D2D2D, #000000) que no se modifica jamás: se usa en contextos cercanos y pedagógicos (redes, tutoriales, bienvenidas) y de forma limitada en comunicaciones institucionales formales u oficiales.
-- Cuando el proyecto se cruza con otra área, nómbrala; las solicitudes entre áreas pasan por el protocolo de acompañamiento interárea.
-- Regla para la CATEGORÍA: si el proyecto se hace con otra dependencia de la UIFCE (Apoyos Académicos, Cursos Libres, Desarrollo, Gestión del Conocimiento, Virtualización o Coordinación), la categoría es «Articulación con [dependencia]», sea cual sea el formato de lo que se entrega; si involucra a todas, «Articulación transversal». Si no, se clasifica por lo que entrega.`;
+- Cuando el proyecto se cruza con otra área, nómbrala; las solicitudes entre áreas pasan por el protocolo de acompañamiento interárea.`;
 
 export const IDEA_PLACEHOLDER = "<<Escribe aquí tu idea en bruto: qué es, por qué surge, qué quieren lograr, quién la haría, fechas.>>";
 
@@ -28,7 +33,7 @@ ${ET_AREA_CONTEXT}
 ## Qué necesita un proyecto para verse bien en el tracker
 Cada proyecto se muestra como una tarjeta con estos campos. Redáctalos con este criterio:
 1. TÍTULO — corporativo y nominal (sustantivo + objeto, sin verbo inicial ni emojis), de máximo 80 caracteres, que se entienda sin contexto. Ej.: «Campaña de difusión "Sala Abierta"».
-2. CATEGORÍA — exactamente una de: ${CATEGORIES.map((c) => `«${c}»`).join(", ")}.
+2. LÍNEA DE TRABAJO, CATEGORÍA y POR QUÉ — la categoría es exactamente una de las del catálogo de abajo y la línea de trabajo es la que la contiene (no inventes otras). Para elegir, hazte una sola pregunta: «¿con quién se hace?». Si el proyecto se hace con otra dependencia de la UIFCE (Apoyos Académicos, Cursos Libres, Desarrollo, Gestión del Conocimiento, Virtualización o Coordinación), va a «Articulación con [dependencia]», sea cual sea el formato de lo que se entrega (una pieza para Cursos Libres es «Articulación con Cursos Libres», no «Producción de contenido»); si involucra a todas, a «Articulación transversal». Si no, se clasifica por lo que entrega. En «POR QUÉ» explica en 1 o 2 frases qué dato de la idea llevó a esa línea y esa categoría, y, si dudaste con otra categoría cercana, nómbrala y di por qué la descartaste.
 3. ETIQUETA de urgencia — una de: «Atención Inmediata» (hay que resolverlo ya; cada persona puede tener máximo ${WIP_ATENCION_INMEDIATA} proyectos activos así), «Próximo Ciclo» (es el siguiente en la fila), «Backlog» (valioso pero sin fecha) o «Sin etiqueta».
 4. QUÉ SE DEBE HACER — 2 a 5 frases, accionables y en orden lógico: qué se produce, para quién y por qué canal.
 5. QUÉ SE ESPERA — 1 a 3 frases con una meta medible o verificable (cifra, fecha o hito observable).
@@ -39,16 +44,21 @@ Cada proyecto se muestra como una tarjeta con estos campos. Redáctalos con este
    - Una sola acción por subtarea; sin «y» que junte dos pasos, sin «etc.» y sin repetir el título del proyecto.
    - Si hay una aprobación o un insumo de otra área, ponlo como subtarea propia antes de producir.
 
+## Líneas de trabajo y categorías disponibles
+${CATALOG}
+
 ## Reglas
 - No inventes datos: cifras, fechas, nombres de personas, presupuestos o antecedentes que yo no te haya dado. Si falta algo, escribe «[por confirmar]».
 - Antes de redactar, si te falta algo esencial (el resultado esperado en términos medibles, quién lo ejecuta, o la fecha límite), hazme como máximo 4 preguntas cortas y espera mi respuesta. Si con lo que te di alcanza, sigue directo.
 - Redacta en español, tono institucional y sobrio, sin relleno ni frases de marketing.
 
 ## Formato de salida
-Entrégame exactamente este bloque, sin texto antes ni después, para copiarlo campo por campo al formulario «Nuevo proyecto»:
+Entrégame exactamente este bloque, sin texto antes ni después, para copiarlo campo por campo al formulario «Nuevo proyecto». «LÍNEA DE TRABAJO» y «POR QUÉ ESTA CLASIFICACIÓN» son de referencia para que yo revise la elección: el formulario solo pide la categoría.
 
 TÍTULO: …
+LÍNEA DE TRABAJO: …
 CATEGORÍA: …
+POR QUÉ ESTA CLASIFICACIÓN: …
 ETIQUETA: …
 QUÉ SE DEBE HACER: …
 QUÉ SE ESPERA: …
