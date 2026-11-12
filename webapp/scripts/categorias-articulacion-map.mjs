@@ -55,7 +55,28 @@ export const NEW_CATEGORY_BY_ID = {
   "estrategicos-tracker-egresados-uifce": ALIAN,
   // Gestión interna (los de «Documentación», «Normativa» e «Innovación» salen por nombre antiguo)
   "et-en-marcha": MEJ,
+  // Es ET pidiéndole algo a Gestión del Conocimiento (no apoyándola): va a Documentación.
+  "documentacion-propuesta-drive-gc": DOC,
 };
+
+/** Categorías vigentes de la nueva clasificación: lo que ya esté en una de ellas no se toca. */
+export const CURRENT_CATEGORIES = new Set([
+  "Articulación con Apoyos Académicos",
+  "Articulación con Cursos Libres",
+  "Articulación con Desarrollo",
+  "Articulación con Gestión del Conocimiento",
+  "Articulación con Virtualización",
+  "Articulación con Coordinación",
+  "Articulación transversal",
+  "Producción de contenido",
+  "Carteleras y pantallas",
+  "Canales digitales",
+  "Eventos y formación",
+  "Alianzas y comunidad",
+  "Documentación y memoria",
+  "Normativa y cumplimiento",
+  "Mejora de procesos",
+]);
 
 /** Respaldo cuando el id no está arriba: categoría antigua (sin sufijo de urgencia) -> categoría nueva. */
 export const OLD_NAME_TO_NEW = {
@@ -77,6 +98,8 @@ export const OLD_NAME_TO_NEW = {
 /** Categoría nueva de un proyecto, o null si no hay regla. `oldCategory` puede traer el sufijo « — urgencia». */
 export function newCategoryFor(id, oldCategory) {
   if (NEW_CATEGORY_BY_ID[id]) return NEW_CATEGORY_BY_ID[id];
+  // Ya está en una categoría vigente (p. ej. el seed la reclasificó, o se creó así en la app): se respeta.
+  if (CURRENT_CATEGORIES.has(String(oldCategory ?? "").trim())) return String(oldCategory).trim();
   const base = String(oldCategory ?? "").split(" — ")[0].trim();
   return OLD_NAME_TO_NEW[base] ?? null;
 }
