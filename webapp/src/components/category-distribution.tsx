@@ -12,7 +12,7 @@ export type CategoryProject = { id: string; title: string; category: string };
 
 type Slice = { label: string; count: number; pct: number; color: string };
 
-/** Vista de la rueda: nivel 1 = macro-categoría, nivel 2 = subcategoría
+/** Vista de la rueda: nivel 1 = línea de trabajo, nivel 2 = categoría
  *  (la `category` original), nivel 3 = lista de proyectos. `cameFromMacro`
  *  recuerda si el nivel 2 se saltó (macro con una sola subcategoría), para
  *  que "Volver" desde el nivel 3 regrese al lugar correcto. */
@@ -197,7 +197,7 @@ export function CategoryDistribution({ projects }: { projects: CategoryProject[]
     }
   }
 
-  const backLabel = view.level === "sub" ? "Todas las categorías" : view.level === "projects" ? view.macro : "";
+  const backLabel = view.level === "sub" ? "Todas las líneas de trabajo" : view.level === "projects" ? view.macro : "";
 
   // Descripción corporativa de la categoría en la que se acaba de entrar: la
   // de la macro-categoría al ver sus subcategorías, la de la subcategoría al
@@ -214,8 +214,8 @@ export function CategoryDistribution({ projects }: { projects: CategoryProject[]
         type="button"
         onClick={toggleOpen}
         aria-expanded={open}
-        aria-label="Por categoría"
-        title="Por categoría"
+        aria-label="Por línea de trabajo"
+        title="Por línea de trabajo"
         className="press inline-flex h-8 w-8 items-center justify-center rounded-md border border-input text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
       >
         <PieChart className="h-4 w-4" aria-hidden />

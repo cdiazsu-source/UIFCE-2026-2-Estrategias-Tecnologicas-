@@ -12,7 +12,8 @@ export const ET_AREA_CONTEXT = `## Contexto del área
 - Terminología fija: UIFCE (en mayúsculas), Concurso/Hackatón (con tilde), ET, máster, monitores. Canales institucionales: Instagram @ui_fce, LinkedIn (prioritario), TikTok, YouTube.
 - Las piezas siguen los lineamientos de identidad visual de la Universidad (Unimedios / Imagen Institucional). El tono es institucional y de invitación: evita el lenguaje restrictivo («prohibido», «no se permite»).
 - Identidad visual propia de la UIFCE (paleta oficial): base en azules —#000066 (azul oscuro, solidez) y #0000FF (azul vibrante)—, con el amarillo #FFFF00 solo como acento para resaltar lo relevante, el lila #6666FF como apoyo y blanco y negro; se recomiendan los degradados, sobre todo en fondos. La mascota UIFCITO tiene su propia paleta única (#EAE9CB, #5D6289, #44D4FF, #5B5B5B, #2D2D2D, #000000) que no se modifica jamás: se usa en contextos cercanos y pedagógicos (redes, tutoriales, bienvenidas) y de forma limitada en comunicaciones institucionales formales u oficiales.
-- Cuando el proyecto se cruza con otra área, nómbrala; las solicitudes entre áreas pasan por el protocolo de acompañamiento interárea.`;
+- Cuando el proyecto se cruza con otra área, nómbrala; las solicitudes entre áreas pasan por el protocolo de acompañamiento interárea.
+- Regla para la CATEGORÍA: si el proyecto se hace con otra dependencia de la UIFCE (Apoyos Académicos, Cursos Libres, Desarrollo, Gestión del Conocimiento, Virtualización o Coordinación), la categoría es «Articulación con [dependencia]», sea cual sea el formato de lo que se entrega; si involucra a todas, «Articulación transversal». Si no, se clasifica por lo que entrega.`;
 
 export const IDEA_PLACEHOLDER = "<<Escribe aquí tu idea en bruto: qué es, por qué surge, qué quieren lograr, quién la haría, fechas.>>";
 

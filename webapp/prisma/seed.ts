@@ -233,7 +233,7 @@ async function seedEtEnMarchaProject() {
     await prisma.project.create({
       data: {
         id: ET_EN_MARCHA_ID,
-        category: "Innovación y eficiencia operativa",
+        category: "Mejora de procesos",
         priorityTag: "ATENCION_INMEDIATA",
         title: "ET en Marcha — plataforma de seguimiento del área",
         description:

@@ -1,123 +1,129 @@
-/** Agrupación de las categorías de planeación (texto libre del CSV, campo
- *  `Project.category`) para la rueda de distribución del panel principal, en
- *  dos niveles:
- *  - Macro-categoría: la rebanada de primer nivel de la rueda.
- *  - Subcategoría: agrupa dentro de cada macro-categoría las categorías del
- *    CSV que en la práctica describen lo mismo (ej. "Eventos", "Eventos /
- *    Proyectos estratégicos" y "Proyectos estratégicos" son variantes del
- *    mismo concepto y se consolidan en una sola subcategoría). Cuando una
- *    categoría del CSV es un concepto propio (sin variantes), su subcategoría
- *    es ella misma.
- *  Cada nivel trae una descripción corta y corporativa que se muestra al
- *  hacer click en esa categoría en el panel principal. */
+/** Estructura de clasificación de los proyectos (campo `Project.category`, texto
+ *  libre en la BD y en el CSV de planeación), en dos niveles:
+ *  - Línea de trabajo: la rebanada de primer nivel de la rueda del panel.
+ *  - Categoría: lo que aparece en los encabezados de los documentos de ET
+ *    («Categoría · Nombre del proyecto») y en el selector de «Nuevo proyecto».
+ *
+ *  Regla para elegir (una sola pregunta): «¿con quién se hace?». Si el proyecto
+ *  se hace con otra dependencia de la UIFCE (Apoyos Académicos, Cursos Libres,
+ *  Desarrollo, Gestión del Conocimiento, Virtualización o Coordinación) va a
+ *  «Articulación con …», sea cual sea el formato; si abarca a todas, a
+ *  «Articulación transversal». Si no, se clasifica por lo que entrega.
+ *
+ *  Los nombres de categoría NO pueden llevar « — »: el CSV usa ese separador
+ *  para pegar la etiqueta de urgencia (ver `splitCategory` en prisma/seed.ts).
+ *
+ *  Cada nivel trae una descripción corta y corporativa que se muestra al hacer
+ *  click en esa línea o categoría en el panel principal. */
 export type CategorySubgroup = { label: string; description: string; categories: string[] };
 export type CategoryGroupDef = { label: string; description: string; subgroups: CategorySubgroup[] };
 
 export const CATEGORY_GROUPS: CategoryGroupDef[] = [
   {
-    label: "🎨 Contenido y redes",
+    label: "Articulación interna",
     description:
-      "Producción de piezas gráficas y audiovisuales, y operación de los canales oficiales de la Unidad: el trabajo recurrente de comunicación digital de ET.",
+      "Proyectos que ET desarrolla en conjunto con otras dependencias de la UIFCE, bajo el canal único de solicitudes y los niveles de servicio definidos en el protocolo de acompañamiento interárea.",
+    subgroups: [
+      {
+        label: "Articulación con Apoyos Académicos",
+        description: "Proyectos que ET desarrolla en conjunto con Apoyos Académicos.",
+        categories: ["Articulación con Apoyos Académicos"],
+      },
+      {
+        label: "Articulación con Cursos Libres",
+        description: "Proyectos que ET desarrolla en conjunto con Cursos Libres: línea gráfica, piezas de lanzamiento y difusión del aplicativo.",
+        categories: ["Articulación con Cursos Libres"],
+      },
+      {
+        label: "Articulación con Desarrollo",
+        description: "Proyectos que ET desarrolla en conjunto con Desarrollo, como el diseño de los aplicativos de la Unidad.",
+        categories: ["Articulación con Desarrollo"],
+      },
+      {
+        label: "Articulación con Gestión del Conocimiento",
+        description: "Proyectos que ET desarrolla en conjunto con Gestión del Conocimiento.",
+        categories: ["Articulación con Gestión del Conocimiento"],
+      },
+      {
+        label: "Articulación con Virtualización",
+        description: "Proyectos que ET desarrolla en conjunto con Virtualización, incluida la estandarización de piezas para cursos virtuales.",
+        categories: ["Articulación con Virtualización"],
+      },
+      {
+        label: "Articulación con Coordinación",
+        description: "Proyectos que ET desarrolla en conjunto con Coordinación, como plantillas y piezas de uso para toda la Unidad.",
+        categories: ["Articulación con Coordinación"],
+      },
+      {
+        label: "Articulación transversal",
+        description: "Trabajo que involucra a todas las dependencias de la UIFCE, y el protocolo de acompañamiento interárea.",
+        categories: ["Articulación transversal"],
+      },
+    ],
+  },
+  {
+    label: "Comunicación",
+    description:
+      "Producción de piezas y operación de los medios oficiales de la Unidad: el trabajo recurrente de comunicación de ET.",
     subgroups: [
       {
         label: "Producción de contenido",
         description:
-          "Diseño y producción de piezas gráficas y audiovisuales para los canales oficiales y las necesidades puntuales del área.",
+          "Diseño y producción de piezas gráficas y audiovisuales propias de ET y de la marca UIFCE: afiches, videos, mascota y logo.",
         categories: ["Producción de contenido"],
       },
       {
-        label: "Redes y canales",
+        label: "Carteleras y pantallas",
         description:
-          "Administración y crecimiento de las cuentas oficiales de la Unidad en redes sociales: publicación, interacción y seguimiento de métricas.",
-        categories: ["Redes y canales"],
+          "Carteleras físicas y digitales, señalética de salas y cápsulas en los televisores de la Unidad.",
+        categories: ["Carteleras y pantallas"],
+      },
+      {
+        label: "Canales digitales",
+        description:
+          "Operación de las cuentas oficiales en redes sociales, del micrositio, el blog y el boletín: publicación, interacción y seguimiento de métricas.",
+        categories: ["Canales digitales"],
       },
     ],
   },
   {
-    label: "🎤 Eventos y proyectos estratégicos",
+    label: "Eventos y vinculación",
     description:
-      "Iniciativas de mayor escala e impacto institucional: eventos, lanzamientos y proyectos estratégicos del semestre, bajo el principio de «calidad sobre cantidad».",
+      "Iniciativas de ET hacia la comunidad y el entorno de la Unidad: eventos, alianzas y relación con egresados, bajo el principio de «calidad sobre cantidad».",
     subgroups: [
       {
-        label: "Eventos y proyectos estratégicos",
+        label: "Eventos y formación",
+        description: "Semana UIFCE, microtalleres y demás actividades con fecha, priorizando calidad y asistencia efectiva sobre volumen.",
+        categories: ["Eventos y formación"],
+      },
+      {
+        label: "Alianzas y comunidad",
         description:
-          "Eventos, microtalleres y proyectos estratégicos de alto impacto para posicionar a la Unidad, priorizando calidad sobre volumen.",
-        categories: ["Eventos / Proyectos estratégicos", "Eventos", "Proyectos estratégicos"],
+          "Relación con empresas, aliados académicos, egresados, extensión solidaria y estudiantes de primeros semestres.",
+        categories: ["Alianzas y comunidad"],
       },
     ],
   },
   {
-    label: "🤝 Acompañamiento interárea",
+    label: "Gestión interna",
     description:
-      "Apoyo de ET a las demás áreas de la UIFCE (piezas, difusión, soporte de canales), bajo el canal único de solicitudes y los niveles de servicio (SLA) definidos.",
+      "Trabajo de base que sostiene al equipo: documentación y memoria, cumplimiento normativo y mejora de los procesos propios.",
     subgroups: [
       {
-        label: "Acompañamiento interárea",
+        label: "Documentación y memoria",
         description:
-          "Solicitudes de apoyo de otras áreas de la UIFCE que no corresponden a un área específica con acompañamiento dedicado.",
-        categories: ["Acompañamiento interárea"],
+          "Registro y preservación de procesos, activos y aprendizajes de ET, para que el conocimiento no se pierda entre semestres.",
+        categories: ["Documentación y memoria"],
       },
       {
-        label: "Acompañamiento a Cursos Libres",
-        description:
-          "Apoyo puntual de ET al área de Cursos Libres (piezas, difusión, soporte de canales), según el protocolo interárea.",
-        categories: ["Acompañamiento a Cursos Libres"],
+        label: "Normativa y cumplimiento",
+        description: "Reglas, términos y condiciones, consentimientos e identidad visual de la Universidad.",
+        categories: ["Normativa y cumplimiento"],
       },
       {
-        label: "Acompañamiento a Virtualización",
-        description:
-          "Apoyo puntual de ET al área de Virtualización, incluida la estandarización de piezas e interacciones para los cursos virtuales.",
-        categories: ["Acompañamiento a Virtualización"],
-      },
-      {
-        label: "Acompañamiento a Apoyos Académicos",
-        description: "Apoyo puntual de ET al área de Apoyos Académicos (AA), según el protocolo interárea.",
-        categories: [
-          "Acompañamiento a Apoyos Académicos",
-          "Acompañamiento a Apoyos académicos",
-          "Acompañamiento a Apoyos Académicos.",
-        ],
-      },
-      {
-        label: "Acompañamiento a Desarrollo",
-        description: "Apoyo puntual de ET al área de Desarrollo (DS), según el protocolo interárea.",
-        categories: ["Acompañamiento a Desarrollo"],
-      },
-    ],
-  },
-  {
-    label: "🏛️ Gestión institucional",
-    description:
-      "Trabajo de base que sostiene al área: documentación y memoria institucional, cumplimiento normativo, y eficiencia de los procesos internos.",
-    subgroups: [
-      {
-        label: "Documentación y memoria institucional",
-        description:
-          "Registro y preservación de procesos, activos y aprendizajes del área, para que el conocimiento no se pierda entre semestres.",
-        categories: ["Documentación y memoria institucional"],
-      },
-      {
-        label: "Normativa",
-        description: "Cumplimiento de los lineamientos institucionales y de identidad visual de la Universidad.",
-        categories: ["Normativa"],
-      },
-      {
-        label: "Innovación y eficiencia operativa",
-        description: "Mejoras a los procesos internos de ET orientadas a ganar eficiencia sin sacrificar calidad.",
-        categories: ["Innovación y eficiencia operativa"],
-      },
-    ],
-  },
-  {
-    label: "🔁 Proyectos en continuidad",
-    description:
-      "Proyectos heredados de semestres anteriores que siguen activos este semestre, dando continuidad a compromisos ya adquiridos.",
-    subgroups: [
-      {
-        label: "Proyectos en continuidad",
-        description:
-          "Proyectos que vienen de semestres anteriores y continúan activos, dando seguimiento a compromisos ya adquiridos.",
-        categories: ["Proyectos en continuidad"],
+        label: "Mejora de procesos",
+        description: "Automatización, herramientas e inteligencia artificial para trabajar con más eficiencia sin sacrificar calidad.",
+        categories: ["Mejora de procesos"],
       },
     ],
   },

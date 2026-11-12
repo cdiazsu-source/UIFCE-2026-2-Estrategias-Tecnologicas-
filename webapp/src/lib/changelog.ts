@@ -21,6 +21,24 @@ export const CHANGELOG_SHOWN = 10;
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: "2026.11.11.2",
+    date: "2026-11-11",
+    title: "Proyectos organizados por línea de trabajo",
+    changes: [
+      { type: "MEJORA", text: "Nueva clasificación en 4 líneas de trabajo y 15 categorías: Articulación interna, Comunicación, Eventos y vinculación y Gestión interna. Se decide con una pregunta: ¿con quién se hace? Si es con otra dependencia de la UIFCE, la categoría es «Articulación con …»; si no, se clasifica por lo que entrega." },
+      { type: "MEJORA", text: "Así se puede ver cuánto trabaja ET con Cursos Libres, Apoyos Académicos, Desarrollo, Virtualización, Coordinación y Gestión del Conocimiento, y el encabezado de los documentos queda como «Categoría · Proyecto»." },
+      { type: "MEJORA", text: "La rueda del panel se titula «Por línea de trabajo» y cada línea y categoría tiene su propio color. Desaparecen «Proyectos estratégicos», «Proyectos en continuidad» y las categorías «Acompañamiento a …»." },
+    ],
+  },
+  {
+    version: "2026.11.11.1",
+    date: "2026-11-11",
+    title: "Nuevo proyecto: logo UIFCE vectorial y animación de áreas",
+    changes: [
+      { type: "NUEVO", text: "Proyecto «Actualización vectorial del logo UIFCE y animación de áreas» (Producción de contenido, Próximo ciclo) con su checklist de 7 pasos: auditoría del logo, rediseño en SVG, aprobación de Coordinación, animación de carrusel cilíndrico con ET, piezas por canal, publicación y plantilla editable." },
+    ],
+  },
+  {
     version: "2026.11.08.2",
     date: "2026-11-08",
     title: "Ficha completa de cada equipo de la Sala 1",

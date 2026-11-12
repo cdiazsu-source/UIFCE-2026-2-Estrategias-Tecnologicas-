@@ -22,7 +22,7 @@ PRIORITY_FILL = PatternFill(start_color="FCE9CE", end_color="FCE9CE", fill_type=
 IDEAS = [
     dict(
         id="redes-instagram",
-        cat="Redes y canales — Atención inmediata",
+        cat="Canales digitales — Atención inmediata",
         idea="Recuperación o recreación de la cuenta de Instagram @uifce_un",
         hacer="Agotar primero las vías de recuperación de la cuenta @uifce_un (verificación de identidad ante Meta, apoyo de Imagen Institucional/Unimedios, revisión de correos y dispositivos con sesión activa) e insistir por distintos canales con la persona con la que se ha intentado retomar contacto. Si no se logra recuperar en un plazo máximo de 2-3 semanas, escalar pidiendo la intermediación directa del profesor a cargo del área y, en paralelo, crear una cuenta nueva oficial, tramitar su oficialización ante la Oficina de Medios Digitales de la UNAL (mismo procedimiento ya usado con Instagram y LinkedIn en 2025-2) y migrar de inmediato los contenidos disponibles.",
         espera="Contar, a más tardar en la semana 4 del semestre, con una cuenta de Instagram activa y oficial (recuperada o nueva) desde la cual retomar el calendario editorial sin perder la continuidad de la estrategia de difusión.",
@@ -32,7 +32,7 @@ IDEAS = [
     ),
     dict(
         id="redes-linkedin",
-        cat="Redes y canales — Próximo ciclo",
+        cat="Canales digitales — Próximo ciclo",
         idea="Posicionamiento prioritario de LinkedIn UIFCE",
         hacer="Definir LinkedIn como canal prioritario del semestre: construir un calendario editorial propio (logros de monitores y egresados, proyectos de estudio, contenido profesional/técnico), aumentar la frecuencia de publicación frente a 2026-1 y evaluar la migración de contenido desde la cuenta personal hacia la cuenta empresa de la Unidad, pendiente según la Guía de Empalme.",
         espera="Superar de manera sostenida las cifras de 2026-1 (7 publicaciones, 1.491 impresiones, 42 reacciones), consolidando a LinkedIn como el canal de posicionamiento profesional e institucional de la UIFCE ante egresados, empresas y otras dependencias académicas.",
@@ -42,7 +42,7 @@ IDEAS = [
     ),
     dict(
         id="redes-tiktok",
-        cat="Redes y canales — Backlog",
+        cat="Canales digitales — Backlog",
         idea="Creación de la cuenta de TikTok UIFCE",
         hacer="Solicitar ante Imagen Institucional/Unimedios los lineamientos para cuentas institucionales en nuevas plataformas, crear y oficializar la cuenta de TikTok siguiendo el mismo trámite usado en 2026-1 para Instagram y LinkedIn, y definir un formato de contenido propio (no una simple réplica de los reels de Instagram). Complementar el lanzamiento con difusión \"análoga\" presencial (volantes/folletos entregados directamente a estudiantes en la Facultad, siguiendo la lógica de negocios cercanos que reparten volantes con promociones), en lugar de depender solo de que la audiencia encuentre la cuenta por su cuenta en redes.",
         espera="Contar con una cuenta de TikTok oficial y activa hacia la mitad del semestre, con un primer lote de publicaciones que permita evaluar su aporte real de alcance antes de comprometer más capacidad de producción del área.",
@@ -52,7 +52,7 @@ IDEAS = [
     ),
     dict(
         id="redes-youtube",
-        cat="Redes y canales",
+        cat="Canales digitales",
         idea="Consolidación y cierre de oficialización de YouTube UIFCE",
         hacer="Cerrar el trámite de oficialización de YouTube ante la Oficina de Medios Digitales UNAL, en curso desde 2025-2, resolviendo los inconvenientes de titularidad de cuenta ya identificados. Definir un calendario editorial propio (tutoriales, hacks en formato largo, videos institucionales) y coordinar con Virtualización la incrustación de videos de cursos.",
         espera="Trámite de oficialización cerrado y canal activo con publicaciones propias del área durante el semestre, además de servir como repositorio de los videos de cursos virtualizados que produce Virtualización.",
@@ -62,7 +62,7 @@ IDEAS = [
     ),
     dict(
         id="normativa-terminos-condiciones",
-        cat="Normativa",
+        cat="Normativa y cumplimiento",
         idea="Cierre de Términos y Condiciones de Estrategias Tecnológicas",
         hacer="Redactar el documento formal de Términos y Condiciones de ET (microtalleres, microeventos, Concurso/Hackatón y otros eventos), definiendo con claridad las penalizaciones por inasistencia y dando continuidad al Manual de Microtalleres y Microeventos ya vigente. Presentarlo a Coordinación para aval.",
         espera="Documento aprobado y difundido a la comunidad UIFCE antes del cierre del primer tercio del semestre, de forma que rija desde los primeros microtalleres de 2026-2.",
@@ -92,7 +92,7 @@ IDEAS = [
     ),
     dict(
         id="eventos-microtalleres",
-        cat="Eventos",
+        cat="Eventos y formación",
         idea="Microtalleres UIFCE",
         hacer="Ejecutar un máximo de 5 microtalleres en el semestre (idealmente 3), priorizando calidad y asistencia efectiva sobre cantidad, y evitando programarlos en las últimas semanas del calendario académico. Implementar certificados de participación desde el primer microtaller (misma plantilla usada para Cursos Libres), confirmar con Juan Martínez (ex-monitor de geología) si dicta el microtaller ya diseñado de \"Análisis espacial aplicado a las ciencias económicas\" (5 sesiones), y confirmar con Jonny el horario del microtaller de Introducción a la Lógica de Programación.",
         espera="Mayor asistencia efectiva por microtaller, con un tope de 5 microtalleres en el semestre frente a los 10 de 2025-2, certificados de participación entregados desde el primer microtaller dictado, y al menos un piloto en modalidad virtual/híbrida.",
@@ -102,7 +102,7 @@ IDEAS = [
     ),
     dict(
         id="continuidad-blog",
-        cat="Proyectos en continuidad",
+        cat="Canales digitales",
         idea="Blog UIFCE",
         hacer="Aprobar y ejecutar la propuesta de difusión del blog, pendiente desde 2026-1, coordinando un cronograma conjunto con Gestión del Conocimiento (GC): GC cura y redacta los resúmenes de proyectos de estudio, ET diseña la plataforma y acompaña el despliegue.",
         espera="Blog con contenido y difusión activos durante el semestre, con la delimitación de funciones frente a GC funcionando en la práctica.",
@@ -112,7 +112,7 @@ IDEAS = [
     ),
     dict(
         id="continuidad-micrositio",
-        cat="Proyectos en continuidad",
+        cat="Canales digitales",
         idea="Micrositio UIFCE",
         hacer="Actualizar fotos, biografías y estructura de contenido del equipo vigente (coordinando con Comunicaciones una sesión de fotos institucionales, individuales y grupales por área), gestionando los consentimientos de imagen mediante el script ya existente en el Drive de ET (genera automáticamente un documento de consentimiento por persona a partir de la lista de monitores). Evaluar con Desarrollo (Johnny) la viabilidad técnica de que la foto de cada integrante del equipo enlace a su perfil de LinkedIn al hacer clic, como mecanismo adicional de posicionamiento del canal.",
         espera="Micrositio con información del equipo vigente para el semestre, desplegado sin retrasos técnicos por falta de coordinación con DS, y una respuesta clara de Desarrollo sobre la viabilidad del enlace a LinkedIn en las fotos del equipo.",
@@ -122,7 +122,7 @@ IDEAS = [
     ),
     dict(
         id="produccion-senaletica-salas",
-        cat="Producción de contenido",
+        cat="Carteleras y pantallas",
         idea="Vigilancia y piezas de software disponible en cada sala",
         hacer="Mantener actualizadas las piezas gráficas de disponibilidad de software y salas en los televisores de oficina y pasillo, evitando el lenguaje restrictivo (tipo \"prohibido\") señalado en la reunión final 2026-1.",
         espera="Señalética de salas vigente durante todo el semestre y mejor recibida por los usuarios.",
@@ -132,7 +132,7 @@ IDEAS = [
     ),
     dict(
         id="cursoslibres-linea-grafica",
-        cat="Acompañamiento a Cursos Libres",
+        cat="Articulación con Cursos Libres",
         idea="Línea gráfica de Cursos Libres",
         hacer="Completar el despliegue de la nueva línea gráfica modular en medios físicos y digitales, y coordinar con Cursos Libres (CL) el mantenimiento de la cartelera y el diseño de plantillas de certificados conforme a Imagen Institucional.",
         espera="Línea gráfica desplegada al 100% en todos los medios, y cartelera de CL corregida y vigente.",
@@ -142,7 +142,7 @@ IDEAS = [
     ),
     dict(
         id="estrategicos-extension-solidaria",
-        cat="Proyectos estratégicos",
+        cat="Alianzas y comunidad",
         idea="Extensión Solidaria",
         hacer="Presentar la propuesta técnica y presupuestal completa (metodología, población objetivo identificada a través de Bienestar Universitario, cotizaciones ya cerradas de kit escolar con Doneta y de refrigerio con Colombia Gourmet) ante Vicedecanatura para obtener el aval institucional. Esperar a que se complete el cambio de Vicedecanatura ya en curso antes de formalizar el trámite presupuestal, para no arriesgar compromisos con la administración saliente; explorar en paralelo la vía de una convocatoria de extensión asociada a problemáticas de Bogotá con apoyo de la Vicedecanatura de Investigación y Extensión (contacto: Sandra Carlos Vargas). Una vez aprobada, iniciar la gestión de ejecución.",
         espera="Aval institucional obtenido y, de ser posible dentro del semestre, ejecución de la capacitación en Excel dirigida a madres cabeza de familia (40 participantes, 15 horas).",
@@ -152,7 +152,7 @@ IDEAS = [
     ),
     dict(
         id="produccion-carteleras",
-        cat="Producción de contenido",
+        cat="Carteleras y pantallas",
         idea="Carteleras UIFCE (física y digital)",
         hacer="Mantener la proyección de piezas en las carteleras digitales de los edificios 310 y 311 en articulación con la Dependencia de Comunicaciones de la Facultad, y conservar y actualizar la cartelera física renovada en 2025-2.",
         espera="Presencia física constante y renovada de la UIFCE en los espacios de mayor circulación de la Facultad.",
@@ -162,7 +162,7 @@ IDEAS = [
     ),
     dict(
         id="eventos-semana-uifce",
-        cat="Eventos / Proyectos estratégicos",
+        cat="Eventos y formación",
         idea="Semana UIFCE — primera edición",
         hacer="Ejecutar la primera edición del evento (septiembre), articulada con la Semana de Investigación de la Vicedecanatura de Investigación y Extensión (VIE, contacto Sandra Carlos Vargas), con tres componentes: (1) Concurso/Hackatón en Bizagi a tres días no consecutivos (capacitación, entrega del caso, y sustentación una semana después), en equipos de 4 y con profesores como jurados, coordinada con Gau y Ángela, quienes ya tienen la capacitación y el proyecto de estudio documentados; (2) microtaller de Introducción a la Lógica de Programación ya comprometido con Jonny; (3) conferencia con invitado del sector empresarial, gestionada por el profesor Montoya vía Daniel, con fecha límite del 17 de septiembre. Formalizar con Carlos Osorio Ramírez (CIID) la donación de cupos en diplomados como premio del Concurso/Hackatón, y sumar un stand físico por cada área de la UIFCE en el pasillo de la biblioteca. Activar la Red de Aliados Académicos y solicitar estudiantes de corresponsabilidad con suficiente anticipación para que la convocatoria al Concurso/Hackatón no se anuncie de un día para otro, como ocurrió en la edición cancelada de 2025-2.",
         espera="Primera edición ejecutada con éxito, con mejor convocatoria al Concurso/Hackatón que en 2025-2, cuando se canceló por baja inscripción, y con el presupuesto de patrocinios (cupos CIID, refrigerios y bonos vía VIE) confirmado antes del evento.",
@@ -172,7 +172,7 @@ IDEAS = [
     ),
     dict(
         id="estrategicos-boletin-digital",
-        cat="Proyectos estratégicos — Backlog",
+        cat="Canales digitales — Backlog",
         idea="Boletín Digital UIFCE",
         hacer="Diseñar la plantilla del boletín, definir el protocolo de recolección de contenido con cada área (AA, GC, DS, Virtualización, CL) y publicar tres números durante el semestre.",
         espera="Tres ediciones publicadas con contenido aportado por al menos tres áreas distintas de la UIFCE en cada número.",
@@ -182,7 +182,7 @@ IDEAS = [
     ),
     dict(
         id="estrategicos-red-aliados-academicos",
-        cat="Proyectos estratégicos — Backlog",
+        cat="Alianzas y comunidad — Backlog",
         idea="Red de Aliados Académicos UIFCE",
         hacer="Construir un listado vivo de profesores y asignaturas aliadas por programa curricular (administración, economía, contaduría) que faciliten la convocatoria presencial a eventos y servicios de la UIFCE.",
         espera="Red activa y utilizada como mecanismo formal de convocatoria para la Semana UIFCE y los microtalleres del semestre.",
@@ -192,7 +192,7 @@ IDEAS = [
     ),
     dict(
         id="innovacion-repositorio-ia",
-        cat="Innovación y eficiencia operativa — Backlog",
+        cat="Mejora de procesos — Backlog",
         idea="Repositorio de material con IA y automatización de producción de video",
         hacer="Evaluar y adoptar herramientas de inteligencia artificial en dos frentes: (1) un repositorio de material clasificado y buscable (piezas, hacks, videos, documentos de proyectos), y (2) automatización de tareas repetitivas de edición de video (subtitulado, recortes por plataforma, primeros cortes). Articular el repositorio con el soporte documental permanente del área (idea siguiente).",
         espera="Un repositorio de material en operación que reduzca el tiempo de búsqueda frente a la práctica actual en Drive, y al menos un flujo de edición de video con una etapa automatizada funcionando de forma regular hacia el final del semestre.",
@@ -202,7 +202,7 @@ IDEAS = [
     ),
     dict(
         id="documentacion-repositorio-permanente",
-        cat="Documentación y memoria institucional — Backlog",
+        cat="Documentación y memoria — Backlog",
         idea="Repositorio documental permanente de Estrategias Tecnológicas",
         hacer="Diseñar y poner en marcha un repositorio propio de ET (carpeta estructurada en Drive con convención de nombres y metadatos mínimos: fecha, tipo de pieza, campaña, autor) donde se archive de forma permanente todo el material del área —piezas gráficas, videos, documentos de proyectos, credenciales y evidencias de gestión de redes— más allá de cada semestre, en articulación con el repositorio general que ya lidera Gestión del Conocimiento (GC). Adoptar el mecanismo propuesto en el empalme: que cada máster entrante tome accesos directos al repositorio único en lugar de copiar carpetas completas semestre a semestre, y mantener un asistente de IA con contexto del Drive (ej. Gemini) que permita ubicar cualquier archivo por consulta en lenguaje natural.",
         espera="Un soporte documental único y organizado, disponible para cualquier monitor entrante desde el primer día de empalme, que reduzca el riesgo de pérdidas como la de la cuenta de Instagram y evite que el conocimiento del área se disperse entre semestres.",
@@ -212,7 +212,7 @@ IDEAS = [
     ),
     dict(
         id="documentacion-propuesta-drive-gc",
-        cat="Documentación y memoria institucional — Backlog",
+        cat="Documentación y memoria — Backlog",
         idea="Propuesta de reorganización del Drive UIFCE ante Gestión del Conocimiento (GC)",
         hacer="Presentar a GC la propuesta formal de repositorio documental permanente para todo el Drive de UIFCE: separar el contenido vigente de cada semestre del contenido permanente por proyecto de continuidad, con convención común de nomenclatura y uso de accesos directos en lugar de copias, tomando como piloto la carpeta ya reorganizada de ET 2026-2. Acordar con GC qué proyectos migran primero al repositorio permanente y quién lidera la migración del material disperso ya existente.",
         espera="Aval de GC sobre el modelo propuesto, creación de la carpeta piloto \"ET — Repositorio Permanente\" dentro del Drive general, y un plan de migración acordado en conjunto para el contenido histórico disperso.",
@@ -222,7 +222,7 @@ IDEAS = [
     ),
     dict(
         id="acompanamiento-interarea",
-        cat="Acompañamiento interárea",
+        cat="Articulación transversal",
         idea="Acompañamiento Interárea",
         hacer="Ejecutar la matriz de acompañamiento a Apoyos Académicos, Gestión del Conocimiento, Desarrollo, Virtualización, Cursos Libres y Coordinación bajo el protocolo de solicitud definido: canal único ante el Máster ET, SLA de 5 días hábiles para piezas puntuales y 4 semanas para campañas institucionales, y criterios de priorización ante solicitudes simultáneas.",
         espera="Cumplimiento del SLA en al menos el 80% de las solicitudes, y necesidades de las seis áreas recogidas formalmente en la reunión de planeación de inicio de semestre.",
@@ -232,7 +232,7 @@ IDEAS = [
     ),
     dict(
         id="documentacion-memorias-2026-2",
-        cat="Documentación y memoria institucional — Backlog",
+        cat="Documentación y memoria — Backlog",
         idea="Memorias UIFCE 2026-2S",
         hacer="Construir un repositorio de memorias del semestre 2026-2 del área —piezas destacadas, eventos, métricas de canales, hitos, decisiones y aprendizajes— recopilando el material de forma continua durante el semestre y no al cierre, con una estructura de carpetas y una convención de nombres consistentes con el repositorio documental permanente. Producir, a partir de ese material, un video final que resuma la gestión del área en el semestre (línea de tiempo de logros, cifras y testimonios del equipo), aplicando la línea gráfica vigente y el flujo de aprobación por el grupo Piezas Redes Sociales.",
         espera="Al cierre del semestre, un repositorio de memorias 2026-2S organizado y navegable, y un video final publicado y enlazado desde ese repositorio, que sirva de cierre de gestión y de insumo directo para el empalme con el equipo entrante.",
@@ -242,7 +242,7 @@ IDEAS = [
     ),
     dict(
         id="memoria-institucional-audiovisual",
-        cat="Documentación y memoria institucional — Próximo ciclo",
+        cat="Documentación y memoria — Próximo ciclo",
         idea="Memoria institucional audiovisual del equipo y del semestre 2026-2S",
         hacer="Organizar el archivo fotográfico y audiovisual del equipo y del semestre a partir del material ya subido a Drive (una carpeta por persona con su nombre y una carpeta de fotos y videos grupales de 2026-2S). Definir una convención de nombres, una estructura de carpetas y unos metadatos mínimos (fecha, tipo, persona o grupo, evento, autor) alineados con el repositorio documental permanente. Hacer una selección curada por persona y una del material grupal del semestre, y dejar el archivo listo para alimentar los micrositios (equipo de trabajo y ex monitores) y el video de cierre de gestión. Publicar una guía breve de captación para el resto del semestre.",
         espera="Un archivo fotográfico y audiovisual organizado y navegable por persona y por semestre, con una selección curada lista para los micrositios y el video de cierre, que no haya que reconstruir cada semestre.",
@@ -252,7 +252,7 @@ IDEAS = [
     ),
     dict(
         id="consentimiento-imagen-micrositio",
-        cat="Normativa — Próximo ciclo",
+        cat="Normativa y cumplimiento — Próximo ciclo",
         idea="Consentimiento de uso de imagen para el micrositio 2026-2S",
         hacer="Recolectar de cada integrante de la UIFCE la firma del documento de autorización de uso de su imagen, nombre y cargo en el micrositio del equipo 2026-2S, y dar a cada persona acceso a su carpeta de Drive con sus fotos. El texto del documento está fijado (Bogotá D.C., 31 de agosto de 2026; autorización para la presentación del equipo en el micrositio de la Facultad de Ciencias Económicas). El seguimiento persona por persona (firmó / acceso a Drive) y el avance visual se llevan en el panel del proyecto.",
         espera="El 100% de los integrantes con consentimiento firmado y con acceso a su carpeta de fotos antes de publicar el micrositio del equipo 2026-2S.",
@@ -262,7 +262,7 @@ IDEAS = [
     ),
     dict(
         id="aa-cartelera-fisica",
-        cat="Acompañamiento interárea — Próximo ciclo",
+        cat="Articulación con Apoyos Académicos — Próximo ciclo",
         idea="Cartelera física de Apoyos Académicos (AA)",
         hacer="A solicitud de Apoyos Académicos (Ángela Lucía Fierro Aponte, máster de AA), diseñar y producir una cartelera física para difundir los apoyos y servicios del área, con un formato parecido al de la cartelera de Cursos Libres que ya existe. Definir el contenido con AA (qué apoyos, cupos, horarios, cómo acceder), aplicar la línea gráfica vigente, pasar por el flujo de aprobación del grupo Piezas Redes Sociales, imprimir y ubicar la cartelera en los puntos de mayor circulación de la Facultad. El objetivo es aumentar la demanda de los AA.",
         espera="Una cartelera física de AA instalada en la Facultad antes de la mitad del semestre, coherente con la de Cursos Libres, y un aumento medible en las consultas o inscripciones a los apoyos académicos frente al periodo anterior.",
@@ -272,7 +272,7 @@ IDEAS = [
     ),
     dict(
         id="ds-solicitudes-uifce-tarjetas",
-        cat="Acompañamiento interárea — Próximo ciclo",
+        cat="Articulación con Desarrollo — Próximo ciclo",
         idea="Rediseño de tarjetas del aplicativo Solicitudes UIFCE (apoyo a Desarrollo)",
         hacer="A solicitud de Desarrollo (Yony Sebastian Chaparro Mesa, máster de DS), apoyar el aplicativo Solicitudes UIFCE con dos frentes: (1) una imagen o foto por cada servicio y (2) el rediseño de las tarjetas de servicio, con libertad total en la proporción. Se parte de una captura de pantalla del aplicativo actual que envía Desarrollo. Aplicar la línea gráfica vigente y entregar las piezas listas para integrar. Tiempo estimado: aproximadamente dos semanas.",
         espera="Un set de imágenes por servicio y una propuesta de tarjeta de servicio rediseñada, aprobadas y entregadas a Desarrollo en cerca de dos semanas, listas para integrar en el aplicativo Solicitudes UIFCE.",
@@ -282,7 +282,7 @@ IDEAS = [
     ),
     dict(
         id="cursoslibres-piezas-primer-lanzamiento",
-        cat="Acompañamiento a Cursos Libres",
+        cat="Articulación con Cursos Libres",
         idea="Elaboración de piezas gráficas de Cursos Libres — Primer lanzamiento",
         hacer="Gestionar y producir las piezas gráficas de difusión del primer lanzamiento de Cursos Libres 2026-2 (seis cursos virtualizados), aplicando la línea gráfica modular vigente de CL y el flujo de aprobación por el grupo Piezas Redes Sociales. El lanzamiento corre de la semana 4 a la semana 8-9 (14 de septiembre a 24 de octubre de 2026). Para cada curso: pieza de inscripción y video corto de lanzamiento del monitor. Coordinar con Cursos Libres con anticipación las fechas, textos y códigos definitivos —es el área con mayor fricción de tiempos según el diagnóstico— y bloquear en el calendario editorial las fechas de entrega antes del inicio de inscripciones de cada curso.",
         espera="Las seis piezas de inscripción y sus videos de lanzamiento aprobados y publicados antes del inicio de inscripciones de cada curso, sin retrasos atribuibles a coordinación tardía con Cursos Libres.",
@@ -302,7 +302,7 @@ IDEAS = [
     ),
     dict(
         id="micrositio-equipo-de-trabajo",
-        cat="Proyectos en continuidad",
+        cat="Canales digitales",
         idea="Actualización de micrositio — Equipo de trabajo",
         hacer="Actualizar la sección «Equipo de trabajo» del micrositio de la UIFCE con la información vigente del semestre: una foto grupal del área, fotos individuales de cada integrante con su cargo y su carrera (programa curricular), y una descripción corporativa del área. Coordinar con Comunicaciones una sesión de fotos institucionales (grupal por área e individuales), gestionar los consentimientos de imagen con el script ya existente en el Drive de ET, y entregar a Desarrollo (DS) los textos, las fotos nombradas y las biografías para su publicación. Verificar el resultado en el micrositio.",
         espera="La sección «Equipo de trabajo» del micrositio publicada con el equipo vigente 2026-2: foto grupal del área, fotos individuales con cargo y carrera, y descripción del área, con los consentimientos de imagen gestionados.",
@@ -312,7 +312,7 @@ IDEAS = [
     ),
     dict(
         id="micrositio-ex-monitores",
-        cat="Proyectos en continuidad",
+        cat="Canales digitales",
         idea="Actualización de micrositio — Ex monitores",
         hacer="Actualizar el apartado «Ex monitores» del micrositio, dedicado a reconocer a quienes ya pasaron por la Unidad. Texto de encabezado de la sección: «Dedicado a quienes dejaron huella en nuestra UIFCE. Cada monitor ha sido una pieza fundamental en nuestro crecimiento y en el apoyo a la comunidad universitaria. A través de sus testimonios, historias y experiencias, este espacio busca reconocer su legado e inspirar a quienes hoy continúan construyendo la historia de la Unidad.» Recopilar de cada ex monitor su foto, su nombre, el rol que desempeñó y, opcionalmente, un testimonio breve, además de su enlace de LinkedIn para que al hacer clic en la foto se abra su perfil. Gestionar los consentimientos de imagen, entregar el contenido a Desarrollo (DS) para su publicación y verificar los enlaces.",
         espera="El apartado «Ex monitores» del micrositio publicado y al día, con el texto de reconocimiento, la ficha de cada ex monitor (foto, nombre, rol) y la foto de cada uno enlazada a su perfil de LinkedIn.",
@@ -332,7 +332,7 @@ IDEAS = [
     ),
     dict(
         id="estrategicos-divulgacion-primeros-semestres",
-        cat="Proyectos estratégicos — Backlog",
+        cat="Alianzas y comunidad — Backlog",
         idea="Divulgación organizada de la UIFCE a estudiantes de primeros semestres",
         hacer="Establecer un enlace formal con las áreas de la Facultad y los grupos estudiantiles de acompañamiento (GEA) para coordinar un espacio periódico de presentación de la Unidad y sus servicios a los estudiantes que ingresan cada semestre, dentro de las actividades de bienvenida o inducción ya existentes.",
         espera="Contar, a más tardar en 2027-1, con un espacio formal y recurrente en el que la UIFCE presente sus servicios a los estudiantes de primeros semestres, coordinado con las áreas y los grupos GEA correspondientes.",
@@ -352,7 +352,7 @@ IDEAS = [
     ),
     dict(
         id="innovacion-experiencia-nfc-uifce",
-        cat="Innovación y eficiencia operativa — Próximo ciclo",
+        cat="Mejora de procesos — Próximo ciclo",
         idea="Experiencia NFC de identificación sonora y audiovisual de la UIFCE",
         hacer="Diseñar una experiencia con chips NFC que permita a las personas interactuar con contenidos audiovisuales de la UIFCE mediante el escaneo. Producir una primera serie de videos breves orientados a presentar la Unidad y facilitar su interacción con el público. Definir una propuesta de identificación sonora breve y distintiva para su uso en contenidos audiovisuales de la UIFCE. Solicitar el acompañamiento de Desarrollo para la programación e integración técnica de los chips NFC.",
         espera="Contar con un prototipo funcional de experiencia NFC, una primera serie de videos [por confirmar] y una propuesta de identificación sonora aprobada para uso institucional.",
@@ -362,7 +362,7 @@ IDEAS = [
     ),
     dict(
         id="innovacion-seguimiento-gastos-et",
-        cat="Innovación y eficiencia operativa — Próximo ciclo",
+        cat="Mejora de procesos — Próximo ciclo",
         idea="Sistema de seguimiento de gastos de ET",
         hacer="Diseñar una planilla para registrar y consultar los gastos de ET asociados a impresiones, publicidad y adquisición de equipo. Definir los campos mínimos de seguimiento y una estructura que permita identificar el concepto, valor y estado de cada gasto. Entregar la herramienta para su uso interno en la gestión de ET.",
         espera="Contar con una planilla funcional para registrar y consultar los gastos de ET en las categorías definidas, con una estructura validada por el máster.",
@@ -382,7 +382,7 @@ IDEAS = [
     ),
     dict(
         id="aa-pieza-audiovisual-docentes",
-        cat="Acompañamiento a Apoyos Académicos — Próximo ciclo",
+        cat="Articulación con Apoyos Académicos — Próximo ciclo",
         idea="Pieza audiovisual \"Apoyos Académicos a Docentes\" para pantallas de la Facultad",
         hacer="Escribir el guion y la justificación de un video corto, de máximo 25 segundos, que muestre a los docentes los servicios y acompañamientos que ofrece el área de Apoyos Académicos. El área de Estrategias Tecnológicas entrega estos insumos al equipo de comunicaciones, que se encarga de producir el video. La pieza se emite en los televisores y pantallas de la Facultad de Ciencias Económicas y sigue los lineamientos de identidad visual de la Universidad.",
         espera="Que el video, de máximo 25 segundos y aprobado, esté en rotación en las pantallas de la Facultad de Ciencias Económicas a más tardar el [por confirmar]. También se espera que aumenten las solicitudes de docentes al área de Apoyos Académicos durante el periodo de medición [por confirmar], frente a una línea base [por confirmar].",
@@ -392,7 +392,7 @@ IDEAS = [
     ),
     dict(
         id="cursoslibres-pieza-audiovisual-aplicativo",
-        cat="Acompañamiento a Cursos Libres — Próximo ciclo",
+        cat="Articulación con Cursos Libres — Próximo ciclo",
         idea="Pieza audiovisual para pantallas sobre el aplicativo de Cursos Libres",
         hacer="Escribir el guion de un video de máximo 25 segundos que promueva el aplicativo de Cursos Libres en software especializado de la Unidad de Informática. El video debe mostrar que los estudiantes pueden emitir por su cuenta los certificados de los cursos que tomaron. Redactar la justificación de la propuesta para el equipo de comunicaciones, que realizará el video y lo transmitirá en los televisores y pantallas de la Facultad de Ciencias Económicas. El área de Estrategias Tecnológicas revisa que el corte final siga los lineamientos de identidad visual de la Universidad.",
         espera="Aumentar en [por confirmar] % los certificados que los estudiantes emiten por su cuenta en el aplicativo de Cursos Libres durante las [por confirmar] semanas siguientes al inicio de la emisión, frente a la cifra base del periodo anterior. Tener el video en emisión en las pantallas de la Facultad de Ciencias Económicas antes del [por confirmar].",
@@ -402,7 +402,7 @@ IDEAS = [
     ),
     dict(
         id="interarea-plantillas-powerpoint-aa-cl",
-        cat="Acompañamiento interárea — Backlog",
+        cat="Articulación con Coordinación — Backlog",
         idea="Plantillas de presentación PowerPoint para Apoyos Académicos y Cursos Libres",
         hacer="El equipo de Estrategias Tecnológicas (ET) desarrollará una plantilla maestra de PowerPoint adaptada para Apoyos Académicos (AA) y Cursos Libres (CL). La producción incorporará los colores oficiales de la UIFCE y la imagen de la mascota UIFCITO bajo los lineamientos de Imagen Institucional de la Universidad Nacional. El paquete incluirá 6 diagramaciones tipo (portada, agenda, contenido general, separador de sección, datos o gráficos y cierre) para ser distribuido a través del repositorio institucional de la Unidad.",
         espera="Entrega de 1 archivo de plantilla maestra (.potx) que contenga 6 diapositivas tipo aprobadas para el uso de AA y CL. La meta de finalización queda fijada para [por confirmar] tras la validación técnica del máster de ET.",
@@ -412,7 +412,7 @@ IDEAS = [
     ),
     dict(
         id="interarea-infografia-puntualidad",
-        cat="Acompañamiento interárea — Atención inmediata",
+        cat="Articulación con Coordinación — Atención inmediata",
         idea="Infografía sobre actualización de reglas de puntualidad en la UIFCE",
         hacer="Diseñar una infografía impresa clara y accesible sobre el esquema actualizado de puntualidad, tolerancias, multas y llamados de atención de la UIFCE. La pieza está destinada al personal y monitores de la Unidad para promover el cumplimiento oportuno de los turnos y unificar criterios de convivencia. El desarrollo visual estará a cargo del monitor de artes bajo la supervisión del máster de ET y se instalará en las instalaciones físicas de la UIFCE.",
         espera="Instalar la infografía impresa en un punto visible de la UIFCE a más tardar el martes 13 de octubre de 2026, coincidiendo con el inicio del nuevo registro de puntualidad. La entrega requiere la validación previa de Coordinación y la aprobación técnica del máster de ET.",
@@ -422,7 +422,7 @@ IDEAS = [
     ),
     dict(
         id="virtualizacion-poster-encuesta-automatizacion",
-        cat="Acompañamiento a Virtualización — Atención inmediata",
+        cat="Articulación con Virtualización — Atención inmediata",
         idea="Póster de difusión para la encuesta de automatización de procesos",
         hacer="Se deben diseñar las piezas gráficas en formatos adaptados para correo institucional y pantallas de la UIFCE. Estas piezas promocionan la encuesta sobre procesos susceptibles de automatización liderada por el área de Virtualización. La difusión está dirigida a la comunidad de la FCE, compuesta por estudiantes, profesores y personal administrativo. La distribución se realizará mediante el canal masivo de correo institucional y la emisión en los televisores de la Unidad.",
         espera="Se espera la entrega y difusión del póster ajustado a las proporciones requeridas para correo institucional y televisores de la UIFCE. El hito verificable será el envío del correo masivo a la comunidad de la FCE y la transmisión activa del material en las pantallas de la Unidad.",
@@ -432,7 +432,7 @@ IDEAS = [
     ),
     dict(
         id="produccion-capsulas-tecnologia-pantallas",
-        cat="Producción de contenido — Próximo ciclo",
+        cat="Carteleras y pantallas — Próximo ciclo",
         idea="Cápsulas de tecnología y difusión de aplicativos en pantallas UIFCE",
         hacer="Se realiza la curaduría de noticias de actualidad en informática, tecnología y economía desde fuentes oficiales para estructurar cápsulas audiovisuales breves. Cada pieza integra información de interés como gancho para promocionar los aplicativos de la UIFCE (Programación de salones, Cursos Libres, Prácticas y pasantías, y Solicitudes). El contenido se produce dinámicamente mediante la herramienta Remotion y se proyecta en las pantallas de televisión de los pasillos de la Unidad de Informática para la comunidad académica de la FCE.",
         espera="Se contempla la entrega y despliegue del piloto funcional del video en las pantallas TV para [por confirmar], alcanzando una meta de [por confirmar] cápsulas producidas. El éxito de la primera entrega se verifica mediante la reproducción continua y correcta del material en los televisores de la UIFCE.",
@@ -442,7 +442,7 @@ IDEAS = [
     ),
     dict(
         id="redes-rastreo-contactos-empresas",
-        cat="Proyectos estratégicos — Atención inmediata",
+        cat="Alianzas y comunidad — Atención inmediata",
         idea="Red Ejecutiva ET: alianzas estratégicas y proyectos con empresas líderes",
         hacer="Identificar, caracterizar y registrar en la plataforma (Aliados → Empresas de interés) a los profesionales de las empresas de interés (las de mayores ingresos y de mayor crecimiento del país, y aquellas en las que miembros del equipo expresaron interés de trabajar en la encuesta del perfil de LinkedIn): reclutadores, gerentes, profesionales de recursos humanos y otros actores de interés, con el fin de fortalecer las alianzas estratégicas vigentes y de establecer nuevos vínculos entre la Unidad y el sector productivo. Por cada empresa se mapean como mínimo cuatro perfiles —un reclutador, un gerente o directivo, un profesional de recursos humanos y un contacto libre—, destacando a los egresados de la Universidad Nacional de Colombia y de la Facultad de Ciencias Económicas, con su cargo, su formación (pregrado y especializaciones), el enlace a su perfil profesional y el estado de la relación (por contactar, conexión enviada, conectado, en conversación o sin respuesta), y se registra la fecha de la última revisión. La información se limita a la que cada persona publica en su perfil profesional.",
         espera="Contar con un mapa actualizado de al menos cuatro contactos por empresa de interés (un reclutador, un gerente o directivo, un profesional de recursos humanos y un contacto libre) que sirva de base para fomentar alianzas estratégicas entre la Unidad y el sector productivo, y para proyectar a los miembros del equipo hacia los principales mercados y empresas del país. El avance se verifica mediante la barra de progreso total del proyecto, que mide las casillas cubiertas frente a la meta, y mediante el estado de la relación de cada contacto.",
@@ -452,7 +452,7 @@ IDEAS = [
     ),
     dict(
         id="estrategicos-tracker-egresados-uifce",
-        cat="Proyectos estratégicos — Próximo ciclo",
+        cat="Alianzas y comunidad — Próximo ciclo",
         idea="Tracker de egresados UIFCE: trayectoria laboral y conexión con antiguos monitores",
         hacer="Identificar y dar seguimiento a los antiguos monitores de la Unidad de Informática para conocer su trayectoria: dónde trabajan actualmente (empresa y cargo), a qué se dedican, cuál es su carrera de graduación y cómo contactarlos. Se parte de los directorios UIFCE de los semestres 2025-2, 2025-1 y 2024-2 (disponibles en los enlaces del proyecto), que se consolidan en el tracker de egresados de la plataforma (menú «Egresados»). A partir de él se establece contacto con cada persona para fortalecer la conexión interna entre la Unidad y quienes pasaron por ella. La información se limita a la que cada persona comparte o publica en su perfil profesional.",
         espera="Contar con un tracker de egresados actualizado, construido a partir de los tres directorios, con la situación laboral actual (empresa y cargo), la carrera de graduación y el enlace de contacto de cada antiguo monitor, así como el estado del contacto con cada uno. La meta de egresados rastreados es [por confirmar]. El avance se verifica con el número de egresados con su situación actual verificada y con contacto establecido.",
@@ -462,12 +462,22 @@ IDEAS = [
     ),
     dict(
         id="cursoslibres-piezas-lanzamiento-especial",
-        cat="Acompañamiento a Cursos Libres — Atención inmediata",
+        cat="Articulación con Cursos Libres — Atención inmediata",
         idea="Elaboración de piezas gráficas de Cursos Libres — Lanzamiento especial",
         hacer="Gestionar y producir las piezas gráficas de difusión del lanzamiento especial de Cursos Libres 2026-2, aplicando la línea gráfica modular vigente de CL y el flujo de aprobación por el grupo Piezas Redes Sociales. El lanzamiento corre de la semana 10 a la 14 (26 de octubre al 28 de noviembre de 2026) e incluye, por ahora, los cursos de la lista de entregables; la lista completa de cursos está [por confirmar] con Cursos Libres. Para cada curso: pieza de inscripción y video corto de lanzamiento del monitor. Coordinar de inmediato con Cursos Libres los textos, los códigos y las fechas de inscripción definitivos —el lanzamiento inicia el 26 de octubre— y bloquear en el calendario editorial las fechas de entrega antes del inicio de inscripciones de cada curso.",
         espera="Las piezas de inscripción y los videos de lanzamiento de todos los cursos del lanzamiento especial, aprobados y publicados antes del inicio de inscripciones de cada curso (fecha de inicio de inscripciones: [por confirmar]), sin retrasos atribuibles a coordinación tardía con Cursos Libres.",
         fundamento="El diagnóstico y el video de empalme señalan a Cursos Libres como el área con la que ET tiene mayor fricción de tiempos: sus agendamientos se demoran y luego se piden piezas con plazos muy cortos. Este lanzamiento inicia el 26 de octubre de 2026, inmediatamente después del primer lanzamiento (14 de septiembre al 24 de octubre), por lo que conviene reutilizar la línea gráfica modular y los formatos ya aprobados para producir con rapidez y calidad, sin sacrificar la pertinencia de cada pieza.",
         entregables="* Confirmar con Cursos Libres la lista final de cursos del lanzamiento especial (semanas 10-14, 26 oct - 28 nov) y la fecha de inicio de inscripciones de cada uno.\n* Excel Básico Virtualizado (CLEBV-I) — monitor: Joel Santiago Rodríguez Guzmán (monitor junior) · sem 10-14 (26 oct - 28 nov) · prerrequisito: ninguno: pieza de inscripción y video de lanzamiento aprobados y publicados.\n* Introducción a la Programación en Python y R (CLIPLE202602) — monitor: Yony Sebastián Chaparro (monitor máster) · sem 10-14 (26 oct - 28 nov) · prerrequisito: ninguno: pieza de inscripción y video de lanzamiento aprobados y publicados.\n* Power BI Avanzado (CLPBIA202602) — monitor: Angel Stiven Gutierrez Diaz (monitor junior) · sem 10-14 (26 oct - 28 nov) · prerrequisito: Inteligencia de Negocios Básico o Introducción a Power BI: pieza de inscripción y video de lanzamiento aprobados y publicados.\n* Curso por confirmar — monitor: Laura Angélica Cárdenas Cely (monitor junior y ad-honorem egresado) · sem 10-14 (26 oct - 28 nov): confirmar el curso, su código y sus prerrequisitos, y producir su pieza de inscripción y su video de lanzamiento.\n* Aprobación de todas las piezas por el grupo Piezas Redes Sociales y publicación en los canales oficiales antes del inicio de inscripciones de cada curso.",
+        priority=False,
+    ),
+    dict(
+        id="produccion-logo-uifce-vectorial-animacion",
+        cat="Producción de contenido — Próximo ciclo",
+        idea="Actualización vectorial del logo UIFCE y animación de áreas",
+        hacer="El máster rediseñará y optimizará en formato SVG el logotipo original de la UIFCE siguiendo los lineamientos de Unimedios y la paleta oficial en azules (#000066, #0000FF) con acento amarillo (#FFFF00). A partir de este archivo maestro, se desarrollará una animación tipo carrusel cilíndrico con fondo transparente que recorra las siete áreas de la Unidad (AA, GC, ET, DS, Virtualización, CL y Coordinación) hasta detenerse en un área específica, iniciando con una primera entrega enfocada en Estrategias Tecnológicas (ET). Las piezas finales se adaptarán para su uso transversal en LinkedIn (prioritario), Instagram @ui_fce, TikTok, YouTube, micrositio y presentaciones institucionales.",
+        espera="Entregar 1 paquete vectorial estandarizado del logo UIFCE (SVG) y 1 animación base en formato carrusel cilíndrico con fondo transparente centrada en ET —escalable a las seis áreas restantes— al cierre del semestre 2026-2 ([fecha exacta por confirmar]). El material deberá quedar operativo para publicar y diferenciar visualmente los logros de cada área en todos los canales institucionales.",
+        fundamento="El proyecto responde a la necesidad institucional de visibilizar los logros de cada una de las siete áreas de la UIFCE y delimitar su identidad de forma corporativa tanto interna como externamente. Actualmente la Unidad carece de un sistema animado unificado que articule la marca principal con sus áreas en entornos digitales. Bajo el principio rector de calidad sobre cantidad del semestre 2026-2, se acota una primera entrega modular de alto estándar en ET para garantizar solidez técnica antes de replicarla en toda la Unidad.",
+        entregables="* Auditar el archivo original de la UIFCE en una ficha técnica con sus nodos vectoriales.\n* Rediseñar el logotipo institucional de la UIFCE en formato SVG limpio bajo la paleta oficial (#000066, #0000FF, #FFFF00).\n* Solicitar la aprobación del rediseño vectorial ante Coordinación mediante registro escrito.\n* Programar la animación tipo carrusel cilíndrico con fondo transparente destacando inicialmente el área de ET.\n* Renderizar el paquete de piezas maestras adaptadas a LinkedIn, Instagram @ui_fce, TikTok, YouTube y micrositio.\n* Publicar la primera entrega audiovisual en LinkedIn e Instagram @ui_fce verificando los enlaces activos.\n* Documentar la plantilla editable en el repositorio interno de ET para facilitar su escalamiento a las demás áreas.",
         priority=False,
     ),
 ]
