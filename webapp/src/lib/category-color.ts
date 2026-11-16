@@ -31,7 +31,6 @@ const FIXED_COLORS: Record<string, string> = {
   "Articulación con Gestión del Conocimiento": "#4F46E5",
   "Articulación con Virtualización": "#D97706",
   "Articulación con Coordinación": "#DB2777",
-  "Articulación transversal": "#DC2626",
   // Comunicación
   "Producción de contenido": "#2563EB",
   "Carteleras y pantallas": "#D97706",

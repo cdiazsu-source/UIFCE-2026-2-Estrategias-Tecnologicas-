@@ -175,7 +175,7 @@ async function seedProjectsFromCsv() {
     const project = await prisma.project.upsert({
       where: { id: row.ID },
       update: existingProject?.editedInApp ? { sourceOrder: i } : { ...csvContent, sourceOrder: i },
-      create: { id: row.ID, ...csvContent, sourceOrder: i, semesterId, ...(assigneeId ? { assigneeId } : {}) },
+      create: { id: row.ID, ...csvContent, sourceOrder: i, semesterId, tags: [CURRENT_SEMESTER_LABEL], ...(assigneeId ? { assigneeId } : {}) },
     });
 
     if (CHECKLIST_OWNED_ELSEWHERE.has(project.id)) continue;
@@ -253,6 +253,7 @@ async function seedEtEnMarchaProject() {
         isManual: true,
         sourceOrder,
         semesterId,
+        tags: [CURRENT_SEMESTER_LABEL],
       },
     });
     console.log("Proyecto ET en Marcha creado.");

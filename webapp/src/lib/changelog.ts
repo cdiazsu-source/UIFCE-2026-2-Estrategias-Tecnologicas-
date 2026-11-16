@@ -21,6 +21,33 @@ export const CHANGELOG_SHOWN = 10;
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: "2026.11.16.2",
+    date: "2026-11-16",
+    title: "Articulación transversal pasa a Coordinación",
+    changes: [
+      { type: "MEJORA", text: "Se elimina la categoría «Articulación transversal»: queda en 14 categorías. El Acompañamiento Interárea y todo lo que sirve a toda la Unidad pasan a «Articulación con Coordinación», que ahora lo explica en su descripción." },
+      { type: "MEJORA", text: "La «Página permanente de oferta de Cursos Libres» se fusiona dentro del «Sitio estático de oferta permanente de la ruta de aprendizaje», que ya la incluye: su bitácora pasa al sitio y el proyecto de la página desaparece." },
+    ],
+  },
+  {
+    version: "2026.11.16.1",
+    date: "2026-11-16",
+    title: "Articulación con otras áreas y proyecto de carpetas con GC",
+    changes: [
+      { type: "CORRECCION", text: "En las descripciones y en la regla de clasificación, las demás áreas de la UIFCE (Apoyos Académicos, Cursos Libres, Desarrollo, Gestión del Conocimiento, Virtualización y Coordinación) se llaman «áreas», no «dependencias»." },
+      { type: "MEJORA", text: "La Propuesta de reorganización del Drive pasa a «Articulación con Gestión del Conocimiento» y queda finalizada: es una infografía y una guía didáctica de cómo quedaron las carpetas de 2026-2, hechas con GC, que promueven un formato único para nombrar carpetas. Lleva enlaces a la página y a su repositorio." },
+      { type: "MEJORA", text: "Cada proyecto lleva una etiqueta «carpeta-X.Y.Z» con el código de su carpeta en el Drive de ET 2026-2 (por ejemplo «carpeta-3.3.7» para Instagram), para que el panel y el Drive se lean con la misma ruta. Se puede buscar por ella. Además se eliminó un proyecto del logo que estaba duplicado." },
+    ],
+  },
+  {
+    version: "2026.11.14.1",
+    date: "2026-11-14",
+    title: "Etiqueta del semestre en cada proyecto",
+    changes: [
+      { type: "MEJORA", text: "Todos los proyectos del semestre llevan la etiqueta «2026-2S», para filtrarlos y distinguirlos de los de otros semestres. Los proyectos nuevos reciben la etiqueta de su semestre al crearse; después se puede quitar o editar como cualquier otra etiqueta." },
+    ],
+  },
+  {
     version: "2026.11.12.1",
     date: "2026-11-12",
     title: "Ajuste de categorías, prompt de proyecto y bitácora de la plataforma",

@@ -54,8 +54,8 @@ export async function createProject(formData: FormData) {
   // Semestre: el que se eligió, si no el vigente.
   const rawSemesterId = String(formData.get("semesterId") ?? "").trim();
   const semester = rawSemesterId
-    ? await prisma.semester.findUnique({ where: { id: rawSemesterId }, select: { id: true } })
-    : await prisma.semester.findFirst({ where: { isCurrent: true }, select: { id: true } });
+    ? await prisma.semester.findUnique({ where: { id: rawSemesterId }, select: { id: true, label: true } })
+    : await prisma.semester.findFirst({ where: { isCurrent: true }, select: { id: true, label: true } });
 
   // Horario (opcional) y proyecto principal (opcional): un proyecto creado como
   // actividad de un evento, ej. una actividad de la Semana UIFCE.
@@ -93,6 +93,8 @@ export async function createProject(formData: FormData) {
       isManual: true,
       sourceOrder,
       semesterId: semester?.id ?? null,
+      // Etiqueta con el nombre del semestre (p. ej. «2026-2S»), editable después como cualquier otra.
+      tags: semester ? [semester.label] : [],
       startAt,
       endAt,
       location,

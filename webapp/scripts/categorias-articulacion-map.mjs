@@ -13,7 +13,6 @@ const AA = "Articulación con Apoyos Académicos";
 const DS = "Articulación con Desarrollo";
 const VIRT = "Articulación con Virtualización";
 const COORD = "Articulación con Coordinación";
-const TRANSV = "Articulación transversal";
 const PROD = "Producción de contenido";
 const CART = "Carteleras y pantallas";
 const CANAL = "Canales digitales";
@@ -35,7 +34,7 @@ export const NEW_CATEGORY_BY_ID = {
   "virtualizacion-poster-encuesta-automatizacion": VIRT,
   "interarea-plantillas-powerpoint-aa-cl": COORD,
   "interarea-infografia-puntualidad": COORD, // provisional: el CSV no dice quién la pidió
-  "acompanamiento-interarea": TRANSV,
+  "acompanamiento-interarea": COORD,
   // Comunicación
   "produccion-senaletica-salas": CART,
   "produccion-carteleras": CART,
@@ -74,7 +73,6 @@ export const CURRENT_CATEGORIES = new Set([
   "Articulación con Gestión del Conocimiento",
   "Articulación con Virtualización",
   "Articulación con Coordinación",
-  "Articulación transversal",
   "Producción de contenido",
   "Carteleras y pantallas",
   "Canales digitales",

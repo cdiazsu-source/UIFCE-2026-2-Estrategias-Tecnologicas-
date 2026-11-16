@@ -5,10 +5,11 @@
  *    («Categoría · Nombre del proyecto») y en el selector de «Nuevo proyecto».
  *
  *  Regla para elegir (una sola pregunta): «¿con quién se hace?». Si el proyecto
- *  se hace con otra dependencia de la UIFCE (Apoyos Académicos, Cursos Libres,
+ *  se hace con otra área de la UIFCE (Apoyos Académicos, Cursos Libres,
  *  Desarrollo, Gestión del Conocimiento, Virtualización o Coordinación) va a
- *  «Articulación con …», sea cual sea el formato; si abarca a todas, a
- *  «Articulación transversal». Si no, se clasifica por lo que entrega.
+ *  «Articulación con …», sea cual sea el formato; lo que sirve a toda la
+ *  Unidad también va a «Articulación con Coordinación». Si no, se clasifica
+ *  por lo que entrega.
  *
  *  Los nombres de categoría NO pueden llevar « — »: el CSV usa ese separador
  *  para pegar la etiqueta de urgencia (ver `splitCategory` en prisma/seed.ts).
@@ -22,7 +23,7 @@ export const CATEGORY_GROUPS: CategoryGroupDef[] = [
   {
     label: "Articulación interna",
     description:
-      "Proyectos que ET desarrolla en conjunto con otras dependencias de la UIFCE, bajo el canal único de solicitudes y los niveles de servicio definidos en el protocolo de acompañamiento interárea.",
+      "Proyectos que ET desarrolla en conjunto con otras áreas de la UIFCE, bajo el canal único de solicitudes y los niveles de servicio definidos en el protocolo de acompañamiento interárea.",
     subgroups: [
       {
         label: "Articulación con Apoyos Académicos",
@@ -41,7 +42,7 @@ export const CATEGORY_GROUPS: CategoryGroupDef[] = [
       },
       {
         label: "Articulación con Gestión del Conocimiento",
-        description: "Proyectos que ET desarrolla en conjunto con Gestión del Conocimiento.",
+        description: "Proyectos que ET desarrolla en conjunto con Gestión del Conocimiento, como la guía de organización y nomenclatura de carpetas del Drive.",
         categories: ["Articulación con Gestión del Conocimiento"],
       },
       {
@@ -51,13 +52,8 @@ export const CATEGORY_GROUPS: CategoryGroupDef[] = [
       },
       {
         label: "Articulación con Coordinación",
-        description: "Proyectos que ET desarrolla en conjunto con Coordinación, como plantillas y piezas de uso para toda la Unidad.",
+        description: "Proyectos que ET desarrolla en conjunto con Coordinación y lo que sirve a toda la Unidad: plantillas, piezas de uso común y el protocolo de acompañamiento interárea.",
         categories: ["Articulación con Coordinación"],
-      },
-      {
-        label: "Articulación transversal",
-        description: "Trabajo que involucra a todas las dependencias de la UIFCE, y el protocolo de acompañamiento interárea.",
-        categories: ["Articulación transversal"],
       },
     ],
   },
