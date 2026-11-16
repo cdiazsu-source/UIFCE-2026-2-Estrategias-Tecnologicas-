@@ -1,8 +1,31 @@
 # Términos y Condiciones de Estrategias Tecnológicas (ET)
 
 **Unidad de Informática de la Facultad de Ciencias Económicas (UIFCE) — Universidad Nacional de Colombia**
-**Versión:** 1.0 (aprobada) · Semestre 2026-2
-**Elaboró:** Máster ET · **Revisión y aval:** Coordinación UIFCE · **Formato normativo:** Gestión del Conocimiento (GC)
+**Versión:** 1.0 · Semestre 2026-2
+**Elaboró:** Máster ET · **Formato normativo:** Gestión del Conocimiento (GC)
+
+---
+
+## Introducción
+
+Estrategias Tecnológicas (ET) organiza cada semestre microtalleres, microeventos, concursos, hackatones y eventos virtuales para la comunidad de la UIFCE. Estas actividades tienen cupo limitado, y cuando alguien se inscribe y no asiste, ocupa un lugar que otra persona pudo aprovechar. Hasta ahora no existía una regla escrita sobre inscripción, asistencia y cancelación, y esa falta de claridad fue identificada como una dificultad operativa del área en el informe de gestión 2025-2.
+
+Este documento reúne esas reglas en un solo texto. Define cómo se inscribe, asiste y cancela quien participa, qué ocurre cuando no asiste sin avisar, cómo se obtienen el certificado de asistencia y las horas de corresponsabilidad, y cómo se formulan los eventos virtuales. Da continuidad al Manual de Microtalleres y Microeventos vigente y se apoya en el principio rector de ET: calidad sobre cantidad.
+
+Está escrito para ser consultado por quienes participan en las actividades y por el equipo de ET que las organiza, en este semestre y en los siguientes.
+
+## Objetivos
+
+**Objetivo general.** Establecer las reglas de participación, asistencia, comunicación y uso de las actividades de Estrategias Tecnológicas, de modo que la comunidad UIFCE las conozca de antemano y el equipo de ET las aplique de forma clara y equitativa.
+
+**Objetivos específicos**
+
+1. Definir el alcance del documento, es decir, qué actividades cubre y a quién aplica.
+2. Fijar las reglas de inscripción, asistencia y cancelación, con porcentajes de permanencia, tolerancia de ingreso y plazos concretos.
+3. Establecer las consecuencias de la inasistencia injustificada, la reincidencia y las causas que la justifican, para proteger los cupos de quienes sí asisten.
+4. Regular el certificado de asistencia y el procedimiento con Bienestar para las horas de corresponsabilidad.
+5. Estandarizar la formulación de propuestas de eventos virtuales mediante una ficha y una ruta de trámite únicas.
+6. Dejar claras las condiciones de propiedad intelectual, uso de imagen, conducta y concursos o hackatones, así como la vigencia y la difusión del documento.
 
 ---
 
@@ -102,12 +125,12 @@ ET formula **propuestas de eventos virtuales** (charlas, seminarios web, microta
 | Difusión | Piezas gráficas, canales y calendario de comunicación. |
 | Responsable y recursos | Persona de ET a cargo y recursos requeridos. |
 
-### 7.2 Ruta de aprobación
+### 7.2 Ruta de las propuestas
 
 1. **Formulación:** el máster o un monitor de ET elabora la propuesta con la ficha anterior.
 2. **Revisión interna:** el máster verifica su pertinencia, viabilidad y carga del equipo.
-3. **Aval:** se presenta a Coordinación para su aval cuando involucra a otras áreas, ponentes externos o la imagen institucional.
-4. **Programación y difusión:** aprobada, se agenda, se crean las piezas de difusión y se abre la inscripción.
+3. **Coordinación:** se presenta a Coordinación cuando involucra a otras áreas, ponentes externos o la imagen institucional.
+4. **Programación y difusión:** definida la propuesta, se agenda, se crean las piezas de difusión y se abre la inscripción.
 5. **Ejecución y cierre:** se realiza el evento, se registra la asistencia y se documentan resultados y lecciones aprendidas.
 
 ### 7.3 Condiciones propias de la modalidad virtual
@@ -132,7 +155,7 @@ Los concursos y hackatones de ET se rigen por este documento y por las bases esp
 
 ## 11. Vigencia, modificaciones y difusión
 
-- Estos términos rigen desde su aprobación por Coordinación y su publicación a la comunidad UIFCE, y aplican a las actividades convocadas a partir de entonces.
+- Estos términos rigen desde su publicación a la comunidad UIFCE y aplican a las actividades convocadas a partir de entonces.
 - ET puede actualizarlos cuando lo considere necesario; los cambios se comunican por los canales oficiales y no afectan actividades ya convocadas.
 - La versión vigente se publica en el repositorio documental de la Unidad y se difunde por los canales de ET.
 
@@ -146,4 +169,4 @@ La inscripción a cualquier actividad de ET implica el conocimiento y la aceptac
 
 | Versión | Fecha | Descripción | Estado |
 |---|---|---|---|
-| 1.0 | 2026-11 | Versión aprobada de los Términos y Condiciones de ET | Aprobada |
+| 1.0 | 2026-11-06 | Primera versión de los Términos y Condiciones de ET | Vigente |

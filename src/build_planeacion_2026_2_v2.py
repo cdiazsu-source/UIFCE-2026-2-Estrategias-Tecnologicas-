@@ -222,7 +222,7 @@ IDEAS = [
     ),
     dict(
         id="acompanamiento-interarea",
-        cat="Articulación transversal",
+        cat="Articulación con Coordinación",
         idea="Acompañamiento Interárea",
         hacer="Ejecutar la matriz de acompañamiento a Apoyos Académicos, Gestión del Conocimiento, Desarrollo, Virtualización, Cursos Libres y Coordinación bajo el protocolo de solicitud definido: canal único ante el Máster ET, SLA de 5 días hábiles para piezas puntuales y 4 semanas para campañas institucionales, y criterios de priorización ante solicitudes simultáneas.",
         espera="Cumplimiento del SLA en al menos el 80% de las solicitudes, y necesidades de las seis áreas recogidas formalmente en la reunión de planeación de inicio de semestre.",
