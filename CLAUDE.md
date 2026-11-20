@@ -194,3 +194,5 @@ La fase de la sección 6 ya está construida y en producción: **"ET en Marcha"*
 - Verificar el nombre completo de "Brayan Sandoval" (se asumió "Brayan Santiago Maldonado Aparicio").
 
 > El historial detallado sesión a sesión de esta app vivía en la memoria de Claude Code, que no se traslada entre máquinas ni cuentas. Esta sección es el resumen durable; para el detalle de un cambio concreto, `git log` sobre `webapp/`.
+
+- **Sin rastreo de la Dirección (desde 2026-11-23):** `touchLastSeen` (`webapp/src/lib/presence.ts`) no registra `User.lastSeenAt` ni `UserVisit` para `DIRECTOR_WHO` (Henry); su usuario y contraseña no cambian.

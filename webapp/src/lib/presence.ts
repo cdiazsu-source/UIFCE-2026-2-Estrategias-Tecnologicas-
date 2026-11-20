@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { DIRECTOR_WHO } from "@/lib/view-profiles";
 
 const STALE_MS = 5 * 60 * 1000; // no escribir más de una vez cada 5 min
 const NEW_VISIT_MS = 30 * 60 * 1000; // una pausa de más de 30 min separa una visita de la siguiente
@@ -10,6 +11,7 @@ const NEW_VISIT_MS = 30 * 60 * 1000; // una pausa de más de 30 min separa una v
  *  visita se sigue registrando igual. Después, una sola sentencia UPDATE … WHERE; casi siempre 0 filas. */
 export async function touchLastSeen(who: string | null): Promise<void> {
   if (!who) return;
+  if (who === DIRECTOR_WHO) return; // la Dirección (Henry) no se rastrea: su sesión y credenciales siguen igual
   const now = new Date();
   const visitCutoff = new Date(now.getTime() - NEW_VISIT_MS);
   try {

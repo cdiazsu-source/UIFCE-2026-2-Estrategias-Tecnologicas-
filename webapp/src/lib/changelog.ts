@@ -21,6 +21,14 @@ export const CHANGELOG_SHOWN = 10;
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: "2026.11.23.1",
+    date: "2026-11-23",
+    title: "Sin seguimiento del último acceso de la Dirección",
+    changes: [
+      { type: "MEJORA", text: "Ya no se registra el último acceso de la Dirección (Henry). Su usuario, su contraseña y su forma de entrar siguen exactamente igual; solo deja de actualizarse esa marca." },
+    ],
+  },
+  {
     version: "2026.11.22.1",
     date: "2026-11-22",
     title: "Aliados por categoría: dependencias y todo contraíble",
