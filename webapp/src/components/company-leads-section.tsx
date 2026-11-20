@@ -800,6 +800,9 @@ export function CompanyLeadsSection({ companies }: { companies: TargetCompanyDat
           <InfoHint text="Empresas donde le interesaría trabajar al equipo y las personas que se les siguen en LinkedIn: reclutadores, gerentes, recursos humanos y otros contactos. Cómo se usa: abre una empresa, usa «Buscar en LinkedIn» para encontrar perfiles de cada tipo, y con perfil completo «Agregar contacto» con su nombre, tipo, cargo y enlace; cambia su avance (por contactar, conexión enviada, conectado, en conversación, sin respuesta) y usa «Marcar revisado hoy» para dejar constancia de cuándo se volvió a mirar. La meta de cada empresa son 4 casillas: un reclutador, un gerente o directivo, una persona de recursos humanos y un contacto libre (cuatro reclutadores no cubren las demás). Marca a los egresados de la UNAL o de la FCE: suelen ser los más fáciles de abordar, y «Egresados UNAL / FCE» abre su búsqueda en LinkedIn. El logo es un archivo en public/logos o una URL." />
         </h2>
         <p className="text-sm text-muted-foreground">
+          Red ejecutiva con organizaciones líderes del sector productivo: contactos clave por empresa, alianzas estratégicas y oportunidades de vinculación para el equipo y sus egresados.
+        </p>
+        <p className="mt-0.5 text-xs text-muted-foreground">
           {companies.length} {companies.length === 1 ? "empresa" : "empresas"} · {totalLeads}{" "}
           {totalLeads === 1 ? "contacto" : "contactos"}
           {toContact > 0 ? ` · ${toContact} por contactar` : ""}

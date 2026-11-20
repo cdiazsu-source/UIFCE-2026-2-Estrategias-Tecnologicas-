@@ -453,7 +453,7 @@ export function AcademicAlliesSection({ data, projectOptions }: { data: AlliesDa
           <InfoHint text="Profesores que han pedido Apoyos Académicos a la UIFCE y las asignaturas donde lo hicieron, ubicadas en las mallas de Economía, Administración y Contaduría. Cómo se usa: en «Profesores» se busca por nombre, asignatura o software; en «Mallas» se ve en qué semestre de cada carrera hay apoyo (en amarillo, el de 2026-2); en «Asignaturas comunes», qué materias comparten los programas. Para convocar a un evento, conviene empezar por un profesor con apoyo este semestre." />
         </h2>
         <p className="text-sm text-muted-foreground">
-          Red de profesores aliados por programa curricular, con los apoyos académicos de 2025-2 a 2026-2.
+          Profesores que conectan a la Unidad con el aula: sus asignaturas definen dónde se prestan los apoyos académicos y desde dónde se convoca a la comunidad estudiantil a nuestros eventos.
         </p>
       </div>
       {open && (

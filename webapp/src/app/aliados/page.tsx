@@ -76,7 +76,7 @@ export default async function AliadosPage() {
           Aliados
           <InfoHint text="Personas e instituciones fuera del equipo con quienes ET coordina, en tres categorías que se abren y se cierran con su flecha: aliados académicos (los profesores), aliados dependencias (ORI, CIID, Vicedecanatura, Comunicaciones y demás) y empresas de interés. Cómo se usa: abre la categoría que necesites; con perfil completo puedes agregar y editar aliados y vincular cada uno a un proyecto." />
         </h1>
-        <p className="text-sm text-muted-foreground">Aliados académicos, aliados dependencias y empresas de interés, cada categoría se abre y se cierra.</p>
+        <p className="text-sm text-muted-foreground">Relaciones estratégicas de la Unidad con la academia, la Facultad y el sector productivo.</p>
       </div>
 
       <AcademicAlliesSection data={alliesData} projectOptions={projects} />

@@ -220,7 +220,10 @@ export function AllyDependenciesSection({ contacts, projectOptions }: { contacts
           <InfoHint text="Oficinas y unidades de la Facultad o la Universidad con las que ET coordina: ORI, CIID, Vicedecanatura, Comunicaciones y las demás. Cómo se usa: abre una dependencia con su flecha para ver a sus aliados; con perfil completo, «Agregar aliado» (o el «Agregar» de la dependencia) y el lápiz de cada fila; puedes vincular cada aliado a un proyecto. Si la dependencia no está en la lista, escríbela en el campo «Dependencia» y aparecerá como un grupo nuevo. Ejemplo: «Sandra Carlos Vargas · Vicedecanatura · proyecto Semana UIFCE»." />
         </h2>
         <p className="text-sm text-muted-foreground">
-          {contacts.length} {contacts.length === 1 ? "aliado" : "aliados"} en {withPeople} {withPeople === 1 ? "dependencia" : "dependencias"} · ORI, CIID, Vicedecanatura, Comunicaciones y más.
+          Oficinas y unidades de la Facultad y la Universidad que respaldan la gestión de ET: canales institucionales para la difusión, la cooperación y los recursos de nuestros proyectos.
+        </p>
+        <p className="mt-0.5 text-xs text-muted-foreground">
+          {contacts.length} {contacts.length === 1 ? "aliado" : "aliados"} en {withPeople} {withPeople === 1 ? "dependencia" : "dependencias"}
         </p>
       </div>
 

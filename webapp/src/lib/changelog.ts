@@ -27,6 +27,7 @@ export const CHANGELOG: VersionEntry[] = [
     changes: [
       { type: "NUEVO", text: "En Aliados hay una categoría nueva, «Aliados dependencias»: las oficinas y unidades con las que ET coordina (ORI, CIID, Vicedecanatura, Comunicaciones y las demás), cada una con sus aliados. Quien tiene perfil completo agrega a cada persona con su dependencia; si la dependencia no está en la lista, se escribe y aparece como un grupo nuevo." },
       { type: "NUEVO", text: "En «Aliados dependencias» está el organigrama de la Facultad de Ciencias Económicas: un enlace a su página oficial y el PDF del Acuerdo 028 de 2023. Las dependencias ORI, Vicedecanatura y Comunicaciones muestran su nombre completo según ese organigrama." },
+      { type: "MEJORA", text: "Cada categoría de Aliados tiene ahora una descripción corporativa que explica para qué sirve: los profesores como enlace con el aula, las dependencias como respaldo institucional y las empresas como red ejecutiva del sector productivo." },
       { type: "MEJORA", text: "Las tres categorías de Aliados —académicos (los profesores), dependencias y empresas de interés— arrancan contraídas y se abren con su flecha; cada dependencia también se contrae, con «Contraer todo» y «Expandir todo» y una búsqueda que abre solo lo que coincide." },
     ],
   },
