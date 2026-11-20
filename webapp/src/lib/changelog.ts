@@ -21,6 +21,17 @@ export const CHANGELOG_SHOWN = 10;
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: "2026.11.20.1",
+    date: "2026-11-20",
+    title: "Aliados académicos: profesores y mallas",
+    changes: [
+      { type: "NUEVO", text: "En «Aliados» hay una sección nueva, «Aliados académicos», con los 25 profesores que han pedido Apoyos Académicos de 2025-2 a 2026-2: su asignatura, el software y las sesiones de cada semestre (en amarillo, las de 2026-2). Se puede buscar por profesor, asignatura o software y filtrar por programa o solo por 2026-2." },
+      { type: "NUEVO", text: "La misma sección muestra las mallas de Economía, Administración de Empresas y Contaduría Pública, semestre por semestre y por componente, con una marca de «Apoyo» en las asignaturas donde ya hubo apoyos; al pasar el cursor sobre la marca aparece el profesor aliado." },
+      { type: "NUEVO", text: "La pestaña «Asignaturas comunes» indica en qué semestre dicta cada programa las asignaturas que comparten (los fundamentos de primer semestre están en los tres), para convocar a varios programas a la vez." },
+      { type: "MEJORA", text: "La «Red de Aliados Académicos UIFCE» pasa de Backlog a Próximo ciclo, porque ya cuenta con su base de profesores aliados." },
+    ],
+  },
+  {
     version: "2026.11.16.2",
     date: "2026-11-16",
     title: "Articulación transversal pasa a Coordinación",

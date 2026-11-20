@@ -182,7 +182,7 @@ IDEAS = [
     ),
     dict(
         id="estrategicos-red-aliados-academicos",
-        cat="Alianzas y comunidad — Backlog",
+        cat="Alianzas y comunidad — Próximo ciclo",
         idea="Red de Aliados Académicos UIFCE",
         hacer="Construir un listado vivo de profesores y asignaturas aliadas por programa curricular (administración, economía, contaduría) que faciliten la convocatoria presencial a eventos y servicios de la UIFCE.",
         espera="Red activa y utilizada como mecanismo formal de convocatoria para la Semana UIFCE y los microtalleres del semestre.",

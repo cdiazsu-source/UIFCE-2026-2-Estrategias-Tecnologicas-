@@ -281,19 +281,20 @@ export const DEV_MODULES: DevModule[] = [
   },
   {
     id: "aliados",
-    label: "Aliados (contactos y empresas de interés)",
+    label: "Aliados (contactos, aliados académicos y empresas de interés)",
     group: "Recursos y equipo",
     route: "/aliados",
     summary: "Directorio de contactos y tracker de empresas objetivo con contactos de LinkedIn por tipo, avance y egresados.",
     page: "app/aliados/page.tsx",
-    components: ["contacts-table.tsx", "company-leads-section.tsx", "leads-goal-panel.tsx"],
+    components: ["contacts-table.tsx", "academic-allies-section.tsx", "company-leads-section.tsx", "leads-goal-panel.tsx"],
     actions: ["contacts.ts", "target-companies.ts"],
-    lib: ["company-leads.ts", "utils.ts"],
+    lib: ["company-leads.ts", "academic-allies-data.ts", "mallas-data.ts", "utils.ts"],
     models: ["Contact", "TargetCompany", "CompanyLead", "Project"],
     permissions:
       "Contactos y empresas: perfil completo. Registrar y actualizar contactos de empresas: `canManageLeads()` (incluye al Junior); borrar contactos y editar empresas: perfil completo.",
     sections: [
       { id: "contactos", label: "Contactos", detail: "ContactsTable (directorio de aliados)." },
+      { id: "aliados-academicos", label: "Aliados académicos", detail: "AcademicAlliesSection en `#aliados-academicos`: profesores con Apoyos Académicos (2025-2 a 2026-2), mallas de Economía, Administración y Contaduría con la marca de apoyo y asignaturas comunes. Datos estáticos en `lib/academic-allies-data.ts` (se regenera con `python scripts/generar-aliados-academicos.py <excel>`) y `lib/mallas-data.ts`; sin modelo ni migración." },
       { id: "empresas-interes", label: "Empresas de interés", detail: "CompanyLeadsSection en `#empresas-interes`: meta de 4 casillas por empresa, «Anexar perfil de LinkedIn» (QuickAddLead), filtros y atajos de búsqueda." },
     ],
     notes: ["El proyecto `redes-rastreo-contactos-empresas` (LEADS_PROJECT_ID) enlaza aquí con un botón grande (`LeadsCta`)."],

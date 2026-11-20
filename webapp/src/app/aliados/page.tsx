@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { ContactsTable } from "@/components/contacts-table";
 import { CompanyLeadsSection } from "@/components/company-leads-section";
+import { AcademicAlliesSection } from "@/components/academic-allies-section";
 import { InfoHint } from "@/components/info-hint";
 
 export const dynamic = "force-dynamic";
@@ -53,6 +54,10 @@ export default async function AliadosPage() {
         </p>
       </div>
       <ContactsTable contacts={contacts} projectOptions={projects} />
+
+      <div className="border-t border-border pt-5">
+        <AcademicAlliesSection />
+      </div>
 
       <div className="border-t border-border pt-5">
         <CompanyLeadsSection companies={companies} />
