@@ -4,7 +4,7 @@
  *  antes de aplicar la migración. */
 
 /** Dependencias que siempre se muestran, aunque aún no tengan contactos. */
-export const DEPENDENCY_PRESETS = ["ORI", "CIID", "Vicedecanatura", "Comunicaciones"] as const;
+export const DEPENDENCY_PRESETS = ["ORI", "CIID", "Vicedecanatura", "Comunicaciones", "Unimedios"] as const;
 
 /** Organigrama de la Facultad de Ciencias Económicas (sede Bogotá, Acuerdo 028 de 2023): página oficial y copia del PDF en `public/documentos/`. */
 export const ORGANIGRAMA_URL = "https://fce.unal.edu.co/facultad/organigrama/";
@@ -16,10 +16,48 @@ export const DEPENDENCY_FULL_NAME: Record<string, string> = {
   ORI: "Oficina de Relaciones Interinstitucionales e Internacionales",
   Vicedecanatura: "Académica y de Investigación y de Extensión",
   Comunicaciones: "Oficina de Comunicaciones, Difusión y Apropiación",
+  Unimedios: "Unidad de Medios de Comunicación (Sede Bogotá)",
+};
+
+/** Conmutador de la Sede Bogotá: todas las extensiones se marcan después de este número. */
+export const CONMUTADOR = "(601) 316 5000";
+
+export type DependencyExtension = { label: string; ext: string };
+
+/** Extensiones telefónicas publicadas en los sitios oficiales (fce.unal.edu.co, directorio de dependencias; unimedios.unal.edu.co, consultado 2026-11-20).
+ *  Solo extensiones de oficina y cargo, nunca de una persona. Clave = nombre del grupo en Aliados dependencias. */
+export const DEPENDENCY_EXTENSIONS: Record<string, DependencyExtension[]> = {
+  ORI: [{ label: "Oficina (ORII)", ext: "12434" }],
+  CIID: [
+    { label: "Dirección", ext: "10379" },
+    { label: "Gestión administrativa y financiera", ext: "12384" },
+  ],
+  Vicedecanatura: [
+    { label: "Académica: secretaría", ext: "12340" },
+    { label: "Académica: acreditación, salones y gestión curricular", ext: "12338 · 12403" },
+    { label: "Investigación y Extensión", ext: "16830 a 16839" },
+  ],
+  Comunicaciones: [{ label: "Área de Comunicaciones FCE (Decanatura)", ext: "12340" }],
+  Unimedios: [
+    { label: "Contacto general", ext: "18234" },
+    { label: "Recepción telefónica", ext: "18384" },
+    { label: "Radio (producción radiofónica)", ext: "18104" },
+    { label: "Prensa", ext: "18108" },
+    { label: "Producción audiovisual", ext: "18058" },
+  ],
+  "Dirección de Bienestar": [{ label: "Bienestar FCE", ext: "12314 · 12315 · 12382" }],
+  "Unidad de Informática (UIFCE)": [{ label: "Unidad", ext: "12304" }],
+  "Unidad de Emprendimiento e Innovación": [{ label: "Unidad", ext: "16810" }],
+  "Secretaría de Facultad": [{ label: "Secretario de Facultad", ext: "12322 · 12323" }],
+  Decanatura: [{ label: "Secretaría de la Decanatura", ext: "12340" }],
+  "Unidad Administrativa": [{ label: "Jefatura", ext: "12355" }],
+  "Escuela de Economía": [{ label: "Dirección y secretaría", ext: "12316" }],
+  "Escuela de Administración y Contaduría Pública": [{ label: "Dirección y secretaría", ext: "12312" }],
 };
 
 /** Otras unidades del organigrama que se sugieren al escribir una dependencia (no crean grupos por sí solas). */
 export const DEPENDENCY_SUGGESTIONS = [
+  "Unidad de Informática (UIFCE)",
   "Unidad de Análisis en Ciencias Económicas",
   "Unidad de Emprendimiento e Innovación",
   "Dirección de Bienestar",
@@ -27,6 +65,8 @@ export const DEPENDENCY_SUGGESTIONS = [
   "Escuela de Economía",
   "Escuela de Administración y Contaduría Pública",
   "Secretaría de Facultad",
+  "Decanatura",
+  "Unidad Administrativa",
 ];
 
 /** Grupo de quienes no encajan en ninguna dependencia (personas externas, monitores, otras áreas…). */
@@ -42,6 +82,7 @@ export function inferDependency(text: string): string | null {
   if (/\bori\b/.test(t)) return "ORI";
   if (/\b(ciid|cid)\b/.test(t)) return "CIID";
   if (t.includes("vicedecan") || /\bvie\b/.test(t)) return "Vicedecanatura";
+  if (t.includes("unimedios")) return "Unimedios";
   if (t.includes("comunicacion")) return "Comunicaciones";
   return null;
 }

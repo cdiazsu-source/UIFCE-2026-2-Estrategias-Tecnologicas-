@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Building2, ExternalLink, FileText, Pencil, Plus, Search, Trash2, X } from "lucide-react";
 
 import { addContact, deleteContact, updateContact } from "@/lib/actions/contacts";
-import { DEPENDENCY_FULL_NAME, DEPENDENCY_PRESETS, DEPENDENCY_SUGGESTIONS, ORGANIGRAMA_FILE, ORGANIGRAMA_URL, groupByDependency, normText, type DependencyGroup } from "@/lib/ally-dependencies";
+import { CONMUTADOR, DEPENDENCY_EXTENSIONS, DEPENDENCY_FULL_NAME, DEPENDENCY_PRESETS, DEPENDENCY_SUGGESTIONS, ORGANIGRAMA_FILE, ORGANIGRAMA_URL, groupByDependency, normText, type DependencyGroup } from "@/lib/ally-dependencies";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
@@ -167,6 +167,17 @@ function GroupBlock({
       </div>
       {shown && (
         <div className="border-t border-border px-3 py-2">
+          {DEPENDENCY_EXTENSIONS[group.name] && (
+            <p className="pb-2 text-xs text-muted-foreground">
+              <span className="font-medium text-foreground">Extensiones</span> (conmutador {CONMUTADOR}):{" "}
+              {DEPENDENCY_EXTENSIONS[group.name].map((e, i) => (
+                <span key={e.label}>
+                  {i > 0 && " · "}
+                  {e.label} <span className="tabular-nums text-foreground">{e.ext}</span>
+                </span>
+              ))}
+            </p>
+          )}
           {n === 0 ? (
             <p className="py-2 text-sm text-muted-foreground">Aún no hay aliados de esta dependencia.</p>
           ) : (
