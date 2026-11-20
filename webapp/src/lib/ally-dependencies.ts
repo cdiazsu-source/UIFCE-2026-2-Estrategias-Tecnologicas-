@@ -41,7 +41,7 @@ export function inferDependency(text: string): string | null {
   const t = normText(text);
   if (/\bori\b/.test(t)) return "ORI";
   if (/\b(ciid|cid)\b/.test(t)) return "CIID";
-  if (t.includes("vicedecan")) return "Vicedecanatura";
+  if (t.includes("vicedecan") || /\bvie\b/.test(t)) return "Vicedecanatura";
   if (t.includes("comunicacion")) return "Comunicaciones";
   return null;
 }
