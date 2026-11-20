@@ -11,6 +11,7 @@ import {
   Megaphone,
   Palette,
   PanelsTopLeft,
+  Presentation,
   Users,
   Wrench,
 } from "lucide-react";
@@ -54,6 +55,7 @@ export const SIDEBAR_ITEMS: SidebarItem[] = [
   },
   { id: "mi-horario", label: "Mi horario", icon: CalendarClock, href: "/horas?vista=horario", juniorOnly: true },
   { id: "calendario", label: "Calendario", icon: CalendarDays, href: "/calendario", hideForJunior: true },
+  { id: "eventos", label: "Microtalleres y eventos", icon: Presentation, href: "/eventos" },
 
   { id: "difusion-digital", label: "Difusión digital", icon: Megaphone, href: "/difusion/digital", section: "Difusión y visibilidad", alsoActiveFor: ["/linkedin"] },
   { id: "difusion-fisica", label: "Difusión física", icon: PanelsTopLeft, href: "/difusion/fisica", section: "Difusión y visibilidad" },

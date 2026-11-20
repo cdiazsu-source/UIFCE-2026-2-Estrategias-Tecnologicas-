@@ -21,6 +21,28 @@ export const CHANGELOG_SHOWN = 10;
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: "2026.11.22.1",
+    date: "2026-11-22",
+    title: "Aliados por categoría: dependencias y todo contraíble",
+    changes: [
+      { type: "NUEVO", text: "En Aliados hay una categoría nueva, «Aliados dependencias»: las oficinas y unidades con las que ET coordina (ORI, CIID, Vicedecanatura, Comunicaciones y las demás), cada una con sus aliados. Quien tiene perfil completo agrega a cada persona con su dependencia; si la dependencia no está en la lista, se escribe y aparece como un grupo nuevo." },
+      { type: "NUEVO", text: "En «Aliados dependencias» está el organigrama de la Facultad de Ciencias Económicas: un enlace a su página oficial y el PDF del Acuerdo 028 de 2023. Las dependencias ORI, Vicedecanatura y Comunicaciones muestran su nombre completo según ese organigrama." },
+      { type: "MEJORA", text: "Las tres categorías de Aliados —académicos (los profesores), dependencias y empresas de interés— arrancan contraídas y se abren con su flecha; cada dependencia también se contrae, con «Contraer todo» y «Expandir todo» y una búsqueda que abre solo lo que coincide." },
+    ],
+  },
+  {
+    version: "2026.11.20.2",
+    date: "2026-11-20",
+    title: "Aliados académicos: convocatoria y seguimiento",
+    changes: [
+      { type: "NUEVO", text: "En «Aliados académicos» hay una vista nueva, «Convocatoria»: eliges un evento (Semana UIFCE, microtalleres, Concurso/Hackatón u otro que crees) y la lista ordena a los profesores a quienes conviene contactar según el programa y los semestres del evento y su apoyo reciente, con lo que se le sugiere pedir: una sesión en su clase, anunciar el evento en clase o reenviar la invitación." },
+      { type: "NUEVO", text: "Cada profesor tiene su seguimiento por evento: por contactar, contactado, aceptó, sin respuesta o no disponible, con una nota y la fecha del primer contacto. Lo puede registrar cualquier perfil, incluidos los monitores Junior." },
+      { type: "NUEVO", text: "Los profesores aliados pasaron a la base de datos: cada uno tiene una ficha con su correo y notas de contacto (las agrega cualquier perfil; el correo y el borrado de notas, el perfil completo). El perfil completo también crea, edita y elimina eventos." },
+      { type: "MEJORA", text: "«Aliados académicos» llega contraída y se abre con su flecha. Los filtros son más simples: búsqueda más programa y semestre del apoyo en listas desplegables, con «Limpiar». Las tablas por programa, la ficha del profesor y los detalles del evento van plegados. En «Convocatoria» el evento se elige en una lista, se filtra por estado con conteos, y la nota de cada profesor se abre con un ícono." },
+      { type: "MEJORA", text: "Mientras la carga a la base de datos no se haga, la sección sigue mostrando los profesores y las mallas de antes, y la vista «Convocatoria» avisa que está en pausa." },
+    ],
+  },
+  {
     version: "2026.11.20.1",
     date: "2026-11-20",
     title: "Aliados académicos: profesores y mallas",

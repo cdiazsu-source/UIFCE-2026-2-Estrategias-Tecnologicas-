@@ -16,6 +16,7 @@ export async function addContact(formData: FormData) {
   const notes = String(formData.get("notes") ?? "").trim();
   const photoUrl = String(formData.get("photoUrl") ?? "").trim();
   const projectId = String(formData.get("projectId") ?? "").trim();
+  const dependency = String(formData.get("dependency") ?? "").trim().slice(0, 60);
 
   await prisma.contact.create({
     data: {
@@ -41,6 +42,7 @@ export async function updateContact(id: string, formData: FormData) {
   const notes = String(formData.get("notes") ?? "").trim();
   const photoUrl = String(formData.get("photoUrl") ?? "").trim();
   const projectId = String(formData.get("projectId") ?? "").trim();
+  const dependency = String(formData.get("dependency") ?? "").trim().slice(0, 60);
 
   await prisma.contact.update({
     where: { id },

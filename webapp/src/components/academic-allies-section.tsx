@@ -1,24 +1,31 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { GraduationCap, Search } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import { InfoHint } from "@/components/info-hint";
-import { ALLIED_SUPPORTS, SUPPORT_SEMESTERS, type AlliedSupport } from "@/lib/academic-allies-data";
+import { AllyDetail } from "@/components/ally-detail";
+import { ConvocationView } from "@/components/ally-convocation";
+import { Fold } from "@/components/ally-fold";
+import { CollapseToggle, useCollapse } from "@/components/collapsible";
+import { SUPPORT_SEMESTERS, type AlliedSupport } from "@/lib/academic-allies-data";
+import type { AlliesData, AllySupportRow } from "@/lib/convocation";
 import { COMMON_COURSES, PROGRAMS, PROGRAM_ORDER, type Component, type Course, type Program, type ProgramKey } from "@/lib/mallas-data";
 
-/** «Aliados académicos»: los profesores que han pedido Apoyos Académicos y cómo se ubican en las mallas de Economía, Administración
- *  y Contaduría. Los datos son estáticos (`lib/academic-allies-data.ts`, generado desde el Excel de asignaciones; `lib/mallas-data.ts`),
- *  así que la sección funciona sin migración. Solo lectura para todos los perfiles. */
+/** «Aliados académicos»: los profesores que han pedido Apoyos Académicos, cómo se ubican en las mallas de Economía, Administración
+ *  y Contaduría y la convocatoria a eventos con su seguimiento. Los datos vienen de la BD (`lib/academic-allies.ts`); si la migración
+ *  o la carga aún no se hicieron, de los archivos estáticos (`lib/academic-allies-data.ts`) y la vista «Convocatoria» queda en pausa. */
 
-type View = "profesores" | "mallas" | "comunes";
+type View = "profesores" | "mallas" | "comunes" | "convocatoria";
 
 const VIEWS: { id: View; label: string }[] = [
   { id: "profesores", label: "Profesores" },
   { id: "mallas", label: "Mallas" },
   { id: "comunes", label: "Asignaturas comunes" },
+  { id: "convocatoria", label: "Convocatoria" },
 ];
 
 const PROGRAM_LABEL: Record<AlliedSupport["pg"], string> = {
@@ -31,11 +38,13 @@ const PROGRAM_LABEL: Record<AlliedSupport["pg"], string> = {
 const CURRENT = "26-2";
 
 /** Apoyos por programa y nombre exacto de asignatura de la malla. */
-const SUPPORT_INDEX: Record<string, AlliedSupport[]> = {};
-for (const a of ALLIED_SUPPORTS) {
-  if (!a.m) continue;
-  const k = `${a.pg}|${a.m}`;
-  (SUPPORT_INDEX[k] ??= []).push(a);
+function buildIndex(supports: AlliedSupport[]) {
+  const idx: Record<string, AlliedSupport[]> = {};
+  for (const a of supports) {
+    if (!a.m) continue;
+    (idx[`${a.pg}|${a.m}`] ??= []).push(a);
+  }
+  return idx;
 }
 
 function norm(s: string) {
@@ -125,56 +134,97 @@ function SupportTable({ rows, third }: { rows: { a: AlliedSupport; third: string
   );
 }
 
-function ProfessorsView() {
-  const [only26, setOnly26] = useState(false);
+function ProfessorsView({ data }: { data: AlliesData }) {
+  const all = data.supports;
+  const [sem, setSem] = useState<string>("todos");
   const [pg, setPg] = useState<AlliedSupport["pg"] | "todos">("todos");
   const [q, setQ] = useState("");
+  const [ficha, setFicha] = useState("");
 
-  const professors = new Set(ALLIED_SUPPORTS.map((a) => a.p)).size;
-  const sessions = ALLIED_SUPPORTS.reduce((n, a) => n + totalSessions(a), 0);
+  const professors = new Set(all.map((a) => a.p)).size;
+  const sessions = all.reduce((n, a) => n + totalSessions(a), 0);
   const state: Record<string, number> = {};
-  for (const a of ALLIED_SUPPORTS) for (const [k, v] of Object.entries(a.e)) state[k] = (state[k] ?? 0) + (v ?? 0);
+  for (const a of all) for (const [k, v] of Object.entries(a.e)) state[k] = (state[k] ?? 0) + (v ?? 0);
 
   const nq = norm(q.trim());
   const list = useMemo(
     () =>
-      ALLIED_SUPPORTS.filter(
+      all.filter(
         (a) =>
-          (!only26 || a.s[CURRENT]) &&
+          (sem === "todos" || a.s[sem as keyof AlliedSupport["s"]]) &&
           (pg === "todos" || a.pg === pg) &&
           (!nq || [a.p, a.c, ...a.w].some((f) => norm(f).includes(nq))),
       ),
-    [only26, pg, nq],
+    [all, sem, pg, nq],
   );
+  const filtering = sem !== "todos" || pg !== "todos" || nq !== "";
+  const allyOf = data.db ? data.allies.find((a) => a.id === ficha) : undefined;
 
   const withMalla = list.filter((a) => a.m);
   const withoutMalla = list.filter((a) => !a.m);
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex flex-wrap gap-x-8 gap-y-2">
-        <Stat value={professors} label="profesores aliados" />
-        <Stat value={sessions} label="sesiones desde 2025-2" />
-        <Stat
-          value={`${state.DICTADA ?? 0} / ${state.ASIGNADA ?? 0} / ${state["SIN ASIGNAR"] ?? 0}`}
-          label="2026-2: dictadas / asignadas / sin asignar"
-        />
-      </div>
-
       <div className="flex flex-wrap items-center gap-2">
         <div className="relative min-w-[13rem] flex-1">
           <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar profesor, asignatura o software…" className="pl-8" aria-label="Buscar aliado académico" />
         </div>
-        <Chip active={only26} onClick={() => setOnly26((v) => !v)}>
-          Solo 2026-2
-        </Chip>
-        {(["todos", "contaduria", "administracion", "economia"] as const).map((k) => (
-          <Chip key={k} active={pg === k} onClick={() => setPg(k)}>
-            {k === "todos" ? "Todos los programas" : PROGRAM_LABEL[k]}
-          </Chip>
-        ))}
+        <Select value={pg} onChange={(e) => setPg(e.target.value as typeof pg)} className="w-auto text-sm" aria-label="Programa">
+          <option value="todos">Todos los programas</option>
+          {(["economia", "administracion", "contaduria"] as const).map((k) => (
+            <option key={k} value={k}>
+              {PROGRAM_LABEL[k]}
+            </option>
+          ))}
+        </Select>
+        <Select value={sem} onChange={(e) => setSem(e.target.value)} className="w-auto text-sm" aria-label="Semestre del apoyo">
+          <option value="todos">Todos los semestres</option>
+          {[...SUPPORT_SEMESTERS].reverse().map((s) => (
+            <option key={s} value={s}>
+              Apoyo en 20{s}
+            </option>
+          ))}
+        </Select>
+        {filtering && (
+          <button
+            type="button"
+            onClick={() => {
+              setQ("");
+              setPg("todos");
+              setSem("todos");
+            }}
+            className="press text-xs text-primary underline underline-offset-2"
+          >
+            Limpiar
+          </button>
+        )}
       </div>
+
+      <p className="flex flex-wrap items-center gap-x-1.5 text-xs text-muted-foreground">
+        <span>
+          {filtering ? `${new Set(list.map((a) => a.p)).size} de ${professors} profesores` : `${professors} profesores`} · {sessions} sesiones desde 2025-2 · 2026-2:{" "}
+          {state.DICTADA ?? 0} dictadas, {state.ASIGNADA ?? 0} asignadas, {state["SIN ASIGNAR"] ?? 0} sin asignar
+        </span>
+        <InfoHint text="Cada número de las tablas es la cantidad de sesiones de apoyo del semestre; en amarillo, las de 2026-2. Los nombres que venían escritos de varias formas se unificaron. Solo se muestra el nombre del profesor, sin datos de contacto." />
+      </p>
+
+      {data.db && (
+        <Fold title="Ficha de un profesor" hint="correo y notas de contacto">
+          <div className="flex flex-col gap-2">
+            <Select value={ficha} onChange={(e) => setFicha(e.target.value)} className="max-w-sm text-sm" aria-label="Elegir profesor">
+              <option value="">Elegir profesor…</option>
+              {data.allies.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.name}
+                  {a.notes.length ? ` (${a.notes.length} ${a.notes.length === 1 ? "nota" : "notas"})` : ""}
+                </option>
+              ))}
+            </Select>
+            {allyOf && <AllyDetail key={allyOf.id} ally={allyOf} />}
+          </div>
+        </Fold>
+      )}
 
       {list.length === 0 && <p className="text-sm text-muted-foreground">Ningún aliado coincide con ese filtro.</p>}
 
@@ -184,30 +234,23 @@ function ProfessorsView() {
           .sort((x, y) => PROGRAMS[k].roman.indexOf(romanOf(k, x.m!)) - PROGRAMS[k].roman.indexOf(romanOf(k, y.m!)) || x.c.localeCompare(y.c));
         if (!rows.length) return null;
         return (
-          <div key={k} className="flex flex-col gap-1">
-            <h3 className="text-sm font-semibold">{PROGRAMS[k].name}</h3>
+          <Fold key={`${k}-${filtering}`} title={PROGRAMS[k].name} hint={`${rows.length} ${rows.length === 1 ? "apoyo" : "apoyos"}`} defaultOpen={filtering}>
             <SupportTable third="Semestre en la malla" rows={rows.map((a) => ({ a, third: romanOf(k, a.m!) }))} />
-          </div>
+          </Fold>
         );
       })}
 
       {withoutMalla.length > 0 && (
-        <div className="flex flex-col gap-1">
-          <h3 className="text-sm font-semibold">Sin asignatura en la malla</h3>
-          <p className="text-xs text-muted-foreground">
+        <Fold key={`sin-${filtering}`} title="Sin asignatura en la malla" hint={`${withoutMalla.length} ${withoutMalla.length === 1 ? "apoyo" : "apoyos"}`} defaultOpen={filtering}>
+          <p className="mb-2 text-xs text-muted-foreground">
             Áreas, escuelas, semilleros, seminarios y asignaturas que no aparecen en el plan de estudios de su programa.
           </p>
           <SupportTable
             third="Programa"
             rows={withoutMalla.sort((x, y) => x.c.localeCompare(y.c)).map((a) => ({ a, third: PROGRAM_LABEL[a.pg] }))}
           />
-        </div>
+        </Fold>
       )}
-
-      <p className="text-xs text-muted-foreground">
-        Cada número es la cantidad de sesiones de apoyo del semestre; en amarillo, las de 2026-2. Los nombres que venían escritos de varias formas
-        se unificaron (por ejemplo «Ernesto Mejía» y «Gerardo Mejía»). Solo se muestra el nombre del profesor, sin datos de contacto.
-      </p>
     </div>
   );
 }
@@ -221,9 +264,9 @@ function Stat({ value, label }: { value: React.ReactNode; label: string }) {
   );
 }
 
-function CourseCard({ c, pg, showCodes }: { c: Course; pg: ProgramKey; showCodes: boolean }) {
+function CourseCard({ c, pg, showCodes, index }: { c: Course; pg: ProgramKey; showCodes: boolean; index: Record<string, AlliedSupport[]> }) {
   const [name, credits, code, comp, flag, sub] = c;
-  const list = SUPPORT_INDEX[`${pg}|${name}`];
+  const list = index[`${pg}|${name}`];
   const have = new Set<string>();
   list?.forEach((a) => Object.keys(a.s).forEach((s) => have.add(s)));
   const sems = SUPPORT_SEMESTERS.filter((s) => have.has(s));
@@ -260,14 +303,15 @@ function CourseCard({ c, pg, showCodes }: { c: Course; pg: ProgramKey; showCodes
   );
 }
 
-function MallaView() {
+function MallaView({ supports }: { supports: AlliedSupport[] }) {
+  const index = useMemo(() => buildIndex(supports), [supports]);
   const [key, setKey] = useState<ProgramKey>("contaduria");
   const [showCodes, setShowCodes] = useState(false);
   const P: Program = PROGRAMS[key];
   const sum = (t: Component) => P.sems.reduce((n, s) => n + s.filter((c) => c[3] === t).reduce((m, c) => m + c[1], 0), 0);
   const total = P.sems.reduce((n, s) => n + s.reduce((m, c) => m + c[1], 0), 0);
   const ing = P.ing.reduce((n, i) => n + i[1], 0);
-  const withSupport = P.sems.flat().filter((c) => SUPPORT_INDEX[`${key}|${c[0]}`]).length;
+  const withSupport = P.sems.flat().filter((c) => index[`${key}|${c[0]}`]).length;
 
   return (
     <div className="flex flex-col gap-3">
@@ -301,7 +345,7 @@ function MallaView() {
                 <span className="text-xs font-normal tabular-nums text-muted-foreground">{s.reduce((n, c) => n + c[1], 0)} cr</span>
               </h3>
               {s.map((c, j) => (
-                <CourseCard key={j} c={c} pg={key} showCodes={showCodes} />
+                <CourseCard key={j} c={c} pg={key} showCodes={showCodes} index={index} />
               ))}
               {i < 4 && (
                 <div className="rounded-md bg-brand-accent px-2 py-1.5 text-xs leading-snug text-brand-accent-foreground">
@@ -393,12 +437,17 @@ function GroupRows({ title, rows }: { title: string; rows: typeof COMMON_COURSES
   );
 }
 
-export function AcademicAlliesSection() {
+export function AcademicAlliesSection({ data, projectOptions }: { data: AlliesData; projectOptions: { id: string; title: string }[] }) {
   const [view, setView] = useState<View>("profesores");
+  const { open, setOpen, toggle } = useCollapse("aliados:academicos", false);
+  useEffect(() => {
+    if (window.location.hash === "#aliados-academicos") setOpen(true);
+  }, [setOpen]);
   return (
     <div id="aliados-academicos" className="flex scroll-mt-20 flex-col gap-3">
       <div>
         <h2 className="flex items-center gap-1.5 text-lg font-bold">
+          <CollapseToggle open={open} onToggle={toggle} label="aliados académicos" />
           <GraduationCap className="h-5 w-5" aria-hidden />
           Aliados académicos
           <InfoHint text="Profesores que han pedido Apoyos Académicos a la UIFCE y las asignaturas donde lo hicieron, ubicadas en las mallas de Economía, Administración y Contaduría. Cómo se usa: en «Profesores» se busca por nombre, asignatura o software; en «Mallas» se ve en qué semestre de cada carrera hay apoyo (en amarillo, el de 2026-2); en «Asignaturas comunes», qué materias comparten los programas. Para convocar a un evento, conviene empezar por un profesor con apoyo este semestre." />
@@ -407,6 +456,7 @@ export function AcademicAlliesSection() {
           Red de profesores aliados por programa curricular, con los apoyos académicos de 2025-2 a 2026-2.
         </p>
       </div>
+      {open && (
       <div className="flex flex-wrap gap-2" role="tablist" aria-label="Vista de aliados académicos">
         {VIEWS.map((v) => (
           <button
@@ -424,9 +474,19 @@ export function AcademicAlliesSection() {
           </button>
         ))}
       </div>
-      {view === "profesores" && <ProfessorsView />}
-      {view === "mallas" && <MallaView />}
-      {view === "comunes" && <CommonView />}
+      )}
+      {open && view === "profesores" && <ProfessorsView data={data} />}
+      {open && view === "mallas" && <MallaView supports={data.supports} />}
+      {open && view === "comunes" && <CommonView />}
+      {open && view === "convocatoria" &&
+        (data.db ? (
+          <ConvocationView events={data.events} supports={data.supports as AllySupportRow[]} followUps={data.followUps} projectOptions={projectOptions} />
+        ) : (
+          <p className="rounded-lg border border-dashed border-border p-4 text-sm text-muted-foreground">
+            La convocatoria necesita los profesores en la base de datos. Falta aplicar la migración y cargarlos (la persona que despliega corre{" "}
+            <code>npm run db:deploy</code> y luego <code>node scripts/load-aliados-academicos.mjs --apply</code>).
+          </p>
+        ))}
     </div>
   );
 }

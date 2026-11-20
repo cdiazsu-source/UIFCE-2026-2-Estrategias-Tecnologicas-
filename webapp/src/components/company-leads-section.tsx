@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useRef, useState, useTransition } from "react";
-import { Check, ChevronDown, Circle, Clock, ExternalLink, GraduationCap, Linkedin, Pencil, Plus, Search, Trash2, UserPlus, Users, X } from "lucide-react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { Briefcase, Check, ChevronDown, Circle, Clock, ExternalLink, GraduationCap, Linkedin, Pencil, Plus, Search, Trash2, UserPlus, Users, X } from "lucide-react";
 
 import {
   addCompanyLeadsFromLinks,
@@ -20,6 +20,7 @@ import { Progress } from "@/components/ui/progress";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { InfoHint } from "@/components/info-hint";
+import { CollapseToggle, useCollapse } from "@/components/collapsible";
 import { initials } from "@/components/person-avatar";
 import { useCanEdit, useCanManageLeads } from "@/components/access-context";
 import {
@@ -770,6 +771,10 @@ export function CompanyLeadsSection({ companies }: { companies: TargetCompanyDat
   const [q, setQ] = useState("");
   const [tag, setTag] = useState("");
   const [onlyAlumni, setOnlyAlumni] = useState(false);
+  const { open: sectionOpen, setOpen: setSectionOpen, toggle: toggleSection } = useCollapse("aliados:empresas", false);
+  useEffect(() => {
+    if (window.location.hash === "#empresas-interes") setSectionOpen(true);
+  }, [setSectionOpen]);
 
   const tags = useMemo(() => Array.from(new Set(companies.flatMap((c) => c.tags))).sort((a, b) => a.localeCompare(b, "es")), [companies]);
   const norm = (s: string) => s.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
@@ -789,6 +794,8 @@ export function CompanyLeadsSection({ companies }: { companies: TargetCompanyDat
     <div id="empresas-interes" className="flex scroll-mt-20 flex-col gap-3">
       <div>
         <h2 className="flex items-center gap-1.5 text-lg font-bold">
+          <CollapseToggle open={sectionOpen} onToggle={toggleSection} label="empresas de interés" />
+          <Briefcase className="h-5 w-5" aria-hidden />
           Empresas de interés
           <InfoHint text="Empresas donde le interesaría trabajar al equipo y las personas que se les siguen en LinkedIn: reclutadores, gerentes, recursos humanos y otros contactos. Cómo se usa: abre una empresa, usa «Buscar en LinkedIn» para encontrar perfiles de cada tipo, y con perfil completo «Agregar contacto» con su nombre, tipo, cargo y enlace; cambia su avance (por contactar, conexión enviada, conectado, en conversación, sin respuesta) y usa «Marcar revisado hoy» para dejar constancia de cuándo se volvió a mirar. La meta de cada empresa son 4 casillas: un reclutador, un gerente o directivo, una persona de recursos humanos y un contacto libre (cuatro reclutadores no cubren las demás). Marca a los egresados de la UNAL o de la FCE: suelen ser los más fáciles de abordar, y «Egresados UNAL / FCE» abre su búsqueda en LinkedIn. El logo es un archivo en public/logos o una URL." />
         </h2>
@@ -800,6 +807,8 @@ export function CompanyLeadsSection({ companies }: { companies: TargetCompanyDat
         </p>
       </div>
 
+      {sectionOpen && (
+      <>
       {companies.length > 0 && (
         <div className="rounded-lg border border-border p-3">
           <div className="flex flex-wrap items-baseline justify-between gap-2 text-sm">
@@ -901,6 +910,8 @@ export function CompanyLeadsSection({ companies }: { companies: TargetCompanyDat
             <CompanyCard key={company.id} company={company} />
           ))}
         </div>
+      )}
+      </>
       )}
     </div>
   );

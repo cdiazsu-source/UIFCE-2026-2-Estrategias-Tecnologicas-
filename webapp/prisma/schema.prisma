@@ -351,6 +351,9 @@ model Contact {
   projectId String?
   project   Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
   notes     String?  @db.Text
+  /// Dependencia de la Facultad o la Universidad a la que pertenece (ORI, CIID, Vicedecanatura,
+  /// Comunicaciones…). Texto libre; si está vacío la app la deduce del rol. Agrupa /aliados.
+  dependency String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1173,4 +1176,114 @@ model ManagementCommittee {
   createdAt DateTime @default(now())
 
   @@index([startsAt])
+}
+
+/// Profesor aliado académico: quien ha pedido Apoyos Académicos a la UIFCE (nombre público; sin cédula ni teléfono). Se carga
+/// desde el Excel de asignaciones con scripts/load-aliados-academicos.mjs. Vive en /aliados, sección «Aliados académicos».
+model AcademicAlly {
+  id        String                @id @default(cuid())
+  name      String                @unique
+  /// Correo institucional, opcional: lo agrega el perfil completo si lo necesita para convocar.
+  email     String?
+  supports  AcademicAllySupport[]
+  notes     AcademicAllyNote[]
+  followUps ConvocationFollowUp[]
+  createdAt DateTime              @default(now())
+  updatedAt DateTime              @updatedAt
+}
+
+/// Una asignatura donde el profesor pidió apoyos, con las sesiones por semestre (`sessions`: {"25-2": 5, "26-1": 3}), el software y
+/// el estado de las sesiones de 2026-2 (`states`). `program`: economia | administracion | contaduria | otro; `mallaCourse` es el nombre
+/// exacto de la asignatura en la malla (lib/mallas-data.ts), null si no aparece en el plan de estudios.
+model AcademicAllySupport {
+  id          String       @id @default(cuid())
+  allyId      String
+  ally        AcademicAlly @relation(fields: [allyId], references: [id], onDelete: Cascade)
+  course      String
+  program     String
+  mallaCourse String?
+  sessions    Json
+  software    String[]     @default([])
+  states      Json
+  updatedAt   DateTime     @updatedAt
+
+  @@unique([allyId, course, program])
+}
+
+/// Nota de contacto sobre un profesor aliado (quién habló con él, qué quedó acordado).
+model AcademicAllyNote {
+  id        String       @id @default(cuid())
+  allyId    String
+  ally      AcademicAlly @relation(fields: [allyId], references: [id], onDelete: Cascade)
+  body      String       @db.Text
+  author    String
+  createdAt DateTime     @default(now())
+
+  @@index([allyId, createdAt])
+}
+
+/// Evento por convocar con ayuda de los aliados (Semana UIFCE, microtalleres, Concurso/Hackatón…): a quién va dirigido (programas y
+/// rango de semestres de la malla, 1 a 10) y su tema (software o asignatura). `projectId` apunta al proyecto del PMO, sin llave foránea.
+model ConvocationEvent {
+  id        String                @id @default(cuid())
+  name      String
+  programs  String[]              @default([])
+  semFrom   Int                   @default(1)
+  semTo     Int                   @default(10)
+  topics    String[]              @default([])
+  eventDate DateTime?
+  notes     String?               @db.Text
+  projectId String?
+  order     Int                   @default(0)
+  followUps ConvocationFollowUp[]
+  createdAt DateTime              @default(now())
+  updatedAt DateTime              @updatedAt
+}
+
+/// Seguimiento de la convocatoria de un profesor para un evento. `status`: POR_CONTACTAR | CONTACTADO | ACEPTO | SIN_RESPUESTA |
+/// NO_DISPONIBLE; `ask` (qué se le pidió): ANUNCIO | REENVIO | SESION.
+model ConvocationFollowUp {
+  id          String           @id @default(cuid())
+  eventId     String
+  event       ConvocationEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  allyId      String
+  ally        AcademicAlly     @relation(fields: [allyId], references: [id], onDelete: Cascade)
+  status      String           @default("POR_CONTACTAR")
+  ask         String?
+  note        String?          @db.Text
+  contactedAt DateTime?
+  updatedBy   String?
+  updatedAt   DateTime         @updatedAt
+
+  @@unique([eventId, allyId])
+}
+
+/// Microtaller o evento de la Unidad, para llevar el histórico por año (menú «Microtalleres y eventos», /eventos). Tipo, modalidad y
+/// estado son texto validado en el servidor (lib/unit-events.ts).
+model UnitEvent {
+  id         String   @id @default(cuid())
+  /// MICROTALLER | EVENTO
+  kind       String   @default("MICROTALLER")
+  title      String
+  date       DateTime
+  /// PRESENCIAL | VIRTUAL | HIBRIDO
+  modality   String   @default("PRESENCIAL")
+  place      String?
+  /// Tallerista o ponente.
+  speaker    String?
+  /// A quién va dirigido.
+  audience   String?
+  /// PLANEADO | REALIZADO | CANCELADO
+  status     String   @default("PLANEADO")
+  registered Int?
+  attended   Int?
+  /// Evidencia: carpeta de Drive, grabación, memorias…
+  link       String?
+  /// Proyecto del tracker asociado (sin llave foránea).
+  projectId  String?
+  notes      String?  @db.Text
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([date])
 }

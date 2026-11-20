@@ -1,17 +1,44 @@
 import { prisma } from "@/lib/prisma";
-import { ContactsTable } from "@/components/contacts-table";
+import { AllyDependenciesSection, type ContactItem } from "@/components/ally-dependencies-section";
 import { CompanyLeadsSection } from "@/components/company-leads-section";
 import { AcademicAlliesSection } from "@/components/academic-allies-section";
 import { InfoHint } from "@/components/info-hint";
+import { loadAcademicAllies } from "@/lib/academic-allies";
 
 export const dynamic = "force-dynamic";
 
-export default async function AliadosPage() {
-  const [contacts, projects, targetCompanies] = await Promise.all([
-    prisma.contact.findMany({
+/** Aliados dependencias. Si la columna `dependency` aún no existe (migración sin aplicar), se lee sin ella
+ *  y la dependencia se deduce del rol, así la pantalla no falla. */
+async function loadContacts(): Promise<ContactItem[]> {
+  try {
+    const rows = await prisma.contact.findMany({
       orderBy: { name: "asc" },
       include: { project: { select: { id: true, title: true } } },
-    }),
+    });
+    return rows.map((c) => ({ ...c, dependency: c.dependency ?? null }));
+  } catch {
+    const rows = await prisma.contact.findMany({
+      orderBy: { name: "asc" },
+      select: {
+        id: true,
+        name: true,
+        role: true,
+        email: true,
+        phone: true,
+        photoUrl: true,
+        projectId: true,
+        notes: true,
+        project: { select: { id: true, title: true } },
+      },
+    });
+    return rows.map((c) => ({ ...c, dependency: null }));
+  }
+}
+
+export default async function AliadosPage() {
+  const alliesData = await loadAcademicAllies();
+  const [contacts, projects, targetCompanies] = await Promise.all([
+    loadContacts(),
     prisma.project.findMany({ orderBy: { sourceOrder: "asc" }, select: { id: true, title: true } }),
     prisma.targetCompany.findMany({
       orderBy: [{ order: "asc" }, { name: "asc" }],
@@ -43,20 +70,19 @@ export default async function AliadosPage() {
   }));
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-5">
       <div>
         <h1 className="flex items-center gap-1.5 text-xl font-bold">
           Aliados
-          <InfoHint text="Personas e instituciones fuera del equipo con quienes ET coordina: profesores, otras dependencias, aliados externos. Cómo se usa: con perfil completo, «Agregar aliado» o el lápiz de la fila; puedes vincular cada aliado a un proyecto. Ejemplo: «Sandra Carlos Vargas · Vicedecanatura de Investigación y Extensión · proyecto Semana UIFCE»." />
+          <InfoHint text="Personas e instituciones fuera del equipo con quienes ET coordina, en tres categorías que se abren y se cierran con su flecha: aliados académicos (los profesores), aliados dependencias (ORI, CIID, Vicedecanatura, Comunicaciones y demás) y empresas de interés. Cómo se usa: abre la categoría que necesites; con perfil completo puedes agregar y editar aliados y vincular cada uno a un proyecto." />
         </h1>
-        <p className="text-sm text-muted-foreground">
-          Directorio de aliados —personas e instituciones externas al equipo— con el proyecto al que están vinculados.
-        </p>
+        <p className="text-sm text-muted-foreground">Aliados académicos, aliados dependencias y empresas de interés, cada categoría se abre y se cierra.</p>
       </div>
-      <ContactsTable contacts={contacts} projectOptions={projects} />
+
+      <AcademicAlliesSection data={alliesData} projectOptions={projects} />
 
       <div className="border-t border-border pt-5">
-        <AcademicAlliesSection />
+        <AllyDependenciesSection contacts={contacts} projectOptions={projects} />
       </div>
 
       <div className="border-t border-border pt-5">
