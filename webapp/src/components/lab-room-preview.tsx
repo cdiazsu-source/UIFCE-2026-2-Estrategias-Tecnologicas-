@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { Search, Trash2, X } from "lucide-react";
 
-import { addLabSeatComment, deleteLabSeatComment, updateLabSeat } from "@/lib/actions/lab-seats";
+import { addLabSeatComment, deleteLabSeatComment, reportLabSeatFaults, updateLabSeat } from "@/lib/actions/lab-seats";
 import { useCanEdit } from "@/components/access-context";
 import { cn } from "@/lib/utils";
 
@@ -119,8 +119,12 @@ function Seat({
   hasTag,
   hasNotes,
   canEdit,
+  hideNumbers,
+  reporting,
   onSelect,
 }: {
+  reporting: boolean;
+  hideNumbers: boolean;
   seat: PlacedSeat;
   name?: string;
   selected: boolean;
@@ -152,9 +156,9 @@ function Seat({
         width={48}
         height={37}
         rx={4}
-        fill={active && swColor ? `${swColor}26` : "hsl(var(--background))"}
-        stroke={pending && swColor ? "#F59E0B" : stroke}
-        strokeWidth={selected ? 5 : 2.5}
+        fill={reporting ? "#DC262633" : active && swColor ? `${swColor}26` : "hsl(var(--background))"}
+        stroke={reporting ? "#DC2626" : pending && swColor ? "#F59E0B" : stroke}
+        strokeWidth={selected || reporting ? 5 : 2.5}
         strokeDasharray={pending ? "6 4" : undefined}
         className={canEdit ? "group-hover:[stroke-width:4.5px]" : undefined}
       />
@@ -170,7 +174,7 @@ function Seat({
         fontWeight={700}
         fill={active && swColor ? swColor : "currentColor"}
       >
-        {seat.n}
+        {hideNumbers ? "" : seat.n}
       </text>
       {name && <circle cx={-19} cy={-19} r={4.5} className="fill-primary" />}
       {hasTag && (
@@ -462,6 +466,54 @@ export function LabRoomPreview({ room, seatData }: { room: string; seatData: Rec
   const canEdit = useCanEdit();
   const [activeKey, setActiveKey] = useState<string | null>(null);
   const [selectedSeat, setSelectedSeat] = useState<number | null>(null);
+  const [hideNumbers, setHideNumbers] = useState(false);
+  const [reportMode, setReportMode] = useState(false);
+  const [faultSeats, setFaultSeats] = useState<number[]>([]);
+  const [faultText, setFaultText] = useState("");
+  const [faultMsg, setFaultMsg] = useState<string | null>(null);
+  const [sending, startSending] = useTransition();
+  const toggleReportMode = () => {
+    setReportMode((v) => !v);
+    setSelectedSeat(null);
+    setFaultSeats([]);
+    setFaultText("");
+    setFaultMsg(null);
+  };
+  const onSeatClick = (n: number) => {
+    if (!reportMode) return setSelectedSeat(n);
+    setFaultMsg(null);
+    setFaultSeats((l) => (l.includes(n) ? l.filter((x) => x !== n) : [...l, n].sort((a, b) => a - b)));
+  };
+  const sendFaults = () => {
+    const seats = faultSeats;
+    const text = faultText;
+    startSending(async () => {
+      try {
+        await reportLabSeatFaults(room, seats, text);
+        setFaultMsg(`Falla reportada en ${seats.length} equipo${seats.length === 1 ? "" : "s"}.`);
+        setFaultSeats([]);
+        setFaultText("");
+      } catch {
+        setFaultMsg("No se pudo guardar el reporte. Intenta de nuevo.");
+      }
+    });
+  };
+  useEffect(() => {
+    try {
+      setHideNumbers(localStorage.getItem("et:sala:ocultar-numeros") === "1");
+    } catch {
+      /* sin almacenamiento: se muestran */
+    }
+  }, []);
+  const toggleNumbers = () =>
+    setHideNumbers((v) => {
+      try {
+        localStorage.setItem("et:sala:ocultar-numeros", v ? "0" : "1");
+      } catch {
+        /* ignorar */
+      }
+      return !v;
+    });
   const active = SOFTWARE.find((s) => s.key === activeKey) ?? null;
 
   const activeSeats = active
@@ -512,7 +564,74 @@ export function LabRoomPreview({ room, seatData }: { room: string; seatData: Rec
             </button>
           );
         })}
+        {canEdit && (
+          <button
+            type="button"
+            onClick={toggleReportMode}
+            aria-pressed={reportMode}
+            className={cn(
+              "press ml-auto rounded-md border px-3 py-1.5 text-sm font-medium",
+              reportMode
+                ? "border-red-600 bg-red-600 text-white"
+                : "border-input text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+            )}
+          >
+            {reportMode ? "Salir de reportar errores" : "Reportar errores"}
+          </button>
+        )}
+        <button
+          type="button"
+          onClick={toggleNumbers}
+          aria-pressed={hideNumbers}
+          className={cn(
+            "press rounded-md border border-input px-3 py-1.5 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+            !canEdit && "ml-auto",
+          )}
+        >
+          {hideNumbers ? "Mostrar números" : "Ocultar números"}
+        </button>
       </div>
+
+      {reportMode && (
+        <section className="flex flex-col gap-2 rounded-md border border-red-300 bg-red-50 p-3 text-red-950 dark:border-red-900 dark:bg-red-950/30 dark:text-red-100">
+          <p className="text-sm font-semibold">Reportar errores</p>
+          <p className="text-xs">
+            Toca en el plano los equipos que presentan fallas (puedes marcar varios; vuelve a tocar uno para quitarlo).
+            El reporte queda como observación en la ficha de cada equipo.
+          </p>
+          <p className="text-xs font-medium">
+            {faultSeats.length
+              ? `${faultSeats.length} equipo${faultSeats.length === 1 ? "" : "s"}: ${faultSeats.join(", ")}`
+              : "Ningún equipo seleccionado."}
+          </p>
+          <textarea
+            value={faultText}
+            onChange={(e) => setFaultText(e.target.value)}
+            rows={2}
+            placeholder="ej. No enciende · Pantalla parpadea · Sin internet"
+            className="w-full resize-none rounded-md border border-input bg-background p-2 text-sm text-foreground"
+          />
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={sendFaults}
+              disabled={sending || !faultSeats.length || !faultText.trim()}
+              className="press rounded-md bg-red-600 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
+            >
+              {sending ? "Enviando…" : "Enviar reporte"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setFaultSeats([])}
+              disabled={!faultSeats.length}
+              className="press rounded-md border border-input bg-background px-3 py-1.5 text-sm text-foreground disabled:opacity-50"
+            >
+              Limpiar selección
+            </button>
+            {faultMsg && <span className="text-xs font-medium">{faultMsg}</span>}
+          </div>
+        </section>
+      )}
 
       <p className="text-sm text-muted-foreground">
         {active
@@ -630,7 +749,9 @@ export function LabRoomPreview({ room, seatData }: { room: string; seatData: Rec
                   hasTag={!!(d?.assetTag1 || d?.assetTag2)}
                   hasNotes={(d?.comments?.length ?? 0) > 0}
                   canEdit={canEdit}
-                  onSelect={setSelectedSeat}
+                  hideNumbers={hideNumbers}
+                  reporting={reportMode && faultSeats.includes(s.n)}
+                  onSelect={onSeatClick}
                 />
               );
             })}

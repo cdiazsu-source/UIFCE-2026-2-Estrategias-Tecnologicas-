@@ -62,6 +62,29 @@ export async function addLabSeatComment(room: string, seatNumber: number, conten
   revalidatePath("/herramientas");
 }
 
+/** Reporta una falla en varios equipos a la vez: agrega la misma observación, marcada «Falla reportada», a cada uno. */
+export async function reportLabSeatFaults(room: string, seatNumbers: number[], content: string): Promise<void> {
+  if (await blockedForJunior()) return;
+  const text = content.trim();
+  const numbers = [...new Set(seatNumbers.filter((n) => Number.isInteger(n) && n > 0 && n < 1000))].slice(0, 60);
+  if (!text || !numbers.length) return;
+
+  const s = await getSession();
+  const author = s.authed ? (s.who ?? "Máster") : null;
+  const body = `Falla reportada: ${text}`.slice(0, 2000);
+
+  for (const number of numbers) {
+    const seat = await prisma.labSeat.upsert({
+      where: { room_number: { room, number } },
+      update: {},
+      create: { room, number, isProjector: false },
+    });
+    await prisma.labSeatComment.create({ data: { seatId: seat.id, author, content: body } });
+  }
+
+  revalidatePath("/herramientas");
+}
+
 export async function deleteLabSeatComment(commentId: string): Promise<void> {
   if (await blockedForJunior()) return;
   await prisma.labSeatComment.deleteMany({ where: { id: commentId } });

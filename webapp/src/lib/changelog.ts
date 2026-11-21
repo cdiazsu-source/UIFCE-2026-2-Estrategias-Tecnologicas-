@@ -21,6 +21,15 @@ export const CHANGELOG_SHOWN = 10;
 
 export const CHANGELOG: VersionEntry[] = [
   {
+    version: "2026.11.23.2",
+    date: "2026-11-23",
+    title: "Sala 1: reportar errores y ocultar números",
+    changes: [
+      { type: "NUEVO", text: "En Herramientas y licencias → Sala 1 hay una vista «Reportar errores»: se tocan en el plano todos los computadores que presentan fallas (uno o varios), se describe la falla y el reporte queda como observación «Falla reportada» en la ficha de cada equipo." },
+      { type: "NUEVO", text: "En Herramientas y licencias → Sala 1 hay un botón «Ocultar números» que quita los números de los equipos del plano (y «Mostrar números» los devuelve). Cada persona conserva su elección en su navegador." },
+    ],
+  },
+  {
     version: "2026.11.23.1",
     date: "2026-11-23",
     title: "Sin seguimiento del último acceso de la Dirección",
